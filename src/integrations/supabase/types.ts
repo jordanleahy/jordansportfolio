@@ -1833,6 +1833,7 @@ export type Database = {
           id: string
           input_source: string
           last_run: string | null
+          max_completion_tokens: number | null
           max_tokens: number | null
           metrics: Json | null
           model_version: string
@@ -1858,6 +1859,7 @@ export type Database = {
           id?: string
           input_source: string
           last_run?: string | null
+          max_completion_tokens?: number | null
           max_tokens?: number | null
           metrics?: Json | null
           model_version?: string
@@ -1883,6 +1885,7 @@ export type Database = {
           id?: string
           input_source?: string
           last_run?: string | null
+          max_completion_tokens?: number | null
           max_tokens?: number | null
           metrics?: Json | null
           model_version?: string

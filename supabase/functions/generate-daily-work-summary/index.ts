@@ -281,7 +281,7 @@ Schema:
           },
           body: JSON.stringify({
             model: 'gpt-4.1-2025-04-14',
-            temperature: 0.3,
+            max_completion_tokens: 2000,
             messages: [
               { role: 'system', content: baseSystemPrompt },
               { role: 'user', content: `Generate the JSON summary for:\n${JSON.stringify(inputPayload)}` }
