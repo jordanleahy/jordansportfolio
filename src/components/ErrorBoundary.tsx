@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,14 +20,26 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    console.error('ErrorBoundary: Component error caught:', error);
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error('ErrorBoundary caught an error:', error);
+    console.error('Component stack:', errorInfo.componentStack);
+    
+    // Log module loading errors specifically
+    if (error.message.includes('module') || error.message.includes('import')) {
+      console.error('Module loading error detected:', {
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack
+      });
+    }
   }
 
   resetError = () => {
+    console.log('ErrorBoundary: Resetting error state');
     this.setState({ hasError: false, error: undefined });
   };
 
@@ -59,8 +72,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 <summary className="cursor-pointer text-sm text-muted-foreground">
                   Technical Details
                 </summary>
-                <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
+                <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto max-h-32">
                   {this.state.error.toString()}
+                  {this.state.error.stack && `\n\nStack:\n${this.state.error.stack}`}
                 </pre>
               </details>
             )}

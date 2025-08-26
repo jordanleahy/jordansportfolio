@@ -1,16 +1,9 @@
+
 import React, { useMemo, useCallback } from 'react';
 import { FixedSizeList as List } from 'react-window';
 import { PostsCardView } from './PostsCardView';
 import type { SocialMediaPost } from '@/types/socialMedia';
-import type { PostsTableViewProps } from '@/types/stories/ui';
-
-interface VirtualizedPostsListProps extends Omit<PostsTableViewProps, 'posts'> {
-  posts: SocialMediaPost[];
-  height?: number;
-  itemHeight?: number;
-  onLoadMorePosts?: () => void;
-  hasMorePosts?: boolean;
-}
+import type { VirtualizedPostsListProps, PostGroup } from './VirtualizedPostsList/types';
 
 const ITEM_HEIGHT = 400; // Estimated height of each post card
 
@@ -23,23 +16,22 @@ export const VirtualizedPostsList: React.FC<VirtualizedPostsListProps> = ({
   ...cardViewProps
 }) => {
   // Group posts by theme for better organization
-  const groupedPosts = useMemo(() => {
-    const groups: { themeId: string; posts: SocialMediaPost[] }[] = [];
+  const groupedPosts = useMemo((): PostGroup[] => {
     const postsByTheme: Record<string, SocialMediaPost[]> = {};
 
     posts.forEach(post => {
-      if (!postsByTheme[post.theme_id]) {
-        postsByTheme[post.theme_id] = [];
+      const themeId = post.theme_id || 'ungrouped';
+      if (!postsByTheme[themeId]) {
+        postsByTheme[themeId] = [];
       }
-      postsByTheme[post.theme_id].push(post);
+      postsByTheme[themeId].push(post);
     });
 
     // Convert to array for virtualization
-    Object.entries(postsByTheme).forEach(([themeId, themePosts]) => {
-      groups.push({ themeId, posts: themePosts });
-    });
-
-    return groups;
+    return Object.entries(postsByTheme).map(([themeId, themePosts]) => ({
+      themeId,
+      posts: themePosts
+    }));
   }, [posts]);
 
   // Render item function for react-window
