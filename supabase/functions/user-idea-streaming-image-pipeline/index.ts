@@ -558,8 +558,33 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
     await SLEEP(backoff);
   }
 
-  // Note: Removed system_prompts table polling as table doesn't exist in schema
-  // The system prompt agent function call above should handle prompt generation
+  // If still not succeeded, poll DB to see if the prompt actually got created
+  if (!succeeded) {
+    console.log('🔎 Falling back to DB poll for newly created system prompt');
+    const maxPolls = 3; // Reduced polling attempts
+    for (let i = 0; i < maxPolls; i++) {
+      const { data, error } = await supabase
+        .from('system_prompts')
+        .select('id, prompt_text, agent_name, theme_id, created_at')
+        .eq('user_id', userId)
+        .eq('theme_id', themeId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.warn('⚠️ DB poll error while checking system_prompts:', error);
+      }
+      if (data?.id) {
+        console.log('✅ Found system prompt via DB poll:', data.id);
+        succeeded = true;
+        break;
+      }
+
+      await SLEEP(1500); // Reduced poll delay
+    }
+  }
 
   if (!succeeded) {
     console.warn('⚠️ System prompt generation did not confirm; continuing pipeline gracefully', {
