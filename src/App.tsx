@@ -34,6 +34,7 @@ import PublicVendorView from "./components/vendors/PublicVendorView";
 import PublicSharedCollection from "./pages/PublicSharedCollection";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Case1 from "./pages/cases/Case1";
+import Case2 from "./pages/cases/Case2";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
 import Case5 from "./pages/cases/Case5";
@@ -376,6 +377,7 @@ function App() {
                   } 
                 />
                 <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
+                <Route path="/cases/case2" element={<CaseStudyRouteWrapper><Case2 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case5" element={<CaseStudyRouteWrapper><Case5 /></CaseStudyRouteWrapper>} />
