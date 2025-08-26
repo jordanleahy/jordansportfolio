@@ -148,11 +148,11 @@ serve(async (req) => {
       .maybeSingle();
 
     if (promptError || !systemPromptData) {
-      console.error('No system prompt found for story type:', story_type, promptError);
-      throw new Error(`No system prompt configured for story type: ${story_type}`);
+      console.error('No system prompt found for Story Telling Agent:', promptError);
+      throw new Error(`No system prompt configured for Story Telling Agent`);
     }
 
-    console.log('Using system prompt for category:', story_type);
+    console.log('Using system prompt for story type:', story_type);
 
     // Prepare the content for OpenAI
     const userPrompt = `

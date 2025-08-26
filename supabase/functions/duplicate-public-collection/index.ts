@@ -220,8 +220,8 @@ serve(async (req) => {
     // Duplicate system prompts using standardized pattern
     const { data: originalPrompts, error: promptsError } = await supabaseClient
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, category, theme_id, agent_purpose, agent_owner, name, description')
-      .or(`agent_name.eq.Theme Generation Agent,category.eq.${originalTheme.category}`)
+      .select('id, prompt_text, agent_name, theme_id, agent_purpose, agent_owner, name, description')
+      .eq('theme_id', originalTheme.id)
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -235,7 +235,6 @@ serve(async (req) => {
           .from('system_prompts')
           .insert([{
             user_id: user.id,
-            category: prompt.category,
             prompt_text: prompt.prompt_text,
             agent_name: prompt.agent_name,
             agent_purpose: prompt.agent_purpose,
