@@ -104,25 +104,48 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { category, theme, description, sample_posts, user_id, skip_ensure, theme_id } = requestBody;
+    const { theme, description, sample_posts, user_id, skip_ensure, theme_id } = requestBody;
     userId = user_id;
     const skipEnsure = !!skip_ensure;
     
-    // Input validation - theme is now primary, category secondary
-    if (!theme || !user_id) {
+    // Input validation - theme_id is now primary
+    if (!theme_id || !user_id) {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: 'Missing required fields: theme and user_id are required' 
+        error: 'Missing required fields: theme_id and user_id are required' 
       }), {
         status: HTTP_STATUS.BAD_REQUEST,
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       });
     }
 
-    // Allow any category for system prompt generation
-    // Categories like 'cdi', 'contracts', 'forms', etc. are allowed
+    // Create Supabase client early to resolve category from theme_id
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
-    console.log('Processing request for theme:', theme, 'category:', category, 'user_id:', user_id, 'correlation:', correlationId);
+    // Resolve category and theme details from theme_id
+    console.log('🔍 Resolving theme details for theme_id:', theme_id);
+    const { data: themeData, error: themeError } = await supabase
+      .from('themes')
+      .select('category, theme_name, description')
+      .eq('id', theme_id)
+      .eq('user_id', user_id)
+      .single();
+    
+    if (themeError || !themeData) {
+      console.error('❌ Theme not found or access denied:', themeError);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'Theme not found or access denied' 
+      }), {
+        status: HTTP_STATUS.NOT_FOUND,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const category = themeData.category;
+    const actualTheme = theme || themeData.theme_name;
+    
+    console.log('Processing request for theme_id:', theme_id, 'theme:', actualTheme, 'category:', category, 'user_id:', user_id, 'correlation:', correlationId);
 
     if (!openAIApiKey) {
       return new Response(JSON.stringify({ 
@@ -134,8 +157,7 @@ serve(async (req) => {
       });
     }
 
-    // Create Supabase client
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Supabase client already created above for theme resolution
     
     // Get default color theme to include in prompt generation
     console.log('🎨 FETCHING DEFAULT COLOR THEME: For enhanced prompt generation');
@@ -196,9 +218,8 @@ serve(async (req) => {
 
     const systemPrompt = systemPromptData.prompt_text;
 
-    // Theme is now primary focus, category provides context
-    const actualTheme = theme;
-    const contextCategory = category || 'general';
+    // Theme details already resolved from theme_id above
+    const contextCategory = category;
     
     let userPrompt = `Create a comprehensive system prompt for the "${actualTheme}" theme with "${contextCategory}" category context.
 

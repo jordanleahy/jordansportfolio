@@ -370,12 +370,11 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
   const invokeOnce = async () => {
     return await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: {
+        theme_id: themeId,
         theme: themeData.theme,
-        category: themeData.category,
         description: themeData.theme_description,
         sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
         user_id: userId,
-        theme_id: themeId, // Pass theme_id for proper linking
         skip_ensure: true, // decouple follow-up work from this call
       },
     });
@@ -456,7 +455,7 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
     try {
       const ensureRes = await supabase.functions.invoke('ensure-post-image-prompts', {
         body: {
-          category: themeData.category,
+          themeId,
           userId,
         },
       });

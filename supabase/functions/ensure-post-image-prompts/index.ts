@@ -54,12 +54,12 @@ serve(async (req) => {
   try {
     console.log('🚀 ENSURE POST IMAGE PROMPTS: Function started');
     
-    const { category, userId, themeId } = await req.json();
+    const { themeId, userId } = await req.json();
 
-    if (!category || !userId) {
-      console.log('❌ MISSING REQUIRED FIELDS: category and userId are required');
+    if (!themeId || !userId) {
+      console.log('❌ MISSING REQUIRED FIELDS: themeId and userId are required');
       return new Response(
-        JSON.stringify({ error: 'Category and userId are required' }), 
+        JSON.stringify({ error: 'ThemeId and userId are required' }), 
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -67,10 +67,33 @@ serve(async (req) => {
       );
     }
 
-    console.log(`📋 ENSURE PROMPTS REQUEST: Category: ${category}, User: ${userId}, Theme: ${themeId || 'all'}`);
+    console.log(`📋 ENSURE PROMPTS REQUEST: Theme: ${themeId}, User: ${userId}`);
 
     // Create Supabase client with service role
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+    
+    // Resolve category from themeId
+    console.log('🔍 Resolving category from theme_id:', themeId);
+    const { data: themeData, error: themeError } = await supabase
+      .from('themes')
+      .select('category, theme_name')
+      .eq('id', themeId)
+      .eq('user_id', userId)
+      .single();
+    
+    if (themeError || !themeData) {
+      console.error('❌ Theme not found or access denied:', themeError);
+      return new Response(
+        JSON.stringify({ error: 'Theme not found or access denied' }), 
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+    
+    const category = themeData.category;
+    console.log(`✅ Resolved category: ${category} for theme: ${themeData.theme_name}`);
 
     // Step 1: Get all posts in the category with theme data (optimized with JOIN)
     console.log('🔍 STEP 1: Fetching posts without image prompts');
@@ -92,11 +115,9 @@ serve(async (req) => {
       .eq('user_id', userId)
       .is('generated_image_prompt', null);
     
-    // If themeId is specified, filter by theme for more targeted processing
-    if (themeId) {
-      postsQuery = postsQuery.eq('theme_id', themeId);
-      console.log(`🎯 FILTERING BY THEME: ${themeId}`);
-    }
+    // Filter by themeId (now required)
+    postsQuery = postsQuery.eq('theme_id', themeId);
+    console.log(`🎯 FILTERING BY THEME: ${themeId}`);
     
     const { data: posts, error: postsError } = await postsQuery;
 
