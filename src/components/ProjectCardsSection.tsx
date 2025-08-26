@@ -175,8 +175,13 @@ const ProjectCardsSection = () => {
                          <img 
                            src="/lovable-uploads/0371b967-606a-4e28-9988-0e597407f50d.png"
                            alt="Healthcare dashboard showing financial and clinical metrics with customizable interface"
-                           className="w-full aspect-video object-cover rounded-lg border border-border/50"
+                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                          />
+                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                           <p className="text-white text-sm font-medium text-center px-4">
+                             Click and enter password for case details
+                           </p>
+                         </div>
                        </div>
                      </div>
                    )}
