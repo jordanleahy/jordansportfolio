@@ -3525,14 +3525,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      insert_book_highlights_visual_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      insert_book_research_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       insert_calendar_theme_json_processor: {
         Args: Record<PropertyKey, never>
         Returns: undefined
