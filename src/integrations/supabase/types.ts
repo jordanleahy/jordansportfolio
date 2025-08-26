@@ -1845,7 +1845,6 @@ export type Database = {
           schedule: string
           status: Database["public"]["Enums"]["agent_status"]
           supported_categories: string[] | null
-          system_prompts: Json | null
           tags: string[] | null
           temperature: number | null
           top_p: number | null
@@ -1871,7 +1870,6 @@ export type Database = {
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
           supported_categories?: string[] | null
-          system_prompts?: Json | null
           tags?: string[] | null
           temperature?: number | null
           top_p?: number | null
@@ -1897,7 +1895,6 @@ export type Database = {
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
           supported_categories?: string[] | null
-          system_prompts?: Json | null
           tags?: string[] | null
           temperature?: number | null
           top_p?: number | null
