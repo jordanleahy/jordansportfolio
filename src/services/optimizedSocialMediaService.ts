@@ -113,8 +113,41 @@ export class OptimizedSocialMediaService {
   }
 
   async createPost(post: CreateSocialMediaPost): Promise<SocialMediaPost> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    console.log('🔐 CREATE_POST: Starting authentication check', { 
+      timestamp: new Date().toISOString(),
+      postData: { category: post.category, theme_id: post.theme_id }
+    });
+
+    // Get current session first for debugging
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('🔐 CREATE_POST: Session state', { 
+      hasSession: !!session,
+      sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null,
+      accessToken: session?.access_token ? 'present' : 'missing'
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    console.log('🔐 CREATE_POST: Auth result', { 
+      hasUser: !!user,
+      userId: user?.id,
+      userEmail: user?.email,
+      authError: authError?.message,
+      timestamp: new Date().toISOString()
+    });
+
+    if (!user) {
+      console.error('🔐 CREATE_POST: Authentication failed', { 
+        authError,
+        sessionExists: !!session,
+        timestamp: new Date().toISOString()
+      });
+      throw new Error('User not authenticated');
+    }
+
+    console.log('🔐 CREATE_POST: Authentication successful, proceeding with post creation', { 
+      userId: user.id,
+      timestamp: new Date().toISOString()
+    });
 
     // If no color theme is provided, use the default
     let colorThemeId = post.color_theme_id;
