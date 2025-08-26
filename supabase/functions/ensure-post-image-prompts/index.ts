@@ -67,6 +67,31 @@ serve(async (req) => {
       );
     }
 
+    // Validate that themeId and userId are valid strings
+    if (typeof themeId !== 'string' || typeof userId !== 'string') {
+      console.log('❌ INVALID PARAMETER TYPES: themeId and userId must be strings');
+      return new Response(
+        JSON.stringify({ error: 'themeId and userId must be valid strings' }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Validate themeId is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(themeId)) {
+      console.log('❌ INVALID THEME ID: themeId must be a valid UUID');
+      return new Response(
+        JSON.stringify({ error: 'themeId must be a valid UUID' }), 
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     console.log(`📋 ENSURE PROMPTS REQUEST: Theme: ${themeId}, User: ${userId}`);
 
     // Create Supabase client with service role
