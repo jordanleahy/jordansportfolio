@@ -387,11 +387,11 @@ export const useUnifiedRealtime = ({
     if ((eventType === 'INSERT' || eventType === 'UPDATE') && record) {
       const isVisualPrompt = record.agent_name === 'Visual Prompt Generator' || 
                             record.description?.includes('Visual Prompt Generator') ||
-                            record.category?.includes('visual') ||
-                            record.category?.includes('image');
+                            record.prompt_text?.includes('visual') ||
+                            record.prompt_text?.includes('image');
       
-      if (isVisualPrompt && record.category) {
-        console.log(`[UnifiedRealtime] Auto-triggering image prompt generation for category: ${record.category}`);
+      if (isVisualPrompt && record.theme_id) {
+        console.log(`[UnifiedRealtime] Auto-triggering image prompt generation for theme_id: ${record.theme_id}`);
         
         // Get current user from auth
         import('@/integrations/supabase/client').then(({ supabase }) => {
@@ -400,7 +400,7 @@ export const useUnifiedRealtime = ({
               // Trigger ensure-post-image-prompts in background
               supabase.functions.invoke('ensure-post-image-prompts', {
                 body: {
-                  category: record.category,
+                  themeId: record.theme_id,
                   userId: user.id
                 }
               }).then((result) => {

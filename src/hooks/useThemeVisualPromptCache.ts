@@ -5,7 +5,6 @@ import { useToast } from '@/hooks/use-toast';
 
 interface VisualPromptCacheEntry {
   themeId: string;
-  category: string;
   basePrompt: string;
   colorInstructions: string;
   visualStyle: string;
@@ -17,7 +16,6 @@ interface VisualPromptCacheConfig {
   title: string;
   description: string;
   theme: ColorTheme;
-  category: string;
   aspectRatio?: string;
 }
 
@@ -26,8 +24,8 @@ class ThemeVisualPromptCache {
   private maxCacheSize = 100;
   private cacheExpiryMs = 24 * 60 * 60 * 1000; // 24 hours
 
-  private generateCacheKey(themeId: string, category: string): string {
-    return `visual_prompt:${themeId}:${category}`;
+  private generateCacheKey(themeId: string): string {
+    return `visual_prompt:${themeId}`;
   }
 
   private isExpired(entry: VisualPromptCacheEntry): boolean {
@@ -56,7 +54,7 @@ class ThemeVisualPromptCache {
   async getCachedVisualPrompt(config: VisualPromptCacheConfig): Promise<string | null> {
     this.cleanExpired();
     
-    const key = this.generateCacheKey(config.theme.id, config.category);
+    const key = this.generateCacheKey(config.theme.id);
     const cached = this.cache.get(key);
     
     if (cached && !this.isExpired(cached)) {
@@ -78,11 +76,10 @@ class ThemeVisualPromptCache {
     config: VisualPromptCacheConfig, 
     basePrompt: string
   ): Promise<void> {
-    const key = this.generateCacheKey(config.theme.id, config.category);
+    const key = this.generateCacheKey(config.theme.id);
     
     const entry: VisualPromptCacheEntry = {
       themeId: config.theme.id,
-      category: config.category,
       basePrompt,
       colorInstructions: config.theme.color_instructions,
       visualStyle: config.theme.visual_style,
@@ -131,29 +128,21 @@ Ensure all colors match the specified theme exactly and maintain visual consiste
       size: this.cache.size,
       maxSize: this.maxCacheSize,
       hitRate: Math.min(avgHitRate / 10, 1), // Normalize to 0-1
-      entriesByCategory: this.getEntriesByCategory()
+      entriesByTheme: this.getEntriesByTheme()
     };
   }
 
-  private getEntriesByCategory() {
-    const categories = new Map<string, number>();
+  private getEntriesByTheme() {
+    const themes = new Map<string, number>();
     for (const entry of this.cache.values()) {
-      categories.set(entry.category, (categories.get(entry.category) || 0) + 1);
+      themes.set(entry.themeId, (themes.get(entry.themeId) || 0) + 1);
     }
-    return Object.fromEntries(categories);
+    return Object.fromEntries(themes);
   }
 
   clearThemeCache(themeId: string): void {
     for (const [key, entry] of this.cache.entries()) {
       if (entry.themeId === themeId) {
-        this.cache.delete(key);
-      }
-    }
-  }
-
-  clearCategoryCache(category: string): void {
-    for (const [key, entry] of this.cache.entries()) {
-      if (entry.category === category) {
         this.cache.delete(key);
       }
     }
@@ -197,7 +186,6 @@ export const useThemeVisualPromptCache = () => {
         .insert({
           title: 'Theme Visual Style Template',
           description: `Generate a reusable visual style template for the ${config.theme.name} color theme with ${config.theme.visual_style} styling.`,
-          category: config.category,
           theme_id: config.theme.id,
           user_id: (await supabase.auth.getUser()).data.user?.id || null
         })
@@ -263,14 +251,6 @@ export const useThemeVisualPromptCache = () => {
     });
   }, [toast]);
 
-  const clearCategoryCache = useCallback((category: string) => {
-    themeVisualPromptCache.clearCategoryCache(category);
-    toast({
-      title: "Category Cache Cleared", 
-      description: "Visual prompt cache cleared for this category.",
-    });
-  }, [toast]);
-
   const getCacheStats = useCallback(() => {
     return themeVisualPromptCache.getCacheStats();
   }, []);
@@ -278,7 +258,6 @@ export const useThemeVisualPromptCache = () => {
   return {
     generateWithThemeCache,
     clearThemeCache,
-    clearCategoryCache,
     getCacheStats,
     isGenerating,
     fromCache

@@ -1,7 +1,6 @@
 import React from 'react';
 import { ImagePromptGeneratorModal } from '@/components/ui/image-prompt-generator-modal';
 import { ImagePromptConfig, ImagePromptContent, AspectRatioOption } from '@/types/imagePromptGenerator';
-import { getCategoryLabel } from '@/constants/categoryConstants';
 import { useParams } from 'react-router-dom';
 
 interface BlogVisualPromptProps {
@@ -9,7 +8,6 @@ interface BlogVisualPromptProps {
   onClose: () => void;
   headline: string;
   content: string;
-  category?: string;
   themeId?: string;
 }
 
@@ -20,12 +18,11 @@ const aspectRatioOptions: AspectRatioOption[] = [
   { label: "Standard (4:3)", value: "4:3" }
 ];
 
-export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category = 'healthcare', themeId }: BlogVisualPromptProps) => {
+export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, themeId }: BlogVisualPromptProps) => {
   const config: ImagePromptConfig = {
-    title: themeId ? `Theme ${themeId} Visual Prompt Generator` : `${getCategoryLabel(category)} Visual Prompt Generator`,
+    title: themeId ? `Theme ${themeId} Visual Prompt Generator` : 'Visual Prompt Generator',
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'visual-prompt-generator',
-    category: category,
     themeId,
     enableCaching: true,
     aspectRatioOptions,
