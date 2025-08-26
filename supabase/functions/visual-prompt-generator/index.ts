@@ -17,7 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 interface VisualPromptRequest {
   category: string;
   context: string;
-  themeId?: string;
+  themeId: string;
   theme?: string;
   description: string;
   aspect_ratio?: string;
@@ -39,9 +39,9 @@ serve(async (req) => {
     // Support both aspect_ratio parameter names for compatibility
     const aspectRatioValue = aspect_ratio || aspectRatio || '1:1';
     
-    if (!category || !context) {
+    if (!category || !context || !themeId) {
       return new Response(JSON.stringify({ 
-        error: 'Missing required fields: category and context are required',
+        error: 'Missing required fields: category, context, and themeId are required',
         success: false 
       }), {
         status: 400,
@@ -50,16 +50,16 @@ serve(async (req) => {
     }
 
     // Retrieve system prompt from database
-    console.log(`🔍 Looking up system prompt for category: ${category}, theme: ${themeValue}`);
+    console.log(`🔍 Looking up system prompt for theme_id: ${themeId}`);
     
     let systemPrompt = '';
     
     try {
-      // First try to find a theme-specific system prompt
+      // Query system prompts by theme_id
       let promptQuery = supabase
         .from('system_prompts')
         .select('prompt_text')
-        .eq('category', category)
+        .eq('theme_id', themeId)
         .order('created_at', { ascending: false })
         .limit(1);
       
@@ -71,9 +71,9 @@ serve(async (req) => {
       
       if (systemPromptData && systemPromptData.length > 0) {
         systemPrompt = systemPromptData[0].prompt_text;
-        console.log(`✅ Retrieved system prompt from database for category: ${category}`);
+        console.log(`✅ Retrieved system prompt from database for theme_id: ${themeId}`);
       } else {
-        console.log(`⚠️ No system prompt found for category: ${category}, using fallback`);
+        console.log(`⚠️ No system prompt found for theme_id: ${themeId}, using fallback`);
       }
     } catch (dbError) {
       console.warn('⚠️ Database error retrieving system prompt:', dbError);
