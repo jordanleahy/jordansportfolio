@@ -46,9 +46,9 @@ serve(async (req) => {
         // Call visual-prompt-generator
         const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
           body: {
-            category: 'book_highlights_visual',
+            category: 'theme_visual',
             context: post.description,
-            theme: post.themes?.theme_name || 'Book Highlights',
+            theme: post.themes?.theme_name || 'Theme Content',
             description: post.title,
             aspect_ratio: '1:1'
           }
