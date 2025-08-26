@@ -83,10 +83,13 @@ serve(async (req) => {
 
     const { data: systemPrompt, error: promptError } = await supabase
       .from('system_prompts')
-      .select('prompt_text')
+      .select('id, prompt_text, agent_name, category, theme_id')
       .eq('agent_id', triageAgent.id)
       .eq('user_id', user.id)
-      .single();
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (promptError || !systemPrompt) {
       console.error('System prompt error:', promptError);

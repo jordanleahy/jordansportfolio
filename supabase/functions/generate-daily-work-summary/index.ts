@@ -211,14 +211,18 @@ if (!openAIApiKey) {
         // Get system prompt for the category (optional - fallback to basic summary if not found)
         let systemPromptData = null
         if (agent) {
-          const { data } = await supabase
+          const { data, error: promptError } = await supabase
             .from('system_prompts')
-            .select('prompt_text')
+            .select('id, prompt_text, agent_name, category, theme_id')
             .eq('agent_id', agent.id)
             .eq('is_active', true)
-            .order('updated_at', { ascending: false })
+            .order('created_at', { ascending: false })
             .limit(1)
-            .single()
+            .maybeSingle()
+            
+          if (promptError) {
+            console.error('❌ SYSTEM PROMPT QUERY ERROR:', promptError);
+          }
           systemPromptData = data
         }
         

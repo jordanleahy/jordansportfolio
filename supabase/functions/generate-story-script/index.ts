@@ -140,12 +140,12 @@ serve(async (req) => {
     // Get the appropriate system prompt for the story type from the system_prompts table
     const { data: systemPromptData, error: promptError } = await supabaseClient
       .from('system_prompts')
-      .select('prompt_text')
+      .select('id, prompt_text, agent_name, category, theme_id')
       .eq('agent_id', agent.id)
       .eq('is_active', true)
-      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (promptError || !systemPromptData) {
       console.error('No system prompt found for story type:', story_type, promptError);

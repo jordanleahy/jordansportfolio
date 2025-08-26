@@ -421,9 +421,10 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
     for (let i = 0; i < maxPolls; i++) {
       const { data, error } = await supabase
         .from('system_prompts')
-        .select('id, created_at, theme_id')
+        .select('id, prompt_text, agent_name, category, theme_id, created_at')
         .eq('user_id', userId)
-        .eq('theme_id', themeId)  // Use theme_id instead of category
+        .eq('theme_id', themeId)
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();

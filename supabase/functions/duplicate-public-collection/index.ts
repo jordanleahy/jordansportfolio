@@ -217,15 +217,21 @@ serve(async (req) => {
       console.log(`Created post: ${newPost.id}`);
     }
 
-    // Duplicate system prompts
+    // Duplicate system prompts using standardized pattern
     const { data: originalPrompts, error: promptsError } = await supabaseClient
       .from('system_prompts')
-      .select('*')
-      .or(`agent_name.eq.Theme Generation Agent,category.eq.${originalTheme.category}`);
+      .select('id, prompt_text, agent_name, category, theme_id, agent_purpose, agent_owner, name, description')
+      .or(`agent_name.eq.Theme Generation Agent,category.eq.${originalTheme.category}`)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (promptsError) {
+      console.error('❌ SYSTEM PROMPTS QUERY ERROR:', promptsError);
+    }
 
     if (!promptsError && originalPrompts) {
       for (const prompt of originalPrompts) {
-        await supabaseClient
+        const { error: insertError } = await supabaseClient
           .from('system_prompts')
           .insert([{
             user_id: user.id,

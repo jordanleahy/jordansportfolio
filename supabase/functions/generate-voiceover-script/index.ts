@@ -103,27 +103,31 @@ serve(async (req) => {
     // First try to get the specific tone, then fall back to any available prompt
     let { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
-      .select('prompt_text, name')
+      .select('id, prompt_text, agent_name, category, theme_id, name')
       .eq('agent_id', agent.id)
       .eq('name', tone)
       .eq('is_active', true)
-      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
     
     let selectedPrompt = systemPromptData;
     
     if (promptError || !selectedPrompt) {
       console.log('Specific tone not found, trying fallback. Requested tone:', tone);
       // Try to get any available prompt as fallback
-      const { data: fallbackData } = await supabase
+      const { data: fallbackData, error: fallbackError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, name')
+        .select('id, prompt_text, agent_name, category, theme_id, name')
         .eq('agent_id', agent.id)
         .eq('is_active', true)
-        .order('updated_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
+        
+      if (fallbackError) {
+        console.error('❌ FALLBACK SYSTEM PROMPT QUERY ERROR:', fallbackError);
+      }
       
       if (fallbackData) {
         console.log('Using fallback prompt:', fallbackData.name, 'instead of:', tone);

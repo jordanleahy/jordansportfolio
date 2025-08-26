@@ -70,22 +70,22 @@ serve(async (req) => {
     let systemPrompt = '';
     
     try {
-      // Query system prompts by theme_id
-      let promptQuery = supabase
+      // Query system prompts by theme_id using standardized pattern
+      const { data: systemPromptData, error: promptError } = await supabase
         .from('system_prompts')
-        .select('prompt_text')
+        .select('id, prompt_text, agent_name, category, theme_id')
         .eq('theme_id', themeId)
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(1);
-      
-      const { data: systemPromptData, error: promptError } = await promptQuery;
+        .limit(1)
+        .maybeSingle();
       
       if (promptError) {
-        console.warn('⚠️ Error retrieving system prompt:', promptError);
+        console.error('❌ SYSTEM PROMPT QUERY ERROR:', promptError);
       }
       
-      if (systemPromptData && systemPromptData.length > 0) {
-        systemPrompt = systemPromptData[0].prompt_text;
+      if (systemPromptData) {
+        systemPrompt = systemPromptData.prompt_text;
         console.log(`✅ Retrieved system prompt from database for theme_id: ${themeId}`);
       } else {
         console.log(`⚠️ No system prompt found for theme_id: ${themeId}, using fallback`);
