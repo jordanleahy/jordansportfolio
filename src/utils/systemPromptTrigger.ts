@@ -1,34 +1,34 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * ❌ BAD: Phase 2 migration incomplete - still using category names
- * TODO: Update to use themeId-based system prompt generation
+ * ✅ FIXED: Trigger system prompt generation for a specific themeId
+ * Migrated from category-based to themeId-based approach
  */
-export const triggerSystemPromptGeneration = async (category: string) => {
-  console.log('🚀 MANUAL TRIGGER: Starting system prompt generation for category:', category);
+export const triggerSystemPromptGeneration = async (themeId: string) => {
+  console.log('🚀 MANUAL TRIGGER: Starting system prompt generation for themeId:', themeId);
   console.log('🕐 TRIGGER TIMESTAMP:', new Date().toISOString());
   
   try {
-    console.log('🔍 STEP 1: Checking existing posts for category');
-    // ❌ BAD: Theme name lookup (Phase 2 migration needed)
-    const { data: theme } = await supabase
+    console.log('🔍 STEP 1: Validating theme exists');
+    const { data: theme, error: themeError } = await supabase
       .from('themes')
-      .select('id')
-      .eq('theme_name', category)
+      .select('id, theme_name, category')
+      .eq('id', themeId)
       .single();
     
-    if (!theme) {
-      console.log('❌ No theme found for category:', category);
-      return { success: false, error: 'No theme found for this category' };
+    if (themeError || !theme) {
+      console.log('❌ No theme found for themeId:', themeId);
+      return { success: false, error: 'No theme found for this themeId' };
     }
     
+    console.log('✅ Found theme:', theme.theme_name, 'in category:', theme.category);
+    
     // ✅ GOOD: Using theme_id for posts query
-    const postsQuery = supabase
+    const { data: existingPosts, error: postsError } = await supabase
       .from('social_media_posts')
       .select('id, title, description')
-      .eq('theme_id', theme.id)
+      .eq('theme_id', themeId)
       .limit(3);
-    const { data: existingPosts, error: postsError } = await postsQuery;
     
     console.log('📊 POSTS QUERY RESULT:', {
       postsFound: existingPosts?.length || 0,
@@ -36,14 +36,13 @@ export const triggerSystemPromptGeneration = async (category: string) => {
       firstPostTitle: existingPosts?.[0]?.title
     });
     
-    console.log('🔍 STEP 2: Checking existing system prompts for category');
-    // ❌ BAD: Legacy theme field check (Phase 2 migration needed)
-    const promptsQuery = supabase
+    console.log('🔍 STEP 2: Checking existing system prompts for theme');
+    // ✅ GOOD: Using theme_id for system prompts check
+    const { data: existingSystemPrompts, error: promptsError } = await supabase
       .from('system_prompts')
       .select('id')
-      .eq('theme', category)
+      .eq('theme_id', themeId)
       .limit(1);
-    const { data: existingSystemPrompts, error: promptsError } = await promptsQuery;
     
     console.log('📊 SYSTEM PROMPTS QUERY RESULT:', {
       promptsFound: existingSystemPrompts?.length || 0,
@@ -53,8 +52,10 @@ export const triggerSystemPromptGeneration = async (category: string) => {
     const hasExistingPosts = existingPosts && existingPosts.length > 0;
     const hasSystemPrompt = existingSystemPrompts && existingSystemPrompts.length > 0;
     
-    console.log('📊 CATEGORY STATUS SUMMARY:', {
-      category,
+    console.log('📊 THEME STATUS SUMMARY:', {
+      themeId,
+      themeName: theme.theme_name,
+      category: theme.category,
       hasExistingPosts,
       postsCount: existingPosts?.length || 0,
       hasSystemPrompt,
@@ -63,17 +64,16 @@ export const triggerSystemPromptGeneration = async (category: string) => {
     });
     
     if (!hasExistingPosts) {
-      console.log('❌ No posts found for category:', category);
-      return { success: false, error: 'No posts found for this category' };
+      console.log('❌ No posts found for themeId:', themeId);
+      return { success: false, error: 'No posts found for this theme' };
     }
     
     if (hasSystemPrompt) {
-      console.log('ℹ️  System prompt already exists for category:', category);
-      return { success: false, error: 'System prompt already exists for this category' };
+      console.log('ℹ️  System prompt already exists for themeId:', themeId);
+      return { success: false, error: 'System prompt already exists for this theme' };
     }
     
     console.log('🔍 STEP 3: Getting current authenticated user');
-    // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     console.log('👤 USER AUTH RESULT:', {
       userFound: !!user,
@@ -86,40 +86,25 @@ export const triggerSystemPromptGeneration = async (category: string) => {
       return { success: false, error: 'User not authenticated' };
     }
     
-    console.log('🚀 STEP 4: Calling invoke-system-prompt-agent edge function');
-    console.log('📋 EDGE FUNCTION PAYLOAD:', {
-      category: 'system_prompt_generation',
-      theme: category,
-      description: `Generated content for ${category} category`,
-      sample_posts_count: existingPosts?.slice(0, 3).length || 0,
-      user_id: user.id
-    });
-    
-    const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+    // Call the system prompt generator with themeId
+    console.log('📡 STEP 4: Calling system prompt generation service');
+    const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: {
-        category: 'system_prompt_generation',
-        theme: category,
-        description: `Generated content for ${category} category`,
-        sample_posts: existingPosts?.slice(0, 3) || [],
-        user_id: user.id
+        theme_id: themeId,
+        user_id: user.id,
+        posts: existingPosts.slice(0, 3)
       }
     });
-    
-    console.log('📡 EDGE FUNCTION COMPLETE:', {
-      hasData: !!invokeData,
-      hasError: !!invokeError,
-      errorMessage: invokeError?.message,
-      successData: invokeData?.success
-    });
-    
-    if (invokeError) {
-      console.error('❌ SYSTEM PROMPT GENERATION ERROR:', invokeError);
-      return { success: false, error: invokeError.message };
-    } else {
-      console.log('✅ SYSTEM PROMPT GENERATED:', invokeData);
-      return { success: true, data: invokeData };
+
+    if (error) {
+      console.error('❌ SYSTEM PROMPT GENERATION ERROR:', error);
+      return { success: false, error: error.message };
     }
-    
+
+    console.log('✅ SYSTEM PROMPT GENERATION SUCCESS:', data);
+    console.log('🏁 TRIGGER COMPLETED:', new Date().toISOString());
+    return { success: true, data };
+
   } catch (error: any) {
     console.error('💥 SYSTEM PROMPT GENERATION EXCEPTION:', error);
     return { success: false, error: error.message };
@@ -159,21 +144,18 @@ export const triggerSystemPromptForNewTheme = async (themeId: string, themeName:
       .limit(10);
 
     if (!posts || posts.length === 0) {
-      console.log(`⚠️ No posts found for category ${category}, skipping system prompt generation`);
+      console.log(`⚠️ No posts found for theme ${themeId}, skipping system prompt generation`);
       return { success: false, error: 'No posts available for system prompt generation' };
     }
 
-    console.log(`📝 Found ${posts.length} posts for category ${category}, generating system prompt...`);
+    console.log(`📝 Found ${posts.length} posts for theme ${themeName}, generating system prompt...`);
 
     // Call the system prompt agent
     const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
       body: {
-        category: 'system_prompt_generation',
-        theme: themeName,
         theme_id: themeId,
-        description: `Generated system prompt for ${category} category`,
-        sample_posts: posts.slice(0, 5), // Limit to 5 sample posts
-        user_id: user.id
+        user_id: user.id,
+        posts: posts.slice(0, 5) // Limit to 5 sample posts
       }
     });
 
@@ -191,26 +173,32 @@ export const triggerSystemPromptForNewTheme = async (themeId: string, themeName:
   }
 };
 
-// Helper function to trigger for all categories missing system prompts
+/**
+ * ✅ FIXED: Find themes missing system prompts and trigger generation
+ * Updated to use themeId-based approach
+ */
 export const triggerMissingSystemPrompts = async () => {
-  console.log('🔍 SEARCHING: Categories with posts but no system prompts');
+  console.log('🔍 SEARCHING FOR THEMES WITHOUT SYSTEM PROMPTS');
   
-  // Get all themes that have posts but no system prompts
-  const themesQuery = supabase
+  const { data: themes } = await supabase
     .from('themes')
-    .select('theme_name, id')
+    .select('id, theme_name, category')
     .is('visual_prompt_system_prompt_id', null);
-  const { data: themes } = await themesQuery;
   
   if (!themes) return [];
   
-  const uniqueCategories = themes.map((t: any) => t.theme_name);
-  console.log('📂 FOUND CATEGORIES:', uniqueCategories);
+  console.log('📂 FOUND THEMES WITHOUT SYSTEM PROMPTS:', themes.length);
   
   const results = [];
-  for (const category of uniqueCategories) {
-    const result = await triggerSystemPromptGeneration(category);
-    results.push({ category, ...result });
+  for (const theme of themes) {
+    console.log(`🔄 Processing theme: ${theme.theme_name} (${theme.category})`);
+    const result = await triggerSystemPromptGeneration(theme.id);
+    results.push({ 
+      themeId: theme.id, 
+      themeName: theme.theme_name, 
+      category: theme.category, 
+      ...result 
+    });
   }
   
   return results;

@@ -103,7 +103,7 @@ serve(async (req) => {
     // First try to get the specific tone, then fall back to any available prompt
     let { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, category, theme_id, name')
+      .select('id, prompt_text, agent_name, theme_id, name, themes!inner(category)')
       .eq('agent_id', agent.id)
       .eq('name', tone)
       .eq('is_active', true)
@@ -118,7 +118,7 @@ serve(async (req) => {
       // Try to get any available prompt as fallback
       const { data: fallbackData, error: fallbackError } = await supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, category, theme_id, name')
+        .select('id, prompt_text, agent_name, theme_id, name, themes!inner(category)')
         .eq('agent_id', agent.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
