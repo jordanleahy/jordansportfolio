@@ -281,14 +281,14 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         category: themeData.category
       });
 
-      // Create new theme
+      // Create new theme without category initially (will be updated later)
       const { data: newTheme, error: themeInsertError } = await supabase
         .from('themes')
         .insert({
           user_id: userId,
           theme_name: themeData.theme,
           description: themeData.theme_description,
-          category: themeData.category
+          category: themeData.category || 'general' // Set category during creation
         })
         .select('id, theme_name, category, created_at, updated_at')
         .single();
@@ -337,13 +337,12 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       });
     }
 
-    // Import posts using direct insert instead of RPC to ensure proper authentication context
+    // Import posts without the category field (since it doesn't belong in social_media_posts)
     const postsToInsert = themeData.posts.map((post: ThemePost) => ({
       day: post.day,
       title: post.title,
       description: post.description,
       theme_id: themeId,
-      category: themeData.category,
       user_id: userId,
       status: 'draft' as const
     }));
@@ -362,12 +361,11 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         title: postsToInsert[0]?.title?.substring(0, 50) + '...',
         description: postsToInsert[0]?.description?.substring(0, 50) + '...',
         theme_id: postsToInsert[0]?.theme_id,
-        category: postsToInsert[0]?.category,
         user_id: postsToInsert[0]?.user_id,
         status: postsToInsert[0]?.status
       },
       allPostsHaveRequiredFields: postsToInsert.every(p => 
-        p.title && p.description && p.theme_id && p.user_id && p.category
+        p.title && p.description && p.theme_id && p.user_id
       )
     });
 
@@ -388,7 +386,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     const { data, error } = await supabase
       .from('social_media_posts')
       .insert(postsToInsert)
-      .select('id, category, theme_id, title, day, created_at');
+      .select('id, theme_id, title, day, created_at');
     
     const insertDuration = Date.now() - insertStartTime;
     
@@ -407,7 +405,6 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         firstPostDetails: {
           id: data[0].id,
           title: data[0].title?.substring(0, 50),
-          category: data[0].category,
           theme_id: data[0].theme_id,
           day: data[0].day,
           created_at: data[0].created_at
@@ -462,7 +459,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     // Verify posts exist and are linked to theme
     const { data: postsVerification, error: postsVerifyError } = await supabase
       .from('social_media_posts')
-      .select('id, title, theme_id, category, user_id, created_at')
+      .select('id, title, theme_id, user_id, created_at')
       .eq('theme_id', themeId)
       .eq('user_id', userId);
       
