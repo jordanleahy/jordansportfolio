@@ -1,61 +1,72 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// CORS headers for browser access
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-type PostStatus = "draft" | "scheduled" | "published";
+// Type definitions for theme data structure
+interface PostStatus {
+  draft: 'draft';
+  scheduled: 'scheduled';
+  published: 'published';
+}
 
 interface ThemePost {
-  day?: number; // 1-365 optional
-  title: string; // 1-500
-  story_description: string; // 1-2000
-  status?: PostStatus; // default draft
+  day?: number;
+  title: string;
+  story_description: string;
+  status?: keyof PostStatus;
 }
 
 interface ThemeImportData {
-  category?: string; // 1-100 optional
-  theme: string; // 1-200
-  theme_description?: string; // <=1000
-  posts: ThemePost[]; // 1-100
+  category?: string;
+  theme: string;
+  theme_description?: string;
+  posts: ThemePost[];
 }
 
 interface ProcessingResult {
   success: boolean;
   data?: ThemeImportData;
-  errors: string[];
-  warnings: string[];
+  error?: string;
+  warnings?: string[];
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const body = await req.json().catch(() => ({}));
-    const text: string = typeof body.text === "string" ? body.text : "";
-
-    if (!text || !text.trim()) {
-      return json({ success: false, errors: ["Missing 'text'"], warnings: [] }, 400);
+    console.log('🔄 Structure Theme Input - Processing request...');
+    
+    const { text } = await req.json();
+    
+    if (!text || typeof text !== 'string') {
+      return json({ error: 'Missing or invalid text input' }, 400);
     }
 
-    // If the user already pasted JSON, try to normalize locally without AI
-    const normalized = await tryNormalizeLocal(text);
-    if (normalized?.success) {
-      return json(normalized);
+    console.log('📥 Input text length:', text.length);
+
+    // First attempt: Try to normalize locally
+    const localResult = tryNormalizeLocal(text);
+    if (localResult.success && localResult.data) {
+      console.log('✅ Local normalization successful');
+      return json(localResult);
     }
 
-    // Otherwise call OpenAI to structure it
-    const openAIApiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openAIApiKey) {
-      return json({ success: false, errors: ["OPENAI_API_KEY not configured"], warnings: [] }, 500);
+    console.log('🤖 Local normalization failed, using OpenAI...');
+    
+    // Fallback: Use OpenAI API for complex structuring
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      return json({ error: 'OpenAI API key not configured' }, 500);
     }
 
-    const system = `You are a strict data structuring agent. Convert user text into EXACT JSON that matches this schema and constraints. Output ONLY raw JSON (no code fences, no commentary).
+    const systemPrompt = `You are a strict data structuring agent. Convert user text into EXACT JSON that matches this schema and constraints. Output ONLY raw JSON (no code fences, no commentary).
 
 SCHEMA:
 {
@@ -79,175 +90,225 @@ REQUIREMENTS:
 - If status missing/invalid: set to "draft"
 - If day missing: auto-increment starting at 1
 - Map any fields like description -> story_description
-- NEVER include markdown, explanations, or keys not in schema.
-`;
+- NEVER include markdown, explanations, or keys not in schema.`;
 
-    const user = `User text:\\n\\n${text}`;
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${openAIApiKey}`,
-        "Content-Type": "application/json",
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: "gpt-4.1-2025-04-14",
+        model: 'gpt-5-mini-2025-08-07',
         messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: text }
         ],
-        max_completion_tokens: 2500,
+        max_completion_tokens: 2000, // GPT-5 compatible parameter
+        // Note: temperature parameter removed for GPT-5 compatibility
       }),
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      return json({ success: false, errors: [
-        `OpenAI error ${response.status}: ${errText}`
-      ], warnings: [] }, 502);
+      const errorData = await response.json();
+      console.error('❌ OpenAI API error:', errorData);
+      return json({ 
+        error: `OpenAI API error: ${response.status}`,
+        details: errorData 
+      }, 500);
     }
 
-    const result = await response.json();
-    const content = String(result?.choices?.[0]?.message?.content || "").trim();
-    const cleaned = content.replace(/^```json\s*|\s*```$/g, "");
+    const aiResponse = await response.json();
+    const structuredText = aiResponse.choices[0].message.content.trim();
+    
+    console.log('📤 OpenAI response length:', structuredText.length);
 
-    let parsed: any;
+    // Parse and validate the AI response
+    let parsedData;
     try {
-      parsed = JSON.parse(cleaned);
-    } catch (e) {
-      return json({ success: false, errors: ["Model did not return valid JSON"], warnings: [] }, 500);
+      parsedData = JSON.parse(structuredText);
+    } catch (parseError) {
+      console.error('❌ Failed to parse OpenAI JSON response:', parseError);
+      return json({ 
+        error: 'Failed to parse AI response as JSON',
+        raw_response: structuredText.substring(0, 200)
+      }, 500);
     }
 
-    const { data, errors, warnings } = validateAndCoerce(parsed);
-    const success = errors.length === 0;
-    return json({ success, data: success ? data : undefined, errors, warnings }, success ? 200 : 400);
-  } catch (e) {
-    return json({ success: false, errors: [e instanceof Error ? e.message : "Unknown error"], warnings: [] }, 500);
+    // Validate and coerce the parsed data
+    const validationResult = validateAndCoerce(parsedData);
+    
+    console.log('✅ Structure Theme Input - Processing complete');
+    return json(validationResult);
+
+  } catch (error) {
+    console.error('💥 Structure Theme Input - Error:', error);
+    return json({ 
+      error: 'Internal server error',
+      message: error.message 
+    }, 500);
   }
 });
 
-function json(obj: any, status = 200) {
+// Helper function to create JSON responses with CORS headers
+function json(obj: any, status = 200): Response {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
 
-async function tryNormalizeLocal(input: string): Promise<ProcessingResult | null> {
+// Try to normalize input locally (for already structured JSON)
+function tryNormalizeLocal(input: string): ProcessingResult {
   try {
-    const maybe = JSON.parse(input);
-    const { data, errors, warnings } = validateAndCoerce(maybe);
-    if (errors.length === 0) {
-      return { success: true, data, errors, warnings };
+    // Remove common markdown artifacts
+    const cleaned = input.replace(/```json\s*|\s*```/g, '').trim();
+    
+    const parsed = JSON.parse(cleaned);
+    const result = validateAndCoerce(parsed);
+    
+    if (result.success) {
+      return result;
     }
-    return { success: false, errors, warnings };
-  } catch {
-    return null;
+    
+    return { success: false, error: 'Local validation failed' };
+  } catch (error) {
+    return { success: false, error: `Local parse failed: ${error.message}` };
   }
 }
 
-function validateAndCoerce(obj: any): { data?: ThemeImportData; errors: string[]; warnings: string[] } {
-  const errors: string[] = [];
+// Validate and coerce data to match ThemeImportData schema
+function validateAndCoerce(obj: any): ProcessingResult {
   const warnings: string[] = [];
+  const errors: string[] = [];
 
-  const trim = (s: any) => (typeof s === "string" ? s.trim() : s);
-  const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max);
+  if (!obj || typeof obj !== 'object') {
+    return { success: false, error: 'Input must be an object' };
+  }
 
-  const out: ThemeImportData = {
-    category: undefined,
-    theme: "",
-    theme_description: undefined,
-    posts: [],
+  // Validate required theme field
+  if (!obj.theme || typeof obj.theme !== 'string') {
+    return { success: false, error: 'Missing required field: theme' };
+  }
+
+  if (obj.theme.length > 200) {
+    obj.theme = obj.theme.substring(0, 200);
+    warnings.push('Theme truncated to 200 characters');
+  }
+
+  // Validate and set category
+  if (!obj.category || typeof obj.category !== 'string') {
+    obj.category = 'general';
+    warnings.push('Category defaulted to "general"');
+  } else if (obj.category.length > 100) {
+    obj.category = obj.category.substring(0, 100);
+    warnings.push('Category truncated to 100 characters');
+  }
+
+  // Validate theme_description
+  if (obj.theme_description && typeof obj.theme_description === 'string') {
+    if (obj.theme_description.length > 1000) {
+      obj.theme_description = obj.theme_description.substring(0, 1000);
+      warnings.push('Theme description truncated to 1000 characters');
+    }
+  }
+
+  // Validate posts array
+  if (!Array.isArray(obj.posts)) {
+    return { success: false, error: 'Posts must be an array' };
+  }
+
+  if (obj.posts.length === 0) {
+    return { success: false, error: 'At least one post is required' };
+  }
+
+  if (obj.posts.length > 100) {
+    obj.posts = obj.posts.slice(0, 100);
+    warnings.push('Posts array truncated to 100 items');
+  }
+
+  // Validate and coerce each post
+  obj.posts = obj.posts.map((post: any, index: number) => {
+    if (!post || typeof post !== 'object') {
+      errors.push(`Post ${index + 1}: Invalid post object`);
+      return null;
+    }
+
+    // Handle title
+    if (!post.title || typeof post.title !== 'string') {
+      errors.push(`Post ${index + 1}: Missing or invalid title`);
+      return null;
+    }
+    if (post.title.length > 500) {
+      post.title = post.title.substring(0, 500);
+      warnings.push(`Post ${index + 1}: Title truncated to 500 characters`);
+    }
+
+    // Handle description (map from various possible field names)
+    let description = post.story_description || post.description || '';
+    if (!description || typeof description !== 'string') {
+      errors.push(`Post ${index + 1}: Missing or invalid description`);
+      return null;
+    }
+    if (description.length > 2000) {
+      description = description.substring(0, 2000);
+      warnings.push(`Post ${index + 1}: Description truncated to 2000 characters`);
+    }
+
+    // Validate day
+    let day = post.day;
+    if (day !== undefined) {
+      day = Number(day);
+      if (isNaN(day) || day < 1 || day > 365) {
+        warnings.push(`Post ${index + 1}: Invalid day value, will be auto-assigned`);
+        day = undefined;
+      }
+    }
+
+    // Validate status
+    let status = post.status;
+    if (!status || !['draft', 'scheduled', 'published'].includes(status)) {
+      status = 'draft';
+      if (post.status) {
+        warnings.push(`Post ${index + 1}: Invalid status, defaulted to 'draft'`);
+      }
+    }
+
+    return {
+      day,
+      title: post.title.trim(),
+      story_description: description.trim(),
+      status
+    };
+  }).filter(Boolean); // Remove null entries
+
+  // Auto-assign days for posts without day values
+  let nextDay = 1;
+  obj.posts.forEach((post: any) => {
+    if (!post.day) {
+      post.day = nextDay;
+    }
+    nextDay = Math.max(nextDay, post.day + 1);
+  });
+
+  if (errors.length > 0) {
+    return { 
+      success: false, 
+      error: `Validation errors: ${errors.join('; ')}`,
+      warnings 
+    };
+  }
+
+  const result: ThemeImportData = {
+    category: obj.category,
+    theme: obj.theme.trim(),
+    theme_description: obj.theme_description?.trim(),
+    posts: obj.posts
   };
 
-  // category (optional, default general)
-  if (obj?.category != null) {
-    const c = String(obj.category).trim();
-    if (c.length === 0) {
-      warnings.push("Empty category removed; defaulting to 'general'.");
-    } else if (c.length > 100) {
-      out.category = c.slice(0, 100);
-      warnings.push("Category truncated to 100 chars");
-    } else {
-      out.category = c;
-    }
-  }
-  if (!out.category) out.category = "general";
-
-  // theme (required)
-  if (obj?.theme == null || String(obj.theme).trim().length === 0) {
-    errors.push("theme is required");
-  } else {
-    const t = String(obj.theme).trim();
-    out.theme = t.length > 200 ? (warnings.push("Theme truncated to 200 chars"), t.slice(0, 200)) : t;
-  }
-
-  // theme_description (optional)
-  if (obj?.theme_description != null) {
-    const d = String(obj.theme_description);
-    out.theme_description = d.length > 1000 ? (warnings.push("theme_description truncated to 1000 chars"), d.slice(0, 1000)) : d;
-  }
-
-  // posts array (required 1-100)
-  if (!Array.isArray(obj?.posts)) {
-    errors.push("posts must be an array");
-  } else if (obj.posts.length === 0) {
-    errors.push("posts must contain at least 1 item");
-  } else {
-    let posts = obj.posts;
-
-    if (posts.length > 100) {
-      posts = posts.slice(0, 100);
-      warnings.push("Limited posts to 100");
-    }
-
-    out.posts = posts.map((p: any, idx: number) => {
-      const mapped: ThemePost = {
-        title: "",
-        story_description: "",
-        status: "draft",
-      };
-
-      // day
-      const dayVal = p?.day != null ? Number(p.day) : idx + 1;
-      if (!Number.isFinite(dayVal)) {
-        mapped.day = idx + 1;
-        warnings.push(`Post ${idx + 1}: invalid day, auto-set`);
-      } else {
-        mapped.day = clamp(Math.round(dayVal), 1, 365);
-      }
-
-      // title
-      const titleSrc = trim(p?.title);
-      if (!titleSrc || typeof titleSrc !== "string" || titleSrc.length === 0) {
-        errors.push(`Post ${idx + 1}: title is required`);
-      } else {
-        mapped.title = titleSrc.length > 500 ? (warnings.push(`Post ${idx + 1}: title truncated`), titleSrc.slice(0, 500)) : titleSrc;
-      }
-
-      // story_description (map description → story_description if needed)
-      const descSrc = trim(p?.story_description ?? p?.description);
-      if (!descSrc || typeof descSrc !== "string" || descSrc.length === 0) {
-        errors.push(`Post ${idx + 1}: story_description is required`);
-      } else {
-        mapped.story_description = descSrc.length > 2000 ? (warnings.push(`Post ${idx + 1}: story_description truncated`), descSrc.slice(0, 2000)) : descSrc;
-      }
-
-      // status
-      const statusSrc = String(p?.status || "draft").toLowerCase();
-      mapped.status = (statusSrc === "draft" || statusSrc === "scheduled" || statusSrc === "published") ? (statusSrc as PostStatus) : "draft";
-      if (mapped.status === "draft" && statusSrc !== "draft") {
-        warnings.push(`Post ${idx + 1}: invalid status, set to draft`);
-      }
-
-      return mapped;
-    });
-  }
-
-  if (out.posts.length === 0) {
-    // Ensure type stability
-    delete (out as any).posts;
-  }
-
-  return { data: out, errors, warnings };
+  return { 
+    success: true, 
+    data: result,
+    warnings: warnings.length > 0 ? warnings : undefined
+  };
 }
