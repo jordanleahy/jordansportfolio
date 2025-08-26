@@ -211,8 +211,9 @@ serve(async (req) => {
 
           // Use internal edge function to generate prompts consistently with retry logic
           const invokePayload = {
-            postId: post.id,
+            context: post.title,
             themeId: post.theme_id,
+            description: post.description,
             aspectRatio: '1:1'
           };
           

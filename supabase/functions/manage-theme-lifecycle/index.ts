@@ -75,8 +75,8 @@ serve(async (req) => {
     });
 
     if (body.action === 'create') {
-      if (!body.description) {
-        throw new Error('Description is required for create action');
+      if (!body.description || typeof body.description !== 'string') {
+        throw new Error('Valid description is required for create action');
       }
 
       console.log(`🔵 [CREATE] Starting theme creation with lifecycle`, {
@@ -165,8 +165,14 @@ serve(async (req) => {
       );
 
     } else if (body.action === 'complete') {
-      if (!body.themeId) {
-        throw new Error('Theme ID is required for complete action');
+      if (!body.themeId || typeof body.themeId !== 'string') {
+        throw new Error('Valid theme ID is required for complete action');
+      }
+
+      // Validate themeId is a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(body.themeId)) {
+        throw new Error('Theme ID must be a valid UUID');
       }
 
       console.log(`🔵 [COMPLETE] Marking theme as user-completed`, {
@@ -214,8 +220,14 @@ serve(async (req) => {
       );
 
     } else if (body.action === 'status') {
-      if (!body.themeId) {
-        throw new Error('Theme ID is required for status action');
+      if (!body.themeId || typeof body.themeId !== 'string') {
+        throw new Error('Valid theme ID is required for status action');
+      }
+
+      // Validate themeId is a valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(body.themeId)) {
+        throw new Error('Theme ID must be a valid UUID');
       }
 
       console.log(`🔵 [STATUS] Fetching theme status`, {

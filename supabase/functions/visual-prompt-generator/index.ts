@@ -33,20 +33,35 @@ serve(async (req) => {
     
     const { context, theme, themeId, description, aspect_ratio, aspectRatio }: VisualPromptRequest = await req.json();
     
-    // Use theme or themeId, preferring theme if both are provided
-    const themeValue = theme || themeId || 'default';
-    // Support both aspect_ratio parameter names for compatibility
-    const aspectRatioValue = aspect_ratio || aspectRatio || '1:1';
-    
-    if (!context || !themeId) {
+    // Validate required parameters
+    if (!themeId) {
       return new Response(JSON.stringify({ 
-        error: 'Missing required fields: context and themeId are required',
+        error: 'Missing required field: themeId is required',
         success: false 
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Validate themeId is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(themeId)) {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid themeId: must be a valid UUID',
+        success: false 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Use theme or themeId, preferring theme if both are provided
+    const themeValue = theme || themeId || 'default';
+    // Support both aspect_ratio parameter names for compatibility
+    const aspectRatioValue = aspect_ratio || aspectRatio || '1:1';
+    // Use provided context or fallback to description
+    const contextValue = context || description || 'Generate professional visual content';
 
     // Direct lookup of system prompt by theme_id (no category lookup needed)
     console.log(`🔍 Looking up system prompt for theme_id: ${themeId}`);
@@ -97,8 +112,8 @@ Focus on:
     const promptRequest = `${systemPrompt}
 
 Theme: ${themeValue}
-Context: ${context}
-Description: ${description}
+Context: ${contextValue}
+Description: ${description || 'Professional content creation'}
 Aspect Ratio: ${aspectRatioValue}
 
 Generate a detailed visual prompt that will create an engaging, professional image.`;
