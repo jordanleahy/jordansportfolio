@@ -110,3 +110,9 @@ verify_jwt = true
 
 [functions.aggregate-api-usage]
 verify_jwt = true
+
+[functions.research-book-highlights]
+verify_jwt = true
+
+[functions.visual-prompt-generator]
+verify_jwt = true

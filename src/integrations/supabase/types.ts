@@ -539,6 +539,39 @@ export type Database = {
           },
         ]
       }
+      books_catalog: {
+        Row: {
+          author: string
+          category: string | null
+          created_at: string | null
+          id: string
+          publication_year: number | null
+          title: string
+          total_highlights_count: number | null
+          user_id: string
+        }
+        Insert: {
+          author: string
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          publication_year?: number | null
+          title: string
+          total_highlights_count?: number | null
+          user_id: string
+        }
+        Update: {
+          author?: string
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          publication_year?: number | null
+          title?: string
+          total_highlights_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cached_prompts: {
         Row: {
           cache_key: string
@@ -3166,6 +3199,54 @@ export type Database = {
           },
         ]
       }
+      verified_book_highlights: {
+        Row: {
+          book_author: string
+          book_title: string
+          created_at: string | null
+          id: string
+          image_urls: Json | null
+          original_input: string
+          processing_status: string | null
+          source_references: Json | null
+          updated_at: string | null
+          user_id: string
+          verification_confidence: string
+          verified_quotes: Json | null
+          visual_prompts: Json | null
+        }
+        Insert: {
+          book_author: string
+          book_title: string
+          created_at?: string | null
+          id?: string
+          image_urls?: Json | null
+          original_input: string
+          processing_status?: string | null
+          source_references?: Json | null
+          updated_at?: string | null
+          user_id: string
+          verification_confidence?: string
+          verified_quotes?: Json | null
+          visual_prompts?: Json | null
+        }
+        Update: {
+          book_author?: string
+          book_title?: string
+          created_at?: string | null
+          id?: string
+          image_urls?: Json | null
+          original_input?: string
+          processing_status?: string | null
+          source_references?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          verification_confidence?: string
+          verified_quotes?: Json | null
+          visual_prompts?: Json | null
+        }
+        Relationships: []
+      }
       voiceover_scripts: {
         Row: {
           created_at: string
@@ -3443,6 +3524,14 @@ export type Database = {
       insert_blog_visual_agent: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      insert_book_highlights_visual_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      insert_book_research_agent: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       insert_calendar_theme_json_processor: {
         Args: Record<PropertyKey, never>
