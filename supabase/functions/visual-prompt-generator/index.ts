@@ -48,32 +48,10 @@ serve(async (req) => {
       });
     }
 
-    // Look up theme to get category
-    console.log(`🔍 Looking up theme for theme_id: ${themeId}`);
-    let category = 'default';
-    
-    try {
-      const { data: themeData, error: themeError } = await supabase
-        .from('themes')
-        .select('category')
-        .eq('id', themeId)
-        .single();
-      
-      if (themeError) {
-        console.warn('⚠️ Error retrieving theme:', themeError);
-      } else if (themeData) {
-        category = themeData.category;
-        console.log(`✅ Retrieved category "${category}" from theme_id: ${themeId}`);
-      } else {
-        console.log(`⚠️ No theme found for theme_id: ${themeId}, using default category`);
-      }
-    } catch (dbError) {
-      console.warn('⚠️ Database error retrieving theme:', dbError);
-    }
+    // Direct lookup of system prompt by theme_id (no category lookup needed)
+    console.log(`🔍 Looking up system prompt for theme_id: ${themeId}`);
 
     // Retrieve system prompt from database
-    console.log(`🔍 Looking up system prompt for theme_id: ${themeId}`);
-    
     let systemPrompt = '';
     
     try {
@@ -101,34 +79,12 @@ serve(async (req) => {
       console.warn('⚠️ Database error retrieving system prompt:', dbError);
     }
     
-    // Fallback system prompts if none found in database
+    // Fallback system prompt if none found in database
     if (!systemPrompt) {
-      console.log('🔄 Using fallback system prompt');
+      console.log('🔄 Using generic fallback system prompt');
       
-      if (category === 'book_highlights_visual') {
-        systemPrompt = `You are the Book Highlights Visual Style Agent. Your role is to create sophisticated visual prompts for book quotes and highlights that maintain consistency with professional, academic, and inspirational aesthetics.
-
-Visual Style Guidelines:
-- Professional typography-focused layouts
-- Clean, modern design with plenty of white space
-- Sophisticated color palettes (deep blues, warm grays, elegant golds)
-- Inspirational but not overly decorative
-- Focus on readability and impact
-- Avoid cliché book imagery (no stacks of books, reading glasses, etc.)
-- Use subtle textures, gradients, or geometric patterns as backgrounds
-- Emphasize the wisdom and insights of the content
-
-Create a detailed image generation prompt that will produce a visually appealing social media post or infographic featuring the book quote. Include specific details about:
-- Layout and composition
-- Typography style and hierarchy 
-- Color scheme and mood
-- Background elements
-- Any symbolic or thematic visual elements related to the book's subject matter
-
-Make it sophisticated and share-worthy for professional social media platforms.`;
-      } else {
-        // Default visual prompt agent for other categories
-        systemPrompt = `You are a Visual Prompt Generator Agent. Create detailed, professional image generation prompts that will produce high-quality visual content suitable for social media and marketing materials.
+      // Generic visual prompt agent for all themes
+      systemPrompt = `You are a Visual Prompt Generator Agent. Create detailed, professional image generation prompts that will produce high-quality visual content suitable for social media and marketing materials.
 
 Focus on:
 - Clean, modern design aesthetics
@@ -136,7 +92,6 @@ Focus on:
 - Clear hierarchy and composition
 - Brand-appropriate styling
 - High visual impact and shareability`;
-      }
     }
 
     const promptRequest = `${systemPrompt}
@@ -179,7 +134,6 @@ Generate a detailed visual prompt that will create an engaging, professional ima
       success: true,
       generatedPrompt: imagePrompt,
       image_prompt: imagePrompt, // Backward compatibility
-      category,
       theme: themeValue,
       aspect_ratio: aspectRatioValue
     }), {
