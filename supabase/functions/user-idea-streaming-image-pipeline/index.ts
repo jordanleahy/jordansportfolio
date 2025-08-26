@@ -267,8 +267,20 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
 
     if (existingTheme) {
       themeId = existingTheme.id;
-      console.log('🔍 Found existing theme:', themeId);
+      console.log('🔄 USING EXISTING THEME:', {
+        themeId: themeId,
+        themeName: existingTheme.theme_name,
+        category: existingTheme.category,
+        createdAt: existingTheme.created_at
+      });
     } else {
+      console.log('🆕 CREATING NEW THEME with data:', {
+        user_id: userId,
+        theme_name: themeData.theme,
+        description: themeData.theme_description?.substring(0, 100) + '...',
+        category: themeData.category
+      });
+
       // Create new theme
       const { data: newTheme, error: themeInsertError } = await supabase
         .from('themes')
@@ -278,11 +290,25 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
           description: themeData.theme_description,
           category: themeData.category
         })
-        .select('id')
+        .select('id, theme_name, category, created_at, updated_at')
         .single();
 
+      console.log('📝 THEME INSERT RESPONSE:', {
+        hasData: !!newTheme,
+        hasError: !!themeInsertError,
+        insertedThemeId: newTheme?.id,
+        insertedThemeName: newTheme?.theme_name,
+        createdAt: newTheme?.created_at
+      });
+
       if (themeInsertError) {
-        console.error('❌ Theme creation error:', themeInsertError);
+        console.error('❌ THEME CREATION ERROR - Full Details:', {
+          error: themeInsertError,
+          message: themeInsertError.message,
+          code: themeInsertError.code,
+          details: themeInsertError.details,
+          hint: themeInsertError.hint
+        });
         const code = (themeInsertError as any)?.code;
         if (code === '23505' || (themeInsertError as any)?.message?.includes('duplicate key value')) {
           throw {
@@ -297,8 +323,18 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         throw new Error(`Theme creation failed: ${themeInsertError.message}`);
       }
 
+      if (!newTheme?.id) {
+        console.error('❌ THEME CREATION FAILED: No theme ID returned');
+        throw new Error('Theme creation failed: No theme ID returned from database');
+      }
+
       themeId = newTheme.id;
-      console.log('✅ Created new theme:', themeId);
+      console.log('✅ THEME CREATION SUCCESS:', {
+        themeId: themeId,
+        themeName: newTheme.theme_name,
+        category: newTheme.category,
+        createdAt: newTheme.created_at
+      });
     }
 
     // Import posts using direct insert instead of RPC to ensure proper authentication context
@@ -312,44 +348,152 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       status: 'draft' as const
     }));
 
-    console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
-    console.log('📝 Sample post data:', JSON.stringify(postsToInsert[0], null, 2));
-    console.log('🔍 BEFORE INSERT: Supabase client info:', {
+    console.log(`🚀 POSTS INSERTION STARTING - Summary:`, {
+      totalPosts: postsToInsert.length,
+      userId: userId,
+      themeId: themeId,
+      category: themeData.category,
+      themeName: themeData.theme
+    });
+    
+    console.log('📝 POSTS DATA VALIDATION:', {
+      firstPost: {
+        day: postsToInsert[0]?.day,
+        title: postsToInsert[0]?.title?.substring(0, 50) + '...',
+        description: postsToInsert[0]?.description?.substring(0, 50) + '...',
+        theme_id: postsToInsert[0]?.theme_id,
+        category: postsToInsert[0]?.category,
+        user_id: postsToInsert[0]?.user_id,
+        status: postsToInsert[0]?.status
+      },
+      allPostsHaveRequiredFields: postsToInsert.every(p => 
+        p.title && p.description && p.theme_id && p.user_id && p.category
+      )
+    });
+
+    console.log('🔍 DATABASE CLIENT STATUS:', {
       hasClient: !!supabase,
       clientType: typeof supabase,
-      isService: !!supabaseServiceKey
+      hasServiceKey: !!supabaseServiceKey,
+      environmentCheck: {
+        supabaseUrl: !!Deno.env.get('SUPABASE_URL'),
+        serviceKey: !!Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+      }
     });
 
     // Use the service role client to bypass RLS
-    console.log('🔍 ATTEMPTING INSERT: Starting database insert operation...');
+    console.log('🔍 EXECUTING POSTS INSERT: Starting database operation...');
+    const insertStartTime = Date.now();
+    
     const { data, error } = await supabase
       .from('social_media_posts')
       .insert(postsToInsert)
-      .select('id, category, theme_id, title');
+      .select('id, category, theme_id, title, day, created_at');
     
-    console.log('🔍 AFTER INSERT: Insert operation completed', {
+    const insertDuration = Date.now() - insertStartTime;
+    
+    console.log('📊 POSTS INSERT COMPLETED:', {
+      duration: `${insertDuration}ms`,
       hasData: !!data,
       hasError: !!error,
-      dataLength: data?.length || 0
+      returnedRecords: data?.length || 0,
+      expectedRecords: postsToInsert.length,
+      successRate: data ? `${data.length}/${postsToInsert.length}` : '0'
     });
 
+    if (data && data.length > 0) {
+      console.log('✅ POSTS INSERT SUCCESS - Details:', {
+        insertedIds: data.map(p => p.id),
+        firstPostDetails: {
+          id: data[0].id,
+          title: data[0].title?.substring(0, 50),
+          category: data[0].category,
+          theme_id: data[0].theme_id,
+          day: data[0].day,
+          created_at: data[0].created_at
+        },
+        allPostsLinkedToTheme: data.every(p => p.theme_id === themeId)
+      });
+    }
+
     if (error) {
-      console.error('❌ Database insert error:', JSON.stringify(error, null, 2));
-      console.error('❌ Error details:', {
+      console.error('❌ POSTS INSERT ERROR - Complete Details:', {
+        error: error,
         message: error.message,
         details: error.details,
         hint: error.hint,
-        code: error.code
+        code: error.code,
+        insertAttempted: postsToInsert.length,
+        samplePostData: postsToInsert[0]
       });
       throw new Error(`Database import failed: ${error.message}`);
     }
 
     if (!data || data.length === 0) {
-      console.error('❌ No data returned from insert operation');
+      console.error('❌ POSTS INSERT VALIDATION FAILED:', {
+        dataReturned: !!data,
+        dataLength: data?.length || 0,
+        expectedLength: postsToInsert.length,
+        possibleCause: 'RLS policy blocking or insert failure'
+      });
       throw new Error('No posts were created - database insert returned empty result');
     }
 
     console.log(`✅ Successfully imported ${data.length} posts for theme: ${themeData.theme}`);
+    
+    // ✅ FINAL VERIFICATION: Query database to confirm data integrity
+    console.log('🔍 POST-INSERT VERIFICATION: Starting data integrity checks...');
+    
+    // Verify theme exists in database
+    const { data: themeVerification, error: themeVerifyError } = await supabase
+      .from('themes')
+      .select('id, theme_name, category, created_at, updated_at')
+      .eq('id', themeId)
+      .single();
+      
+    console.log('📋 THEME VERIFICATION RESULT:', {
+      themeExists: !!themeVerification,
+      themeId: themeVerification?.id,
+      themeName: themeVerification?.theme_name,
+      category: themeVerification?.category,
+      verifyError: themeVerifyError
+    });
+    
+    // Verify posts exist and are linked to theme
+    const { data: postsVerification, error: postsVerifyError } = await supabase
+      .from('social_media_posts')
+      .select('id, title, theme_id, category, user_id, created_at')
+      .eq('theme_id', themeId)
+      .eq('user_id', userId);
+      
+    console.log('📝 POSTS VERIFICATION RESULT:', {
+      postsFound: postsVerification?.length || 0,
+      expectedPosts: data.length,
+      allPostsLinked: postsVerification?.every(p => p.theme_id === themeId),
+      allPostsOwnedByUser: postsVerification?.every(p => p.user_id === userId),
+      postIds: postsVerification?.map(p => p.id),
+      verifyError: postsVerifyError
+    });
+    
+    if (themeVerifyError || postsVerifyError) {
+      console.warn('⚠️ VERIFICATION WARNINGS detected:', {
+        themeError: themeVerifyError,
+        postsError: postsVerifyError
+      });
+    }
+    
+    if (!themeVerification) {
+      console.error('❌ CRITICAL: Theme not found in database after insert!');
+    }
+    
+    if (!postsVerification || postsVerification.length !== data.length) {
+      console.error('❌ CRITICAL: Post count mismatch after insert!', {
+        found: postsVerification?.length || 0,
+        expected: data.length
+      });
+    }
+    
+    console.log('✅ DATABASE VERIFICATION COMPLETE');
     
     return { insertedCount: data.length, createdThemeId: themeId };
     
