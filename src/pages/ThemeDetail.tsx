@@ -52,12 +52,16 @@ export default function ThemeDetail() {
     
     const markThemeCompleted = async () => {
       try {
-        const { data } = await supabase.functions.invoke('manage-theme-lifecycle', {
-          body: {
-            action: 'complete',
-            themeId: themeId
-          }
-        });
+        // Update theme status directly in database instead of calling non-existent function
+        const { data } = await supabase
+          .from('themes')
+          .update({ 
+            lifecycle_status: 'completed',
+            user_interaction_required: false,
+            background_processing_complete: true
+          })
+          .eq('id', themeId)
+          .select();
         
         if (isMounted) {
           console.log('Theme marked as completed:', data);

@@ -585,40 +585,52 @@ export default function StoriesDashboard() {
     });
     
     try {
-      console.log('📡 Calling theme lifecycle orchestrator...');
+      console.log('📡 Using structure-theme-input to create theme from description...');
+      
+      // First structure the input using the same pattern as import
+      const { data: structuredData, error: structureError } = await supabase.functions.invoke('structure-theme-input', {
+        body: { 
+          text: `Please create a comprehensive theme with 10-15 posts about: ${themeDescription}` 
+        }
+      });
+
+      if (structureError || !structuredData?.success) {
+        throw new Error(structureError?.message || structuredData?.errors?.join(', ') || 'Failed to structure theme');
+      }
+
+      console.log('📡 Calling process-and-import-theme...');
       const {
         data,
         error
-      } = await supabase.functions.invoke('manage-theme-lifecycle', {
+      } = await supabase.functions.invoke('process-and-import-theme', {
         body: {
-          action: 'create',
-          description: themeDescription
+          rawJson: structuredData.data,
+          idempotencyKey: `custom-theme-${themeId}`
         }
       });
       
       console.log('📡 Edge function response:', { data, error });
-      // Remove duplicate handling - always proceed with generation
+      
       if (error) {
         console.log('❌ Edge function error:', error);
         throw new Error(`Edge function error: ${error.message}`);
       }
       if (!data?.success) {
         console.log('❌ Edge function returned failure:', data);
-        throw new Error(data?.error || 'Failed to generate theme');
+        throw new Error(data?.errors?.join(', ') || 'Failed to generate theme');
       }
       
       console.log('✅ Theme saved to database:', data);
       
       // Update pending theme with the actual theme_id from the response
-      if (data?.theme_id) {
-        console.log('🔗 DASHBOARD: Updating pending theme with theme_id:', data.theme_id);
-        console.log('🎯 DASHBOARD: Theme generation successful, theme_id:', data.theme_id);
+      if (data?.themeId) {
+        console.log('🔗 DASHBOARD: Updating pending theme with theme_id:', data.themeId);
+        console.log('🎯 DASHBOARD: Theme generation successful, theme_id:', data.themeId);
         setPendingTheme(prev => {
-          const updated = prev ? { ...prev, theme_id: data.theme_id } : null;
+          const updated = prev ? { ...prev, theme_id: data.themeId } : null;
           console.log('📝 DASHBOARD: Updated pending theme state:', updated);
           return updated;
         });
-        
         
         // Refresh themes to get the new theme
         const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
