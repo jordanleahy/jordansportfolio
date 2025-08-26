@@ -13,6 +13,7 @@ import {
   FileBarChart,
   BarChart3,
   Target,
+  Edit3,
   type LucideIcon 
 } from "lucide-react";
 
@@ -33,6 +34,7 @@ export const navigationConfig: NavigationItem[] = [
   { href: "/", label: "Home", icon: Home, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/blog", label: "Blog", icon: FileText, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+  { href: "/cover-letter", label: "Cover Letter", icon: Edit3, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/about", label: "About", icon: Target, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
   // Authenticated items
@@ -55,7 +57,7 @@ export const getNavigationItems = (user: any, isAdmin: boolean, hideMarketingRou
     
     if (!hasAccess) return false;
     
-    // For authenticated users, hide marketing routes if requested
+    // For authenticated users, hide marketing routes if requested (but keep cover letter available)
     if (hideMarketingRoutes && user && item.accessLevel === 'public' && marketingRoutes.includes(item.href)) {
       return false;
     }

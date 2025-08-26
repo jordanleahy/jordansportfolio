@@ -76,6 +76,7 @@ import BillingPage from "./pages/BillingPage";
 import AccountPage from "./pages/AccountPage";
 import CofactorProposal from "./pages/CofactorProposal";
 import { PixarConverter } from "./components/PixarConverter";
+import { CoverLetterGenerator } from "./components/CoverLetterGenerator";
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -241,6 +242,7 @@ function App() {
                 <Route path="/book-quote-test" element={<ProtectedRoute><BookQuoteTestPage /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/pixar" element={<PixarConverter />} />
+                <Route path="/cover-letter" element={<CoverLetterGenerator />} />
                 {/* Vendor routes - redirect to admin namespace */}
                 <Route path="/vendors" element={<Navigate to="/admin/vendors" replace />} />
                 <Route path="/vendors/:slugname" element={<Navigate to="/admin/vendors" replace />} />
