@@ -4,12 +4,12 @@ import { Feature } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
 import { ImageThumbnails } from "@/components/ui/lightbox";
 
-interface SolutionSectionProps {
+interface CaseSectionProps {
   title: string;
   features: Feature[];
 }
 
-export const SolutionSection = ({ title, features }: SolutionSectionProps) => {
+export const CaseSection = ({ title, features }: CaseSectionProps) => {
   return (
     <section className="py-16 px-4">
       <div className="max-w-4xl mx-auto">
