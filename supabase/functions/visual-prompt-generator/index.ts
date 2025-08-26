@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,6 +8,11 @@ const corsHeaders = {
 };
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
+// Initialize Supabase client
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface VisualPromptRequest {
   category: string;
@@ -43,10 +49,42 @@ serve(async (req) => {
       });
     }
 
+    // Retrieve system prompt from database
+    console.log(`🔍 Looking up system prompt for category: ${category}, theme: ${themeValue}`);
+    
     let systemPrompt = '';
     
-    if (category === 'book_highlights_visual') {
-      systemPrompt = `You are the Book Highlights Visual Style Agent. Your role is to create sophisticated visual prompts for book quotes and highlights that maintain consistency with professional, academic, and inspirational aesthetics.
+    try {
+      // First try to find a theme-specific system prompt
+      let promptQuery = supabase
+        .from('system_prompts')
+        .select('prompt_text')
+        .eq('category', category)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      const { data: systemPromptData, error: promptError } = await promptQuery;
+      
+      if (promptError) {
+        console.warn('⚠️ Error retrieving system prompt:', promptError);
+      }
+      
+      if (systemPromptData && systemPromptData.length > 0) {
+        systemPrompt = systemPromptData[0].prompt_text;
+        console.log(`✅ Retrieved system prompt from database for category: ${category}`);
+      } else {
+        console.log(`⚠️ No system prompt found for category: ${category}, using fallback`);
+      }
+    } catch (dbError) {
+      console.warn('⚠️ Database error retrieving system prompt:', dbError);
+    }
+    
+    // Fallback system prompts if none found in database
+    if (!systemPrompt) {
+      console.log('🔄 Using fallback system prompt');
+      
+      if (category === 'book_highlights_visual') {
+        systemPrompt = `You are the Book Highlights Visual Style Agent. Your role is to create sophisticated visual prompts for book quotes and highlights that maintain consistency with professional, academic, and inspirational aesthetics.
 
 Visual Style Guidelines:
 - Professional typography-focused layouts
@@ -66,9 +104,9 @@ Create a detailed image generation prompt that will produce a visually appealing
 - Any symbolic or thematic visual elements related to the book's subject matter
 
 Make it sophisticated and share-worthy for professional social media platforms.`;
-    } else {
-      // Default visual prompt agent for other categories
-      systemPrompt = `You are a Visual Prompt Generator Agent. Create detailed, professional image generation prompts that will produce high-quality visual content suitable for social media and marketing materials.
+      } else {
+        // Default visual prompt agent for other categories
+        systemPrompt = `You are a Visual Prompt Generator Agent. Create detailed, professional image generation prompts that will produce high-quality visual content suitable for social media and marketing materials.
 
 Focus on:
 - Clean, modern design aesthetics
@@ -76,6 +114,7 @@ Focus on:
 - Clear hierarchy and composition
 - Brand-appropriate styling
 - High visual impact and shareability`;
+      }
     }
 
     const promptRequest = `${systemPrompt}
