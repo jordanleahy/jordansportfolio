@@ -179,7 +179,7 @@ serve(async (req) => {
     if (firstPost?.themes?.visual_prompt_system_prompt_id) {
       const { data: systemPromptData, error: promptError } = await supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, category, theme_id')
+        .select('id, prompt_text, agent_name, theme_id')
         .eq('id', firstPost.themes.visual_prompt_system_prompt_id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
@@ -196,7 +196,7 @@ serve(async (req) => {
     if (!cachedSystemPrompt) {
       const { data: systemPromptData, error: promptError } = await supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, category, theme_id')
+        .select('id, prompt_text, agent_name, theme_id')
         .eq('user_id', userId)
         .eq('agent_name', 'Visual Prompt Generator')
         .eq('is_active', true)

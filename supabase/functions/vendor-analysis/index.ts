@@ -115,7 +115,7 @@ serve(async (req) => {
 
     const { data: systemPrompt, error: systemPromptError } = await supabase
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, category, theme_id')
+      .select('id, prompt_text, agent_name, theme_id')
       .eq('agent_id', vendorAgent?.id)
       .eq('is_active', true)
       .order('created_at', { ascending: false })

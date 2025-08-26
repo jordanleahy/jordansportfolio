@@ -74,10 +74,9 @@ serve(async (req) => {
     // Fetch system prompts for requested platforms using standardized pattern
     const { data: systemPrompts, error: promptsError } = await supabase
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, category, theme_id')
+      .select('id, prompt_text, agent_name, theme_id')
       .eq('agent_id', agent.id)
       .eq('is_active', true)
-      .in('category', platforms)
       .order('created_at', { ascending: false });
 
     if (promptsError || !systemPrompts || systemPrompts.length === 0) {
@@ -86,10 +85,11 @@ serve(async (req) => {
 
     const results = [];
 
+    // Use the most recent system prompt for all platforms
+    const systemPrompt = systemPrompts[0];
+
     // Generate content for each platform
     for (const platform of platforms) {
-      const systemPrompt = systemPrompts.find(p => p.category === platform);
-      
       if (!systemPrompt) {
         console.log(`Skipping platform ${platform} - no system prompt found`);
         continue;

@@ -73,7 +73,7 @@ serve(async (req) => {
       // Query system prompts by theme_id using standardized pattern
       const { data: systemPromptData, error: promptError } = await supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, category, theme_id')
+        .select('id, prompt_text, agent_name, theme_id')
         .eq('theme_id', themeId)
         .eq('is_active', true)
         .order('created_at', { ascending: false })

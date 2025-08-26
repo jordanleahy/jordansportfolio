@@ -213,7 +213,7 @@ if (!openAIApiKey) {
         if (agent) {
           const { data, error: promptError } = await supabase
             .from('system_prompts')
-            .select('id, prompt_text, agent_name, category, theme_id')
+            .select('id, prompt_text, agent_name, theme_id')
             .eq('agent_id', agent.id)
             .eq('is_active', true)
             .order('created_at', { ascending: false })
