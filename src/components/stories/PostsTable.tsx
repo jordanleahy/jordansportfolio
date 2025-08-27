@@ -73,7 +73,7 @@ export const PostsTable = ({
         .from('social_media_posts')
         .update({
           title: updatedPost.title,
-          description: updatedPost.story_description,
+          description: updatedPost.description,
           updated_at: new Date().toISOString()
         })
         .eq('id', updatedPost.id);
@@ -138,7 +138,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         body: {
           postId: post.id,
           title: post.title,
-          description: post.story_description,
+          description: post.description,
           category: post.category,
           themeId: post.theme_id
         }
@@ -468,8 +468,8 @@ const { handleGenerateImage } = useImageManager({
       }
 
       const titleArg = (category && String(category).trim()) || candidates[0]?.title || handle;
-      const firstWithDesc = candidates.find(p => (p.story_description ?? '').trim().length > 0);
-      const baseDesc = firstWithDesc?.story_description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
+      const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
+      const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
       const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
       const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
@@ -719,8 +719,8 @@ const { handleGenerateImage } = useImageManager({
         }
 
         const titleArg = (category && String(category).trim()) || candidates[0]?.title || newHandle;
-      const firstWithDesc = candidates.find(p => (p.story_description ?? '').trim().length > 0);
-      const baseDesc = firstWithDesc?.story_description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
+        const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
+        const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
         const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
         const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
@@ -1242,7 +1242,7 @@ const { handleGenerateImage } = useImageManager({
 
       {previewImage && <ImagePreviewModal isOpen={!!previewImage} onClose={closePreviewImage} imageUrl={previewImage.url} alt={previewImage.alt} />}
 
-      {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.story_description}`} />}
+      {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`} />}
 
       {/* Edit Post Modal */}
       <PostEditModal

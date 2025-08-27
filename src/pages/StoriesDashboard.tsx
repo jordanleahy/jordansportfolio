@@ -98,7 +98,6 @@ export default function StoriesDashboard() {
   const [selectedThemes, setSelectedThemes] = useState<Set<string>>(new Set());
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
-  
   const [deleteProgress, setDeleteProgress] = useState<{
     completed: number;
     total: number;
@@ -452,33 +451,32 @@ export default function StoriesDashboard() {
     }
   };
   const handleGenerateCustomTheme = async () => {
-    const themeDescription = customThemeDescription.trim();
-    console.log('🎯 DASHBOARD: Starting theme generation with description:', themeDescription);
+    console.log('🎯 handleGenerateCustomTheme called');
     
-    if (!themeDescription) {
+    if (!customThemeDescription.trim()) {
+      console.log('❌ No theme description provided');
       toast({
-        title: "Description required",
-        description: "Please enter a theme description to continue"
+        title: "Description Required",
+        description: "Please describe the theme you want to create",
+        variant: "destructive"
       });
       return;
     }
+    const themeDescription = customThemeDescription.trim();
+    console.log('📝 Theme description:', themeDescription);
     
     if (!user) {
+      console.log('❌ No user found');
       toast({
-        title: 'Sign in required',
-        description: 'Please sign in to generate themes.'
+        title: "Sign in required",
+        description: "Please sign in to generate themes."
       });
       navigate('/auth');
       return;
     }
-
-    // Proceed directly with theme generation
-    await proceedWithThemeGeneration(themeDescription);
-  };
-
-  // Extract theme generation logic into separate function
-  const proceedWithThemeGeneration = async (themeDescription: string) => {
     
+    console.log('✅ User found:', user.id);
+    setCustomThemeDescription(''); // Clear input immediately
     setIsGeneratingTheme(true);
     console.log('🚀 Starting theme generation...');
 
@@ -489,7 +487,7 @@ export default function StoriesDashboard() {
     setPendingTheme({
       theme_id: themeId,
       theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
-      theme_description: themeDescription
+      description: themeDescription
     });
 
     // Smooth scroll to cards section after setting pending theme
@@ -504,52 +502,40 @@ export default function StoriesDashboard() {
     });
     
     try {
-      console.log('📡 Using generate-custom-theme to create theme from description...');
-      
-      // Generate theme using the dedicated custom theme function
-      const { data: themeData, error: themeError } = await supabase.functions.invoke('generate-custom-theme', {
-        body: { 
-          description: themeDescription
-        }
-      });
-
-      if (themeError || !themeData?.success) {
-        throw new Error(themeError?.message || themeData?.error || 'Failed to generate theme');
-      }
-
-      console.log('📡 Calling process-and-import-theme...');
+      console.log('📡 Calling theme lifecycle orchestrator...');
       const {
         data,
         error
-      } = await supabase.functions.invoke('process-and-import-theme', {
+      } = await supabase.functions.invoke('manage-theme-lifecycle', {
         body: {
-          rawJson: themeData.themeData,
-          idempotencyKey: `custom-theme-${themeId}`
+          action: 'create',
+          description: themeDescription
         }
       });
       
       console.log('📡 Edge function response:', { data, error });
-      
+      // Remove duplicate handling - always proceed with generation
       if (error) {
         console.log('❌ Edge function error:', error);
         throw new Error(`Edge function error: ${error.message}`);
       }
       if (!data?.success) {
         console.log('❌ Edge function returned failure:', data);
-        throw new Error(data?.errors?.join(', ') || 'Failed to generate theme');
+        throw new Error(data?.error || 'Failed to generate theme');
       }
       
       console.log('✅ Theme saved to database:', data);
       
       // Update pending theme with the actual theme_id from the response
-      if (data?.themeId) {
-        console.log('🔗 DASHBOARD: Updating pending theme with theme_id:', data.themeId);
-        console.log('🎯 DASHBOARD: Theme generation successful, theme_id:', data.themeId);
+      if (data?.theme_id) {
+        console.log('🔗 DASHBOARD: Updating pending theme with theme_id:', data.theme_id);
+        console.log('🎯 DASHBOARD: Theme generation successful, theme_id:', data.theme_id);
         setPendingTheme(prev => {
-          const updated = prev ? { ...prev, theme_id: data.themeId } : null;
+          const updated = prev ? { ...prev, theme_id: data.theme_id } : null;
           console.log('📝 DASHBOARD: Updated pending theme state:', updated);
           return updated;
         });
+        
         
         // Refresh themes to get the new theme
         const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
@@ -604,7 +590,7 @@ export default function StoriesDashboard() {
     }
   };
   const handleConfirmDuplicate = async (newCategory: string) => {
-    if (!pendingTheme?.theme_description) {
+    if (!pendingTheme?.description) {
       setDuplicateInfo(null);
       toast({
         title: 'Missing description',
@@ -629,7 +615,7 @@ export default function StoriesDashboard() {
         error
       } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: {
-          description: pendingTheme.theme_description,
+          description: pendingTheme.description,
           stream: false,
           overrideCategory: newCategory
         }
@@ -853,25 +839,25 @@ export default function StoriesDashboard() {
               <div className="w-full text-center">
                 <TypewriterInput 
                   aria-label="Describe your theme" 
-                   typewriterTexts={[
-                     "patient education for diabetes",
-                     "patient education for sepsis", 
-                     "patient education for UTI",
-                     "AI applications in healthcare",
-                     "social media marketing tips"
-                   ]}
-                   fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare')"
+                  typewriterTexts={[
+                    "patient education for diabetes",
+                    "patient education for sepsis", 
+                    "patient education for UTI",
+                    "patient education for resp failure",
+                    "patient education for heart attack"
+                  ]}
+                  fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
                   className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
                   value={customThemeDescription} 
                   onChange={e => setCustomThemeDescription(e.target.value)} 
-                   onKeyDown={e => {
-                     if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
-                       console.log('⌨️ Enter key pressed - triggering theme generation');
-                       e.preventDefault();
-                       handleGenerateCustomTheme();
-                     }
-                   }}
-                   disabled={isGeneratingTheme}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
+                      console.log('⌨️ Enter key pressed - triggering theme generation');
+                      e.preventDefault();
+                      handleGenerateCustomTheme();
+                    }
+                  }}
+                  disabled={isGeneratingTheme} 
                   typingSpeed={80}
                   deletingSpeed={40}
                   pauseDuration={2000}
@@ -883,22 +869,22 @@ export default function StoriesDashboard() {
               {isAdmin && <div className="mt-2 space-y-2">
                   {/* Submit button - only show when text is entered */}
                   {customThemeDescription.trim() && (
-                     <Button 
-                       onClick={handleGenerateCustomTheme}
-                       disabled={isGeneratingTheme}
-                       className="w-full"
-                     >
-                       {isGeneratingTheme ? (
-                         <>
-                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                           Generating...
-                         </>
-                       ) : (
-                         <>
-                           <Send className="w-4 h-4 mr-2" />
-                           Submit
-                         </>
-                       )}
+                    <Button 
+                      onClick={handleGenerateCustomTheme}
+                      disabled={isGeneratingTheme}
+                      className="w-full"
+                    >
+                      {isGeneratingTheme ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Submit
+                        </>
+                      )}
                     </Button>
                   )}
                   
@@ -927,7 +913,7 @@ export default function StoriesDashboard() {
                   const shimmerTheme: ThemeWithPosts = {
                     id: 'pending-import-' + Date.now(),
                     theme_name: categoryName,
-                    theme_description: `Imported theme: ${categoryName}`,
+                    description: `Imported theme: ${categoryName}`,
                     category: categoryName,
                     post_count: 0,
                     prompt_completion_count: 0,
@@ -935,7 +921,7 @@ export default function StoriesDashboard() {
                     first_post: {
                       id: 'pending',
                       title: 'Generating theme...',
-                      story_description: `Processing ${categoryName} content`
+                      description: `Processing ${categoryName} content`
                     }
                   };
                   setAvailableThemes(prev => [shimmerTheme, ...prev]);
@@ -952,9 +938,8 @@ export default function StoriesDashboard() {
             </Suspense>}
         </Section>
 
-
         {/* Second Section: Authenticated users see their themes; guests see Featured Posts */}
-        {user ? <Section id="cards" className="-mt-8 md:-mt-12 lg:-MT-16 mb-12 sticky top-0 z-10 bg-background" fluid>
+        {user ? <Section id="cards" className="-mt-8 md:-mt-12 lg:-mt-16 mb-12 sticky top-0 z-10 bg-background" fluid>
             <header className="mb-6 flex items-center justify-end gap-4">
               <Button variant="outline" onClick={handleRefreshThemes} aria-label="Refresh themes">
                 Refresh

@@ -54,12 +54,12 @@ serve(async (req) => {
   try {
     console.log('🚀 ENSURE POST IMAGE PROMPTS: Function started');
     
-    const { themeId, userId } = await req.json();
+    const { category, userId, themeId } = await req.json();
 
-    if (!themeId || !userId) {
-      console.log('❌ MISSING REQUIRED FIELDS: themeId and userId are required');
+    if (!category || !userId) {
+      console.log('❌ MISSING REQUIRED FIELDS: category and userId are required');
       return new Response(
-        JSON.stringify({ error: 'ThemeId and userId are required' }), 
+        JSON.stringify({ error: 'Category and userId are required' }), 
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -67,58 +67,10 @@ serve(async (req) => {
       );
     }
 
-    // Validate that themeId and userId are valid strings
-    if (typeof themeId !== 'string' || typeof userId !== 'string') {
-      console.log('❌ INVALID PARAMETER TYPES: themeId and userId must be strings');
-      return new Response(
-        JSON.stringify({ error: 'themeId and userId must be valid strings' }), 
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    // Validate themeId is a valid UUID
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(themeId)) {
-      console.log('❌ INVALID THEME ID: themeId must be a valid UUID');
-      return new Response(
-        JSON.stringify({ error: 'themeId must be a valid UUID' }), 
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    console.log(`📋 ENSURE PROMPTS REQUEST: Theme: ${themeId}, User: ${userId}`);
+    console.log(`📋 ENSURE PROMPTS REQUEST: Category: ${category}, User: ${userId}, Theme: ${themeId || 'all'}`);
 
     // Create Supabase client with service role
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-    
-    // Resolve category from themeId
-    console.log('🔍 Resolving category from theme_id:', themeId);
-    const { data: themeData, error: themeError } = await supabase
-      .from('themes')
-      .select('category, theme_name')
-      .eq('id', themeId)
-      .eq('user_id', userId)
-      .single();
-    
-    if (themeError || !themeData) {
-      console.error('❌ Theme not found or access denied:', themeError);
-      return new Response(
-        JSON.stringify({ error: 'Theme not found or access denied' }), 
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-    
-    const category = themeData.category;
-    console.log(`✅ Resolved category: ${category} for theme: ${themeData.theme_name}`);
 
     // Step 1: Get all posts in the category with theme data (optimized with JOIN)
     console.log('🔍 STEP 1: Fetching posts without image prompts');
@@ -140,9 +92,11 @@ serve(async (req) => {
       .eq('user_id', userId)
       .is('generated_image_prompt', null);
     
-    // Filter by themeId (now required)
-    postsQuery = postsQuery.eq('theme_id', themeId);
-    console.log(`🎯 FILTERING BY THEME: ${themeId}`);
+    // If themeId is specified, filter by theme for more targeted processing
+    if (themeId) {
+      postsQuery = postsQuery.eq('theme_id', themeId);
+      console.log(`🎯 FILTERING BY THEME: ${themeId}`);
+    }
     
     const { data: posts, error: postsError } = await postsQuery;
 
@@ -179,12 +133,10 @@ serve(async (req) => {
     if (firstPost?.themes?.visual_prompt_system_prompt_id) {
       const { data: systemPromptData, error: promptError } = await supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, theme_id')
+        .select('id, agent_name, prompt_text')
         .eq('id', firstPost.themes.visual_prompt_system_prompt_id)
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .single();
       
       if (systemPromptData && !promptError) {
         cachedSystemPrompt = systemPromptData;
@@ -196,13 +148,13 @@ serve(async (req) => {
     if (!cachedSystemPrompt) {
       const { data: systemPromptData, error: promptError } = await supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, theme_id')
+        .select('id, agent_name, prompt_text')
         .eq('user_id', userId)
         .eq('agent_name', 'Visual Prompt Generator')
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
         .limit(1)
-        .maybeSingle();
+        .single();
 
       if (promptError || !systemPromptData) {
         console.error(`❌ ERROR: No system prompt found for user`);
@@ -238,9 +190,8 @@ serve(async (req) => {
 
           // Use internal edge function to generate prompts consistently with retry logic
           const invokePayload = {
-            context: post.title,
+            postId: post.id,
             themeId: post.theme_id,
-            description: post.description,
             aspectRatio: '1:1'
           };
           

@@ -5,7 +5,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 interface Theme {
   id: string;
   theme_name: string;
-  theme_description: string;
+  description: string;
   category: string;
   created_at: string;
   prompt_generation_status: string;
@@ -32,12 +32,12 @@ export const useOptimizedStoriesData = ({
     try {
       const { data, error } = await supabase
         .from('themes')
-        .select('id, theme_name, theme_description, category, created_at, prompt_generation_status')
+        .select('id, theme_name, description, category, created_at, prompt_generation_status')
         .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setThemes((data as any) || []);
+      setThemes(data || []);
     } catch (err) {
       console.error('Error fetching themes:', err);
       setError('Failed to load themes');

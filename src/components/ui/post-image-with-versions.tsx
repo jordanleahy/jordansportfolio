@@ -112,7 +112,7 @@ export const PostImageWithVersions = memo(({
           <button
             onClick={() => {
               // Start with 1:1 aspect ratio as default
-              onGenerateImage(post.id, '1_1', post.title, post.story_description, post.category);
+              onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
             }}
             disabled={regenerateStates.get(post.id)?.isDisabled}
             className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"

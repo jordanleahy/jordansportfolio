@@ -62,7 +62,7 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(theme => 
         theme.theme_name.toLowerCase().includes(query) ||
-        (theme.theme_description && theme.theme_description.toLowerCase().includes(query)) ||
+        (theme.description && theme.description.toLowerCase().includes(query)) ||
         theme.category.toLowerCase().includes(query)
       );
     }

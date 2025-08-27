@@ -1,11 +1,10 @@
-
 export type PostStatus = 'draft' | 'scheduled' | 'published';
 
 export interface SocialMediaPost {
   id: string;
   user_id: string;
   title: string;
-  story_description: string;
+  description: string;
   day?: number | null;
   image_16_9_url?: string | null;
   image_9_16_url?: string | null;
@@ -46,8 +45,6 @@ export interface SocialMediaPost {
   // Theme relationship
   theme_id?: string | null;
   
-  // Individual prompt status
-  individual_prompt_status?: 'none' | 'processing' | 'complete' | 'failed';
   
   status: PostStatus;
   scheduled_date?: string | null;

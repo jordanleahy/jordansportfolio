@@ -2,7 +2,7 @@ export interface Theme {
   id: string;
   user_id: string;
   theme_name: string;
-  theme_description?: string;
+  description?: string;
   category: string;
   created_at: string;
   updated_at: string;
@@ -10,7 +10,7 @@ export interface Theme {
 
 export interface CreateTheme {
   theme_name: string;
-  theme_description?: string;
+  description?: string;
   category: string;
 }
 
@@ -21,7 +21,7 @@ export interface UpdateTheme extends Partial<CreateTheme> {
 export interface ThemeWithPosts {
   id: string;
   theme_name: string;
-  theme_description: string | null;
+  description: string | null;
   category: string;
   post_count: number;
   first_post: {

@@ -71,13 +71,12 @@ serve(async (req) => {
       throw new Error('Social Media Agent not found. Please create it first.');
     }
 
-    // Fetch system prompts for requested platforms using standardized pattern
+    // Fetch system prompts for requested platforms
     const { data: systemPrompts, error: promptsError } = await supabase
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, theme_id')
+      .select('*')
       .eq('agent_id', agent.id)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
+      .in('category', platforms);
 
     if (promptsError || !systemPrompts || systemPrompts.length === 0) {
       throw new Error('System prompts not found for requested platforms');
@@ -85,11 +84,10 @@ serve(async (req) => {
 
     const results = [];
 
-    // Use the most recent system prompt for all platforms
-    const systemPrompt = systemPrompts[0];
-
     // Generate content for each platform
     for (const platform of platforms) {
+      const systemPrompt = systemPrompts.find(p => p.category === platform);
+      
       if (!systemPrompt) {
         console.log(`Skipping platform ${platform} - no system prompt found`);
         continue;

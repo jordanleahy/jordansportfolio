@@ -12,6 +12,9 @@ verify_jwt = true
 [functions.manage-theme-lifecycle]
 verify_jwt = true
 
+[functions.input-triage]
+verify_jwt = true
+
 [functions.vendor-analysis]
 verify_jwt = true
 
@@ -99,12 +102,11 @@ verify_jwt = true
 [functions.debug-stripe-session]
 verify_jwt = true
 
+[functions.structure-theme-input]
+verify_jwt = false
 
 [functions.duplicate-public-collection]
 verify_jwt = true
 
 [functions.aggregate-api-usage]
-verify_jwt = true
-
-[functions.visual-prompt-generator]
 verify_jwt = true

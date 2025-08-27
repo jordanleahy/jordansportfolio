@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,10 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
   
   const creditStatus = getCreditStatus();
   
-  // ✅ GOOD: Use post.theme_id directly
+  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
+  // const params = useParams();
+  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  // const themeId = theme;  // REMOVED - use post.theme_id instead
   const themeId = (post as any).theme_id;
   
   const isCurrentlyGenerating = isGenerating(post.id);
@@ -82,8 +84,10 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       const request: BulkImageGenerationRequest = {
         postId: post.id,
         title: post.title,
-        description: post.story_description, // Use story_description from the interface
+        description: post.description,
         category: post.category,
+        // ❌ BAD: Using theme name - removed in Phase 1 migration
+        // theme,  // REMOVED - use themeId instead
         context: 'table',
         colorThemeId: post.color_theme_id || undefined
       };
@@ -99,7 +103,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
           .order('day', { ascending: true });
         
         if (refreshedPosts) {
-          onPostsChange(refreshedPosts as any[]);
+          onPostsChange(refreshedPosts as SocialMediaPost[]);
         }
       }
       

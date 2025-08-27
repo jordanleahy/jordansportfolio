@@ -29,13 +29,13 @@ export const CategoriesGrid = ({
             <CategoryCard
               theme={theme.theme_name}
               themeId={theme.id}
-              themeDescription={theme.theme_description}
+              themeDescription={theme.description}
               category={theme.category}
               postCount={theme.post_count}
               imageUrl={theme.first_post?.image_url}
               firstPostData={theme.first_post ? {
                 title: theme.first_post.title,
-                description: theme.first_post.story_description
+                description: theme.first_post.description
               } : undefined}
               onDelete={onDeleteCategory}
               isShimmer={theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)}

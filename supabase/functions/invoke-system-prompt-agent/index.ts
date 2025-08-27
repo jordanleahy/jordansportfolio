@@ -18,7 +18,7 @@ const SYSTEM_PROMPT_CATEGORIES = {
 } as const;
 
 const OPENAI_CONFIG = {
-  DEFAULT_MODEL: 'gpt-5-mini-2025-08-07',
+  DEFAULT_MODEL: 'gpt-5-mini',
   MAX_COMPLETION_TOKENS: 4000,
   TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
   ESCALATION_TIMEOUTS: {
@@ -104,71 +104,25 @@ serve(async (req) => {
 
   try {
     const requestBody = await req.json();
-    const { theme, description, sample_posts, user_id, skip_ensure, theme_id } = requestBody;
+    const { category, theme, description, sample_posts, user_id, skip_ensure, theme_id } = requestBody;
     userId = user_id;
     const skipEnsure = !!skip_ensure;
     
-    // Input validation - theme_id is now primary
-    if (!theme_id || !user_id) {
+    // Input validation - theme is now primary, category secondary
+    if (!theme || !user_id) {
       return new Response(JSON.stringify({ 
         success: false, 
-        error: 'Missing required fields: theme_id and user_id are required' 
+        error: 'Missing required fields: theme and user_id are required' 
       }), {
         status: HTTP_STATUS.BAD_REQUEST,
         headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       });
     }
 
-    // Validate theme_id and user_id are valid strings
-    if (typeof theme_id !== 'string' || typeof user_id !== 'string') {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'theme_id and user_id must be valid strings' 
-      }), {
-        status: HTTP_STATUS.BAD_REQUEST,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Validate theme_id is a valid UUID
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(theme_id)) {
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: 'theme_id must be a valid UUID' 
-      }), {
-        status: HTTP_STATUS.BAD_REQUEST,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Create Supabase client early to resolve category from theme_id
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Allow any category for system prompt generation
+    // Categories like 'cdi', 'contracts', 'forms', etc. are allowed
     
-    // Resolve category and theme details from theme_id
-    console.log('🔍 Resolving theme details for theme_id:', theme_id);
-    const { data: themeData, error: themeError } = await supabase
-      .from('themes')
-      .select('category, theme_name, description')
-      .eq('id', theme_id)
-      .eq('user_id', user_id)
-      .single();
-    
-    if (themeError || !themeData) {
-      console.error('❌ Theme not found or access denied:', themeError);
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: 'Theme not found or access denied' 
-      }), {
-        status: HTTP_STATUS.NOT_FOUND,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    const category = themeData.category;
-    const actualTheme = theme || themeData.theme_name;
-    
-    console.log('Processing request for theme_id:', theme_id, 'theme:', actualTheme, 'category:', category, 'user_id:', user_id, 'correlation:', correlationId);
+    console.log('Processing request for theme:', theme, 'category:', category, 'user_id:', user_id, 'correlation:', correlationId);
 
     if (!openAIApiKey) {
       return new Response(JSON.stringify({ 
@@ -180,7 +134,8 @@ serve(async (req) => {
       });
     }
 
-    // Supabase client already created above for theme resolution
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Get default color theme to include in prompt generation
     console.log('🎨 FETCHING DEFAULT COLOR THEME: For enhanced prompt generation');
@@ -218,7 +173,7 @@ serve(async (req) => {
     // Use order by to get the most recent one and handle multiple records gracefully
       const { data: systemPromptData, error: systemPromptError } = await supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, theme_id')
+        .select('prompt_text')
         .eq('agent_id', agent.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
@@ -241,8 +196,9 @@ serve(async (req) => {
 
     const systemPrompt = systemPromptData.prompt_text;
 
-    // Theme details already resolved from theme_id above
-    const contextCategory = category;
+    // Theme is now primary focus, category provides context
+    const actualTheme = theme;
+    const contextCategory = category || 'general';
     
     let userPrompt = `Create a comprehensive system prompt for the "${actualTheme}" theme with "${contextCategory}" category context.
 
@@ -388,9 +344,8 @@ Please generate a detailed, professional system prompt following the established
       console.log('🔍 STEP 0: Checking for existing system prompts for theme_id:', theme_id);
       const existingPromptsQuery = supabase
         .from('system_prompts')
-        .select('id, prompt_text, agent_name, theme_id, created_at')
-        .eq('user_id', user_id)
-        .eq('is_active', true);
+        .select('id, created_at, theme')
+        .eq('user_id', user_id);
 
       // Use theme_id if provided, otherwise fall back to theme name
       if (theme_id) {

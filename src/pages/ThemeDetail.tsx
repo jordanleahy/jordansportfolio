@@ -1,73 +1,122 @@
-
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, Palette, Eye, Sparkles, Image as ImageIcon, Loader2 } from 'lucide-react';
+import React, { useState, Suspense, useEffect } from 'react';
+import { Navigate, useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader';
+import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useThemeDetailsById } from '@/hooks/useOptimizedStories';
-import { Skeleton } from '@/components/ui/skeleton';
-import { formatDistanceToNow } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useThemeSEO } from '@/hooks/useThemeSEO';
+import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 import { supabase } from '@/integrations/supabase/client';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { TrashIcon } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { SocialMediaPost } from '@/types/socialMedia';
+import { Helmet } from 'react-helmet-async';
+import { ArrowLeft, Trash2, Download } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
-const ThemeDetail = () => {
+// Lazy load components
+const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
+const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
+import { LibraryCollectionsFallback } from '@/components/library/LibraryCollectionsFallback';
+
+
+export default function ThemeDetail() {
   const { themeId } = useParams<{ themeId: string }>();
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+  const { isAdmin } = useUserRole();
+  const [selectedThemeId, setSelectedThemeId] = useState<string>('');
   const { toast } = useToast();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [activeView, setActiveView] = useState<'table' | 'cards'>('table');
+  const isMobile = useIsMobile();
 
-  const { 
-    theme, 
-    posts, 
-    hasAnyPosts,
-    isLoading, 
-    refetch 
-  } = useThemeDetailsById(themeId || '', !!themeId);
-
+  // Scroll to top when component mounts and mark theme as completed
   useEffect(() => {
-    if (!themeId) {
-      navigate('/stories');
-      return;
-    }
-  }, [themeId, navigate]);
+    window.scrollTo(0, 0);
+    
+    // Mark theme as user-completed when they view the detail page
+    if (!themeId) return;
+    
+    let isMounted = true; // Prevent race conditions with unmounting
+    
+    const markThemeCompleted = async () => {
+      try {
+        const { data } = await supabase.functions.invoke('manage-theme-lifecycle', {
+          body: {
+            action: 'complete',
+            themeId: themeId
+          }
+        });
+        
+        if (isMounted) {
+          console.log('Theme marked as completed:', data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Failed to mark theme as completed:', error);
+        }
+      }
+    };
+    
+    markThemeCompleted();
+    
+    // Cleanup function to prevent race conditions
+    return () => {
+      isMounted = false;
+    };
+  }, [themeId]); // Added proper dependency array
+
+  // Simple completion tracking - redirect incomplete themes to dashboard
+  const { isCompleted } = useSimpleThemeCompletion(themeId);
+  
+  // Fetch theme and posts for this specific theme ID
+  const { theme: themeData, posts = [], hasAnyPosts, isLoading: isLoadingPosts, refetch } = useThemeDetailsById(themeId || '', !!themeId);
+  
+  // Debug logging for navigation issues
+  console.log('[ThemeDetail] Component state:', {
+    themeId,
+    isCompleted,
+    hasThemeData: !!themeData,
+    isLoadingPosts,
+    postCount: posts.length
+  });
+  
+  // Get theme name for display purposes
+  const decodedTheme = themeData?.theme_name || '';
+  
+  // Generate SEO metadata for the theme
+  const seoData = useThemeSEO(themeData);
 
   const handleDeleteTheme = async () => {
-    if (!theme?.id) return;
-    
-    setIsDeleting(true);
-    try {
-      // First delete all posts in this theme
-      const { error: postsError } = await supabase
-        .from('social_media_posts')
-        .delete()
-        .eq('theme_id', theme.id);
-
-      if (postsError) {
-        throw postsError;
-      }
-
-      // Then delete the theme
-      const { error: themeError } = await supabase
-        .from('themes')
-        .delete()
-        .eq('id', theme.id);
-
-      if (themeError) {
-        throw themeError;
-      }
-
+    if (!themeData?.id) {
       toast({
-        title: "Theme deleted",
-        description: "Theme and all its posts have been deleted successfully.",
+        title: "Error",
+        description: "Theme ID not found. Cannot delete theme.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log('Deleting theme with ID:', themeData.id);
+      await optimizedSocialMediaService.deleteTheme(themeData.id);
+      toast({
+        title: "Theme Deleted",
+        description: `All posts in the "${decodedTheme}" theme have been deleted.`,
       });
       
+      // Navigate back to dashboard after deletion
       navigate('/stories');
     } catch (error) {
       console.error('Error deleting theme:', error);
@@ -76,185 +125,199 @@ const ThemeDetail = () => {
         description: "Failed to delete theme. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
     }
   };
 
-  const handlePostsChange = (updatedPosts: SocialMediaPost[]) => {
-    // Posts will be automatically refetched by React Query
+  const handlePostsChange = () => {
     refetch();
   };
 
-  if (isLoading) {
+  const handleDownloadAllPDF = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to download images",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (posts.length === 0) {
+      toast({
+        title: "No posts",
+        description: "No posts available to download",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Dynamic import to avoid build issues
+    const { generateMultiplePostsPDF } = await import('@/utils/pdfGenerator');
+    
+    // Check if any posts have 1:1 images for LinkedIn slideshow
+    const postsWithImages = posts.filter(post => post.image_1_1_url);
+
+    if (postsWithImages.length === 0) {
+      toast({
+        title: "No square images",
+        description: "No square (1:1) images found for LinkedIn slideshow",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await generateMultiplePostsPDF(postsWithImages as any, ['1_1'], themeData?.theme_name || decodedTheme);
+      toast({
+        title: "LinkedIn Slideshow Downloaded",
+        description: `${postsWithImages.length} square images saved as PDF for LinkedIn`
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to generate images PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  if (loading || isLoadingPosts) {
     return (
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10" />
-          <Skeleton className="h-8 w-64" />
-        </div>
-        <Skeleton className="h-32 w-full" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-        </div>
-      </div>
+      <PageLayout>
+        <CalendarSkeletonLoader />
+      </PageLayout>
     );
   }
 
-  if (!theme) {
-    return (
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Theme not found</h1>
-          <Button onClick={() => navigate('/stories')} variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Stories
-          </Button>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
-  const totalPosts = posts.length;
-  const postsWithImages = posts.filter(post => 
-    post.image_1_1_url || post.image_16_9_url || post.image_9_16_url || post.image_3_4_url || post.image_4_3_url
-  ).length;
+  if (!themeId) {
+    console.log('[ThemeDetail] No themeId, redirecting to dashboard');
+    return <Navigate to="/stories" replace />;
+  }
 
-  const completionPercentage = totalPosts > 0 ? Math.round((postsWithImages / totalPosts) * 100) : 0;
+  // Only redirect themes that are still being generated (no posts yet)
+  // Themes with posts should be viewable even if prompt generation isn't complete
+  if (!hasAnyPosts && !isCompleted) {
+    console.log('[ThemeDetail] Theme still generating with no posts, redirecting to dashboard:', { themeId, isCompleted, hasAnyPosts });
+    return <Navigate to="/stories" replace />;
+  }
+
+  if (!themeData) {
+    console.log('[ThemeDetail] No theme data found, redirecting to dashboard:', { themeId });
+    return <Navigate to="/stories" replace />;
+  }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+    <PageLayout>
+      <Helmet>
+        <title>{seoData.title}</title>
+        <meta name="description" content={seoData.description} />
+        <meta property="og:title" content={seoData.ogTitle} />
+        <meta property="og:description" content={seoData.ogDescription} />
+        <meta property="og:image" content={seoData.image} />
+        <meta property="og:url" content={seoData.url} />
+        <meta property="og:type" content={seoData.type} />
+        <meta property="og:site_name" content={seoData.siteName} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoData.ogTitle} />
+        <meta name="twitter:description" content={seoData.ogDescription} />
+        <meta name="twitter:image" content={seoData.image} />
+        <link rel="canonical" href={seoData.url} />
+      </Helmet>
+      <div className="container mx-auto py-4 px-4">
+        {/* Navigation Header */}
+        <div className="mb-4 flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => navigate('/stories')}
-            className="shrink-0"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{theme.theme_name}</h1>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                Created {formatDistanceToNow(new Date(theme.created_at), { addSuffix: true })}
-              </div>
-              <Badge variant="secondary" className="capitalize">
-                {theme.category.replace(/[-_]/g, ' ')}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
+          
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm" disabled={isDeleting}>
-                {isDeleting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <TrashIcon className="w-4 h-4" />
-                )}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Theme</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Are you sure you want to delete this theme? This will permanently delete the theme and all its posts. This action cannot be undone.
+                  Are you sure you want to delete the "{decodedTheme}" theme? This will permanently delete all {posts.length} posts in this theme. This action cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteTheme} className="bg-red-600 hover:bg-red-700">
+                <AlertDialogAction
+                  onClick={handleDeleteTheme}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
                   Delete Theme
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         </div>
-      </div>
 
-      {/* Theme Description */}
-      {theme.theme_description && (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-gray-700 leading-relaxed">{theme.theme_description}</p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Progress Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalPosts}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">With Images</CardTitle>
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{postsWithImages}</div>
-            <p className="text-xs text-muted-foreground">
-              out of {totalPosts} posts
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Completion</CardTitle>
-            <Palette className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completionPercentage}%</div>
-            <Progress value={completionPercentage} className="mt-2" />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Posts Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Posts ({totalPosts})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!hasAnyPosts ? (
-            <div className="text-center py-12">
-              <div className="mx-auto w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-                <Sparkles className="w-6 h-6 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
-              <p className="text-gray-500 mb-4">Posts are being generated for this theme.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {posts.map((post) => (
-                <div key={post.id} className="border rounded-lg p-4">
-                  <h3 className="font-medium">{post.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Day {post.day}</p>
-                </div>
-              ))}
+        {/* Theme Title Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            {themeData?.theme_name ?? decodedTheme}
+          </h1>
+          <p className="text-base text-muted-foreground leading-relaxed mb-2">
+            {themeData?.description || `Theme details for ${decodedTheme}`}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Theme: {decodedTheme}
+          </p>
+          
+          {/* Mobile-only LinkedIn Slideshow Button */}
+          {user && posts && posts.length > 1 && (
+            <div className="md:hidden mt-4">
+              <Button
+                onClick={handleDownloadAllPDF}
+                variant="outline"
+                size="sm"
+                className="gap-2 w-full"
+              >
+                <Download className="h-4 w-4" />
+                LinkedIn Slideshow
+              </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+        </div>
 
-export default ThemeDetail;
+        {/* Content */}
+        <div className="space-y-8">
+          <Suspense fallback={<CalendarSkeletonLoader />}>
+            {/* Color Theme Consistency Checker */}
+            {themeData?.id && <ColorThemeConsistencyChecker themeId={themeData.id} />}
+            
+            {themeData?.id && hasAnyPosts ? (
+              <PostsTable 
+                themeId={themeData.id}
+                posts={posts as any}
+                onPostsChange={handlePostsChange}
+                isAdmin={isAdmin}
+                category={decodedTheme}
+                selectedThemeId={selectedThemeId}
+                onThemeChange={setSelectedThemeId}
+              />
+            ) : (
+              <LibraryCollectionsFallback />
+            )}
+          </Suspense>
+        </div>
+      </div>
+    </PageLayout>
+  );
+}

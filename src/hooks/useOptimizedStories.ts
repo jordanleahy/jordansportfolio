@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
@@ -148,8 +147,7 @@ export function useOptimizedStories(user: any) {
         .order('day', { ascending: true });
       
       if (error) throw error;
-      // Return posts directly - cast as any to avoid type issues
-      return (data || []) as any[];
+      return (data || []) as SocialMediaPost[];
     },
     enabled: !!activeTab && !!user?.id && availableThemes.length > 0,
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,

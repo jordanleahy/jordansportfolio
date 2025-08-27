@@ -7,7 +7,7 @@ import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaServ
 
 interface EditPostData {
   title: string;
-  story_description: string;
+  description: string;
   regeneratePrompt?: boolean;
 }
 
@@ -24,7 +24,7 @@ export const usePostEditor = (): UsePostEditorReturn => {
 
   const editMutation = useMutation({
     mutationFn: async ({ postId, data }: { postId: string; data: EditPostData }) => {
-      const { title, story_description, regeneratePrompt } = data;
+      const { title, description, regeneratePrompt } = data;
       
       // Validate input
       if (!title.trim()) {
@@ -34,7 +34,7 @@ export const usePostEditor = (): UsePostEditorReturn => {
       // Step 1: Update post content first
       const updatedPost = await optimizedSocialMediaService.updatePost(postId, {
         title: title.trim(),
-        description: story_description.trim()
+        description: description.trim()
       });
 
       // Step 2: If regenerate prompt is requested, do it after successful content update

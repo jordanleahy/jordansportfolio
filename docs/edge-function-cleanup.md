@@ -50,7 +50,7 @@ Social Media Crawler Request
 ## Impact on System Architecture
 
 ### What Still Works
-- ✅ All existing Edge Functions (`send-auth-email`, `generic-blog`)
+- ✅ All existing Edge Functions (`job-scraper`, `job-monitor`, `send-auth-email`, `generic-blog`)
 - ✅ Social media crawler detection and routing
 - ✅ OG tag generation and delivery
 - ✅ SPA functionality for regular users

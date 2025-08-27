@@ -4,12 +4,12 @@ import { Feature } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
 import { ImageThumbnails } from "@/components/ui/lightbox";
 
-interface CaseSectionProps {
+interface SolutionSectionProps {
   title: string;
   features: Feature[];
 }
 
-export const CaseSection = ({ title, features }: CaseSectionProps) => {
+export const SolutionSection = ({ title, features }: SolutionSectionProps) => {
   return (
     <section className="py-16 px-4">
       <div className="max-w-4xl mx-auto">
@@ -26,10 +26,6 @@ export const CaseSection = ({ title, features }: CaseSectionProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => {
             const IconComponent = iconMap[feature.icon as keyof typeof iconMap];
-            
-            // Fallback to a default icon if the specified icon doesn't exist
-            const SafeIconComponent = IconComponent || iconMap.AlertCircle;
-            
             return (
               <motion.div
                 key={index}
@@ -41,7 +37,7 @@ export const CaseSection = ({ title, features }: CaseSectionProps) => {
                 <Card className="p-6 h-full">
                   <div className="flex flex-col">
                     <div className="bg-primary/10 p-3 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                      <SafeIconComponent className="h-6 w-6 text-primary" />
+                      <IconComponent className="h-6 w-6 text-primary" />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold mb-2">{feature.title}</h3>

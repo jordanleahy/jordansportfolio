@@ -120,7 +120,7 @@ const PostCardComponent = ({
           post={{
             id: post.id,
             title: post.title,
-            description: post.story_description,
+            description: post.description,
             theme: post.category,
             category: post.category
           }}
@@ -137,7 +137,7 @@ export const PostCard = memo(PostCardComponent, (prevProps, nextProps) => {
     prevProps.isAdmin !== nextProps.isAdmin ||
     prevProps.post.id !== nextProps.post.id ||
     prevProps.post.title !== nextProps.post.title ||
-    prevProps.post.story_description !== nextProps.post.story_description ||
+    prevProps.post.description !== nextProps.post.description ||
     prevProps.post.status !== nextProps.post.status ||
     prevProps.post.day !== nextProps.post.day ||
     prevProps.draftIndex !== nextProps.draftIndex ||

@@ -1010,6 +1010,7 @@ const BlogEditor = () => {
             onClose={handleClosePromptModal}
             headline={formData.visual_sections[promptModalOpen]?.headline || ''}
             content={formData.visual_sections[promptModalOpen]?.content || ''}
+            category={socialMediaPost?.category || formData.category || 'healthcare'}
             themeId={socialMediaPost?.theme_id}
           />
         )}

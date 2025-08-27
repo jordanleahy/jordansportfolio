@@ -73,7 +73,7 @@ export default function PostDetail() {
       {
         id: post.id,
         title: post.title,
-        description: post.story_description,
+        description: post.description,
         category: post.category
       },
       colorTheme,
@@ -84,7 +84,7 @@ export default function PostDetail() {
   const handleBackClick = () => {
     // Navigate back to the theme if we have it, otherwise go to stories dashboard
     if (post?.theme_id) {
-      navigate(`/stories/theme/${post.theme_id}`);
+      navigate(`/stories/id/${post.theme_id}`);
     } else if (post?.category) {
       // Fallback to category for backward compatibility
       navigate(`/stories/theme/${encodeURIComponent(post.category)}`);
@@ -96,7 +96,7 @@ export default function PostDetail() {
   const handleShare = async () => {
     if (!post) return;
     
-    const shareText = `${post.title}\n\n${post.story_description}`;
+    const shareText = `${post.title}\n\n${post.description}`;
     const shareUrl = window.location.href;
     
     if (navigator.share) {
@@ -245,7 +245,7 @@ export default function PostDetail() {
               <div className="mb-8">
                 <div className="prose prose-lg max-w-none">
                   <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap">
-                    {post.story_description}
+                    {post.description}
                   </p>
                 </div>
               </div>
@@ -439,7 +439,7 @@ export default function PostDetail() {
             onClose={() => setShowVoiceoverModal(false)}
             sourceId={post.id}
             sourceType="social_media_post"
-            originalContent={`${post.title}\n\n${post.story_description}`}
+            originalContent={`${post.title}\n\n${post.description}`}
           />
         )}
       </div>

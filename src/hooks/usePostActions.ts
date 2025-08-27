@@ -25,7 +25,7 @@ export const usePostActions = (onPostsChange: () => void) => {
   }, [onPostsChange, toast]);
 
   const handleCopyContent = useCallback(async (post: SocialMediaPost) => {
-    const content = `${post.title}\n\n${post.story_description}`;
+    const content = `${post.title}\n\n${post.description}`;
     try {
       await navigator.clipboard.writeText(content);
       toast({

@@ -108,7 +108,7 @@ export const GenerateImage = ({
       return;
     }
     
-    if (!post.title || !post.story_description) {
+    if (!post.title || !post.description) {
       console.log('🚫 IMAGE_GEN: Missing title or description');
       toastHook({
         title: "Generation failed",

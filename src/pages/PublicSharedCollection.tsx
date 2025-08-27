@@ -59,7 +59,7 @@ export default function PublicSharedCollection() {
   
   // Priority system for OG metadata: First post > Theme data > Collection data > Fallback
   const pageTitle = firstPost?.title || theme?.theme_name || collection?.title || `${handle} – Photo Collection`;
-  const pageDescription = firstPost?.description || (theme as any)?.theme_description || collection?.description || `A shareable image collection published by ${handle}.`;
+  const pageDescription = firstPost?.description || theme?.description || collection?.description || `A shareable image collection published by ${handle}.`;
 
   useEffect(() => {
     // Check authentication state
@@ -110,11 +110,11 @@ export default function PublicSharedCollection() {
         if (col.theme_id) {
           const { data: thm, error: thmErr } = await supabase
             .from('themes')
-            .select('id, theme_name, theme_description')
+            .select('id, theme_name, description')
             .eq('id', col.theme_id)
             .maybeSingle();
           if (!thmErr && thm) {
-            themeData = thm as any;
+            themeData = thm as Theme;
           }
         }
 
@@ -206,7 +206,7 @@ export default function PublicSharedCollection() {
         id: item.id,
         user_id: '',
         title: item.title,
-        story_description: item.description,
+        description: item.description,
         image_16_9_url: item.image_16_9_url,
         image_1_1_url: item.image_1_1_url,
         image_4_3_url: null,

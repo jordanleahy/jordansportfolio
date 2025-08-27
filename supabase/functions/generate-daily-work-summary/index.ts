@@ -211,18 +211,14 @@ if (!openAIApiKey) {
         // Get system prompt for the category (optional - fallback to basic summary if not found)
         let systemPromptData = null
         if (agent) {
-          const { data, error: promptError } = await supabase
+          const { data } = await supabase
             .from('system_prompts')
-            .select('id, prompt_text, agent_name, theme_id')
+            .select('prompt_text')
             .eq('agent_id', agent.id)
             .eq('is_active', true)
-            .order('created_at', { ascending: false })
+            .order('updated_at', { ascending: false })
             .limit(1)
-            .maybeSingle()
-            
-          if (promptError) {
-            console.error('❌ SYSTEM PROMPT QUERY ERROR:', promptError);
-          }
+            .single()
           systemPromptData = data
         }
         
@@ -281,7 +277,7 @@ Schema:
           },
           body: JSON.stringify({
             model: 'gpt-4.1-2025-04-14',
-            max_completion_tokens: 2000,
+            temperature: 0.3,
             messages: [
               { role: 'system', content: baseSystemPrompt },
               { role: 'user', content: `Generate the JSON summary for:\n${JSON.stringify(inputPayload)}` }

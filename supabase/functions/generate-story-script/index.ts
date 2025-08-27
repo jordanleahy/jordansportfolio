@@ -140,19 +140,19 @@ serve(async (req) => {
     // Get the appropriate system prompt for the story type from the system_prompts table
     const { data: systemPromptData, error: promptError } = await supabaseClient
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, theme_id')
+      .select('prompt_text')
       .eq('agent_id', agent.id)
       .eq('is_active', true)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .single();
 
     if (promptError || !systemPromptData) {
-      console.error('No system prompt found for Story Telling Agent:', promptError);
-      throw new Error(`No system prompt configured for Story Telling Agent`);
+      console.error('No system prompt found for story type:', story_type, promptError);
+      throw new Error(`No system prompt configured for story type: ${story_type}`);
     }
 
-    console.log('Using system prompt for story type:', story_type);
+    console.log('Using system prompt for category:', story_type);
 
     // Prepare the content for OpenAI
     const userPrompt = `

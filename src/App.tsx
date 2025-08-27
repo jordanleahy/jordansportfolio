@@ -12,7 +12,6 @@ import { ImageGenerationTimerProvider } from "@/contexts/ImageGenerationTimerCon
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { Suspense, lazy, useState } from "react";
-import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
@@ -31,11 +30,10 @@ import VendorsIndex from "./pages/VendorsIndex";
 import VendorDetail from "./pages/VendorDetail";
 import PublicVendorView from "./components/vendors/PublicVendorView";
 import PublicSharedCollection from "./pages/PublicSharedCollection";
+import ErrorBoundary from "./components/ErrorBoundary";
 import Case1 from "./pages/cases/Case1";
-import Case2 from "./pages/cases/Case2";
 import Case3 from "./pages/cases/Case3";
 import Case4 from "./pages/cases/Case4";
-import Case5 from "./pages/cases/Case5";
 import { CaseStudyRouteWrapper } from "./components/case-study/CaseStudyRouteWrapper";
 import { CofactorRouteWrapper } from "./components/cofactor/CofactorRouteWrapper";
 import Library from "./pages/Library";
@@ -75,7 +73,6 @@ import BillingPage from "./pages/BillingPage";
 import AccountPage from "./pages/AccountPage";
 import CofactorProposal from "./pages/CofactorProposal";
 import { PixarConverter } from "./components/PixarConverter";
-import { CoverLetterGenerator } from "./components/CoverLetterGenerator";
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
@@ -102,19 +99,10 @@ function App() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         retry: (failureCount, error) => {
-          // Don't retry on 4xx errors or network failures
-          console.log('Query retry attempt:', failureCount, 'Error:', error);
+          // Don't retry on 4xx errors
           if (error && typeof error === 'object' && 'status' in error) {
             const status = error.status as number;
             if (status >= 400 && status < 500) return false;
-          }
-          // Don't retry on network failures ("Load failed")
-          if (error && typeof error === 'object' && 'message' in error) {
-            const message = (error.message as string).toLowerCase();
-            if (message.includes('load failed') || message.includes('network error')) {
-              console.warn('Network error detected, not retrying:', error);
-              return false;
-            }
           }
           return failureCount < 2;
         },
@@ -125,17 +113,16 @@ function App() {
     },
   }));
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <HelmetProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <AuthProvider>
-                <ProcessingStatesProvider>
-                  <ImageGenerationTimerProvider>
-                  <Routes>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <ProcessingStatesProvider>
+                <ImageGenerationTimerProvider>
+                <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/portfolio" element={<Navigate to="/about" replace />} />
@@ -163,29 +150,17 @@ function App() {
                     </Suspense>
                   } 
                 />
-                {/* Post detail route - individual social media posts */}
-                <Route 
-                  path="/stories/id/:postId" 
-                  element={
-                    <ProtectedRoute>
-                      <Suspense fallback={<CalendarSkeletonLoader />}>
-                        <PostDetail />
-                      </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
+                {/* ✅ GOOD: Direct themeId routing only */}
                 
-                {/* Theme detail route - theme overview with statistics */}
-                <Route 
-                  path="/stories/theme/:themeId" 
-                  element={
-                    <ProtectedRoute>
+                  {/* ✅ GOOD: Only themeId routes supported */}
+                  <Route 
+                    path="/stories/id/:themeId" 
+                    element={
                       <Suspense fallback={<div>Loading...</div>}>
                         <ThemeDetail />
                       </Suspense>
-                    </ProtectedRoute>
-                  } 
-                />
+                    } 
+                  />
                 
                 <Route 
                   path="/stories" 
@@ -260,10 +235,8 @@ function App() {
                  <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
                  <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
                  <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
-                
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/pixar" element={<PixarConverter />} />
-                <Route path="/cover-letter" element={<CoverLetterGenerator />} />
                 {/* Vendor routes - redirect to admin namespace */}
                 <Route path="/vendors" element={<Navigate to="/admin/vendors" replace />} />
                 <Route path="/vendors/:slugname" element={<Navigate to="/admin/vendors" replace />} />
@@ -397,10 +370,8 @@ function App() {
                   } 
                 />
                 <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
-                <Route path="/cases/case2" element={<CaseStudyRouteWrapper><Case2 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
                 <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
-                <Route path="/cases/case5" element={<CaseStudyRouteWrapper><Case5 /></CaseStudyRouteWrapper>} />
                 <Route path="/companies" element={<RCMCompanies />} />
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
@@ -489,14 +460,13 @@ function App() {
                 />
                 <Route path="*" element={<NotFound />} />
                 </Routes>
-                  </ImageGenerationTimerProvider>
-                </ProcessingStatesProvider>
-              </AuthProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-        </HelmetProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+                </ImageGenerationTimerProvider>
+              </ProcessingStatesProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </HelmetProvider>
+    </QueryClientProvider>
   );
 }
 

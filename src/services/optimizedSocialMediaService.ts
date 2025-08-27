@@ -35,46 +35,7 @@ export class OptimizedSocialMediaService {
 
     let query = supabase
       .from('social_media_posts')
-      .select(`
-        id,
-        user_id,
-        title,
-        story_description,
-        day,
-        image_16_9_url,
-        image_9_16_url,
-        image_3_4_url,
-        image_4_3_url,
-        image_1_1_url,
-        image_16_9_video_url,
-        image_3_4_video_url,
-        general_video_url,
-        image_16_9_status,
-        image_9_16_status,
-        image_3_4_status,
-        image_4_3_status,
-        image_1_1_status,
-        image_16_9_watermark_url,
-        image_9_16_watermark_url,
-        image_3_4_watermark_url,
-        image_4_3_watermark_url,
-        image_1_1_watermark_url,
-        image_16_9_watermark_status,
-        image_9_16_watermark_status,
-        image_3_4_watermark_status,
-        image_4_3_watermark_status,
-        image_1_1_watermark_status,
-        seed_value,
-        color_theme_id,
-        theme_id,
-        status,
-        scheduled_date,
-        platform_tags,
-        generated_image_prompt,
-        category,
-        created_at,
-        updated_at
-      `)
+      .select('*')
       // Stable ordering: first by day (if exists), then by created_at, finally by id as tiebreaker
       .order('day', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false })
@@ -89,8 +50,9 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    this.setCache(cacheKey, data || []);
-    return (data as unknown as SocialMediaPost[]) || [];
+    const posts = (data || []) as SocialMediaPost[];
+    this.setCache(cacheKey, posts);
+    return posts;
   }
 
   // DEPRECATED: Use getPostsByThemeId instead for theme-based queries
@@ -111,44 +73,7 @@ export class OptimizedSocialMediaService {
     const { data, error } = await supabase
       .from('social_media_posts')
       .select(`
-        id,
-        user_id,
-        title,
-        story_description,
-        day,
-        image_16_9_url,
-        image_9_16_url,
-        image_3_4_url,
-        image_4_3_url,
-        image_1_1_url,
-        image_16_9_video_url,
-        image_3_4_video_url,
-        general_video_url,
-        image_16_9_status,
-        image_9_16_status,
-        image_3_4_status,
-        image_4_3_status,
-        image_1_1_status,
-        image_16_9_watermark_url,
-        image_9_16_watermark_url,
-        image_3_4_watermark_url,
-        image_4_3_watermark_url,
-        image_1_1_watermark_url,
-        image_16_9_watermark_status,
-        image_9_16_watermark_status,
-        image_3_4_watermark_status,
-        image_4_3_watermark_status,
-        image_1_1_watermark_status,
-        seed_value,
-        color_theme_id,
-        theme_id,
-        status,
-        scheduled_date,
-        platform_tags,
-        generated_image_prompt,
-        category,
-        created_at,
-        updated_at,
+        *,
         themes!inner(*)
       `)
       .eq('theme_id', themeId)
@@ -158,8 +83,9 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    this.setCache(cacheKey, data || []);
-    return (data as unknown as SocialMediaPost[]) || [];
+    const posts = (data || []) as SocialMediaPost[];
+    this.setCache(cacheKey, posts);
+    return posts;
   }
 
   // Add method for getting a single post by ID
@@ -173,93 +99,22 @@ export class OptimizedSocialMediaService {
 
     const { data, error } = await supabase
       .from('social_media_posts')
-      .select(`
-        id,
-        user_id,
-        title,
-        story_description,
-        day,
-        image_16_9_url,
-        image_9_16_url,
-        image_3_4_url,
-        image_4_3_url,
-        image_1_1_url,
-        image_16_9_video_url,
-        image_3_4_video_url,
-        general_video_url,
-        image_16_9_status,
-        image_9_16_status,
-        image_3_4_status,
-        image_4_3_status,
-        image_1_1_status,
-        image_16_9_watermark_url,
-        image_9_16_watermark_url,
-        image_3_4_watermark_url,
-        image_4_3_watermark_url,
-        image_1_1_watermark_url,
-        image_16_9_watermark_status,
-        image_9_16_watermark_status,
-        image_3_4_watermark_status,
-        image_4_3_watermark_status,
-        image_1_1_watermark_status,
-        seed_value,
-        color_theme_id,
-        theme_id,
-        status,
-        scheduled_date,
-        platform_tags,
-        generated_image_prompt,
-        category,
-        created_at,
-        updated_at
-      `)
+      .select('*')
       .eq('id', id)
       .maybeSingle();
 
     if (error) throw error;
     
-    if (data) {
-      this.setCache(cacheKey, data);
+    const post = data as SocialMediaPost | null;
+    if (post) {
+      this.setCache(cacheKey, post);
     }
-    return (data as unknown as SocialMediaPost) || null;
+    return post;
   }
 
   async createPost(post: CreateSocialMediaPost): Promise<SocialMediaPost> {
-    console.log('🔐 CREATE_POST: Starting authentication check', { 
-      timestamp: new Date().toISOString(),
-      postData: { category: post.category, theme_id: post.theme_id }
-    });
-
-    // Get current session first for debugging
-    const { data: { session } } = await supabase.auth.getSession();
-    console.log('🔐 CREATE_POST: Session state', { 
-      hasSession: !!session,
-      sessionExpiry: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null,
-      accessToken: session?.access_token ? 'present' : 'missing'
-    });
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    console.log('🔐 CREATE_POST: Auth result', { 
-      hasUser: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      authError: authError?.message,
-      timestamp: new Date().toISOString()
-    });
-
-    if (!user) {
-      console.error('🔐 CREATE_POST: Authentication failed', { 
-        authError,
-        sessionExists: !!session,
-        timestamp: new Date().toISOString()
-      });
-      throw new Error('User not authenticated');
-    }
-
-    console.log('🔐 CREATE_POST: Authentication successful, proceeding with post creation', { 
-      userId: user.id,
-      timestamp: new Date().toISOString()
-    });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
 
     // If no color theme is provided, use the default
     let colorThemeId = post.color_theme_id;
@@ -281,7 +136,7 @@ export class OptimizedSocialMediaService {
         category: post.category || 'cdi',
         user_id: user.id,
         color_theme_id: colorThemeId,
-      } as any)
+      })
       .select()
       .single();
 
@@ -290,7 +145,7 @@ export class OptimizedSocialMediaService {
     // Invalidate relevant caches
     this.invalidateCache(post.category);
     
-    return data as unknown as SocialMediaPost;
+    return data as SocialMediaPost;
   }
 
   async updatePost(id: string, updates: Partial<CreateSocialMediaPost>): Promise<SocialMediaPost> {
@@ -298,7 +153,7 @@ export class OptimizedSocialMediaService {
     
     const { data, error } = await supabase
       .from('social_media_posts')
-      .update(updates as any)
+      .update(updates)
       .eq('id', id)
       .select()
       .maybeSingle();
@@ -317,7 +172,7 @@ export class OptimizedSocialMediaService {
     // Invalidate relevant caches
     this.invalidateCache(updates.category);
     
-    return data as unknown as SocialMediaPost;
+    return data as SocialMediaPost;
   }
 
   async deletePost(id: string): Promise<void> {
@@ -335,7 +190,7 @@ export class OptimizedSocialMediaService {
   async bulkImportPosts(category: string, posts: Array<{
     day?: number;
     title: string;
-    story_description: string;
+    description: string;
     theme?: string;
     status?: 'draft' | 'scheduled' | 'published';
   }>): Promise<number> {
@@ -359,14 +214,14 @@ export class OptimizedSocialMediaService {
   async getAvailableThemes(): Promise<Array<{
     id: string;
     theme_name: string;
-    theme_description: string | null;
+    description: string | null;
     category: string;
     post_count: number;
     prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
     first_post: {
       id: string;
       title: string;
-      story_description: string;
+      description: string;
       image_url?: string;
     } | null;
   }>> {
@@ -393,7 +248,7 @@ export class OptimizedSocialMediaService {
     // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, theme_description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
+      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -405,14 +260,14 @@ export class OptimizedSocialMediaService {
     }
 
     // Get post counts efficiently using indexed columns with day and status info
-    const themeIds = (themes as any[]).map(t => t.id);
+    const themeIds = themes.map(t => t.id);
     const { data: postData, error: postError } = await supabase
       .from('social_media_posts')
       .select(`
         theme_id,
         id,
         title,
-        story_description,
+        description,
         day,
         image_16_9_url,
         image_4_3_url,
@@ -435,16 +290,16 @@ export class OptimizedSocialMediaService {
     if (postError) throw postError;
 
     // Group posts by theme_id for efficient processing
-    const postsByTheme = (postData || []).reduce((acc: Record<string, any[]>, post: any) => {
+    const postsByTheme = (postData || []).reduce((acc, post) => {
       if (!acc[post.theme_id]) {
         acc[post.theme_id] = [];
       }
       acc[post.theme_id].push(post);
       return acc;
-    }, {});
+    }, {} as Record<string, any[]>);
 
     // Filter out incomplete themes (only show themes where all prompts are completed)
-    const completedThemes = (themes as any[]).filter((theme: any) => 
+    const completedThemes = themes.filter((theme: any) => 
       theme.prompt_generation_status === 'completed' &&
       theme.prompt_completion_count === theme.total_posts_count
     );
@@ -468,7 +323,7 @@ export class OptimizedSocialMediaService {
       return {
         id: theme.id,
         theme_name: theme.theme_name,
-        theme_description: theme.theme_description,
+        description: theme.description,
         category: theme.category,
         post_count: posts.length,
         prompt_generation_status: theme.prompt_generation_status,
@@ -477,7 +332,7 @@ export class OptimizedSocialMediaService {
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,
-          story_description: firstPost.story_description,
+          description: firstPost.description,
           day: firstPost.day,
           image_url: imageUrl,
           image_16_9_url: firstPost.image_16_9_url,

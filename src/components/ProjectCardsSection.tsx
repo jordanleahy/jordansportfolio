@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Workflow, FileText, Palette, BarChart } from "lucide-react";
+import { ArrowRight, Brain, Shield, Workflow, FileText } from "lucide-react";
 import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 
@@ -11,17 +11,17 @@ const projects = [
     id: "case1",
     title: "Improved clinical primary diagnosis by 60%.",
     company: "Healthcare Analytics",
-    description: "I designed a second-pass UX/UI that enables CDS specialists to review ICD-10–specific interfaces and more easily identify the correct primary diagnosis that maximizes revenue.",
-    tags: ["#RCM", "#LLM", "#ICD-10", "#CDS", "#CDI"],
+    description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
+    tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
     color: "bg-blue-500",
     path: "/cases/case1"
   },
   {
     id: "case2",
-    title: "Reduced clinical note review time by 8 minutes.",
+    title: "Reduce clinical note review time by 8 minutes.",
     company: "Healthcare EMR Solutions",
-    description: "I designed a solution to address the challenge of inpatient EMR notes—while they are essential for ICD-10 coding, they are often duplicated or copy-pasted, making it difficult for systems and humans to assign the correct codes.",
+    description: "Inpatient EMR notes are essential for assigning the correct ICD-10 codes but they are often \"duplicates\" or \"copy and pasted\" making it hard for systems and humans to assign the right codes.",
     tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates"],
     icon: FileText,
     color: "bg-orange-500",
@@ -29,33 +29,23 @@ const projects = [
   },
   {
     id: "case4",
-    title: "Reduced speciality drug PA response time from 3 days to 5 minutes.",
+    title: "Drug Prior Auth and Validation",
     company: "Digital Health Platform",
-    description: "I designed an AI powered drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, and reauthorization dates, drafts the letter, and sends it to the appropriate insurance company.",
-    tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Medical Necessity"],
+    description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
+    tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
     color: "bg-green-500",
     path: "/cases/case4"
   },
   {
     id: "case3",
-    title: "Reduced appeal drafting process by 20 minutes.",
+    title: "Denial and Appeal Resolution",
     company: "Revenue Cycle Solutions",
     description: "Designed a denial and appeal resolution application for managing denials, including the drafting of templates and sending to payer.",
     tags: ["#Appeals", "#Research", "#UX"],
     icon: FileText,
     color: "bg-purple-500",
     path: "/cases/case3"
-  },
-  {
-    id: "case5",
-    title: "Reduce customer success tickets by 32% by creating configurable data dashboards.",
-    company: "Healthcare Data",
-    description: "I transformed health system and hospital intelligence interfaces across financial and clinical workflows into mobile responsive, customizable experiences.",
-    tags: ["#Healthcare Data", "#Dashboard Design", "#Mobile Responsive", "#Healthcare Analytics"],
-    icon: BarChart,
-    color: "bg-indigo-500",
-    path: "/cases/case5"
   }
 ];
 
@@ -94,10 +84,12 @@ const ProjectCardsSection = () => {
                 viewport={{ once: true }}
                 whileHover={{ y: -8, rotate: -1 }}
               >
-                  <Card 
-                      className="h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent cursor-pointer"
-                   onClick={() => handleCaseStudyNavigation(project.path)}
-                 >
+                <Card 
+                  className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
+                    project.id === 'case2' || project.id === 'case3' ? 'cursor-default' : 'cursor-pointer'
+                  }`}
+                  onClick={project.id === 'case2' || project.id === 'case3' ? undefined : () => handleCaseStudyNavigation(project.path)}
+                >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                       <div className="p-3 rounded-lg bg-accent/10 mb-4">
@@ -165,26 +157,9 @@ const ProjectCardsSection = () => {
                          </div>
                        </div>
                      </div>
-                   )}
-                   
-                   {project.id === "case5" && (
-                     <div className="px-6 pb-4">
-                       <div className="relative group/image">
-                         <img 
-                           src="/lovable-uploads/0371b967-606a-4e28-9988-0e597407f50d.png"
-                           alt="Healthcare dashboard showing financial and clinical metrics with customizable interface"
-                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
-                         />
-                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                           <p className="text-white text-sm font-medium text-center px-4">
-                             Click and enter password for case details
-                           </p>
-                         </div>
-                       </div>
-                     </div>
-                   )}
-                   
-                   {project.id === "case3" && (
+                  )}
+                  
+                  {project.id === "case3" && (
                     <div className="px-6 pb-4">
                       <img 
                         src="/lovable-uploads/ed730bb1-ba72-46ce-bfa8-1a7aa1f8e60d.png"
@@ -207,13 +182,14 @@ const ProjectCardsSection = () => {
                       ))}
                     </div>
                     
-                     <Button 
-                       variant="outline" 
-                       className="w-full" 
-                     >
-                       View Case Study
-                       <ArrowRight className="ml-2 h-4 w-4" />
-                     </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      disabled={project.id === 'case2' || project.id === 'case3'}
+                    >
+                      {project.id === 'case2' || project.id === 'case3' ? 'Coming Soon' : 'View Case Study'}
+                      {project.id !== 'case2' && project.id !== 'case3' && <ArrowRight className="ml-2 h-4 w-4" />}
+                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>

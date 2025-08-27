@@ -152,7 +152,7 @@ export const useThemeShimmer = ({
     if (postsCompleted) {
       console.log('✅ All posts completed - clearing shimmer and navigating to theme');
       clearPendingThemeState();
-      navigate(`/stories/theme/${pendingTheme.theme_id}`);
+      navigate(`/stories/id/${pendingTheme.theme_id}`);
     }
   }, [pendingTheme, themePosts, navigate]);
 
@@ -190,7 +190,7 @@ export const useThemeShimmer = ({
     clearPendingThemeState();
     
     setTimeout(() => {
-      navigate(`/stories/theme/${themeId}`);
+      navigate(`/stories/id/${themeId}`);
     }, 0);
   };
 
@@ -201,7 +201,7 @@ export const useThemeShimmer = ({
     pendingThemeObject: pendingTheme ? {
       theme_id: pendingTheme.theme_id,
       theme_name: pendingTheme.theme_name,
-      theme_description: pendingTheme.theme_description
+      description: pendingTheme.description
     } : null,
     totalPosts: themePosts.length,
     completedPosts: themePosts.filter(p => p.individual_prompt_status === 'completed').length,

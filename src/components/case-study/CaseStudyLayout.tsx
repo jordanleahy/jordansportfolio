@@ -6,7 +6,7 @@ import { FigmaPresentationViewer } from "./FigmaPresentationViewer";
 import { ProblemSection } from "./ProblemSection";
 import { TeamSection } from "./TeamSection";
 import { ProcessSection } from "./ProcessSection";
-import { CaseSection } from "./CaseSection";
+import { SolutionSection } from "./SolutionSection";
 import { OutcomesSection } from "./OutcomesSection";
 import { ReflectionSection } from "./ReflectionSection";
 import { VisualsSection } from "./VisualsSection";
@@ -64,7 +64,7 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         steps={data.processSteps}
       />
       
-      <CaseSection 
+      <SolutionSection 
         title={data.solutionTitle}
         features={data.features}
       />

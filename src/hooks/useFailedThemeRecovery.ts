@@ -23,36 +23,17 @@ export const useFailedThemeRecovery = () => {
         throw updateError;
       }
 
-      // Get theme description for regeneration
-      const { data: themeData, error: fetchError } = await supabase
-        .from('themes')
-        .select('theme_description')
-        .eq('id', themeId)
-        .single();
-
-      if (fetchError || !(themeData as any)?.theme_description) {
-        throw new Error('Could not fetch theme description for regeneration');
-      }
-
-      // Generate new theme using the original description
-      const { data: newThemeData, error: generateError } = await supabase.functions.invoke('generate-custom-theme', {
-        body: { description: (themeData as any).theme_description }
-      });
-
-      if (generateError || !newThemeData?.success) {
-        throw new Error(generateError?.message || newThemeData?.error || 'Failed to regenerate theme');
-      }
-
-      // Import the newly generated theme
-      const { error: importError } = await supabase.functions.invoke('process-and-import-theme', {
+      // Trigger theme regeneration
+      const { error: functionError } = await supabase.functions.invoke('structure-theme-input', {
         body: {
-          rawJson: newThemeData.themeData,
-          idempotencyKey: `retry-theme-${themeId}-${Date.now()}`
+          theme_id: themeId,
+          category,
+          retry: true
         }
       });
 
-      if (importError) {
-        throw importError;
+      if (functionError) {
+        throw functionError;
       }
 
       toast.success('Theme regeneration started', {

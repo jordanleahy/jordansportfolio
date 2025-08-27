@@ -138,12 +138,12 @@ serve(async (req) => {
     // Get the system prompt for the role type from the system_prompts table
     const { data: systemPromptData, error: promptError } = await supabase
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, theme_id')
+      .select('prompt_text')
       .eq('agent_id', agent.id)
       .eq('is_active', true)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .single();
     
     if (promptError || !systemPromptData) {
       throw new Error(`System prompt not found for role type: ${roleType}`);

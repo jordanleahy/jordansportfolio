@@ -88,7 +88,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
                   }
                   // Always regenerate as 1:1 for square container
                   const aspectRatioKey = '1_1';
-                  onGenerateImage?.(post.id, aspectRatioKey, post.title, post.story_description, post.category);
+                  onGenerateImage?.(post.id, aspectRatioKey, post.title, post.description, post.category);
                 }}
                 disabled={isButtonDisabled(post.id, '1:1' as any)}
                 className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-3 py-1 text-sm text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
@@ -102,7 +102,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
           <button
             onClick={() => {
               // Start with 1:1 aspect ratio as default
-              onGenerateImage?.(post.id, '1_1', post.title, post.story_description, post.category);
+              onGenerateImage?.(post.id, '1_1', post.title, post.description, post.category);
             }}
             disabled={isButtonDisabled(post.id, '1:1' as any)}
             className="w-full h-full flex flex-col items-center justify-center text-sm text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
@@ -123,7 +123,7 @@ export const PostCardHeroImage: React.FC<PostCardHeroImageProps> = ({
           {post.title || 'Untitled Post'}
         </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          {post.story_description}
+          {post.description}
         </p>
       </div>
     </div>

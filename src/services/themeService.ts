@@ -165,7 +165,7 @@ export class ThemeService {
       .from('themes')
       .update({
         theme_name: theme.theme_name,
-        theme_description: theme.theme_description,
+        description: theme.description,
         category: theme.category,
       })
       .eq('id', theme.id)
@@ -200,7 +200,7 @@ export class ThemeService {
 
     // Always create new theme - deprecating "find" behavior
     logger.info('Creating new theme (deprecated exact match check)');
-    return this.createTheme({ theme_name, category, theme_description: description });
+    return this.createTheme({ theme_name, category, description });
   }
 
   private invalidateCache(category?: string, userId?: string) {

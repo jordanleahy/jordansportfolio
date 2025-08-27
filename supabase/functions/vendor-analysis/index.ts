@@ -113,18 +113,12 @@ serve(async (req) => {
       .limit(1)
       .maybeSingle();
 
-    const { data: systemPrompt, error: systemPromptError } = await supabase
+    const { data: systemPrompt } = await supabase
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, theme_id')
+      .select('prompt_text')
       .eq('agent_id', vendorAgent?.id)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-
-    if (systemPromptError) {
-      console.error('❌ SYSTEM PROMPT QUERY ERROR:', systemPromptError);
-    }
 
     const basePrompt = systemPrompt?.prompt_text || `Analyze the company ${companyName} and provide structured competitive intelligence data.`;
 

@@ -91,7 +91,7 @@ export const PostsTableView = memo(({
       await generateAllImages({
         postId: post.id,
         title: post.title,
-        description: post.story_description,
+        description: post.description,
         category: post.category
       });
       // Refresh the posts to show newly generated images
@@ -140,7 +140,7 @@ export const PostsTableView = memo(({
           const generatedPrompt = await generateWithCache({
             postId: post.id,
             title: post.title,
-            description: post.story_description,
+            description: post.description,
             theme: themeData?.theme,
             themeId: themeData?.themeId,
             category: themeData?.category || post.category
@@ -412,12 +412,12 @@ export const PostsTableView = memo(({
                       />
                     ) : (
                       <div className="text-sm text-muted-foreground pr-6">
-                        {post.story_description}
+                        {post.description}
                       </div>
                     )}
                     {hoveredCell?.postId === post.id && hoveredCell?.field === 'description' && !editingCell && (
                       <button
-                        onClick={() => handleCellEdit(post.id, 'description', post.story_description || '')}
+                        onClick={() => handleCellEdit(post.id, 'description', post.description || '')}
                         className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted rounded"
                         title="Edit description"
                       >

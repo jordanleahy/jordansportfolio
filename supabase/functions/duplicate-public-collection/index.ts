@@ -44,19 +44,8 @@ serve(async (req) => {
 
     const { theme_id }: DuplicationRequest = await req.json();
 
-    if (!theme_id || typeof theme_id !== 'string') {
-      return new Response(JSON.stringify({ error: 'theme_id is required and must be a string' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Validate theme_id is a valid UUID
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(theme_id)) {
-      return new Response(JSON.stringify({ 
-        error: 'theme_id must be a valid UUID' 
-      }), {
+    if (!theme_id) {
+      return new Response(JSON.stringify({ error: 'theme_id is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -217,24 +206,19 @@ serve(async (req) => {
       console.log(`Created post: ${newPost.id}`);
     }
 
-    // Duplicate system prompts using standardized pattern
+    // Duplicate system prompts
     const { data: originalPrompts, error: promptsError } = await supabaseClient
       .from('system_prompts')
-      .select('id, prompt_text, agent_name, theme_id, agent_purpose, agent_owner, name, description')
-      .eq('theme_id', originalTheme.id)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-
-    if (promptsError) {
-      console.error('❌ SYSTEM PROMPTS QUERY ERROR:', promptsError);
-    }
+      .select('*')
+      .or(`agent_name.eq.Theme Generation Agent,category.eq.${originalTheme.category}`);
 
     if (!promptsError && originalPrompts) {
       for (const prompt of originalPrompts) {
-        const { error: insertError } = await supabaseClient
+        await supabaseClient
           .from('system_prompts')
           .insert([{
             user_id: user.id,
+            category: prompt.category,
             prompt_text: prompt.prompt_text,
             agent_name: prompt.agent_name,
             agent_purpose: prompt.agent_purpose,
