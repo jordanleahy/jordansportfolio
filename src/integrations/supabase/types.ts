@@ -2311,7 +2311,7 @@ export type Database = {
           color_theme_id: string | null
           created_at: string
           day: number | null
-          description: string
+          theme_description: string
           general_gif_url: string | null
           general_video_url: string | null
           generated_image_prompt: string | null
