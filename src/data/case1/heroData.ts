@@ -5,7 +5,7 @@ export const heroData = {
   heroImageAlt: "Healthcare encounter interface showing patient data, clinical workflow, and improved primary diagnosis system",
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
-  timeline: "6 months",
+  timeline: "2 months",
   timelineDetails: "March - May 2024",
   tags: ["Sepsis Detection", "Clinical AI", "Patient Safety", "Healthcare Dashboard"],
 };
