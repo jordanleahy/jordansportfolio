@@ -424,7 +424,6 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
         .from('system_prompts')
         .select('id, created_at, theme_id')
         .eq('user_id', userId)
-        .eq('category', themeData.category)
         .or(`theme.eq.${themeData.theme},theme_id.eq.${themeId}`) // Check both theme name and theme_id
         .order('created_at', { ascending: false })
         .limit(1)
