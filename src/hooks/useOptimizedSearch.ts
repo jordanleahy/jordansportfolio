@@ -5,7 +5,7 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 interface Theme {
   id: string;
   theme_name: string;
-  description: string;
+  theme_description: string;
   category: string;
 }
 
@@ -44,7 +44,7 @@ export const useOptimizedSearch = ({
 
     const filteredThemes = themes.filter(theme => 
       theme.theme_name.toLowerCase().includes(lowerQuery) ||
-      theme.description.toLowerCase().includes(lowerQuery) ||
+      theme.theme_description.toLowerCase().includes(lowerQuery) ||
       theme.category.toLowerCase().includes(lowerQuery)
     );
 
