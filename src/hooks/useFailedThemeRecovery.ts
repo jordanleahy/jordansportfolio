@@ -30,13 +30,13 @@ export const useFailedThemeRecovery = () => {
         .eq('id', themeId)
         .single();
 
-      if (fetchError || !themeData?.theme_description) {
+      if (fetchError || !(themeData as any)?.theme_description) {
         throw new Error('Could not fetch theme description for regeneration');
       }
 
       // Generate new theme using the original description
       const { data: newThemeData, error: generateError } = await supabase.functions.invoke('generate-custom-theme', {
-        body: { description: themeData.theme_description }
+        body: { description: (themeData as any).theme_description }
       });
 
       if (generateError || !newThemeData?.success) {
