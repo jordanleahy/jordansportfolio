@@ -5,7 +5,7 @@ export const heroData = {
   heroImageAlt: "Medical dashboard interface showing patient encounters, vital signs, diagnosis codes, and clinical decision support tools",
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
-  timeline: "6 months",
+  timeline: "2.5 months",
   timelineDetails: "March - May 2024",
   tags: ["Sepsis Detection", "Clinical AI", "Patient Safety", "Healthcare Dashboard"],
 };
