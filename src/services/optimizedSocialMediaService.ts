@@ -39,7 +39,7 @@ export class OptimizedSocialMediaService {
         id,
         user_id,
         title,
-        story_description,
+        description,
         day,
         image_16_9_url,
         image_9_16_url,
@@ -90,9 +90,9 @@ export class OptimizedSocialMediaService {
     if (error) throw error;
     
     // Map database response to interface format
-    const posts = (data || []).map(post => ({
+    const posts = (data || []).map((post: any) => ({
       ...post,
-      story_description: post.description // Map to interface format
+      story_description: post.description // Map database column to interface
     })) as SocialMediaPost[];
     this.setCache(cacheKey, posts);
     return posts;
@@ -164,7 +164,7 @@ export class OptimizedSocialMediaService {
     if (error) throw error;
     
     // Map database response to interface format
-    const posts = (data || []).map(post => ({
+    const posts = (data || []).map((post: any) => ({
       ...post,
       story_description: post.description // Map to interface format
     })) as SocialMediaPost[];
