@@ -113,7 +113,7 @@ JSON STRUCTURE:
 {
   "category": "lowercase-category-name",
   "theme": "Professional Theme Title",
-  "description": "Brief description of the theme focus (1–2 sentences, supportive tone)",
+  "theme_description": "Brief description of the theme focus (1–2 sentences, supportive tone)",
   "posts": [
     {
       "day": 1,
@@ -211,7 +211,7 @@ JSON STRUCTURE:
     console.log('📊 Parsed data structure:', {
       hasCategory: !!parsedData.category,
       hasTheme: !!parsedData.theme,
-      hasDescription: !!parsedData.description,
+      hasDescription: !!parsedData.theme_description,
       hasPosts: !!parsedData.posts,
       postsCount: parsedData.posts?.length,
       category: parsedData.category,
@@ -275,7 +275,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         .insert({
           user_id: userId,
           theme_name: themeData.theme,
-          description: themeData.description,
+          description: themeData.theme_description,
           category: themeData.category
         })
         .select('id')
@@ -424,6 +424,7 @@ const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeDa
         .from('system_prompts')
         .select('id, created_at, theme_id')
         .eq('user_id', userId)
+        .eq('category', themeData.category)
         .or(`theme.eq.${themeData.theme},theme_id.eq.${themeId}`) // Check both theme name and theme_id
         .order('created_at', { ascending: false })
         .limit(1)
