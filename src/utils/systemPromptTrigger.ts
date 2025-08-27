@@ -26,9 +26,9 @@ export const triggerSystemPromptGeneration = async (themeId: string) => {
     // ✅ GOOD: Using theme_id for posts query
     const { data: existingPosts, error: postsError } = await supabase
       .from('social_media_posts')
-      .select('id, title, description')
+      .select('id, title, story_description')
       .eq('theme_id', themeId)
-      .limit(3);
+      .limit(3) as { data: Array<{id: string, title: string, story_description: string}> | null, error: any };
     
     console.log('📊 POSTS QUERY RESULT:', {
       postsFound: existingPosts?.length || 0,
@@ -92,7 +92,11 @@ export const triggerSystemPromptGeneration = async (themeId: string) => {
       body: {
         theme_id: themeId,
         user_id: user.id,
-        posts: existingPosts.slice(0, 3)
+        posts: existingPosts ? existingPosts.slice(0, 3).map(post => ({
+          id: post.id,
+          title: post.title,
+          description: post.story_description
+        })) : []
       }
     });
 
@@ -138,10 +142,10 @@ export const triggerSystemPromptForNewTheme = async (themeId: string, themeName:
     // Check if posts exist for this theme
     const { data: posts } = await supabase
       .from('social_media_posts')
-      .select('id, title, description')
+      .select('id, title, story_description')
       .eq('theme_id', themeId)
       .eq('user_id', user.id)
-      .limit(10);
+      .limit(10) as { data: Array<{id: string, title: string, story_description: string}> | null };
 
     if (!posts || posts.length === 0) {
       console.log(`⚠️ No posts found for theme ${themeId}, skipping system prompt generation`);
@@ -155,7 +159,11 @@ export const triggerSystemPromptForNewTheme = async (themeId: string, themeName:
       body: {
         theme_id: themeId,
         user_id: user.id,
-        posts: posts.slice(0, 5) // Limit to 5 sample posts
+        posts: posts ? posts.slice(0, 5).map(post => ({
+          id: post.id,
+          title: post.title,
+          description: post.story_description
+        })) : []
       }
     });
 
