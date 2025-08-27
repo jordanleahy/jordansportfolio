@@ -26,17 +26,17 @@ export const useFailedThemeRecovery = () => {
       // Get theme description for regeneration
       const { data: themeData, error: fetchError } = await supabase
         .from('themes')
-        .select('description')
+        .select('theme_description')
         .eq('id', themeId)
         .single();
 
-      if (fetchError || !themeData?.description) {
+      if (fetchError || !themeData?.theme_description) {
         throw new Error('Could not fetch theme description for regeneration');
       }
 
       // Generate new theme using the original description
       const { data: newThemeData, error: generateError } = await supabase.functions.invoke('generate-custom-theme', {
-        body: { description: themeData.description }
+        body: { description: themeData.theme_description }
       });
 
       if (generateError || !newThemeData?.success) {
