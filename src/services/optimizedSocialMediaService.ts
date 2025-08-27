@@ -35,7 +35,46 @@ export class OptimizedSocialMediaService {
 
     let query = supabase
       .from('social_media_posts')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        title,
+        description,
+        day,
+        image_16_9_url,
+        image_9_16_url,
+        image_3_4_url,
+        image_4_3_url,
+        image_1_1_url,
+        image_16_9_video_url,
+        image_3_4_video_url,
+        general_video_url,
+        image_16_9_status,
+        image_9_16_status,
+        image_3_4_status,
+        image_4_3_status,
+        image_1_1_status,
+        image_16_9_watermark_url,
+        image_9_16_watermark_url,
+        image_3_4_watermark_url,
+        image_4_3_watermark_url,
+        image_1_1_watermark_url,
+        image_16_9_watermark_status,
+        image_9_16_watermark_status,
+        image_3_4_watermark_status,
+        image_4_3_watermark_status,
+        image_1_1_watermark_status,
+        seed_value,
+        color_theme_id,
+        theme_id,
+        status,
+        scheduled_date,
+        platform_tags,
+        generated_image_prompt,
+        category,
+        created_at,
+        updated_at
+      `)
       // Stable ordering: first by day (if exists), then by created_at, finally by id as tiebreaker
       .order('day', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false })
@@ -73,7 +112,44 @@ export class OptimizedSocialMediaService {
     const { data, error } = await supabase
       .from('social_media_posts')
       .select(`
-        *,
+        id,
+        user_id,
+        title,
+        description,
+        day,
+        image_16_9_url,
+        image_9_16_url,
+        image_3_4_url,
+        image_4_3_url,
+        image_1_1_url,
+        image_16_9_video_url,
+        image_3_4_video_url,
+        general_video_url,
+        image_16_9_status,
+        image_9_16_status,
+        image_3_4_status,
+        image_4_3_status,
+        image_1_1_status,
+        image_16_9_watermark_url,
+        image_9_16_watermark_url,
+        image_3_4_watermark_url,
+        image_4_3_watermark_url,
+        image_1_1_watermark_url,
+        image_16_9_watermark_status,
+        image_9_16_watermark_status,
+        image_3_4_watermark_status,
+        image_4_3_watermark_status,
+        image_1_1_watermark_status,
+        seed_value,
+        color_theme_id,
+        theme_id,
+        status,
+        scheduled_date,
+        platform_tags,
+        generated_image_prompt,
+        category,
+        created_at,
+        updated_at,
         themes!inner(*)
       `)
       .eq('theme_id', themeId)
@@ -99,7 +175,46 @@ export class OptimizedSocialMediaService {
 
     const { data, error } = await supabase
       .from('social_media_posts')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        title,
+        description,
+        day,
+        image_16_9_url,
+        image_9_16_url,
+        image_3_4_url,
+        image_4_3_url,
+        image_1_1_url,
+        image_16_9_video_url,
+        image_3_4_video_url,
+        general_video_url,
+        image_16_9_status,
+        image_9_16_status,
+        image_3_4_status,
+        image_4_3_status,
+        image_1_1_status,
+        image_16_9_watermark_url,
+        image_9_16_watermark_url,
+        image_3_4_watermark_url,
+        image_4_3_watermark_url,
+        image_1_1_watermark_url,
+        image_16_9_watermark_status,
+        image_9_16_watermark_status,
+        image_3_4_watermark_status,
+        image_4_3_watermark_status,
+        image_1_1_watermark_status,
+        seed_value,
+        color_theme_id,
+        theme_id,
+        status,
+        scheduled_date,
+        platform_tags,
+        generated_image_prompt,
+        category,
+        created_at,
+        updated_at
+      `)
       .eq('id', id)
       .maybeSingle();
 
