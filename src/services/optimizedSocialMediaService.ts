@@ -281,7 +281,7 @@ export class OptimizedSocialMediaService {
     // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
+      .select('id, theme_name, theme_description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -293,7 +293,7 @@ export class OptimizedSocialMediaService {
     }
 
     // Get post counts efficiently using indexed columns with day and status info
-    const themeIds = themes.map(t => t.id);
+    const themeIds = (themes as any[]).map(t => t.id);
     const { data: postData, error: postError } = await supabase
       .from('social_media_posts')
       .select(`
@@ -332,7 +332,7 @@ export class OptimizedSocialMediaService {
     }, {} as Record<string, any[]>);
 
     // Filter out incomplete themes (only show themes where all prompts are completed)
-    const completedThemes = themes.filter((theme: any) => 
+    const completedThemes = (themes as any[]).filter((theme: any) => 
       theme.prompt_generation_status === 'completed' &&
       theme.prompt_completion_count === theme.total_posts_count
     );
@@ -356,7 +356,7 @@ export class OptimizedSocialMediaService {
       return {
         id: theme.id,
         theme_name: theme.theme_name,
-        description: theme.description,
+        description: theme.theme_description,
         category: theme.category,
         post_count: posts.length,
         prompt_generation_status: theme.prompt_generation_status,
