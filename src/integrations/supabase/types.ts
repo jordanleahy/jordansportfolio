@@ -539,6 +539,39 @@ export type Database = {
           },
         ]
       }
+      books_catalog: {
+        Row: {
+          author: string
+          category: string | null
+          created_at: string | null
+          id: string
+          publication_year: number | null
+          title: string
+          total_highlights_count: number | null
+          user_id: string
+        }
+        Insert: {
+          author: string
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          publication_year?: number | null
+          title: string
+          total_highlights_count?: number | null
+          user_id: string
+        }
+        Update: {
+          author?: string
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          publication_year?: number | null
+          title?: string
+          total_highlights_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       cached_prompts: {
         Row: {
           cache_key: string
@@ -1800,7 +1833,7 @@ export type Database = {
           id: string
           input_source: string
           last_run: string | null
-          max_tokens: number | null
+          max_completion_tokens: number | null
           metrics: Json | null
           model_version: string
           name: string
@@ -1812,7 +1845,6 @@ export type Database = {
           schedule: string
           status: Database["public"]["Enums"]["agent_status"]
           supported_categories: string[] | null
-          system_prompts: Json | null
           tags: string[] | null
           temperature: number | null
           top_p: number | null
@@ -1826,7 +1858,7 @@ export type Database = {
           id?: string
           input_source: string
           last_run?: string | null
-          max_tokens?: number | null
+          max_completion_tokens?: number | null
           metrics?: Json | null
           model_version?: string
           name: string
@@ -1838,7 +1870,6 @@ export type Database = {
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
           supported_categories?: string[] | null
-          system_prompts?: Json | null
           tags?: string[] | null
           temperature?: number | null
           top_p?: number | null
@@ -1852,7 +1883,7 @@ export type Database = {
           id?: string
           input_source?: string
           last_run?: string | null
-          max_tokens?: number | null
+          max_completion_tokens?: number | null
           metrics?: Json | null
           model_version?: string
           name?: string
@@ -1864,7 +1895,6 @@ export type Database = {
           schedule?: string
           status?: Database["public"]["Enums"]["agent_status"]
           supported_categories?: string[] | null
-          system_prompts?: Json | null
           tags?: string[] | null
           temperature?: number | null
           top_p?: number | null
@@ -3166,6 +3196,54 @@ export type Database = {
           },
         ]
       }
+      verified_book_highlights: {
+        Row: {
+          book_author: string
+          book_title: string
+          created_at: string | null
+          id: string
+          image_urls: Json | null
+          original_input: string
+          processing_status: string | null
+          source_references: Json | null
+          updated_at: string | null
+          user_id: string
+          verification_confidence: string
+          verified_quotes: Json | null
+          visual_prompts: Json | null
+        }
+        Insert: {
+          book_author: string
+          book_title: string
+          created_at?: string | null
+          id?: string
+          image_urls?: Json | null
+          original_input: string
+          processing_status?: string | null
+          source_references?: Json | null
+          updated_at?: string | null
+          user_id: string
+          verification_confidence?: string
+          verified_quotes?: Json | null
+          visual_prompts?: Json | null
+        }
+        Update: {
+          book_author?: string
+          book_title?: string
+          created_at?: string | null
+          id?: string
+          image_urls?: Json | null
+          original_input?: string
+          processing_status?: string | null
+          source_references?: Json | null
+          updated_at?: string | null
+          user_id?: string
+          verification_confidence?: string
+          verified_quotes?: Json | null
+          visual_prompts?: Json | null
+        }
+        Relationships: []
+      }
       voiceover_scripts: {
         Row: {
           created_at: string
@@ -3449,19 +3527,12 @@ export type Database = {
         Returns: undefined
       }
       insert_category_content: {
-        Args:
-          | {
-              category_name: string
-              posts_data: Json
-              theme_description_param?: string
-              theme_id_param?: string
-            }
-          | {
-              category_name?: string
-              posts_data: Json
-              theme_description_param?: string
-              theme_id_param?: string
-            }
+        Args: {
+          category_name: string
+          posts_data: Json
+          theme_description_param?: string
+          theme_id_param?: string
+        }
         Returns: Json
       }
       insert_cdi_content: {
@@ -3488,9 +3559,9 @@ export type Database = {
         Args: {
           posts_data: Json
           theme_description_param?: string
-          theme_id: string
+          theme_id?: string
         }
-        Returns: number
+        Returns: Json
       }
       insert_sample_agents: {
         Args: Record<PropertyKey, never>
@@ -3505,14 +3576,6 @@ export type Database = {
         Returns: string
       }
       insert_story_telling_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      insert_theme_structuring_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      insert_triage_orchestra_agent: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
