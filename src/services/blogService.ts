@@ -3,7 +3,7 @@ import { BlogPost, BlogPostInput, BlogPostSchema, calculateWordCount, calculateR
 
 interface SocialMediaPost {
   title: string;
-  description: string;
+  story_description: string;
   day?: number;
   theme?: string;
   category?: string;

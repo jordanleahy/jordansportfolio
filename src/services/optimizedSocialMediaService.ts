@@ -39,7 +39,7 @@ export class OptimizedSocialMediaService {
         id,
         user_id,
         title,
-        story_description,
+        description,
         day,
         image_16_9_url,
         image_9_16_url,
@@ -89,7 +89,11 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    const posts = (data || []) as SocialMediaPost[];
+    // Map database response to interface format
+    const posts = (data || []).map(post => ({
+      ...post,
+      story_description: post.description // Map to interface format
+    })) as SocialMediaPost[];
     this.setCache(cacheKey, posts);
     return posts;
   }
@@ -115,7 +119,7 @@ export class OptimizedSocialMediaService {
         id,
         user_id,
         title,
-        story_description,
+        description,
         day,
         image_16_9_url,
         image_9_16_url,
@@ -159,7 +163,11 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    const posts = (data || []) as SocialMediaPost[];
+    // Map database response to interface format
+    const posts = (data || []).map(post => ({
+      ...post,
+      story_description: post.description // Map to interface format
+    })) as SocialMediaPost[];
     this.setCache(cacheKey, posts);
     return posts;
   }
@@ -179,7 +187,7 @@ export class OptimizedSocialMediaService {
         id,
         user_id,
         title,
-        story_description,
+        description,
         day,
         image_16_9_url,
         image_9_16_url,
@@ -220,7 +228,11 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    const post = data as SocialMediaPost | null;
+    // Map database response to interface format
+    const post = data ? {
+      ...data,
+      story_description: data.description // Map to interface format
+    } as SocialMediaPost : null;
     if (post) {
       this.setCache(cacheKey, post);
     }
@@ -284,6 +296,7 @@ export class OptimizedSocialMediaService {
         category: post.category || 'cdi',
         user_id: user.id,
         color_theme_id: colorThemeId,
+        description: post.story_description, // Map to database column
       })
       .select()
       .single();
@@ -293,7 +306,11 @@ export class OptimizedSocialMediaService {
     // Invalidate relevant caches
     this.invalidateCache(post.category);
     
-    return data as SocialMediaPost;
+    // Map database response to interface format
+    return {
+      ...data,
+      story_description: data.description // Map to interface format
+    } as SocialMediaPost;
   }
 
   async updatePost(id: string, updates: Partial<CreateSocialMediaPost>): Promise<SocialMediaPost> {
@@ -320,7 +337,11 @@ export class OptimizedSocialMediaService {
     // Invalidate relevant caches
     this.invalidateCache(updates.category);
     
-    return data as SocialMediaPost;
+    // Map database response to interface format
+    return {
+      ...data,
+      story_description: data.description // Map to interface format
+    } as SocialMediaPost;
   }
 
   async deletePost(id: string): Promise<void> {
@@ -415,7 +436,7 @@ export class OptimizedSocialMediaService {
         theme_id,
         id,
         title,
-        story_description,
+        description,
         day,
         image_16_9_url,
         image_4_3_url,
@@ -480,7 +501,7 @@ export class OptimizedSocialMediaService {
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,
-          story_description: firstPost.story_description,
+          story_description: firstPost.description,
           day: firstPost.day,
           image_url: imageUrl,
           image_16_9_url: firstPost.image_16_9_url,
@@ -497,8 +518,17 @@ export class OptimizedSocialMediaService {
       };
     });
     
-    this.setCache(cacheKey, processedThemes, 1 * 60 * 1000); // 1 minute cache for faster updates during theme creation
-    return processedThemes;
+    // Map database response to interface format
+    const mappedThemes = processedThemes.map(theme => ({
+      ...theme,
+        first_post: theme.first_post ? {
+          ...theme.first_post,
+          story_description: theme.first_post.story_description // Already mapped correctly
+        } : null
+    }));
+    
+    this.setCache(cacheKey, mappedThemes, 1 * 60 * 1000); // 1 minute cache for faster updates during theme creation
+    return mappedThemes;
   }
 
   // Keep the old method for backward compatibility

@@ -147,7 +147,11 @@ export function useOptimizedStories(user: any) {
         .order('day', { ascending: true });
       
       if (error) throw error;
-      return (data || []) as SocialMediaPost[];
+      // Map database response to interface format
+      return (data || []).map(post => ({
+        ...post,
+        story_description: post.description // Map to interface format
+      })) as SocialMediaPost[];
     },
     enabled: !!activeTab && !!user?.id && availableThemes.length > 0,
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,

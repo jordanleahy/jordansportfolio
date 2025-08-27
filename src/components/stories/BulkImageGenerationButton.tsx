@@ -103,7 +103,11 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
           .order('day', { ascending: true });
         
         if (refreshedPosts) {
-          onPostsChange(refreshedPosts as SocialMediaPost[]);
+          const mappedPosts = refreshedPosts.map(post => ({
+            ...post,
+            story_description: post.description // Map to interface format
+          })) as SocialMediaPost[];
+          onPostsChange(mappedPosts);
         }
       }
       
