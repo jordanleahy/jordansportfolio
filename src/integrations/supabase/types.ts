@@ -2304,6 +2304,7 @@ export type Database = {
       }
       social_media_posts: {
         Row: {
+          category: string | null
           color_theme_id: string | null
           created_at: string
           day: number | null
@@ -2347,6 +2348,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
@@ -2390,6 +2392,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
