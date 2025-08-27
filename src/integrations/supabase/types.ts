@@ -3556,11 +3556,17 @@ export type Database = {
         Returns: string
       }
       insert_posts_for_theme: {
-        Args: {
-          posts_data: Json
-          theme_description_param?: string
-          theme_id: string
-        }
+        Args:
+          | {
+              posts_data: Json
+              theme_description_param?: string
+              theme_id: string
+            }
+          | {
+              posts_data: Json
+              theme_description_param?: string
+              theme_id?: string
+            }
         Returns: number
       }
       insert_sample_agents: {
