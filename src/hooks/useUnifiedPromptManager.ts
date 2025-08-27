@@ -127,7 +127,7 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
             id: tempPostId,
             theme_id: themeId,
             title: `Post ${postNumber}`,
-            description: '', // Use description column as it exists in database
+            story_description: '', // Use story_description column as it exists in database
             day: postNumber,
             user_id: userId,
             category: category,

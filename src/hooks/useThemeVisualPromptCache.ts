@@ -185,7 +185,7 @@ export const useThemeVisualPromptCache = () => {
         .from('social_media_posts')
         .insert({
           title: 'Theme Visual Style Template',
-          description: `Generate a reusable visual style template for the ${config.theme.name} color theme with ${config.theme.visual_style} styling.`,
+          story_description: `Generate a reusable visual style template for the ${config.theme.name} color theme with ${config.theme.visual_style} styling.`,
           theme_id: config.theme.id,
           user_id: (await supabase.auth.getUser()).data.user?.id || null
         })

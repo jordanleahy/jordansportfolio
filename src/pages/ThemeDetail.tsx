@@ -182,10 +182,10 @@ const ThemeDetail = () => {
       </div>
 
       {/* Theme Description */}
-      {theme.description && (
+      {theme.theme_description && (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-gray-700 leading-relaxed">{theme.description}</p>
+            <p className="text-gray-700 leading-relaxed">{theme.theme_description}</p>
           </CardContent>
         </Card>
       )}
