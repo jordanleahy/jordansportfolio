@@ -2311,7 +2311,7 @@ export type Database = {
           color_theme_id: string | null
           created_at: string
           day: number | null
-          theme_description: string
+          story_description: string
           general_gif_url: string | null
           general_video_url: string | null
           generated_image_prompt: string | null
@@ -2355,7 +2355,7 @@ export type Database = {
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
-          description: string
+          story_description: string
           general_gif_url?: string | null
           general_video_url?: string | null
           generated_image_prompt?: string | null
@@ -2399,7 +2399,7 @@ export type Database = {
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
-          description?: string
+          story_description?: string
           general_gif_url?: string | null
           general_video_url?: string | null
           generated_image_prompt?: string | null
@@ -2698,7 +2698,7 @@ export type Database = {
           background_processing_complete: boolean | null
           category: string
           created_at: string
-          description: string | null
+          theme_description: string | null
           has_character_reference: boolean | null
           id: string
           lifecycle_status: string | null
@@ -2717,7 +2717,7 @@ export type Database = {
           background_processing_complete?: boolean | null
           category: string
           created_at?: string
-          description?: string | null
+          theme_description?: string | null
           has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
@@ -2736,7 +2736,7 @@ export type Database = {
           background_processing_complete?: boolean | null
           category?: string
           created_at?: string
-          description?: string | null
+          theme_description?: string | null
           has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
