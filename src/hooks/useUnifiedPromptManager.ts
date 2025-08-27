@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
-import { useUser } from '@supabase/auth-helpers-react';
+import { useUser } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
@@ -52,7 +53,8 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
     if (existingPosts && !isInitialized) {
       setPosts(existingPosts);
       const initialStatuses = existingPosts.reduce((acc: { [postId: string]: PromptStatus }, post) => {
-        acc[post.id] = post.individual_prompt_status as PromptStatus || 'complete';
+        // Use generated_image_prompt as indicator since individual_prompt_status doesn't exist
+        acc[post.id] = post.generated_image_prompt ? 'complete' : 'pending';
         return acc;
       }, {});
       setPromptStatuses(initialStatuses);
@@ -89,7 +91,7 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
       return;
     }
 
-    const usageCheck = await enforceUsage('prompt_generation', posts.length);
+    const usageCheck = await enforceUsage('image_generation', posts.length);
     if (!usageCheck.allowed) {
       return;
     }
@@ -112,7 +114,7 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
           continue;
         }
 
-        setProcessing(post.id, true);
+        setProcessing(post.id, 'generate', true);
         setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'processing' }));
 
         const tempPostId = uuidv4();
@@ -129,7 +131,6 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
             day: postNumber,
             user_id: userId,
             category: category,
-            individual_prompt_status: 'processing',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });
@@ -137,7 +138,7 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
         if (tempPostError) {
           console.error("Error creating temporary post:", tempPostError);
           setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'error' }));
-          setProcessing(post.id, false);
+          setProcessing(post.id, 'generate', false);
           continue;
         }
 
@@ -157,7 +158,7 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
           if (error) {
             console.error("Error generating individual image prompt:", error);
             setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'error' }));
-            setProcessing(post.id, false);
+            setProcessing(post.id, 'generate', false);
             return;
           }
 
@@ -165,19 +166,19 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
           const { error: updateError } = await supabase
             .from('social_media_posts')
             .update({
-              individual_prompt_status: 'complete',
+              generated_image_prompt: 'completed',
             })
             .eq('id', post.id);
 
           if (updateError) {
             console.error("Error updating post with individual prompt status:", updateError);
             setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'error' }));
-            setProcessing(post.id, false);
+            setProcessing(post.id, 'generate', false);
             return;
           }
 
           setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'complete' }));
-          setProcessing(post.id, false);
+          setProcessing(post.id, 'generate', false);
         };
 
         await generatePrompt(post.id);

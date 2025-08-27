@@ -1,10 +1,11 @@
+
 export type PostStatus = 'draft' | 'scheduled' | 'published';
 
 export interface SocialMediaPost {
   id: string;
   user_id: string;
   title: string;
-  story_description: string;
+  description: string; // Changed from story_description to description
   day?: number | null;
   image_16_9_url?: string | null;
   image_9_16_url?: string | null;
@@ -45,7 +46,6 @@ export interface SocialMediaPost {
   // Theme relationship
   theme_id?: string | null;
   
-  
   status: PostStatus;
   scheduled_date?: string | null;
   platform_tags?: any;
@@ -57,7 +57,7 @@ export interface SocialMediaPost {
 
 export interface CreateSocialMediaPost {
   title: string;
-  story_description: string;
+  description: string; // Changed from story_description to description
   day?: number;
   image_16_9_url?: string;
   image_9_16_url?: string;

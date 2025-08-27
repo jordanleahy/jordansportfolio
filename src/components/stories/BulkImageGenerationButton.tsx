@@ -82,7 +82,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       const request: BulkImageGenerationRequest = {
         postId: post.id,
         title: post.title,
-        description: post.description || '', // Use description from database
+        description: post.description, // Use description from the interface
         category: post.category,
         context: 'table',
         colorThemeId: post.color_theme_id || undefined
@@ -99,11 +99,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
           .order('day', { ascending: true });
         
         if (refreshedPosts) {
-          const mappedPosts = refreshedPosts.map(post => ({
-            ...post,
-            // Map the database column to the expected property name
-          })) as SocialMediaPost[];
-          onPostsChange(mappedPosts);
+          onPostsChange(refreshedPosts as SocialMediaPost[]);
         }
       }
       
