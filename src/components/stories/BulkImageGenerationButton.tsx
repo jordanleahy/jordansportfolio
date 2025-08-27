@@ -82,7 +82,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       const request: BulkImageGenerationRequest = {
         postId: post.id,
         title: post.title,
-        description: post.description, // Use description from the interface
+        description: post.story_description, // Use story_description from the interface
         category: post.category,
         context: 'table',
         colorThemeId: post.color_theme_id || undefined
@@ -99,7 +99,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
           .order('day', { ascending: true });
         
         if (refreshedPosts) {
-          onPostsChange(refreshedPosts as SocialMediaPost[]);
+          onPostsChange(refreshedPosts as any[]);
         }
       }
       

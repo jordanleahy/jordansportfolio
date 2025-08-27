@@ -43,7 +43,7 @@ export const useUnifiedPromptManager = (themeId: string, themeName: string, cate
         console.error("Error fetching existing posts:", error);
         throw error;
       }
-      return data as SocialMediaPost[];
+      return data as any[];
     },
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
   });

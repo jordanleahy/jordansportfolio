@@ -73,7 +73,7 @@ export const PostsTable = ({
         .from('social_media_posts')
         .update({
           title: updatedPost.title,
-          story_description: updatedPost.story_description,
+          description: updatedPost.story_description,
           updated_at: new Date().toISOString()
         })
         .eq('id', updatedPost.id);

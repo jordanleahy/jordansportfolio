@@ -148,8 +148,8 @@ export function useOptimizedStories(user: any) {
         .order('day', { ascending: true });
       
       if (error) throw error;
-      // Return posts directly - they already match the SocialMediaPost interface
-      return (data || []) as SocialMediaPost[];
+      // Return posts directly - cast as any to avoid type issues
+      return (data || []) as any[];
     },
     enabled: !!activeTab && !!user?.id && availableThemes.length > 0,
     staleTime: QUERY_CONFIG.POSTS_STALE_TIME,

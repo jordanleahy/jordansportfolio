@@ -34,7 +34,7 @@ export const usePostEditor = (): UsePostEditorReturn => {
       // Step 1: Update post content first
       const updatedPost = await optimizedSocialMediaService.updatePost(postId, {
         title: title.trim(),
-        story_description: story_description.trim()
+        description: story_description.trim()
       });
 
       // Step 2: If regenerate prompt is requested, do it after successful content update

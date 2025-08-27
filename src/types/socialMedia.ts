@@ -5,7 +5,7 @@ export interface SocialMediaPost {
   id: string;
   user_id: string;
   title: string;
-  description: string; // Changed from story_description to description
+  story_description: string;
   day?: number | null;
   image_16_9_url?: string | null;
   image_9_16_url?: string | null;
@@ -46,6 +46,9 @@ export interface SocialMediaPost {
   // Theme relationship
   theme_id?: string | null;
   
+  // Individual prompt status
+  individual_prompt_status?: 'none' | 'processing' | 'complete' | 'failed';
+  
   status: PostStatus;
   scheduled_date?: string | null;
   platform_tags?: any;
@@ -57,7 +60,7 @@ export interface SocialMediaPost {
 
 export interface CreateSocialMediaPost {
   title: string;
-  description: string; // Changed from story_description to description
+  description: string;
   day?: number;
   image_16_9_url?: string;
   image_9_16_url?: string;
