@@ -35,7 +35,7 @@ export const CategoriesGrid = ({
               imageUrl={theme.first_post?.image_url}
               firstPostData={theme.first_post ? {
                 title: theme.first_post.title,
-                description: theme.first_post.description
+                description: theme.first_post.story_description
               } : undefined}
               onDelete={onDeleteCategory}
               isShimmer={theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)}

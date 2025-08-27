@@ -935,7 +935,7 @@ export default function StoriesDashboard() {
                     first_post: {
                       id: 'pending',
                       title: 'Generating theme...',
-                      description: `Processing ${categoryName} content`
+                      story_description: `Processing ${categoryName} content`
                     }
                   };
                   setAvailableThemes(prev => [shimmerTheme, ...prev]);

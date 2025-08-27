@@ -338,7 +338,7 @@ export class OptimizedSocialMediaService {
   async bulkImportPosts(category: string, posts: Array<{
     day?: number;
     title: string;
-    description: string;
+    story_description: string;
     theme?: string;
     status?: 'draft' | 'scheduled' | 'published';
   }>): Promise<number> {
@@ -369,7 +369,7 @@ export class OptimizedSocialMediaService {
     first_post: {
       id: string;
       title: string;
-      description: string;
+      story_description: string;
       image_url?: string;
     } | null;
   }>> {
@@ -480,7 +480,7 @@ export class OptimizedSocialMediaService {
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,
-          description: firstPost.story_description,
+          story_description: firstPost.story_description,
           day: firstPost.day,
           image_url: imageUrl,
           image_16_9_url: firstPost.image_16_9_url,

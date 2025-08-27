@@ -206,7 +206,7 @@ export default function PublicSharedCollection() {
         id: item.id,
         user_id: '',
         title: item.title,
-        description: item.description,
+        story_description: item.description,
         image_16_9_url: item.image_16_9_url,
         image_1_1_url: item.image_1_1_url,
         image_4_3_url: null,

@@ -25,7 +25,7 @@ export const PostEditModal = ({ isOpen, onClose, post, onSuccess }: PostEditModa
   useEffect(() => {
     if (post && isOpen) {
       setTitle(post.title);
-      setDescription(post.description || '');
+      setDescription(post.story_description || '');
       setRegeneratePrompt(false);
     }
   }, [post, isOpen]);
@@ -40,7 +40,7 @@ export const PostEditModal = ({ isOpen, onClose, post, onSuccess }: PostEditModa
     try {
       await editPost(post.id, {
         title,
-        description,
+        story_description: description,
         regeneratePrompt
       });
       

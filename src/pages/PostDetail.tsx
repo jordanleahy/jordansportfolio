@@ -73,7 +73,7 @@ export default function PostDetail() {
       {
         id: post.id,
         title: post.title,
-        description: post.description,
+        description: post.story_description,
         category: post.category
       },
       colorTheme,
@@ -96,7 +96,7 @@ export default function PostDetail() {
   const handleShare = async () => {
     if (!post) return;
     
-    const shareText = `${post.title}\n\n${post.description}`;
+    const shareText = `${post.title}\n\n${post.story_description}`;
     const shareUrl = window.location.href;
     
     if (navigator.share) {
@@ -245,7 +245,7 @@ export default function PostDetail() {
               <div className="mb-8">
                 <div className="prose prose-lg max-w-none">
                   <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap">
-                    {post.description}
+                    {post.story_description}
                   </p>
                 </div>
               </div>
@@ -439,7 +439,7 @@ export default function PostDetail() {
             onClose={() => setShowVoiceoverModal(false)}
             sourceId={post.id}
             sourceType="social_media_post"
-            originalContent={`${post.title}\n\n${post.description}`}
+            originalContent={`${post.title}\n\n${post.story_description}`}
           />
         )}
       </div>

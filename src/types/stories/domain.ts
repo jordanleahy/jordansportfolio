@@ -35,7 +35,7 @@ export interface ThemeWithPosts {
   first_post: {
     id: string;
     title: string;
-    description: string;
+    story_description: string;
     day?: number;
     image_url?: string;
     image_16_9_url?: string;
@@ -55,7 +55,7 @@ export interface ThemeWithPosts {
 export interface CategoryPost {
   id: string;
   title: string;
-  description: string;
+  story_description: string;
   category: string;
   day?: number;
   image_url?: string;
