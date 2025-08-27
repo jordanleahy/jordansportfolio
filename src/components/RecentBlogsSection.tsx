@@ -14,7 +14,13 @@ const RecentBlogsSection = () => {
   const recentPosts = blogPosts.slice(0, 6);
   const mobileRecentPosts = blogPosts.slice(0, 3);
 
-  if (error || recentPosts.length === 0) {
+  if (error) {
+    // Silently fail - don't show the section if there's an error
+    console.warn('RecentBlogsSection: Failed to load blog posts:', error);
+    return null;
+  }
+  
+  if (recentPosts.length === 0 && !isLoading) {
     return null; // Hide section if no posts or error
   }
 

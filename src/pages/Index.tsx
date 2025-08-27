@@ -9,6 +9,7 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import ContactSection from "@/components/ContactSection";
 import RecentBlogsSection from "@/components/RecentBlogsSection";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 
 
@@ -74,11 +75,21 @@ const Index = () => {
       
       
       {/* Portfolio Content */}
-      <CompaniesSection />
-      <ProjectCardsSection />
-      <TestimonialsSection />
-      <ContactSection />
-      <RecentBlogsSection />
+      <ErrorBoundary>
+        <CompaniesSection />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <ProjectCardsSection />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <TestimonialsSection />  
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <ContactSection />
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <RecentBlogsSection />
+      </ErrorBoundary>
     </AppLayout>
   );
 };

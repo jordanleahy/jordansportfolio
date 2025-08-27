@@ -12,6 +12,7 @@ import { ImageGenerationTimerProvider } from "@/contexts/ImageGenerationTimerCon
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { Suspense, lazy, useState } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
@@ -30,7 +31,6 @@ import VendorsIndex from "./pages/VendorsIndex";
 import VendorDetail from "./pages/VendorDetail";
 import PublicVendorView from "./components/vendors/PublicVendorView";
 import PublicSharedCollection from "./pages/PublicSharedCollection";
-import ErrorBoundary from "./components/ErrorBoundary";
 import Case1 from "./pages/cases/Case1";
 import Case2 from "./pages/cases/Case2";
 import Case3 from "./pages/cases/Case3";
@@ -102,10 +102,19 @@ function App() {
         refetchOnWindowFocus: false,
         refetchOnMount: false,
         retry: (failureCount, error) => {
-          // Don't retry on 4xx errors
+          // Don't retry on 4xx errors or network failures
+          console.log('Query retry attempt:', failureCount, 'Error:', error);
           if (error && typeof error === 'object' && 'status' in error) {
             const status = error.status as number;
             if (status >= 400 && status < 500) return false;
+          }
+          // Don't retry on network failures ("Load failed")
+          if (error && typeof error === 'object' && 'message' in error) {
+            const message = (error.message as string).toLowerCase();
+            if (message.includes('load failed') || message.includes('network error')) {
+              console.warn('Network error detected, not retrying:', error);
+              return false;
+            }
           }
           return failureCount < 2;
         },
@@ -116,16 +125,17 @@ function App() {
     },
   }));
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <ProcessingStatesProvider>
-                <ImageGenerationTimerProvider>
-                <Routes>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthProvider>
+                <ProcessingStatesProvider>
+                  <ImageGenerationTimerProvider>
+                  <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/portfolio" element={<Navigate to="/about" replace />} />
@@ -467,13 +477,14 @@ function App() {
                 />
                 <Route path="*" element={<NotFound />} />
                 </Routes>
-                </ImageGenerationTimerProvider>
-              </ProcessingStatesProvider>
-            </AuthProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
+                  </ImageGenerationTimerProvider>
+                </ProcessingStatesProvider>
+              </AuthProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </HelmetProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
