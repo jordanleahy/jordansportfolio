@@ -3556,18 +3556,12 @@ export type Database = {
         Returns: string
       }
       insert_posts_for_theme: {
-        Args:
-          | {
-              posts_data: Json
-              theme_description_param?: string
-              theme_id: string
-            }
-          | {
-              posts_data: Json
-              theme_description_param?: string
-              theme_id?: string
-            }
-        Returns: number
+        Args: {
+          posts_data: Json
+          theme_description_param?: string
+          theme_id?: string
+        }
+        Returns: Json
       }
       insert_sample_agents: {
         Args: Record<PropertyKey, never>
