@@ -39,7 +39,7 @@ export class OptimizedSocialMediaService {
         id,
         user_id,
         title,
-        description,
+        story_description,
         day,
         image_16_9_url,
         image_9_16_url,
@@ -89,13 +89,8 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    // Map database response to interface format
-    const posts = (data || []).map((post: any) => ({
-      ...post,
-      story_description: post.description // Map database column to interface
-    })) as SocialMediaPost[];
-    this.setCache(cacheKey, posts);
-    return posts;
+    this.setCache(cacheKey, data || []);
+    return (data as unknown as SocialMediaPost[]) || [];
   }
 
   // DEPRECATED: Use getPostsByThemeId instead for theme-based queries
@@ -119,7 +114,7 @@ export class OptimizedSocialMediaService {
         id,
         user_id,
         title,
-        description,
+        story_description,
         day,
         image_16_9_url,
         image_9_16_url,
@@ -163,13 +158,8 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    // Map database response to interface format
-    const posts = (data || []).map((post: any) => ({
-      ...post,
-      story_description: post.description // Map to interface format
-    })) as SocialMediaPost[];
-    this.setCache(cacheKey, posts);
-    return posts;
+    this.setCache(cacheKey, data || []);
+    return (data as unknown as SocialMediaPost[]) || [];
   }
 
   // Add method for getting a single post by ID
@@ -187,7 +177,7 @@ export class OptimizedSocialMediaService {
         id,
         user_id,
         title,
-        description,
+        story_description,
         day,
         image_16_9_url,
         image_9_16_url,
@@ -228,15 +218,10 @@ export class OptimizedSocialMediaService {
 
     if (error) throw error;
     
-    // Map database response to interface format
-    const post = data ? {
-      ...data,
-      story_description: data.description // Map to interface format
-    } as SocialMediaPost : null;
-    if (post) {
-      this.setCache(cacheKey, post);
+    if (data) {
+      this.setCache(cacheKey, data);
     }
-    return post;
+    return (data as unknown as SocialMediaPost) || null;
   }
 
   async createPost(post: CreateSocialMediaPost): Promise<SocialMediaPost> {
@@ -296,8 +281,7 @@ export class OptimizedSocialMediaService {
         category: post.category || 'cdi',
         user_id: user.id,
         color_theme_id: colorThemeId,
-        description: post.story_description, // Map to database column
-      })
+      } as any)
       .select()
       .single();
 
@@ -306,11 +290,7 @@ export class OptimizedSocialMediaService {
     // Invalidate relevant caches
     this.invalidateCache(post.category);
     
-    // Map database response to interface format
-    return {
-      ...data,
-      story_description: data.description // Map to interface format
-    } as SocialMediaPost;
+    return data as unknown as SocialMediaPost;
   }
 
   async updatePost(id: string, updates: Partial<CreateSocialMediaPost>): Promise<SocialMediaPost> {
@@ -318,7 +298,7 @@ export class OptimizedSocialMediaService {
     
     const { data, error } = await supabase
       .from('social_media_posts')
-      .update(updates)
+      .update(updates as any)
       .eq('id', id)
       .select()
       .maybeSingle();
@@ -337,11 +317,7 @@ export class OptimizedSocialMediaService {
     // Invalidate relevant caches
     this.invalidateCache(updates.category);
     
-    // Map database response to interface format
-    return {
-      ...data,
-      story_description: data.description // Map to interface format
-    } as SocialMediaPost;
+    return data as unknown as SocialMediaPost;
   }
 
   async deletePost(id: string): Promise<void> {
@@ -436,7 +412,7 @@ export class OptimizedSocialMediaService {
         theme_id,
         id,
         title,
-        description,
+        story_description,
         day,
         image_16_9_url,
         image_4_3_url,
@@ -459,13 +435,13 @@ export class OptimizedSocialMediaService {
     if (postError) throw postError;
 
     // Group posts by theme_id for efficient processing
-    const postsByTheme = (postData || []).reduce((acc, post) => {
+    const postsByTheme = (postData || []).reduce((acc: Record<string, any[]>, post: any) => {
       if (!acc[post.theme_id]) {
         acc[post.theme_id] = [];
       }
       acc[post.theme_id].push(post);
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {});
 
     // Filter out incomplete themes (only show themes where all prompts are completed)
     const completedThemes = (themes as any[]).filter((theme: any) => 
@@ -501,7 +477,7 @@ export class OptimizedSocialMediaService {
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,
-          story_description: firstPost.description,
+          story_description: firstPost.story_description,
           day: firstPost.day,
           image_url: imageUrl,
           image_16_9_url: firstPost.image_16_9_url,
@@ -518,17 +494,8 @@ export class OptimizedSocialMediaService {
       };
     });
     
-    // Map database response to interface format
-    const mappedThemes = processedThemes.map(theme => ({
-      ...theme,
-        first_post: theme.first_post ? {
-          ...theme.first_post,
-          story_description: theme.first_post.story_description // Already mapped correctly
-        } : null
-    }));
-    
-    this.setCache(cacheKey, mappedThemes, 1 * 60 * 1000); // 1 minute cache for faster updates during theme creation
-    return mappedThemes;
+    this.setCache(cacheKey, processedThemes, 1 * 60 * 1000); // 1 minute cache for faster updates during theme creation
+    return processedThemes;
   }
 
   // Keep the old method for backward compatibility
