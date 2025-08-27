@@ -1834,7 +1834,6 @@ export type Database = {
           input_source: string
           last_run: string | null
           max_completion_tokens: number | null
-          max_tokens: number | null
           metrics: Json | null
           model_version: string
           name: string
@@ -1860,7 +1859,6 @@ export type Database = {
           input_source: string
           last_run?: string | null
           max_completion_tokens?: number | null
-          max_tokens?: number | null
           metrics?: Json | null
           model_version?: string
           name: string
@@ -1886,7 +1884,6 @@ export type Database = {
           input_source?: string
           last_run?: string | null
           max_completion_tokens?: number | null
-          max_tokens?: number | null
           metrics?: Json | null
           model_version?: string
           name?: string
@@ -2311,7 +2308,6 @@ export type Database = {
           color_theme_id: string | null
           created_at: string
           day: number | null
-          theme_description: string
           general_gif_url: string | null
           general_video_url: string | null
           generated_image_prompt: string | null
@@ -2345,6 +2341,7 @@ export type Database = {
           scheduled_date: string | null
           seed_value: number | null
           status: Database["public"]["Enums"]["post_status"]
+          story_description: string
           theme_id: string | null
           title: string
           updated_at: string
@@ -2355,7 +2352,6 @@ export type Database = {
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
-          description: string
           general_gif_url?: string | null
           general_video_url?: string | null
           generated_image_prompt?: string | null
@@ -2389,6 +2385,7 @@ export type Database = {
           scheduled_date?: string | null
           seed_value?: number | null
           status?: Database["public"]["Enums"]["post_status"]
+          story_description: string
           theme_id?: string | null
           title: string
           updated_at?: string
@@ -2399,7 +2396,6 @@ export type Database = {
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
-          description?: string
           general_gif_url?: string | null
           general_video_url?: string | null
           generated_image_prompt?: string | null
@@ -2433,6 +2429,7 @@ export type Database = {
           scheduled_date?: string | null
           seed_value?: number | null
           status?: Database["public"]["Enums"]["post_status"]
+          story_description?: string
           theme_id?: string | null
           title?: string
           updated_at?: string
@@ -2698,7 +2695,6 @@ export type Database = {
           background_processing_complete: boolean | null
           category: string
           created_at: string
-          description: string | null
           has_character_reference: boolean | null
           id: string
           lifecycle_status: string | null
@@ -2706,6 +2702,7 @@ export type Database = {
           prompt_generation_status: string | null
           reference_character_analysis: Json | null
           reference_character_id: string | null
+          theme_description: string | null
           theme_name: string
           total_posts_count: number | null
           updated_at: string
@@ -2717,7 +2714,6 @@ export type Database = {
           background_processing_complete?: boolean | null
           category: string
           created_at?: string
-          description?: string | null
           has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
@@ -2725,6 +2721,7 @@ export type Database = {
           prompt_generation_status?: string | null
           reference_character_analysis?: Json | null
           reference_character_id?: string | null
+          theme_description?: string | null
           theme_name: string
           total_posts_count?: number | null
           updated_at?: string
@@ -2736,7 +2733,6 @@ export type Database = {
           background_processing_complete?: boolean | null
           category?: string
           created_at?: string
-          description?: string | null
           has_character_reference?: boolean | null
           id?: string
           lifecycle_status?: string | null
@@ -2744,6 +2740,7 @@ export type Database = {
           prompt_generation_status?: string | null
           reference_character_analysis?: Json | null
           reference_character_id?: string | null
+          theme_description?: string | null
           theme_name?: string
           total_posts_count?: number | null
           updated_at?: string
