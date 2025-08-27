@@ -104,7 +104,7 @@ Event-by-event sequence:
      - If approaching ≥80% usage → checkAndEnforceUsage triggers send-usage-alert (best-effort; non-blocking)
 
 3) Prompt Generation
-   - supabase.functions.invoke('generate-image-prompt-dynamic', { title, description, theme, category, aspectRatio? })
+   - supabase.functions.invoke('generate-image-prompt-dynamic', { title, story_description, theme, category, aspectRatio? })
    - Expected output: prompt string (validated non-empty, trimmed, length ≤ IMAGE_SETTINGS.PROMPT_MAX_LENGTH)
 
 4) Image Generation
@@ -170,7 +170,7 @@ sequenceDiagram
 ```
 
 Data Contracts (indicative):
-- Prompt Request: { title: string; description: string; theme?: string; category?: string; aspectRatio?: '16:9'|'9:16'|'1:1'|'4:3'|'3:4' }
+- Prompt Request: { title: string; theme_description: string; theme?: string; category?: string; aspectRatio?: '16:9'|'9:16'|'1:1'|'4:3'|'3:4' }
 - Prompt Response: { prompt: string }
 - Image Request: { prompt: string; size?: '1024x1024'|'1792x1024'|'1024x1792'; quality?: 'high' }
 - Image Response: { image: string(base64) or { data: string } }
