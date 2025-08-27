@@ -183,15 +183,34 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
     options.onOptimisticStart?.(categoryName);
 
     try {
-      // Always structure input via edge function for strict schema enforcement
-      const { data, error } = await supabase.functions.invoke('structure-theme-input', {
-        body: { text: rawJson }
-      });
-      if (error || !data?.success || !data?.data) {
-        throw new Error(error?.message || data?.errors?.join(', ') || 'Failed to structure input');
+      let finalJsonString = rawJson;
+      
+      // Check if input is already valid JSON
+      try {
+        const parsed = JSON.parse(rawJson);
+        // If it's valid JSON with theme structure, use it directly
+        if (parsed.category && parsed.theme && parsed.posts) {
+          console.log('📋 Valid theme JSON detected, using directly');
+          finalJsonString = rawJson;
+          categoryName = parsed.category || parsed.theme || categoryName;
+        } else {
+          throw new Error('Not a valid theme structure');
+        }
+      } catch (jsonError) {
+        // Input is not valid JSON or doesn't have theme structure
+        console.log('🤖 Using generate-custom-theme for text input');
+        
+        const { data, error } = await supabase.functions.invoke('generate-custom-theme', {
+          body: { description: rawJson }
+        });
+        
+        if (error || !data?.success) {
+          throw new Error(error?.message || data?.error || 'Failed to generate theme from description');
+        }
+        
+        finalJsonString = JSON.stringify(data.themeData);
+        categoryName = data.themeData.category || data.themeData.theme || categoryName;
       }
-      const finalJsonString = JSON.stringify(data.data);
-      categoryName = data.data.category || data.data.theme || categoryName;
 
       submitMutation.mutate({ rawJson: finalJsonString, categoryName, idempotencyKey });
     } catch (err) {
