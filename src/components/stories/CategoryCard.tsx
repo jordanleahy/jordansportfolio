@@ -99,7 +99,7 @@ export const ThemeCard = ({
       onClick();
     } else {
       
-      navigate(`/stories/id/${themeId}`);
+      navigate(`/stories/theme/${themeId}`);
     }
   };
 
@@ -319,7 +319,7 @@ export const ThemeCard = ({
               onClick();
             } else {
               
-              navigate(`/stories/id/${themeId}`);
+              navigate(`/stories/theme/${themeId}`);
             }
           }}
         >

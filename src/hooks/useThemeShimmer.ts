@@ -152,7 +152,7 @@ export const useThemeShimmer = ({
     if (postsCompleted) {
       console.log('✅ All posts completed - clearing shimmer and navigating to theme');
       clearPendingThemeState();
-      navigate(`/stories/id/${pendingTheme.theme_id}`);
+      navigate(`/stories/theme/${pendingTheme.theme_id}`);
     }
   }, [pendingTheme, themePosts, navigate]);
 
@@ -190,7 +190,7 @@ export const useThemeShimmer = ({
     clearPendingThemeState();
     
     setTimeout(() => {
-      navigate(`/stories/id/${themeId}`);
+      navigate(`/stories/theme/${themeId}`);
     }, 0);
   };
 

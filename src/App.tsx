@@ -163,17 +163,29 @@ function App() {
                     </Suspense>
                   } 
                 />
-                {/* ✅ GOOD: Direct themeId routing only */}
+                {/* Post detail route - individual social media posts */}
+                <Route 
+                  path="/stories/id/:postId" 
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<CalendarSkeletonLoader />}>
+                        <PostDetail />
+                      </Suspense>
+                    </ProtectedRoute>
+                  } 
+                />
                 
-                  {/* ✅ GOOD: Only themeId routes supported */}
-                  <Route 
-                    path="/stories/id/:themeId" 
-                    element={
+                {/* Theme detail route - theme overview with statistics */}
+                <Route 
+                  path="/stories/theme/:themeId" 
+                  element={
+                    <ProtectedRoute>
                       <Suspense fallback={<div>Loading...</div>}>
                         <ThemeDetail />
                       </Suspense>
-                    } 
-                  />
+                    </ProtectedRoute>
+                  } 
+                />
                 
                 <Route 
                   path="/stories" 

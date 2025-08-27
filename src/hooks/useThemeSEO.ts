@@ -66,7 +66,7 @@ export const useThemeSEO = (theme: Theme | null | undefined): ThemeSEOData => {
       title,
       description,
       image: SEO_DEFAULTS.defaultImage,
-      url: `/stories/id/${theme?.id}`,
+      url: `/stories/theme/${theme?.id}`,
       type: 'website'
     });
 
