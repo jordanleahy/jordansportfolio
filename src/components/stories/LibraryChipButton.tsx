@@ -34,7 +34,7 @@ export const LibraryChipButton: React.FC<LibraryChipButtonProps> = ({ post }) =>
         .replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
 
       const titleArg = (post.title || handle).slice(0, 80);
-      const baseDesc = (post.description || '').replace(/\s+/g, ' ').trim();
+      const baseDesc = (post.story_description || '').replace(/\s+/g, ' ').trim();
       const descriptionArg = baseDesc.length > 0 ? baseDesc.slice(0, 165) : `A shareable image from ${titleArg}.`;
 
       console.log('🔍 LibraryChipButton publishing with params:', {

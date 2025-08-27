@@ -84,7 +84,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       const request: BulkImageGenerationRequest = {
         postId: post.id,
         title: post.title,
-        description: post.description,
+        description: post.story_description,
         category: post.category,
         // ❌ BAD: Using theme name - removed in Phase 1 migration
         // theme,  // REMOVED - use themeId instead

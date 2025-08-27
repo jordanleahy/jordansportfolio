@@ -53,7 +53,7 @@ export const useOptimizedSearch = ({
     const filteredPosts = posts.filter(post => 
       filteredThemeIds.has(post.theme_id) ||
       post.title.toLowerCase().includes(lowerQuery) ||
-      post.description.toLowerCase().includes(lowerQuery)
+      post.story_description.toLowerCase().includes(lowerQuery)
     );
 
     return {

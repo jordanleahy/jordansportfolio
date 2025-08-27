@@ -242,7 +242,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
             {post.title}
           </div>
           <div className="text-sm text-muted-foreground line-clamp-2 mt-1">
-            {post.description}
+            {post.story_description}
           </div>
         </div>
       </div>

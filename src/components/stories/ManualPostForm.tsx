@@ -38,7 +38,7 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
     try {
       const postData: CreateSocialMediaPost = {
         title: data.title,
-        description: data.description,
+        story_description: data.description,
         category,
         theme_id: themeId,
         status: 'draft'

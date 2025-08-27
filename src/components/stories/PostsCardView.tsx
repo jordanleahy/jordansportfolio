@@ -150,7 +150,7 @@ export const PostsCardView = memo(({
 
     // Always use AspectRatioKey format for consistency
     const aspectRatioKey = '1_1';
-    onGenerateImage(post.id, aspectRatioKey, post.title, post.description, post.category);
+    onGenerateImage(post.id, aspectRatioKey, post.title, post.story_description, post.category);
   }, [regenerateClickDebounce, getCreditStatus, getBlockingMessage, toast, onGenerateImage, isButtonDisabled, getCooldownMessage]);
 
   // Timer is now auto-managed by ImageGenerationTimerContext
@@ -172,7 +172,7 @@ export const PostsCardView = memo(({
       await generateAllImages({
         postId: post.id,
         title: post.title,
-        description: post.description,
+        description: post.story_description,
         category: post.category
       });
       onPostsChange();
@@ -209,7 +209,7 @@ export const PostsCardView = memo(({
           const generatedPrompt = await generateWithCache({
             postId: post.id,
             title: post.title,
-            description: post.description,
+            description: post.story_description,
             theme: themeData?.theme,
             themeId: themeData?.themeId,
             category: themeData?.category || post.category
@@ -379,9 +379,9 @@ export const PostsCardView = memo(({
                   </div>
                   
                   {/* Description */}
-                  {post.description && (
+                  {post.story_description && (
                     <p className="text-sm text-muted-foreground">
-                      {post.description}
+                      {post.story_description}
                     </p>
                   )}
                   
@@ -514,7 +514,7 @@ export const PostsCardView = memo(({
                                       });
                                       return;
                                     }
-                                     onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
+                                     onGenerateImage(post.id, aspectKey, post.title, post.story_description, post.category);
                                   }}
                                   disabled={isProcessingCtx(post.id, 'generate', aspectRatio) || isAnyImageGenerating()}
                                   className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-background/90 hover:bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground hover:text-primary transition-colors pointer-events-auto disabled:opacity-50 disabled:cursor-not-allowed"
@@ -542,7 +542,7 @@ export const PostsCardView = memo(({
                           ) : (
                             <button
                               onClick={() => {
-                                onGenerateImage(post.id, aspectKey, post.title, post.description, post.category);
+                                onGenerateImage(post.id, aspectKey, post.title, post.story_description, post.category);
                               }}
                               disabled={status === 'processing' || isAnyImageGenerating()}
                               className="w-full h-full flex flex-col items-center justify-center text-xs text-muted-foreground hover:text-primary hover:bg-accent/50 transition-colors group-hover:bg-accent/30 disabled:cursor-not-allowed disabled:opacity-50"
@@ -602,7 +602,7 @@ export const PostsCardView = memo(({
                           });
                           return;
                         }
-                        onGenerateImage(post.id, '1_1', post.title, post.description, post.category);
+                        onGenerateImage(post.id, '1_1', post.title, post.story_description, post.category);
                       }}
                       disabled={regenerateStates.get(post.id)?.isDisabled}
                       className="w-full"

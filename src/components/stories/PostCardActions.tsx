@@ -27,7 +27,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
       try {
         await navigator.share({
           title: post.title || 'Check out this post',
-          text: `${post.title || 'Post'}${post.description ? `\n\n${post.description}` : ''}`,
+          text: `${post.title || 'Post'}${post.story_description ? `\n\n${post.story_description}` : ''}`,
           url: window.location.href
         });
       } catch (error) {
@@ -35,7 +35,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
       }
     } else {
       // Fallback: copy to clipboard
-      navigator.clipboard.writeText(`${post.title || 'Post'}${post.description ? `\n\n${post.description}` : ''}\n\n${window.location.href}`);
+      navigator.clipboard.writeText(`${post.title || 'Post'}${post.story_description ? `\n\n${post.story_description}` : ''}\n\n${window.location.href}`);
     }
   };
 
