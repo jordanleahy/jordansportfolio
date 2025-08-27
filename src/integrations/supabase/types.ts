@@ -3604,13 +3604,22 @@ export type Database = {
         Returns: string
       }
       publish_shared_collection_1_1: {
-        Args: {
-          p_description?: string
-          p_handle: string
-          p_post_ids?: string[]
-          p_theme_id?: string
-          p_title?: string
-        }
+        Args:
+          | {
+              p_description?: string
+              p_handle: string
+              p_post_ids?: string[]
+              p_public_access_type?: string
+              p_theme_id?: string
+              p_title?: string
+            }
+          | {
+              p_description?: string
+              p_handle: string
+              p_post_ids?: string[]
+              p_theme_id?: string
+              p_title?: string
+            }
         Returns: string
       }
       publish_shared_collection_16_9: {

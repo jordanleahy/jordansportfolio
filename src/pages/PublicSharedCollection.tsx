@@ -22,6 +22,7 @@ interface SharedCollection {
   updated_at: string;
   published_at: string | null;
   theme_id: string | null;
+  public_access_type: string;
 }
 
 interface Theme {
@@ -169,7 +170,7 @@ export default function PublicSharedCollection() {
   };
 
   const handleDownload = async (item: SharedItem) => {
-    if (!user) {
+    if (collection?.public_access_type === 'blurred' && !user) {
       setShowAuthModal(true);
       return;
     }
@@ -193,7 +194,7 @@ export default function PublicSharedCollection() {
   };
 
   const handleDownloadAllPDF = async () => {
-    if (!user) {
+    if (collection?.public_access_type === 'blurred' && !user) {
       setShowAuthModal(true);
       return;
     }
@@ -258,7 +259,7 @@ export default function PublicSharedCollection() {
             </span>
           </h1>
           <div className="flex items-center gap-2 w-full md:w-auto">
-            {user && theme?.id && (
+            {(collection?.public_access_type === 'full_public' || user) && theme?.id && (
               <Button 
                 variant="default" 
                 onClick={handleSaveCollection}
@@ -269,7 +270,7 @@ export default function PublicSharedCollection() {
                 {duplicateCollection.isPending ? 'Saving Images...' : 'Save Images'}
               </Button>
             )}
-            {user && items.length > 0 && (
+            {(collection?.public_access_type === 'full_public' || user) && items.length > 0 && (
               <Button 
                 variant="outline" 
                 onClick={handleDownloadAllPDF}
@@ -318,7 +319,7 @@ export default function PublicSharedCollection() {
             <section aria-label="Shared images">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((item, index) => {
-                  const isBlurred = !user && index >= 3;
+                  const isBlurred = collection.public_access_type === 'blurred' && !user && index >= 3;
                   
                   return (
                     <figure key={item.id} className={`rounded-md overflow-hidden border relative group ${isBlurred ? 'blur-sm' : ''}`}>

@@ -395,9 +395,8 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
-  // Publish 16:9 collection (exactly 10 posts)
-  // Publish/remove from library toggle
-  const handlePublishCollection = async () => {
+  // Publish/remove from library toggle with wrapper functions
+  const handlePublishCollection = async (publicAccessType: 'blurred' | 'full_public' = 'blurred') => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { session } } = await supabase.auth.getSession();
@@ -487,6 +486,7 @@ const { handleGenerateImage } = useImageManager({
         p_theme_id: themeId,
         p_title: titleArg,
         p_description: descriptionArg,
+        p_public_access_type: publicAccessType,
       });
       
       if (error) {
@@ -514,6 +514,10 @@ const { handleGenerateImage } = useImageManager({
       setIsPublishing(false);
     }
   };
+
+  // Wrapper functions for button onClick handlers
+  const handlePublishBlurred = () => handlePublishCollection('blurred');
+  const handlePublishFullPublic = () => handlePublishCollection('full_public');
 
   // Check current featured and library status for this theme
   const checkCollectionStatus = async () => {
@@ -933,13 +937,26 @@ const { handleGenerateImage } = useImageManager({
                     <Button
                       variant={isInLibrary ? "default" : "outline"}
                       size="icon"
-                      onClick={handlePublishCollection}
+                      onClick={handlePublishBlurred}
                       disabled={isPublishing}
-                      aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
-                      title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
+                      aria-label={isInLibrary ? "Remove from Library" : "Add to Library (Blurred)"}
+                      title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library (Blurred)')}
                     >
                       <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                     </Button>
+                    {!isInLibrary && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handlePublishFullPublic}
+                        disabled={isPublishing}
+                        aria-label="Add to Library (Full Public)"
+                        title={isPublishing ? 'Updating…' : 'Add to Library (Full Public)'}
+                      >
+                        <BookOpen className="h-4 w-4" />
+                        <span className="sr-only">Full Access</span>
+                      </Button>
+                    )}
                     {hasSharedLink && newPostsCount > 0 ? (
                       <Button 
                         variant="outline" 
@@ -1105,14 +1122,27 @@ const { handleGenerateImage } = useImageManager({
                         <Button
                           variant={isInLibrary ? "default" : "outline"}
                           size="icon"
-                          onClick={handlePublishCollection}
+                          onClick={handlePublishBlurred}
                           disabled={isPublishing}
                           className=""
-                          aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
-                          title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
+                          aria-label={isInLibrary ? "Remove from Library" : "Add to Library (Blurred)"}
+                          title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library (Blurred)')}
                         >
                           <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                         </Button>
+                        {!isInLibrary && (
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handlePublishFullPublic}
+                            disabled={isPublishing}
+                            className=""
+                            aria-label="Add to Library (Full Public)"
+                            title={isPublishing ? 'Updating…' : 'Add to Library (Full Public)'}
+                          >
+                            <BookOpen className="h-4 w-4" />
+                          </Button>
+                        )}
                         {hasSharedLink && newPostsCount > 0 ? (
                           <Button 
                             variant="outline" 
