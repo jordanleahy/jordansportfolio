@@ -130,7 +130,7 @@ serve(async (req) => {
         .insert({
           user_id: user.id,
           theme_name: aiResult.cleanedData.theme,
-          description: aiResult.cleanedData.theme_description || null,
+          theme_description: aiResult.cleanedData.theme_description || null,
           category: resolvedCategory
         })
         .select('id')
