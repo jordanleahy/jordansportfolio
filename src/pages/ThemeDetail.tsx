@@ -310,8 +310,24 @@ export default function ThemeDetail() {
                     onClick={() => navigate(`/stories/id/${post.id}`)}
                     className="p-4 rounded-lg border border-border bg-card hover:bg-accent/50 cursor-pointer transition-colors group"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                    <div className="flex items-start gap-4">
+                      {/* Post Image */}
+                      {post.image_1_1_url ? (
+                        <div className="flex-shrink-0">
+                          <img 
+                            src={post.image_1_1_url} 
+                            alt={post.title}
+                            className="w-16 h-16 rounded-lg object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                          <span className="text-xs text-muted-foreground">No Image</span>
+                        </div>
+                      )}
+                      
+                      {/* Post Content */}
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           {post.day && (
                             <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded">
@@ -322,18 +338,18 @@ export default function ThemeDetail() {
                             Click to edit
                           </span>
                         </div>
-                        <h3 className="font-medium text-sm text-foreground group-hover:text-accent-foreground">
+                        <h3 className="font-medium text-sm text-foreground group-hover:text-accent-foreground mb-1">
                           {post.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        <p className="text-xs text-muted-foreground line-clamp-2">
                           {post.description}
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {post.image_1_1_url && (
-                          <div className="w-2 h-2 bg-green-500 rounded-full" title="Has image" />
-                        )}
-                        <div className="text-xs text-muted-foreground">
+                      
+                      {/* Status Indicators */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="w-2 h-2 bg-green-500 rounded-full" title="Post ready" />
+                        <div className="text-sm text-muted-foreground">
                           →
                         </div>
                       </div>
