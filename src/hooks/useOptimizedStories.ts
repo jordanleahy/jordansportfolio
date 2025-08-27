@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
@@ -147,10 +148,10 @@ export function useOptimizedStories(user: any) {
         .order('day', { ascending: true });
       
       if (error) throw error;
-      // Map database response to interface format
+      // ✅ Fixed: Map story_description correctly
       return (data || []).map(post => ({
         ...post,
-        story_description: post.description // Map to interface format
+        story_description: post.story_description // Use correct column name
       })) as SocialMediaPost[];
     },
     enabled: !!activeTab && !!user?.id && availableThemes.length > 0,

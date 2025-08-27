@@ -184,12 +184,12 @@ export const useUnifiedPromptManager = () => {
   const generateEnhancedPrompt = async (request: UnifiedPromptRequest): Promise<string> => {
     const colorScheme = precomputeColorScheme(request.colorTheme);
     
-    // Create a temporary post for unified prompt generation
+    // ✅ Fixed: Use correct column names for social_media_posts
     const { data: tempPost } = await supabase
       .from('social_media_posts')
       .insert({
         title: request.title,
-        description: request.description,
+        story_description: request.description, // ✅ Fixed: use story_description instead of description
         category: request.category,
         theme_id: request.themeId,
         user_id: (await supabase.auth.getUser()).data.user?.id || null
