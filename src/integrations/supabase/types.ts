@@ -2172,6 +2172,7 @@ export type Database = {
           id: string
           include_in_library: boolean
           item_count: number
+          public_access_type: string | null
           published_at: string | null
           status: string
           theme_id: string | null
@@ -2188,6 +2189,7 @@ export type Database = {
           id?: string
           include_in_library?: boolean
           item_count?: number
+          public_access_type?: string | null
           published_at?: string | null
           status?: string
           theme_id?: string | null
@@ -2204,6 +2206,7 @@ export type Database = {
           id?: string
           include_in_library?: boolean
           item_count?: number
+          public_access_type?: string | null
           published_at?: string | null
           status?: string
           theme_id?: string | null
@@ -2304,7 +2307,7 @@ export type Database = {
       }
       social_media_posts: {
         Row: {
-          category: string
+          category: string | null
           color_theme_id: string | null
           created_at: string
           day: number | null
@@ -2348,7 +2351,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          category?: string
+          category?: string | null
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
@@ -2392,7 +2395,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          category?: string
+          category?: string | null
           color_theme_id?: string | null
           created_at?: string
           day?: number | null
@@ -2621,6 +2624,7 @@ export type Database = {
           agent_name: string | null
           agent_owner: string | null
           agent_purpose: string | null
+          category: string | null
           created_at: string
           description: string | null
           generated_by: string | null
@@ -2640,6 +2644,7 @@ export type Database = {
           agent_name?: string | null
           agent_owner?: string | null
           agent_purpose?: string | null
+          category?: string | null
           created_at?: string
           description?: string | null
           generated_by?: string | null
@@ -2659,6 +2664,7 @@ export type Database = {
           agent_name?: string | null
           agent_owner?: string | null
           agent_purpose?: string | null
+          category?: string | null
           created_at?: string
           description?: string | null
           generated_by?: string | null
