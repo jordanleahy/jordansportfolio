@@ -102,7 +102,7 @@ serve(async (req) => {
       category: aiResult.cleanedData.category,
       theme: aiResult.cleanedData.theme,
       postsCount: aiResult.cleanedData.posts?.length || 0,
-      hasThemeDescription: !!aiResult.cleanedData.theme_description,
+      hasThemeDescription: !!aiResult.cleanedData.description,
       idempotencyKey,
       timestamp: new Date().toISOString()
     });
@@ -130,7 +130,7 @@ serve(async (req) => {
         .insert({
           user_id: user.id,
           theme_name: aiResult.cleanedData.theme,
-          description: aiResult.cleanedData.theme_description || null,
+          description: aiResult.cleanedData.description || null,
           category: resolvedCategory
         })
         .select('id')

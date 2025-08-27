@@ -113,7 +113,7 @@ JSON STRUCTURE:
 {
   "category": "lowercase-category-name",
   "theme": "Professional Theme Title",
-  "theme_description": "Brief description of the theme focus (1–2 sentences, supportive tone)",
+  "description": "Brief description of the theme focus (1–2 sentences, supportive tone)",
   "posts": [
     {
       "day": 1,
@@ -211,7 +211,7 @@ JSON STRUCTURE:
     console.log('📊 Parsed data structure:', {
       hasCategory: !!parsedData.category,
       hasTheme: !!parsedData.theme,
-      hasDescription: !!parsedData.theme_description,
+      hasDescription: !!parsedData.description,
       hasPosts: !!parsedData.posts,
       postsCount: parsedData.posts?.length,
       category: parsedData.category,
@@ -275,7 +275,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         .insert({
           user_id: userId,
           theme_name: themeData.theme,
-          description: themeData.theme_description,
+          description: themeData.description,
           category: themeData.category
         })
         .select('id')

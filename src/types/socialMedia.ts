@@ -51,6 +51,7 @@ export interface SocialMediaPost {
   platform_tags?: any;
   generated_image_prompt?: string | null;
   category: string;
+  individual_prompt_status?: string | null;
   created_at: string;
   updated_at: string;
 }

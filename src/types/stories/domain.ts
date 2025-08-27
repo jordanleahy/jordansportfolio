@@ -51,12 +51,11 @@ export interface ThemeWithPosts {
   } | null;
 }
 
-// Post-related domain types
+// Post-related domain types - category comes from theme relationship
 export interface CategoryPost {
   id: string;
   title: string;
   description: string;
-  category: string;
   day?: number;
   image_url?: string;
   status: 'draft' | 'scheduled' | 'published';
