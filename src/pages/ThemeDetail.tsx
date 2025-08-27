@@ -10,23 +10,16 @@ import { useThemeDetailsById } from '@/hooks/useOptimizedStories';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { PostTable } from '@/components/stories/PostTable';
-import { PostCreationModal } from '@/components/stories/PostCreationModal';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { TrashIcon } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { ThemeCompletionStatus } from '@/components/stories/ThemeCompletionStatus';
-import { ThemeProgressTracker } from '@/components/stories/ThemeProgressTracker';
-import { ProcessingLoadingShimmer } from '@/components/stories/ProcessingLoadingShimmer';
-import { PostCardGrid } from '@/components/stories/PostCardGrid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
-export const ThemeDetail = () => {
+const ThemeDetail = () => {
   const { themeId } = useParams<{ themeId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [activeView, setActiveView] = useState<'table' | 'cards'>('table');
 
@@ -160,14 +153,6 @@ export const ThemeDetail = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            onClick={() => setIsCreatingPost(true)}
-            className="flex items-center gap-2"
-          >
-            <Sparkles className="w-4 h-4" />
-            Add Post
-          </Button>
-          
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm" disabled={isDeleting}>
@@ -197,10 +182,10 @@ export const ThemeDetail = () => {
       </div>
 
       {/* Theme Description */}
-      {theme.theme_description && ( // ✅ Fixed: use theme_description instead of description
+      {theme.description && (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-gray-700 leading-relaxed">{theme.theme_description}</p>
+            <p className="text-gray-700 leading-relaxed">{theme.description}</p>
           </CardContent>
         </Card>
       )}
@@ -242,24 +227,10 @@ export const ThemeDetail = () => {
         </Card>
       </div>
 
-      {/* Theme Progress and Status */}
-      <div className="space-y-4">
-        <ThemeProgressTracker themeId={theme.id} />
-        <ThemeCompletionStatus themeId={theme.id} />
-      </div>
-
       {/* Posts Section */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Posts ({totalPosts})</CardTitle>
-            <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'table' | 'cards')}>
-              <TabsList>
-                <TabsTrigger value="table">Table</TabsTrigger>
-                <TabsTrigger value="cards">Cards</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+          <CardTitle>Posts ({totalPosts})</CardTitle>
         </CardHeader>
         <CardContent>
           {!hasAnyPosts ? (
@@ -268,47 +239,22 @@ export const ThemeDetail = () => {
                 <Sparkles className="w-6 h-6 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
-              <p className="text-gray-500 mb-4">Create your first post to start building your story theme.</p>
-              <Button onClick={() => setIsCreatingPost(true)}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Create First Post
-              </Button>
+              <p className="text-gray-500 mb-4">Posts are being generated for this theme.</p>
             </div>
           ) : (
-            <>
-              {/* Check if theme needs processing shimmer */}
-              <ProcessingLoadingShimmer themeId={theme.id} />
-              
-              {/* Render posts based on active view */}
-              {activeView === 'table' ? (
-                <PostTable 
-                  posts={posts} 
-                  onPostsChange={handlePostsChange}
-                  viewMode="theme-detail"
-                />
-              ) : (
-                <PostCardGrid 
-                  posts={posts} 
-                  onPostsChange={handlePostsChange}
-                />
-              )}
-            </>
+            <div className="space-y-4">
+              {posts.map((post) => (
+                <div key={post.id} className="border rounded-lg p-4">
+                  <h3 className="font-medium">{post.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Day {post.day}</p>
+                </div>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>
-
-      {/* Post Creation Modal */}
-      <PostCreationModal
-        isOpen={isCreatingPost}
-        onClose={() => setIsCreatingPost(false)}
-        onSuccess={() => {
-          setIsCreatingPost(false);
-          refetch();
-        }}
-        themeId={theme.id}
-        themeName={theme.theme_name}
-        category={theme.category}
-      />
     </div>
   );
 };
+
+export default ThemeDetail;

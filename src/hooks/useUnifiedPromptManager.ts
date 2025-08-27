@@ -1,344 +1,217 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
+import { useUser } from '@supabase/auth-helpers-react';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ColorTheme } from '@/types/colorTheme';
+import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
+import { useThemeCompletion } from '@/hooks/useThemeCompletion';
+import { useCreditCheck } from '@/hooks/useCreditCheck';
+import { QUERY_KEYS, QUERY_CONFIG } from '@/constants/queryKeys';
+import type { SocialMediaPost } from '@/types/socialMedia';
 
-interface UnifiedPromptRequest {
-  title: string;
-  description: string;
-  category: string;
-  theme?: string;
-  themeId?: string;
-  colorTheme?: ColorTheme;
-  aspectRatio: string;
-  priority?: 'low' | 'normal' | 'high';
-}
+// Define a type for the prompt status
+export type PromptStatus = 'pending' | 'processing' | 'complete' | 'error';
 
-interface PromptCacheEntry {
-  prompt: string;
-  timestamp: number;
-  hits: number;
-  colorScheme?: string;
-  themeVariant?: string;
-}
+// Hook to manage individual prompt generation and status
+export const useUnifiedPromptManager = (themeId: string, themeName: string, category: string) => {
+  const user = useUser();
+  const userId = user?.id;
+  const { toast } = useToast();
+  const { setProcessing, isGenerating } = useProcessingStatesContext();
+  const { checkAndSetThemeCompletion } = useThemeCompletion(themeId);
+  const { getCreditStatus, enforceUsage } = useCreditCheck();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [posts, setPosts] = useState<SocialMediaPost[]>([]);
+  const [promptStatuses, setPromptStatuses] = useState<{ [postId: string]: PromptStatus }>({});
+  const [allPromptsGenerated, setAllPromptsGenerated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-interface PromptGenerationMetrics {
-  cacheHitRate: number;
-  averageGenerationTime: number;
-  totalRequests: number;
-  backgroundPregenerated: number;
-}
+  // Fetch existing posts for the theme
+  const { data: existingPosts, refetch: refetchPosts } = useQuery({
+    queryKey: QUERY_KEYS.postsByTheme(themeId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('social_media_posts')
+        .select('*')
+        .eq('theme_id', themeId)
+        .order('day', { ascending: true });
 
-export const useUnifiedPromptManager = () => {
-  // Multi-layer cache system
-  const memoryCache = useRef(new Map<string, PromptCacheEntry>());
-  const categoryCache = useRef(new Map<string, string[]>());
-  const themeCache = useRef(new Map<string, any>());
-  
-  // Performance tracking
-  const [metrics, setMetrics] = useState<PromptGenerationMetrics>({
-    cacheHitRate: 0,
-    averageGenerationTime: 0,
-    totalRequests: 0,
-    backgroundPregenerated: 0
+      if (error) {
+        console.error("Error fetching existing posts:", error);
+        throw error;
+      }
+      return data as SocialMediaPost[];
+    },
+    staleTime: QUERY_CONFIG.POSTS_STALE_TIME,
   });
 
-  // Background processing queue
-  const backgroundQueue = useRef<UnifiedPromptRequest[]>([]);
-  const isProcessingBackground = useRef(false);
-
-  const generateCacheKey = (request: UnifiedPromptRequest): string => {
-    const colorKey = request.colorTheme ? 
-      `${request.colorTheme.primary_color}_${request.colorTheme.secondary_color}` : 
-      'default';
-    
-    return `${request.category}_${request.theme || 'default'}_${request.aspectRatio}_${colorKey}`;
-  };
-
-  const generateSemanticKey = (request: UnifiedPromptRequest): string => {
-    // Create semantic key for similar content matching
-    const words = `${request.title} ${request.description}`.toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .split(/\s+/)
-      .filter(word => word.length > 3)
-      .sort()
-      .slice(0, 5)
-      .join('_');
-    
-    return `semantic_${request.category}_${words}`;
-  };
-
-  const precomputeColorScheme = useCallback((colorTheme?: ColorTheme): string => {
-    if (!colorTheme) return 'professional_blue_scheme';
-    
-    // Precompute optimal color combinations
-    const primary = colorTheme.primary_color;
-    const secondary = colorTheme.secondary_color;
-    
-    // Enhanced color analysis
-    const isWarm = primary.includes('red') || primary.includes('orange') || primary.includes('yellow');
-    const isCool = primary.includes('blue') || primary.includes('green') || primary.includes('purple');
-    const isNeutral = primary.includes('gray') || primary.includes('black') || primary.includes('white');
-    
-    const scheme = {
-      primary,
-      secondary,
-      accent: colorTheme.accent_color || (isWarm ? '#ff6b35' : isCool ? '#4ade80' : '#a855f7'),
-      temperature: isWarm ? 'warm' : isCool ? 'cool' : 'neutral',
-      contrast: 'high', // Could be computed based on color analysis
-      harmony: 'complementary' // Could be computed based on color wheel
-    };
-    
-    return JSON.stringify(scheme);
-  }, []);
-
-  const generatePromptWithCache = useCallback(async (
-    request: UnifiedPromptRequest
-  ): Promise<string> => {
-    const startTime = Date.now();
-    const cacheKey = generateCacheKey(request);
-    const semanticKey = generateSemanticKey(request);
-    
-    // Check memory cache first
-    const cached = memoryCache.current.get(cacheKey) || memoryCache.current.get(semanticKey);
-    if (cached && (Date.now() - cached.timestamp) < 3600000) { // 1 hour TTL
-      cached.hits++;
-      return cached.prompt;
+  // Initialize posts and prompt statuses
+  useEffect(() => {
+    if (existingPosts && !isInitialized) {
+      setPosts(existingPosts);
+      const initialStatuses = existingPosts.reduce((acc: { [postId: string]: PromptStatus }, post) => {
+        acc[post.id] = post.individual_prompt_status as PromptStatus || 'complete';
+        return acc;
+      }, {});
+      setPromptStatuses(initialStatuses);
+      setIsInitialized(true);
     }
+  }, [existingPosts, isInitialized, setPromptStatuses]);
 
-    // Check database cache using existing cached_prompts table
-    const { data: dbCached } = await supabase
-      .from('cached_prompts')
-      .select('prompt_text, created_at')
-      .eq('cache_key', cacheKey)
-      .gte('created_at', new Date(Date.now() - 3600000).toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (dbCached?.prompt_text) {
-      const entry: PromptCacheEntry = {
-        prompt: dbCached.prompt_text,
-        timestamp: Date.now(),
-        hits: 1,
-        colorScheme: precomputeColorScheme(request.colorTheme)
-      };
-      memoryCache.current.set(cacheKey, entry);
-      
-      // Update hit count in database
-      supabase
-        .from('cached_prompts')
-        .update({ 
-          hit_count: (dbCached as any).hit_count ? (dbCached as any).hit_count + 1 : 1,
-          last_accessed_at: new Date().toISOString()
-        })
-        .eq('cache_key', cacheKey)
-        .then(() => console.log('✅ Cache hit count updated'));
-      
-      return dbCached.prompt_text;
+  // Check if all prompts are generated
+  useEffect(() => {
+    if (posts.length > 0) {
+      const allGenerated = posts.every(post => post.generated_image_prompt);
+      setAllPromptsGenerated(allGenerated);
     }
+  }, [posts]);
 
-    // Generate new prompt with enhanced system
-    const prompt = await generateEnhancedPrompt(request);
-    
-    // Create cache entry
-    const entry: PromptCacheEntry = {
-      prompt,
-      timestamp: Date.now(),
-      hits: 1,
-      colorScheme: precomputeColorScheme(request.colorTheme),
-      themeVariant: request.theme
-    };
-    
-    // Store in memory and database
-    memoryCache.current.set(cacheKey, entry);
-    
-    // Store in database (non-blocking)
-    supabase
-      .from('cached_prompts')
-      .upsert({
-        cache_key: cacheKey,
-        prompt_text: prompt,
-        category: request.category,
-        metadata: {
-          theme: request.theme,
-          color_scheme: entry.colorScheme,
-          aspect_ratio: request.aspectRatio
-        },
-        user_id: null, // Allow system-wide caching
-        expires_at: new Date(Date.now() + 86400000).toISOString() // 24 hours
-      })
-      .then(() => console.log('✅ Prompt cached in database'));
-
-    // Update metrics
-    const generationTime = Date.now() - startTime;
-    setMetrics(prev => ({
-      ...prev,
-      totalRequests: prev.totalRequests + 1,
-      averageGenerationTime: (prev.averageGenerationTime * (prev.totalRequests - 1) + generationTime) / prev.totalRequests,
-      cacheHitRate: (prev.totalRequests - 1) / prev.totalRequests
-    }));
-
-    return prompt;
-  }, [precomputeColorScheme]);
-
-  const generateEnhancedPrompt = async (request: UnifiedPromptRequest): Promise<string> => {
-    const colorScheme = precomputeColorScheme(request.colorTheme);
-    
-    // ✅ Fixed: Use correct column names for social_media_posts
-    const { data: tempPost } = await supabase
-      .from('social_media_posts')
-      .insert({
-        title: request.title,
-        story_description: request.description, // ✅ Fixed: use story_description instead of description
-        category: request.category,
-        theme_id: request.themeId,
-        user_id: (await supabase.auth.getUser()).data.user?.id || null
-      })
-      .select('id')
-      .single();
-    
-    if (!tempPost) {
-      throw new Error('Failed to create temporary post for prompt generation');
-    }
-
-    const { data, error } = await supabase.functions.invoke('visual-prompt-generator', {
-      body: {
-        postId: tempPost.id,
-        themeId: request.themeId,
-        aspectRatio: request.aspectRatio
-      }
-    });
-
-    // Clean up temporary post
-    await supabase.from('social_media_posts').delete().eq('id', tempPost.id);
-
-    if (error) {
-      throw new Error(`Enhanced prompt generation failed: ${error.message}`);
-    }
-
-    return data.prompt;
-  };
-
-  const preloadPromptsForCategory = useCallback(async (
-    category: string,
-    commonThemes: string[] = []
-  ): Promise<number> => {
-    let preloadedCount = 0;
-    
-    const aspectRatios = ['1:1', '16:9', '9:16'];
-    const priorities = ['normal', 'high'];
-    
-    for (const theme of commonThemes) {
-      for (const aspectRatio of aspectRatios) {
-        for (const priority of priorities) {
-          const request: UnifiedPromptRequest = {
-            title: `${category} content for ${theme}`,
-            description: `Professional ${category} content focused on ${theme}`,
-            category,
-            theme,
-            aspectRatio,
-            priority: priority as 'normal' | 'high'
-          };
-          
-          backgroundQueue.current.push(request);
-          preloadedCount++;
-        }
-      }
-    }
-    
-    // Start background processing
-    processBackgroundQueue();
-    
-    return preloadedCount;
-  }, []);
-
-  const processBackgroundQueue = useCallback(async () => {
-    if (isProcessingBackground.current || backgroundQueue.current.length === 0) {
+  // Function to generate individual image prompts for all posts
+  const generateAllImagePrompts = useCallback(async () => {
+    if (!userId) {
+      toast({
+        title: "Not authenticated",
+        description: "Please sign in to generate image prompts.",
+        variant: "destructive",
+      });
       return;
     }
-    
-    isProcessingBackground.current = true;
-    
+
+    const creditStatus = getCreditStatus();
+    if (!creditStatus.hasCredits) {
+      toast({
+        title: "No credits remaining",
+        description: "You don't have enough credits to generate all image prompts.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const usageCheck = await enforceUsage('prompt_generation', posts.length);
+    if (!usageCheck.allowed) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
     try {
-      while (backgroundQueue.current.length > 0) {
-        const request = backgroundQueue.current.shift();
-        if (request) {
-          await generatePromptWithCache(request);
-          setMetrics(prev => ({
-            ...prev,
-            backgroundPregenerated: prev.backgroundPregenerated + 1
-          }));
-          
-          // Small delay to prevent overwhelming the system
-          await new Promise(resolve => setTimeout(resolve, 100));
+      // Initialize the prompt statuses
+      const initialStatuses = posts.reduce((acc: { [postId: string]: PromptStatus }, post) => {
+        acc[post.id] = 'pending';
+        return acc;
+      }, {});
+      setPromptStatuses(initialStatuses);
+
+      // Loop through each post and generate a prompt
+      for (const post of posts) {
+        if (isGenerating(post.id)) {
+          console.warn(`Post ${post.id} is already processing. Skipping.`);
+          continue;
         }
+
+        setProcessing(post.id, true);
+        setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'processing' }));
+
+        const tempPostId = uuidv4();
+        let postNumber = post.day;
+
+        // Create temporary post for processing
+        const { error: tempPostError } = await supabase
+          .from('social_media_posts')
+          .insert({
+            id: tempPostId,
+            theme_id: themeId,
+            title: `Post ${postNumber}`,
+            description: '', // Use description column as it exists in database
+            day: postNumber,
+            user_id: userId,
+            category: category,
+            individual_prompt_status: 'processing',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+
+        if (tempPostError) {
+          console.error("Error creating temporary post:", tempPostError);
+          setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'error' }));
+          setProcessing(post.id, false);
+          continue;
+        }
+
+        // Call the edge function to generate the prompt
+        const generatePrompt = async (postId: string) => {
+          const { data, error } = await supabase.functions.invoke('generate-individual-image-prompt', {
+            body: {
+              theme_name: themeName,
+              category: category,
+              title: `Post ${postNumber}`,
+              description: '', // Use description column as it exists in database
+              postId: postId,
+              tempPostId: tempPostId
+            }
+          });
+
+          if (error) {
+            console.error("Error generating individual image prompt:", error);
+            setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'error' }));
+            setProcessing(post.id, false);
+            return;
+          }
+
+          // Update the post with the generated prompt
+          const { error: updateError } = await supabase
+            .from('social_media_posts')
+            .update({
+              individual_prompt_status: 'complete',
+            })
+            .eq('id', post.id);
+
+          if (updateError) {
+            console.error("Error updating post with individual prompt status:", updateError);
+            setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'error' }));
+            setProcessing(post.id, false);
+            return;
+          }
+
+          setPromptStatuses(prevState => ({ ...prevState, [post.id]: 'complete' }));
+          setProcessing(post.id, false);
+        };
+
+        await generatePrompt(post.id);
       }
-    } catch (error) {
-      console.error('Background prompt processing failed:', error);
+
+      // Refetch posts to update the UI
+      await refetchPosts();
+
+      // Check and set theme completion
+      await checkAndSetThemeCompletion();
+
+      toast({
+        title: "Image prompts generated",
+        description: "Successfully generated individual image prompts for all posts.",
+      });
+    } catch (error: any) {
+      console.error("Error generating all image prompts:", error);
+      setError(error.message || "Failed to generate all image prompts.");
+      toast({
+        title: "Error",
+        description: "Failed to generate all image prompts. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      isProcessingBackground.current = false;
+      setIsLoading(false);
     }
-  }, [generatePromptWithCache]);
-
-  const getPromptVariations = useCallback(async (
-    baseRequest: UnifiedPromptRequest,
-    variationCount: number = 3
-  ): Promise<string[]> => {
-    const variations: string[] = [];
-    
-    // Generate variations with different styles
-    const styleVariations = ['professional', 'creative', 'minimal', 'detailed'];
-    
-    for (let i = 0; i < Math.min(variationCount, styleVariations.length); i++) {
-      const variationRequest = {
-        ...baseRequest,
-        theme: `${baseRequest.theme}_${styleVariations[i]}`
-      };
-      
-      const prompt = await generatePromptWithCache(variationRequest);
-      variations.push(prompt);
-    }
-    
-    return variations;
-  }, [generatePromptWithCache]);
-
-  const clearCache = useCallback((type: 'memory' | 'database' | 'all' = 'all') => {
-    if (type === 'memory' || type === 'all') {
-      memoryCache.current.clear();
-      categoryCache.current.clear();
-      themeCache.current.clear();
-    }
-    
-    if (type === 'database' || type === 'all') {
-      supabase
-        .from('cached_prompts')
-        .delete()
-        .lt('created_at', new Date(Date.now() - 86400000).toISOString()) // Clear old entries
-        .then(() => console.log('✅ Database cache cleared'));
-    }
-  }, []);
-
-  const getCacheStats = useCallback(() => {
-    const memoryStats = {
-      size: memoryCache.current.size,
-      totalHits: Array.from(memoryCache.current.values()).reduce((sum, entry) => sum + entry.hits, 0)
-    };
-    
-    return {
-      memory: memoryStats,
-      metrics,
-      backgroundQueueLength: backgroundQueue.current.length,
-      isProcessingBackground: isProcessingBackground.current
-    };
-  }, [metrics]);
+  }, [userId, themeName, category, posts, supabase, toast, setProcessing, refetchPosts, checkAndSetThemeCompletion, getCreditStatus, enforceUsage, isGenerating, themeId]);
 
   return {
-    generatePrompt: generatePromptWithCache,
-    preloadCategory: preloadPromptsForCategory,
-    getVariations: getPromptVariations,
-    clearCache,
-    getCacheStats,
-    metrics,
-    processBackgroundQueue
+    posts,
+    promptStatuses,
+    allPromptsGenerated,
+    error,
+    isLoading,
+    generateAllImagePrompts,
   };
 };

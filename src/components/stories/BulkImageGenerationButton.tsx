@@ -82,7 +82,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
       const request: BulkImageGenerationRequest = {
         postId: post.id,
         title: post.title,
-        description: post.story_description, // ✅ Fixed: use story_description
+        description: post.description || '', // Use description from database
         category: post.category,
         context: 'table',
         colorThemeId: post.color_theme_id || undefined
@@ -101,7 +101,7 @@ export const BulkImageGenerationButton: React.FC<BulkImageGenerationButtonProps>
         if (refreshedPosts) {
           const mappedPosts = refreshedPosts.map(post => ({
             ...post,
-            story_description: post.description || post.story_description // Handle both column names
+            // Map the database column to the expected property name
           })) as SocialMediaPost[];
           onPostsChange(mappedPosts);
         }

@@ -148,10 +148,10 @@ export function useOptimizedStories(user: any) {
         .order('day', { ascending: true });
       
       if (error) throw error;
-      // ✅ Fixed: Map story_description correctly
+      // Return posts with correct property mapping
       return (data || []).map(post => ({
         ...post,
-        story_description: post.story_description // Use correct column name
+        // No need to remap - use database columns as they are
       })) as SocialMediaPost[];
     },
     enabled: !!activeTab && !!user?.id && availableThemes.length > 0,
