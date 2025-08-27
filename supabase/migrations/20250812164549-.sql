@@ -82,6 +82,6 @@ SECURITY DEFINER
 SET search_path TO 'public'
 AS $function$
 BEGIN
-  RETURN public.insert_category_content(posts_data, NULL, theme_description_param, theme_id);
+  RETURN public.insert_category_content(NULL, posts_data, theme_description_param, theme_id);
 END;
 $function$;
