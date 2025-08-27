@@ -489,7 +489,7 @@ export default function StoriesDashboard() {
     setPendingTheme({
       theme_id: themeId,
       theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
-      description: themeDescription
+      theme_description: themeDescription
     });
 
     // Smooth scroll to cards section after setting pending theme
@@ -604,7 +604,7 @@ export default function StoriesDashboard() {
     }
   };
   const handleConfirmDuplicate = async (newCategory: string) => {
-    if (!pendingTheme?.description) {
+    if (!pendingTheme?.theme_description) {
       setDuplicateInfo(null);
       toast({
         title: 'Missing description',
@@ -629,7 +629,7 @@ export default function StoriesDashboard() {
         error
       } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: {
-          description: pendingTheme.description,
+          description: pendingTheme.theme_description,
           stream: false,
           overrideCategory: newCategory
         }
@@ -927,7 +927,7 @@ export default function StoriesDashboard() {
                   const shimmerTheme: ThemeWithPosts = {
                     id: 'pending-import-' + Date.now(),
                     theme_name: categoryName,
-                    description: `Imported theme: ${categoryName}`,
+                    theme_description: `Imported theme: ${categoryName}`,
                     category: categoryName,
                     post_count: 0,
                     prompt_completion_count: 0,

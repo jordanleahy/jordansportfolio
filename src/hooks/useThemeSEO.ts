@@ -34,26 +34,26 @@ export const useThemeSEO = (theme: Theme | null | undefined): ThemeSEOData => {
     let description: string;
     
     // Special handling for educational/program content
-    if (themeName === 'Discover StoryShip' && theme.description?.includes('Scandinavian-inspired')) {
+    if (themeName === 'Discover StoryShip' && theme.theme_description?.includes('Scandinavian-inspired')) {
       title = 'Origins and Guiding Philosophy - Scandinavian Educational Approach';
       description = 'Discover our Scandinavian-inspired educational program established in 2010, blending Reggio-Emilia principles with child-led, project-based learning that honors curiosity, play, and children\'s rights.';
     } 
     // Check for other educational content indicators
-    else if (theme.description?.includes('Reggio-Emilia') || theme.description?.includes('child-led') || theme.description?.includes('educational')) {
+    else if (theme.theme_description?.includes('Reggio-Emilia') || theme.theme_description?.includes('child-led') || theme.theme_description?.includes('educational')) {
       title = `${themeName} - Educational Philosophy & Approach`;
-      description = theme.description.length > 160 
-        ? theme.description.substring(0, 157) + '...'
-        : theme.description;
+      description = theme.theme_description.length > 160 
+        ? theme.theme_description.substring(0, 157) + '...'
+        : theme.theme_description;
     }
     // Check for healthcare/technology content
-    else if (theme.description?.includes('healthcare') || theme.description?.includes('technology') || theme.description?.includes('medical')) {
+    else if (theme.theme_description?.includes('healthcare') || theme.theme_description?.includes('technology') || theme.theme_description?.includes('medical')) {
       title = `${themeName} - Healthcare Technology Insights`;
-      description = theme.description || `Explore healthcare technology insights and analysis about ${themeName}. Expert perspectives on digital health, medical innovation, and industry trends.`;
+      description = theme.theme_description || `Explore healthcare technology insights and analysis about ${themeName}. Expert perspectives on digital health, medical innovation, and industry trends.`;
     }
     // Default handling for other themes
     else {
       title = `${themeName} - Stories & Insights`;
-      description = theme.description || `Explore content and insights about ${themeName}. Stories, analysis, and expert perspectives.`;
+      description = theme.theme_description || `Explore content and insights about ${themeName}. Stories, analysis, and expert perspectives.`;
     }
     
     // Ensure description is optimized for SEO (max 160 characters)

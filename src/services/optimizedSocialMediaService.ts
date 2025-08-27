@@ -247,7 +247,7 @@ export class OptimizedSocialMediaService {
   async getAvailableThemes(): Promise<Array<{
     id: string;
     theme_name: string;
-    description: string | null;
+    theme_description: string | null;
     category: string;
     post_count: number;
     prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
@@ -356,7 +356,7 @@ export class OptimizedSocialMediaService {
       return {
         id: theme.id,
         theme_name: theme.theme_name,
-        description: theme.theme_description,
+        theme_description: theme.theme_description,
         category: theme.category,
         post_count: posts.length,
         prompt_generation_status: theme.prompt_generation_status,

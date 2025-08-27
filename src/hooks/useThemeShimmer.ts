@@ -201,7 +201,7 @@ export const useThemeShimmer = ({
     pendingThemeObject: pendingTheme ? {
       theme_id: pendingTheme.theme_id,
       theme_name: pendingTheme.theme_name,
-      description: pendingTheme.description
+      theme_description: pendingTheme.theme_description
     } : null,
     totalPosts: themePosts.length,
     completedPosts: themePosts.filter(p => p.individual_prompt_status === 'completed').length,

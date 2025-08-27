@@ -4,7 +4,7 @@ export interface Theme {
   id: string;
   user_id: string;
   theme_name: string;
-  description?: string;
+  theme_description?: string;
   category: string;
   created_at: string;
   updated_at: string;
@@ -12,7 +12,7 @@ export interface Theme {
 
 export interface CreateTheme {
   theme_name: string;
-  description?: string;
+  theme_description?: string;
   category: string;
 }
 
@@ -23,7 +23,7 @@ export interface UpdateTheme extends Partial<CreateTheme> {
 export interface ThemeWithPosts {
   id: string;
   theme_name: string;
-  description: string | null;
+  theme_description: string | null;
   category: string;
   post_count: number;
   prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
@@ -70,7 +70,7 @@ export interface CategoryPost {
 export interface ThemeGeneration {
   id: string;
   theme_name: string;
-  description: string;
+  theme_description: string;
   category: string;
   status: 'pending' | 'generating' | 'completed' | 'failed';
   error_message?: string;
@@ -91,7 +91,7 @@ export interface StreamingProgress {
 export interface PendingTheme {
   theme_id?: string;  // Added for precise theme matching
   theme_name: string;
-  description: string;
+  theme_description: string;
 }
 
 export interface ThemeDescriptionInput {

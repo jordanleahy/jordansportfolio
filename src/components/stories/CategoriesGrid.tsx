@@ -29,7 +29,7 @@ export const CategoriesGrid = ({
             <CategoryCard
               theme={theme.theme_name}
               themeId={theme.id}
-              themeDescription={theme.description}
+              themeDescription={theme.theme_description}
               category={theme.category}
               postCount={theme.post_count}
               imageUrl={theme.first_post?.image_url}
