@@ -49,7 +49,6 @@ Frontend (React + TS):
 Supabase Edge Functions (Server):
 - generate-image-prompt-dynamic — Creates prompts from post content
 - generate-image-gpt — Generates images from prompts (base64)
-- generate-all-images-optimized — Bulk pipeline (multi-aspect)
 - streaming-image-pipeline — Streaming image pipeline (SSE/SSE-like)
 - check-usage-limits — Enforces per-user daily/monthly usage
 - get-usage-summary — Summarizes usage limits/usage
@@ -76,8 +75,7 @@ Runtime:
 
 Internal Modules:
 - Credit/Usage: useUsageEnforcement, useCreditCheck, useUsageSummary (not shown here), check-usage-limits, get-usage-summary
-- Image Gen: useImageGeneration, useImageManager, useImageBatchGeneration
-- Bulk: Bulk buttons/components, generate-all-images-optimized
+- Image Gen: useImageGeneration, useImageManager
 - Storage: imageUpload, storageImageUpload
 - Notifications: sonner, use-toast
 - Types: src/types/bulkImageGeneration.ts, src/types/imagePromptGenerator.ts
@@ -185,9 +183,11 @@ Failure Modes and Handling:
 
 ---
 
-## Flow 2 — Bulk Image Generation (All Aspect Ratios)
+## Flow 2 — Single Aspect Image Generation
 
-Primary entry points: BulkImageGenerationButton.tsx + useBulkImageGeneration.ts.
+Primary entry points: SingleAspectRatioSelector.tsx (individual aspect generation)
+
+Note: Bulk generation functionality has been removed. Users should generate images individually per aspect ratio as needed.
 
 Event-by-event sequence:
 1) User Action
@@ -213,58 +213,47 @@ Event-by-event sequence:
    - On success: optionally refetch user’s posts and update UI (BulkImageGenerationButton does this)
    - Toast summary: images generated, failures, total cost, time
 
-Sequence Diagram (Bulk)
+Sequence Diagram (Single Aspect)
 
 ```mermaid
 sequenceDiagram
   autonumber
   actor User
-  participant UI as FE UI (Bulk Button)
+  participant UI as FE UI (Aspect Selector)
   participant CC as useCreditCheck
   participant UE as useUsageEnforcement
   participant SB as Supabase Functions
-  participant DB as cached_prompts
   participant ST as Storage
   participant POSTS as DB (social_media_posts)
 
-  User->>UI: Click Bulk Generate
+  User->>UI: Click Generate (Aspect)
   UI->>CC: getCreditStatus()
   CC-->>UI: status
   alt No credits
     UI-->>User: Toast: No credits
   else Has credits
-    UI->>CC: enforceUsage('image_generation', 4)
+    UI->>CC: enforceUsage('image_generation', 1)
     CC->>UE: checkAndEnforceUsage()
     UE->>SB: invoke('check-usage-limits')
     SB-->>UE: {allowed}
     alt Not allowed
       UI-->>User: Toast: limit exceeded
     else Allowed
-      UI->>DB: get cached prompt
-      DB-->>UI: hit/miss
-      alt Miss
-        UI->>SB: invoke('generate-image-prompt-dynamic')
-        SB-->>UI: {prompt}
-        UI->>DB: upsert cached_prompts
-      end
-      UI->>SB: invoke('generate-all-images-optimized')
-      SB-->>UI: stream/progress/results
-      loop For each aspect
-        UI->>ST: Upload image
-        ST-->>UI: {publicUrl}
-        UI->>POSTS: Update image URL + status
-        POSTS-->>UI: OK
-      end
-      UI-->>User: Toast: Bulk complete
+      UI->>SB: invoke('generate-image-gpt')
+      SB-->>UI: {imageBase64}
+      UI->>ST: Upload image
+      ST-->>UI: {publicUrl}
+      UI->>POSTS: Update image URL + status
+      POSTS-->>UI: OK
+      UI-->>User: Toast: Image ready
     end
   end
 ```
 
 Failure Modes and Handling:
-- Partial failures (some aspect ratios fail) → Collect failures, show counts; do not rollback successes
-- Prompt cache write failure → Non-blocking; proceed without cache
-- Posts refresh failure after success → Non-blocking; user can manually refresh
-- Usage enforcement 80% email may fail → logged only (non-blocking)
+- Image generation failures → show error, allow retry
+- Upload failures → retry mechanism  
+- DB update failures → non-blocking, show status
 
 ---
 

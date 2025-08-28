@@ -37,7 +37,7 @@ graph TB
     end
     
     subgraph "Edge Functions Layer"
-        EF1[generate-image-gpt] --> EF2[generate-all-images-optimized]
+        EF1[generate-image-gpt] --> EF3[visual-prompt-generator] 
         EF3[visual-prompt-generator] --> EF4[invoke-system-prompt-agent]
         EF5[generate-image-with-concurrency-control]
     end
@@ -311,7 +311,6 @@ export interface VisualPromptConfig {
 | Function | Purpose | Input | Output |
 |----------|---------|--------|--------|
 | `generate-image-gpt` | Single image generation | Prompt, aspect ratio, config | Base64 image data |
-| `generate-all-images-optimized` | Bulk multi-aspect generation | Post IDs, config | Batch results |
 | `generate-image-with-concurrency-control` | Controlled single generation | Post data, options | Generation result |
 | `streaming-image-pipeline` | Real-time streaming generation | Stream config | SSE stream |
 
@@ -358,10 +357,8 @@ if (result.data?.success) {
 // 1. Setup bulk job
 const posts = await getBulkPosts();
 
-// 2. Process batch
-const results = await supabase.functions.invoke('generate-all-images-optimized', {
-  body: {
-    posts: posts.map(p => ({ id: p.id, prompt: p.generated_image_prompt })),
+// 2. Process batch (functionality removed)
+// Bulk generation has been removed - use individual generation instead
     aspectRatios: ['1:1', '16:9', '9:16'],
     mode: 'missing_only'
   }

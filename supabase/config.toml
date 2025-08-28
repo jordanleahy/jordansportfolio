@@ -24,9 +24,6 @@ verify_jwt = true
 [functions.generate-image-gpt]
 verify_jwt = true
 
-[functions.generate-all-images-optimized]
-verify_jwt = true
-
 [functions.user-idea-streaming-image-pipeline]
 verify_jwt = true
 
