@@ -19,6 +19,7 @@ import { useImageManager } from "@/hooks/useImageManager";
 import { useProcessingStatesContext } from "@/contexts/ProcessingStatesContext";
 import { useBatchBlogStatus } from "@/hooks/useBatchBlogStatus";
 import { PostEditModal } from "./PostEditModal";
+import { useSelectedImageVersions } from "@/hooks/useSelectedImageVersions";
 // Removed deprecated optimizedSocialMediaService import
 
 import { ImagePreviewModal } from "@/components/ui/responsive-image-preview-modal";
@@ -62,6 +63,9 @@ export default function PostsTable({
   const [hasImageActivity, setHasImageActivity] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
+  
+  // Track selected image versions
+  const selectedImageVersions = useSelectedImageVersions(posts);
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -437,10 +441,17 @@ const { handleGenerateImage } = useImageManager({
 
         // If adding to library, also update the collection content with the access type
         if (newLibraryState) {
+          // Get selected image versions for updating collection
+          const selectedVersionsRecord = selectedImageVersions.getSelectedVersionsRecord();
+          const hasCustomSelections = Object.keys(selectedVersionsRecord).some(postId => 
+            selectedImageVersions.hasCustomSelection(postId, posts.find(p => p.id === postId)?.image_1_1_url)
+          );
+
           const { error: contentUpdateErr } = await supabase.rpc('update_shared_collection_1_1', {
             p_collection_id: existing.id,
             p_theme_id: themeId,
             p_public_access_type: publicAccessType,
+            p_selected_image_urls: hasCustomSelections ? selectedVersionsRecord : null,
           });
           
           if (contentUpdateErr) {
@@ -486,12 +497,19 @@ const { handleGenerateImage } = useImageManager({
       const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
       const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
 
+      // Get selected image versions for publishing
+      const selectedVersionsRecord = selectedImageVersions.getSelectedVersionsRecord();
+      const hasCustomSelections = Object.keys(selectedVersionsRecord).some(postId => 
+        selectedImageVersions.hasCustomSelection(postId, posts.find(p => p.id === postId)?.image_1_1_url)
+      );
+
       console.log('🔍 Publishing collection with params:', {
         p_handle: handle,
         p_post_ids: candidateIds,
         p_theme_id: themeId,
         p_title: titleArg,
         p_description: descriptionArg,
+        p_selected_image_urls: hasCustomSelections ? selectedVersionsRecord : null,
       });
 
       const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
@@ -501,6 +519,7 @@ const { handleGenerateImage } = useImageManager({
         p_title: titleArg,
         p_description: descriptionArg,
         p_public_access_type: publicAccessType,
+        p_selected_image_urls: hasCustomSelections ? selectedVersionsRecord : null,
       });
       
       if (error) {
