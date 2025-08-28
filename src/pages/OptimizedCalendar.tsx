@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 // Lazy load components
-const PostsTable = React.lazy(() => import('@/components/stories/PostsTable').then(module => ({ default: module.PostsTable })));
+const PostsTable = React.lazy(() => import('@/components/stories/PostsTable'));
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
 const ColorThemeConsistencyChecker = React.lazy(() => import('@/components/stories/ColorThemeConsistencyChecker').then(module => ({ default: module.ColorThemeConsistencyChecker })));
 

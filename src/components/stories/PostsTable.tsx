@@ -34,7 +34,7 @@ import { useParams } from 'react-router-dom';
 import { ManualPostForm } from './ManualPostForm';
 
 
-export const PostsTable = ({
+export default function PostsTable({
   posts,
   onPostsChange,
   isAdmin = false,
@@ -42,7 +42,7 @@ export const PostsTable = ({
   themeId,
   selectedThemeId,
   onThemeChange,
-}: PostsTableProps) => {
+}: PostsTableProps) {
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
