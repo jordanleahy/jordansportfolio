@@ -62,10 +62,40 @@ export const processData = {
       ],
       images: [
         {
-          src: "/lovable-uploads/f237a7dc-8f4a-4015-943b-4f42a2d1b189.png",
-          alt: "Dashboard ideation and wireframing process",
-          caption: "Collaborative design sessions and wireframing concepts for healthcare dashboard interface",
+          src: "/lovable-uploads/0c9250c3-95a5-4d46-84cb-59d7e8c90c2a.png",
+          alt: "User research and ideation board with sticky notes",
+          caption: "User research synthesis and ideation process using sticky notes to identify pain points and opportunities",
+          title: "Research & Ideation"
+        },
+        {
+          src: "/lovable-uploads/a1ab13c5-1a23-4cb2-a0dd-6c25e1a44ea0.png",
+          alt: "Sepsis dashboard interface with patient data and charts",
+          caption: "Dashboard design showing sepsis detection interface with patient vitals, diagnosis codes, and clinical indicators",
+          title: "Sepsis Dashboard Design"
+        },
+        {
+          src: "/lovable-uploads/9dc96ab2-47c4-4265-8e74-253566aa0261.png",
+          alt: "Healthcare interface with multiple workflow panels",
+          caption: "Multi-panel healthcare interface design showing workflow integration and data visualization",
+          title: "Multi-Panel Interface"
+        },
+        {
+          src: "/lovable-uploads/c62b1fa0-8c37-4f44-974d-0b52e932fb45.png",
+          alt: "Dashboard wireframe layout with defined sections",
+          caption: "Low-fidelity wireframe showing dashboard layout with header, patient info, diagnosis finding, and action buttons",
           title: "Dashboard Wireframes"
+        },
+        {
+          src: "/lovable-uploads/54c111e9-6781-4e0b-84a5-b53f035593ce.png",
+          alt: "Patient encounter interface with diagnostic information",
+          caption: "Patient encounter dashboard design with metabolic encephalopathy case and diagnostic workflow",
+          title: "Encounter Dashboard"
+        },
+        {
+          src: "/lovable-uploads/c8b0452e-d6f9-4a9e-a47d-ad5b77f9f7fa.png",
+          alt: "Sepsis criteria dashboard with vital signs and treatment data",
+          caption: "Detailed sepsis criteria dashboard showing SIRS criteria, vital signs charts, and treatment protocols",
+          title: "Clinical Criteria Interface"
         }
       ]
     },
