@@ -23,12 +23,14 @@ interface SharedCollection {
   published_at: string | null;
   theme_id: string | null;
   public_access_type: string;
+  cover_image_url: string | null;
 }
 
 interface Theme {
   id: string;
   theme_name: string;
   description: string | null;
+  cover_image_url: string | null;
 }
 
 interface SharedItem {
@@ -111,7 +113,7 @@ export default function PublicSharedCollection() {
         if (col.theme_id) {
           const { data: thm, error: thmErr } = await supabase
             .from('themes')
-            .select('id, theme_name, description')
+            .select('id, theme_name, description, cover_image_url')
             .eq('id', col.theme_id)
             .maybeSingle();
           if (!thmErr && thm) {
@@ -243,8 +245,10 @@ export default function PublicSharedCollection() {
         <meta property="og:description" content={pageDescription.slice(0, 165)} />
         <meta property="og:type" content="website" />
         <meta property="og:url" content={publicUrl} />
-        {firstPost?.image_1_1_url && (
-          <meta property="og:image" content={firstPost.image_1_1_url.startsWith('http') ? firstPost.image_1_1_url : `${window.location.origin}${firstPost.image_1_1_url}`} />
+        {(collection?.cover_image_url || theme?.cover_image_url || firstPost?.image_1_1_url) && (
+          <meta property="og:image" content={(collection?.cover_image_url || theme?.cover_image_url || firstPost?.image_1_1_url)!.startsWith('http') 
+            ? (collection?.cover_image_url || theme?.cover_image_url || firstPost?.image_1_1_url)! 
+            : `${window.location.origin}${collection?.cover_image_url || theme?.cover_image_url || firstPost?.image_1_1_url}`} />
         )}
         <meta name="twitter:card" content="summary_large_image" />
       </Helmet>

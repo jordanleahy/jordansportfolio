@@ -2700,6 +2700,7 @@ export type Database = {
         Row: {
           background_processing_complete: boolean | null
           category: string
+          cover_image_url: string | null
           created_at: string
           description: string | null
           has_character_reference: boolean | null
@@ -2719,6 +2720,7 @@ export type Database = {
         Insert: {
           background_processing_complete?: boolean | null
           category: string
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           has_character_reference?: boolean | null
@@ -2738,6 +2740,7 @@ export type Database = {
         Update: {
           background_processing_complete?: boolean | null
           category?: string
+          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           has_character_reference?: boolean | null
