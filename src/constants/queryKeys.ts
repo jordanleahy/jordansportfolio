@@ -10,6 +10,7 @@ export const QUERY_CONFIG = {
   DEFAULT_STALE_TIME: 2 * 60 * 1000,  // 2 minutes default
   WORK_SUMMARIES_STALE_TIME: 5 * 60 * 1000,  // 5 minutes - summaries don't change often
   WORK_SUMMARIES_GC_TIME: 10 * 60 * 1000,    // 10 minutes - keep in cache longer
+  USAGE_SUMMARY_STALE_TIME: 30 * 1000,      // 30 seconds - optimized for performance
 } as const;
 
 export const QUERY_KEYS = {
