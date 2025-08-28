@@ -108,7 +108,15 @@ export const processData = {
         "A/B testing of alert mechanisms",
         "Clinical accuracy validation sessions"
       ],
-      image: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png"
+      image: "/lovable-uploads/e9e1093f-623d-4331-a500-749e8c9108c3.png",
+      images: [
+        {
+          src: "/lovable-uploads/18e65336-e421-4a4a-85c2-3405d7aa0871.png",
+          alt: "Scenario 3 testing results showing EMR data impact assessment",
+          caption: "Clinical testing scenario showing user feedback on EMR data impact, with 43% reporting moderate impact and EMR interface testing results",
+          title: "EMR Data Impact Testing"
+        }
+      ]
     },
     {
       icon: "CheckCircle", 
