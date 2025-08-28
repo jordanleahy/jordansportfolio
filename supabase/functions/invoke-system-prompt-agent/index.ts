@@ -18,8 +18,8 @@ const SYSTEM_PROMPT_CATEGORIES = {
 } as const;
 
 const OPENAI_CONFIG = {
-  DEFAULT_MODEL: 'gpt-5-mini',
-  MAX_COMPLETION_TOKENS: 4000,
+  DEFAULT_MODEL: 'gpt-5-2025-08-07',
+  MAX_COMPLETION_TOKENS: 15000, // Increased for complex system prompt generation
   TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
   ESCALATION_TIMEOUTS: {
     ATTEMPT_1: 180000,   // 180 seconds for first attempt
