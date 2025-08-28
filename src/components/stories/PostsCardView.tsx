@@ -62,7 +62,6 @@ export const PostsCardView = memo(({
   completingRows = new Set(),
   getRowAnimationClass = () => '',
   blogStatuses = {},
-  selectedImageVersions,
   onEditPost
 }: PostsTableViewProps) => {
   const { generateAllImages, isGenerating } = useBulkImageGeneration();
@@ -323,17 +322,23 @@ export const PostsCardView = memo(({
       
       <div className={`grid grid-cols-1 gap-4 p-6${posts.length > 1 ? ' pt-0' : ''}`}>
       {posts.map((post, index) => {
-        // Get the selected image version or default to the original image
-        const defaultImageUrl = post.image_1_1_url;
-        const selectedImageUrl = selectedImageVersions?.getSelectedVersion(post.id, defaultImageUrl);
+        // Only display 1:1 images to maintain square container aspect
+        const imageOrder: AspectRatioKey[] = ['1_1'];
+        let selectedImage = null;
+        let selectedAspectRatio = null;
         
-        // Ensure we prioritize existing images over generate state
-        let selectedImage = selectedImageUrl || defaultImageUrl;
-        let selectedAspectRatio = selectedImage ? '1:1' : null;
-        
-        // Check if image is processing when no image is available
-        if (!selectedImage && post.image_1_1_status === 'processing') {
-          selectedAspectRatio = '1:1';
+        for (const aspectKey of imageOrder) {
+          const imageUrl = post[`image_${aspectKey}_url` as keyof SocialMediaPost] as string;
+          const status = post[`image_${aspectKey}_status` as keyof SocialMediaPost] as string;
+          
+          if (imageUrl) {
+            selectedImage = imageUrl;
+            selectedAspectRatio = aspectKey.replace('_', ':');
+            break;
+          } else if (status === 'processing') {
+            selectedAspectRatio = aspectKey.replace('_', ':');
+            break;
+          }
         }
         
         const isProcessing = post.image_1_1_status === 'processing';
@@ -356,7 +361,6 @@ export const PostsCardView = memo(({
                 secondsRemaining={secondsRemaining}
                 isRunning={isRunning}
                 isExpired={isExpired}
-                selectedImageVersions={selectedImageVersions}
               />
             </div>
 

@@ -6,7 +6,6 @@ export interface Theme {
   theme_name: string;
   description?: string;
   category: string;
-  cover_image_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -26,7 +25,6 @@ export interface ThemeWithPosts {
   theme_name: string;
   description: string | null;
   category: string;
-  cover_image_url?: string;
   post_count: number;
   prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
   prompt_completion_count?: number;

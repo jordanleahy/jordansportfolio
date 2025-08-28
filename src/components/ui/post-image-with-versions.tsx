@@ -24,10 +24,6 @@ interface PostImageWithVersionsProps {
   secondsRemaining: number;
   isRunning: boolean;
   isExpired: boolean;
-  selectedImageVersions?: {
-    updateSelectedVersion: (postId: string, imageUrl: string) => void;
-    getSelectedVersion: (postId: string, defaultUrl?: string | null) => string | null;
-  };
 }
 
 export const PostImageWithVersions = memo(({
@@ -42,36 +38,13 @@ export const PostImageWithVersions = memo(({
   isProcessingCtx,
   secondsRemaining,
   isRunning,
-  isExpired,
-  selectedImageVersions
+  isExpired
 }: PostImageWithVersionsProps) => {
   // Hooks must be called at component level, not inside conditional logic
   const imageVersions = useImageVersions(selectedImage || '', '1:1');
   const swipeGestures = useSwipeGestures({
-    onSwipeLeft: () => {
-      imageVersions.goToNextVersion();
-      // Update selected version in parent state
-      if (selectedImageVersions && imageVersions.imageVersions.length > 0) {
-        const nextIndex = (imageVersions.currentVersionIndex + 1) % imageVersions.imageVersions.length;
-        const nextVersionUrl = imageVersions.imageVersions[nextIndex]?.url;
-        if (nextVersionUrl) {
-          selectedImageVersions.updateSelectedVersion(post.id, nextVersionUrl);
-        }
-      }
-    },
-    onSwipeRight: () => {
-      imageVersions.goToPreviousVersion();
-      // Update selected version in parent state
-      if (selectedImageVersions && imageVersions.imageVersions.length > 0) {
-        const prevIndex = imageVersions.currentVersionIndex === 0 
-          ? imageVersions.imageVersions.length - 1 
-          : imageVersions.currentVersionIndex - 1;
-        const prevVersionUrl = imageVersions.imageVersions[prevIndex]?.url;
-        if (prevVersionUrl) {
-          selectedImageVersions.updateSelectedVersion(post.id, prevVersionUrl);
-        }
-      }
-    },
+    onSwipeLeft: imageVersions.goToNextVersion,
+    onSwipeRight: imageVersions.goToPreviousVersion,
     threshold: 50,
     preventScroll: true
   });
@@ -152,24 +125,13 @@ export const PostImageWithVersions = memo(({
         )}
       </div>
       
-      {/* Version thumbnails */}
-      {imageVersions.hasMultipleVersions && (
-        <ImageVersionThumbnails
-          versions={imageVersions.imageVersions}
-          currentIndex={imageVersions.currentVersionIndex}
-          onVersionSelect={(index) => {
-            imageVersions.goToVersion(index);
-            // Update selected version in parent state
-            if (selectedImageVersions) {
-              const selectedVersionUrl = imageVersions.imageVersions[index]?.url;
-              if (selectedVersionUrl) {
-                selectedImageVersions.updateSelectedVersion(post.id, selectedVersionUrl);
-              }
-            }
-          }}
-          className="px-2"
-        />
-      )}
+      {/* Image Version Thumbnails */}
+      <ImageVersionThumbnails
+        versions={imageVersions.imageVersions}
+        currentIndex={imageVersions.currentVersionIndex}
+        onVersionSelect={imageVersions.goToVersion}
+        className="justify-center"
+      />
     </div>
   );
 });

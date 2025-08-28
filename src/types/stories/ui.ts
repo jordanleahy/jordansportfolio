@@ -93,12 +93,6 @@ export interface PostsTableViewProps {
   completingRows?: Set<string>;
   getRowAnimationClass?: (postId: string) => string;
   blogStatuses?: Record<string, BlogStatus>;
-  selectedImageVersions?: {
-    updateSelectedVersion: (postId: string, imageUrl: string) => void;
-    getSelectedVersion: (postId: string, defaultUrl?: string | null) => string | null;
-    getSelectedVersionsRecord: () => Record<string, string>;
-    hasCustomSelection: (postId: string, defaultUrl?: string | null) => boolean;
-  };
   onEditPost?: (post: SocialMediaPost) => void | Promise<void>;
 }
 

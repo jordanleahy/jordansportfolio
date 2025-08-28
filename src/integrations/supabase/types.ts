@@ -2700,7 +2700,6 @@ export type Database = {
         Row: {
           background_processing_complete: boolean | null
           category: string
-          cover_image_url: string | null
           created_at: string
           description: string | null
           has_character_reference: boolean | null
@@ -2720,7 +2719,6 @@ export type Database = {
         Insert: {
           background_processing_complete?: boolean | null
           category: string
-          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           has_character_reference?: boolean | null
@@ -2740,7 +2738,6 @@ export type Database = {
         Update: {
           background_processing_complete?: boolean | null
           category?: string
-          cover_image_url?: string | null
           created_at?: string
           description?: string | null
           has_character_reference?: boolean | null
@@ -3613,15 +3610,6 @@ export type Database = {
               p_handle: string
               p_post_ids?: string[]
               p_public_access_type?: string
-              p_selected_image_urls?: Json
-              p_theme_id?: string
-              p_title?: string
-            }
-          | {
-              p_description?: string
-              p_handle: string
-              p_post_ids?: string[]
-              p_public_access_type?: string
               p_theme_id?: string
               p_title?: string
             }
@@ -3671,12 +3659,6 @@ export type Database = {
       }
       update_shared_collection_1_1: {
         Args:
-          | {
-              p_collection_id: string
-              p_public_access_type?: string
-              p_selected_image_urls?: Json
-              p_theme_id?: string
-            }
           | {
               p_collection_id: string
               p_public_access_type?: string

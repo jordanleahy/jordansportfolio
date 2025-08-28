@@ -32,7 +32,7 @@ export const CategoriesGrid = ({
               themeDescription={theme.description}
               category={theme.category}
               postCount={theme.post_count}
-              imageUrl={theme.cover_image_url || theme.first_post?.image_url}
+              imageUrl={theme.first_post?.image_url}
               firstPostData={theme.first_post ? {
                 title: theme.first_post.title,
                 description: theme.first_post.description
