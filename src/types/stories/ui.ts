@@ -228,15 +228,10 @@ export interface SystemPromptViewerProps {
   onThemeChange?: (themeId: string) => void;
 }
 
-// Image Generation Props
-export interface BulkImageGenerationButtonProps {
+// Image Generation Props (bulk generation removed)
+export interface SingleAspectGenerationProps {
   post: SocialMediaPost;
   onPostsChange?: (posts: SocialMediaPost[]) => void;
-}
-
-export interface BulkGenerationThumbnailsProps {
-  showThumbnails: boolean;
-  className?: string;
 }
 
 export interface SingleAspectRatioSelectorProps {

@@ -94,7 +94,7 @@ sequenceDiagram
 **Entry Points:**
 - `GenerateImage.tsx` - Primary image generation interface
 - `SingleAspectRatioSelector.tsx` - Aspect-specific generation
-- `BulkImageGenerationButton.tsx` - Bulk processing interface
+- Individual aspect ratio generation (bulk functionality removed)
 
 **Validation Steps:**
 1. **Credit Check** (`useCreditCheck`)
@@ -177,10 +177,10 @@ sequenceDiagram
    - Concurrency control to prevent duplicates
    - Real-time status updates
 
-2. **Bulk Generation** (`useBulkSingleAspectGeneration`, `useBulkImageGeneration`)
-   - Batch processing with progress tracking
-   - Multiple aspect ratios simultaneously
-   - Intelligent retry logic
+2. **Individual Generation** (`useImageGeneration`)
+   - Per-aspect ratio generation
+   - Concurrency control to prevent duplicates
+   - Real-time status updates
 
 3. **Streaming Pipeline** (`streaming-image-pipeline`)
    - Real-time generation updates via SSE
@@ -394,20 +394,21 @@ const result = await generateImage(post, {
 });
 ```
 
-#### `useBulkImageGeneration`
-**Purpose:** Multi-aspect ratio bulk generation
+#### `useImageGeneration`
+**Purpose:** Individual aspect ratio generation
 **Key Features:**
-- Batch processing with progress tracking
-- Intelligent retry logic
+- Single aspect generation with progress tracking
+- Real-time status updates
 - Cost estimation and validation
 
 ```typescript
-const { generateAllImages, isGenerating, progress } = useBulkImageGeneration();
+const { generateImage, isGenerating } = useImageGeneration();
 
-// Usage
-const results = await generateAllImages(posts, {
-  aspectRatios: ['1:1', '16:9', '9:16'],
-  mode: 'missing_only'
+// Usage  
+const result = await generateImage({
+  postId,
+  aspectRatio: '1:1',
+  prompt: 'A beautiful landscape'
 });
 ```
 
@@ -439,11 +440,11 @@ const results = await generateAllImages(posts, {
 - Real-time status checking
 - Visual progress indicators
 
-#### `BulkImageGenerationButton.tsx`
-**Bulk processing interface**
-- Batch operation controls
-- Progress tracking and cancellation
-- Results summary and error reporting
+#### `GenerateImage.tsx`
+**Individual generation interface**
+- Individual aspect ratio generation
+- Real-time status checking
+- Visual progress indicators
 
 ### Processing Context
 
