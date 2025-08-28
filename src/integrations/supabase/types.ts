@@ -3658,7 +3658,13 @@ export type Database = {
         Returns: undefined
       }
       update_shared_collection_1_1: {
-        Args: { p_collection_id: string; p_theme_id?: string }
+        Args:
+          | {
+              p_collection_id: string
+              p_public_access_type?: string
+              p_theme_id?: string
+            }
+          | { p_collection_id: string; p_theme_id?: string }
         Returns: string
       }
       upgrade_generic_system_prompts: {

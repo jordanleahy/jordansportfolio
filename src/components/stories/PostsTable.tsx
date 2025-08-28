@@ -425,7 +425,7 @@ const { handleGenerateImage } = useImageManager({
         
         // If removing from library and it's featured, also remove from featured
         const updateData = newLibraryState
-          ? { include_in_library: true }
+          ? { include_in_library: true, public_access_type: publicAccessType }
           : { include_in_library: false, featured: false };
 
         const { error: updateErr } = await supabase
@@ -434,6 +434,19 @@ const { handleGenerateImage } = useImageManager({
           .eq('id', existing.id);
 
         if (updateErr) throw updateErr;
+
+        // If adding to library, also update the collection content with the access type
+        if (newLibraryState) {
+          const { error: contentUpdateErr } = await supabase.rpc('update_shared_collection_1_1', {
+            p_collection_id: existing.id,
+            p_theme_id: themeId,
+            p_public_access_type: publicAccessType,
+          });
+          
+          if (contentUpdateErr) {
+            console.warn('Failed to update collection content:', contentUpdateErr);
+          }
+        }
         
         // Update local state
         setIsInLibrary(newLibraryState);
@@ -441,8 +454,9 @@ const { handleGenerateImage } = useImageManager({
           setIsFeatured(false); // Can't be featured if not in library
         }
         
+        const accessTypeText = publicAccessType === 'full_public' ? ' (Full Public)' : ' (Blurred)';
         const message = newLibraryState 
-          ? 'Added to Library' 
+          ? `Added to Library${accessTypeText}` 
           : existing.featured 
             ? 'Removed from Library & Featured' 
             : 'Removed from Library';

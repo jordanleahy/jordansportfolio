@@ -43,6 +43,10 @@ export const useDuplicatePublicCollection = () => {
       queryClient.invalidateQueries({ queryKey: ["themes"] });
       queryClient.invalidateQueries({ queryKey: ["libraryCollections"] });
       queryClient.invalidateQueries({ queryKey: ["availableThemes"] });
+      queryClient.invalidateQueries({ queryKey: ["shared_collections"] });
+      
+      // Force refetch of current collection data
+      window.location.reload();
     },
     onError: (error) => {
       console.error("Duplication failed:", error);
