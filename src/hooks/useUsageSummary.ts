@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { QUERY_KEYS, QUERY_CONFIG } from "@/constants/queryKeys";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDebounce } from "./useDebounce";
 
 export interface UsageLimits {
@@ -198,6 +198,11 @@ export const useUsageSummary = () => {
     enabled: !!user?.id,
   });
 
+  // Stable refetch function
+  const triggerRefetch = useCallback(() => {
+    setRefetchTrigger(prev => prev + 1);
+  }, []);
+
   // Set up real-time subscription for immediate updates
   useEffect(() => {
     if (!user?.id) return;
@@ -221,7 +226,7 @@ export const useUsageSummary = () => {
             });
           }
           // Debounced refetch when new usage is recorded
-          setRefetchTrigger(prev => prev + 1);
+          triggerRefetch();
         }
       )
       .subscribe();
@@ -229,11 +234,11 @@ export const useUsageSummary = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, triggerRefetch]);
 
   // Debounced refetch effect
   useEffect(() => {
-    if (debouncedRefetchTrigger > 0) {
+    if (debouncedRefetchTrigger > 0 && query.refetch) {
       query.refetch();
     }
   }, [debouncedRefetchTrigger, query.refetch]);
