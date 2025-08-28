@@ -187,7 +187,7 @@ const ProjectCardsSection = () => {
                       className="w-full" 
                       disabled={project.id === 'case2' || project.id === 'case3'}
                     >
-                      {project.id === 'case2' || project.id === 'case3' ? 'Coming Soon' : 'View Case Study'}
+                      {project.id === 'case2' || project.id === 'case3' ? 'Available on Tuesday, Sep 2nd 2025' : 'View Case Study'}
                       {project.id !== 'case2' && project.id !== 'case3' && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                   </CardContent>
