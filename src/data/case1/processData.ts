@@ -59,6 +59,14 @@ export const processData = {
         "Real-time data visualization concepts",
         "Alert hierarchy and notification design",
         "Hosted sepsis workshop"
+      ],
+      images: [
+        {
+          src: "/lovable-uploads/f237a7dc-8f4a-4015-943b-4f42a2d1b189.png",
+          alt: "Dashboard ideation and wireframing process",
+          caption: "Collaborative design sessions and wireframing concepts for healthcare dashboard interface",
+          title: "Dashboard Wireframes"
+        }
       ]
     },
     {
