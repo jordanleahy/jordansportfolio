@@ -9,7 +9,7 @@ import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 const projects = [
   {
     id: "case1",
-    title: "Improved clinical primary diagnosis by 60%.",
+    title: "I improved clinical primary diagnosis by 60%.",
     company: "Healthcare Analytics",
     description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
