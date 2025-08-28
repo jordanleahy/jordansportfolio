@@ -22,7 +22,7 @@ const projects = [
     title: "Reduce clinical note review time by 8 minutes.",
     company: "Healthcare EMR Solutions",
     description: "Inpatient EMR notes are essential for assigning the correct ICD-10 codes but they are often \"duplicates\" or \"copy and pasted\" making it hard for systems and humans to assign the right codes.",
-    tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates"],
+    tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates", "#MetabolicEncephalopathy", "#UnstructuredNotes"],
     icon: FileText,
     color: "bg-orange-500",
     path: "/cases/case2"
