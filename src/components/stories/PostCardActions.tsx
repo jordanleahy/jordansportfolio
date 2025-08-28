@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Trash2, Mic, Share, Volume2, Upload } from 'lucide-react';
+import { Copy, Trash2, Mic, Share, Volume2, Share2 } from 'lucide-react';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardActionsProps {
@@ -40,7 +40,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
   };
 
   // Determine which share icon to use based on post title
-  const ShareIcon = post.title === "A — Artful Arrival" ? Upload : Share;
+  const ShareIcon = post.title === "A — Artful Arrival" ? Share2 : Share;
 
   return (
     <div className="flex gap-1">
