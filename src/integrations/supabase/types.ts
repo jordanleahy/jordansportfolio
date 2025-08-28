@@ -3674,6 +3674,12 @@ export type Database = {
           | {
               p_collection_id: string
               p_public_access_type?: string
+              p_selected_image_urls?: Json
+              p_theme_id?: string
+            }
+          | {
+              p_collection_id: string
+              p_public_access_type?: string
               p_theme_id?: string
             }
           | { p_collection_id: string; p_theme_id?: string }
