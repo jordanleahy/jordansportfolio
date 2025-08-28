@@ -32,7 +32,7 @@ const projects = [
     title: "Drug Prior Auth and Validation",
     company: "Digital Health Platform",
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
-    tags: ["#PriorAuth", "#ML", "#Workflow"],
+    tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
     icon: Shield,
     color: "bg-green-500",
     path: "/cases/case4"
