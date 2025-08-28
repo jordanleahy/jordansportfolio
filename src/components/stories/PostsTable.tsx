@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Eye, BookOpen, Star, Share2, Pencil, ExternalLink, RefreshCw } from "lucide-react";
+import { Eye, Heart, Star, Share2, Pencil, ExternalLink, RefreshCw } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { PostsCardView } from "./PostsCardView";
@@ -956,7 +956,7 @@ const { handleGenerateImage } = useImageManager({
                       aria-label={isInLibrary ? "Remove from Library" : "Add to Library (Blurred)"}
                       title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library (Blurred)')}
                     >
-                      <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
+                      <Heart className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                     </Button>
                     {!isInLibrary && (
                       <Button
@@ -967,7 +967,7 @@ const { handleGenerateImage } = useImageManager({
                         aria-label="Add to Library (Full Public)"
                         title={isPublishing ? 'Updating…' : 'Add to Library (Full Public)'}
                       >
-                        <BookOpen className="h-4 w-4" />
+                        <Heart className="h-4 w-4" />
                         <span className="sr-only">Full Access</span>
                       </Button>
                     )}
@@ -1142,7 +1142,7 @@ const { handleGenerateImage } = useImageManager({
                           aria-label={isInLibrary ? "Remove from Library" : "Add to Library (Blurred)"}
                           title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library (Blurred)')}
                         >
-                          <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
+                          <Heart className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
                         </Button>
                         {!isInLibrary && (
                           <Button
@@ -1154,7 +1154,7 @@ const { handleGenerateImage } = useImageManager({
                             aria-label="Add to Library (Full Public)"
                             title={isPublishing ? 'Updating…' : 'Add to Library (Full Public)'}
                           >
-                            <BookOpen className="h-4 w-4" />
+                            <Heart className="h-4 w-4" />
                           </Button>
                         )}
                         {hasSharedLink && newPostsCount > 0 ? (
