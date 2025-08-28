@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Trash2, Mic, Share, Volume2, Share2 } from 'lucide-react';
+import { Copy, Trash2, Mic, Share, Volume2 } from 'lucide-react';
 import type { SocialMediaPost } from '@/types/socialMedia';
 
 interface PostCardActionsProps {
@@ -39,9 +39,6 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
     }
   };
 
-  // Determine which share icon to use based on post title
-  const ShareIcon = post.title === "A — Artful Arrival" ? Share2 : Share;
-
   return (
     <div className="flex gap-1">
       <Button
@@ -50,7 +47,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
         onClick={handleShare}
         className="h-8 w-8 p-0"
       >
-        <ShareIcon className="h-4 w-4" />
+        <Share className="h-4 w-4" />
       </Button>
       {showVoiceover && onVoiceover && (
         <Button
