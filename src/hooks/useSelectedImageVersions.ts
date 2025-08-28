@@ -21,7 +21,9 @@ export const useSelectedImageVersions = (posts: Array<{ id: string; image_1_1_ur
 
   // Get selected version for a specific post (or default to original)
   const getSelectedVersion = useCallback((postId: string, defaultUrl?: string | null) => {
-    return selectedVersions.get(postId) || defaultUrl || null;
+    const selectedUrl = selectedVersions.get(postId);
+    // Always return defaultUrl if no explicit selection was made and defaultUrl exists
+    return selectedUrl || defaultUrl || null;
   }, [selectedVersions]);
 
   // Get all selected versions as a record for API calls

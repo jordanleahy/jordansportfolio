@@ -327,7 +327,8 @@ export const PostsCardView = memo(({
         const defaultImageUrl = post.image_1_1_url;
         const selectedImageUrl = selectedImageVersions?.getSelectedVersion(post.id, defaultImageUrl);
         
-        let selectedImage = selectedImageUrl;
+        // Ensure we prioritize existing images over generate state
+        let selectedImage = selectedImageUrl || defaultImageUrl;
         let selectedAspectRatio = selectedImage ? '1:1' : null;
         
         // Check if image is processing when no image is available
