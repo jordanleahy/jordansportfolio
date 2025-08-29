@@ -180,6 +180,18 @@ const ProjectCardsSection = () => {
                           {tag}
                         </Badge>
                       ))}
+                      <Badge variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
+                        Pdx
+                      </Badge>
+                      <Badge variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
+                        DRG
+                      </Badge>
+                      <Badge variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
+                        Quality
+                      </Badge>
+                      <Badge variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
+                        Financial
+                      </Badge>
                     </div>
                     
                     <Button 
