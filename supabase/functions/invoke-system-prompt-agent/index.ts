@@ -450,6 +450,26 @@ Please generate a detailed, professional system prompt following the established
         } else {
           console.log('✅ THEME UPDATED: Successfully linked system prompt to theme');
           
+          // Update theme lifecycle status to mark it as ready
+          console.log('🔄 UPDATING THEME LIFECYCLE STATUS: Marking theme as ready');
+          const { error: lifecycleUpdateError } = await supabase
+            .from('themes')
+            .update({ 
+              lifecycle_status: 'ready',
+              prompt_generation_status: 'completed',
+              background_processing_complete: true,
+              user_interaction_required: false,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', theme_id)
+            .eq('user_id', user_id);
+
+          if (lifecycleUpdateError) {
+            console.error('❌ THEME LIFECYCLE UPDATE ERROR:', lifecycleUpdateError);
+          } else {
+            console.log('✅ THEME LIFECYCLE UPDATED: Theme marked as ready for prompt generation');
+          }
+          
           // 🚀 TRIGGER BULK INDIVIDUAL PROMPT GENERATION IMMEDIATELY
           console.log('🚀 TRIGGERING BULK INDIVIDUAL PROMPT GENERATION:', { theme_id, category: contextCategory });
           
