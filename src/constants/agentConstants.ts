@@ -130,6 +130,6 @@ export const MAX_OUTPUT_TOKENS = {
   SHORT_RESPONSE: 1000,      // For image prompts
   MEDIUM_RESPONSE: 5000,     // For cover letters, scripts
   LONG_RESPONSE: 15000,      // For comparison pages
-  COMPREHENSIVE: 25000,      // For blog content, system prompts (includes reasoning)
+  COMPREHENSIVE: 7000,       // For blog content, system prompts (updated to 7000)
   MAXIMUM: 128000,           // GPT-5 maximum output tokens
 } as const;

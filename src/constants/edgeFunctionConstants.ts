@@ -22,7 +22,7 @@ export const EDGE_FUNCTION_NAMES = {
 
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
-  MAX_TOKENS: 4000,
+  MAX_TOKENS: 7000,
   DEFAULT_TEMPERATURE: 1,
   DEFAULT_MODEL: 'gpt-5-mini-2025-08-07', // Updated to GPT-5 mini for faster processing
   TIMEOUT_MS: 180000, // Increased base timeout to 180 seconds (3 minutes)
