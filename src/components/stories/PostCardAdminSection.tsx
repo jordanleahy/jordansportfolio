@@ -4,7 +4,6 @@ import { ImageIcon, Lightbulb, Mic, BookOpen, Video, FileText } from 'lucide-rea
 import { BlogPostButton } from './BlogPostButton';
 import { IndividualPromptViewer } from './IndividualPromptViewer';
 
-import { BulkImageGenerationButton } from './BulkImageGenerationButton';
 import { GenerateImage } from './GenerateImage';
 import VideoUploadCard from './VideoUploadCard';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
@@ -104,11 +103,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
       </div>
       
       {/* Second row - responsive grid */}
-      <div className={`grid gap-2 ${isAdmin ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3'}`}>
-        <BulkImageGenerationButton
-          post={post}
-          onPostsChange={onPostsChange}
-        />
+      <div className={`grid gap-2 ${isAdmin ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3'}`}>
         {isAdmin && (
           <Button
             variant="outline"

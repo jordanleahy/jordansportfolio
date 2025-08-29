@@ -1,4 +1,6 @@
 // Type definitions for bulk image generation
+import type { SocialMediaPost } from '@/types/socialMedia';
+
 export type AspectRatio = '16:9' | '9:16' | '4:3' | '3:4' | '1:1';
 export type AspectRatioKey = '16_9' | '9_16' | '4_3' | '3_4' | '1_1';
 export type BulkGenerationMode = 'card' | 'table';
@@ -45,18 +47,8 @@ export interface BulkImageGenerationResponse {
 }
 
 export interface OptimizedBulkGenerationHook {
-  generateAllImages: (request: BulkImageGenerationRequest) => Promise<BulkImageGenerationResponse>;
-  isGenerating: (postId: string) => boolean;
-  progress: {
-    completed: number;
-    total: number;
-    currentAspectRatio?: AspectRatio;
-    isProcessing?: boolean;
-    isFinalizing?: boolean;
-  };
-  error: string | null;
-  getExistingPrompt: (request: BulkImageGenerationRequest) => Promise<string>;
-  clearCache: () => void;
+  generateSingleAspect: (posts: SocialMediaPost[], aspectRatio: AspectRatio, mode: 'missing_only' | 'regenerate_all', category?: string) => Promise<any>;
+  isGeneratingSingle: boolean;
 }
 
 // Utility function to convert between aspect ratio formats

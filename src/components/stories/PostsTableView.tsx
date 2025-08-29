@@ -14,7 +14,7 @@ import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit2, 
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
+
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
@@ -66,7 +66,6 @@ export const PostsTableView = memo(({
   const [editingCell, setEditingCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
   const [hoveredCell, setHoveredCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
-  const { generateAllImages, isGenerating } = useBulkImageGeneration();
   const { isProcessing: isProcessingCtx, setProcessing } = useProcessingStatesContext();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { themeData } = useEnhancedThemeDataPrefetch();
@@ -86,20 +85,6 @@ export const PostsTableView = memo(({
     }
   };
 
-  const handleGenerateAllImages = async (post: SocialMediaPost) => {
-    try {
-      await generateAllImages({
-        postId: post.id,
-        title: post.title,
-        description: post.description,
-        category: post.category
-      });
-      // Refresh the posts to show newly generated images
-      onPostsChange();
-    } catch (error) {
-      console.error('Batch generation failed:', error);
-    }
-  };
 
   const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
     // Instant UI feedback - show loading immediately
@@ -312,12 +297,6 @@ export const PostsTableView = memo(({
                 };
 
                 const adminActions = [
-                  {
-                    icon: <Sparkles className="h-4 w-4" />,
-                    onClick: () => handleGenerateAllImages(post),
-                    loading: isGenerating(post.id),
-                    title: "Bulk Generate"
-                  },
                   {
                     icon: <Lightbulb className="h-4 w-4" />,
                     onClick: () => onGenerateImagePrompt(post),

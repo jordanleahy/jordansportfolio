@@ -229,11 +229,6 @@ export interface SystemPromptViewerProps {
 }
 
 // Image Generation Props
-export interface BulkImageGenerationButtonProps {
-  post: SocialMediaPost;
-  onPostsChange?: (posts: SocialMediaPost[]) => void;
-}
-
 export interface BulkGenerationThumbnailsProps {
   showThumbnails: boolean;
   className?: string;
