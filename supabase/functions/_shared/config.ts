@@ -3,10 +3,10 @@
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
   MODELS: {
-    FLAGSHIP: 'gpt-5-mini',
-    FAST: 'gpt-5-mini',
+    FLAGSHIP: 'gpt-5-2025-08-07',
+    FAST: 'gpt-5-mini-2025-08-07',
     REASONING: 'o3-2025-04-16',
-    VISION: 'gpt-5-mini',
+    VISION: 'gpt-5-2025-08-07',
     // Legacy models (deprecated)
     LEGACY_GPT4O: 'gpt-4o',
     LEGACY_GPT4O_MINI: 'gpt-4o-mini',
@@ -17,8 +17,8 @@ export const OPENAI_CONFIG = {
     LONG_RESPONSE: 2500,
     COMPREHENSIVE: 4000,
   },
-  // Default model for theme generation (gpt-5-mini launched Aug 7, 2025)
-  DEFAULT_THEME_MODEL: 'gpt-5-mini',
+  // Default model for theme generation (gpt-5-2025-08-07 launched Aug 7, 2025)
+  DEFAULT_THEME_MODEL: 'gpt-5-2025-08-07',
   DEFAULT_THEME_MAX_COMPLETION_TOKENS: 4000, // Increased to prevent token limit errors
 } as const;
 

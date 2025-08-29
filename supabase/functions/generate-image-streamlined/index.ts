@@ -78,7 +78,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-4.1-2025-04-14',
+          model: 'gpt-5-mini-2025-08-07',
           messages: [
             {
               role: 'system',
@@ -104,8 +104,7 @@ Aspect Ratio: ${aspectRatio}
 ${colorTheme ? `Color Theme: ${colorTheme.name} (${colorTheme.visual_style})` : ''}`
             }
           ],
-          max_tokens: 1000,
-          temperature: 0.7
+          max_completion_tokens: 1000
         }),
       });
 

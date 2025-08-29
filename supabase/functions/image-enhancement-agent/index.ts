@@ -145,7 +145,7 @@ Respond with JSON only:`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini-2025-08-07',
         messages: [
           {
             role: 'system',
@@ -156,8 +156,7 @@ Respond with JSON only:`;
             content: `Enhance this image editing request: "${userInput}"`
           }
         ],
-        temperature: 0.3,
-        max_tokens: 1000,
+        max_completion_tokens: 1000,
         response_format: { type: "json_object" }
       }),
     });

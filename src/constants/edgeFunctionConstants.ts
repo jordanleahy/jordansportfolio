@@ -24,7 +24,7 @@ export const EDGE_FUNCTION_NAMES = {
 export const OPENAI_CONFIG = {
   MAX_TOKENS: 4000,
   DEFAULT_TEMPERATURE: 1,
-  DEFAULT_MODEL: 'gpt-5-mini', // Updated to latest flagship model
+  DEFAULT_MODEL: 'gpt-5-2025-08-07', // Updated to latest flagship model
   TIMEOUT_MS: 180000, // Increased base timeout to 180 seconds (3 minutes)
   ESCALATION_TIMEOUTS: {
     ATTEMPT_1: 180000,  // 180 seconds for first attempt
