@@ -19,9 +19,9 @@ export const OPENAI_CONFIG = {
     LONG_RESPONSE: 2500,
     COMPREHENSIVE: 7000,
   },
-  // Default model for theme generation (updated to gpt-5-mini for faster processing)
-  DEFAULT_THEME_MODEL: 'gpt-5-mini-2025-08-07',
-  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 7000, // Updated to 7000 tokens
+  // Default model for theme generation
+  DEFAULT_THEME_MODEL: 'gpt-5-mini-2025-08-07', // Keep as FAST variant for theme generation
+  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 7000,
 } as const;
 
 // Image Generation Configuration
