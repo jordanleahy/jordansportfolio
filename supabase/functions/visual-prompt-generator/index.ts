@@ -395,6 +395,24 @@ Incorporate these characteristics naturally into the generated prompt while main
     estimatedCost = usageData.estimatedCost;
     openAIRequestId = usageData.openAIRequestId;
 
+    // 🎯 TOKEN USAGE LOGGING
+    const costPerToken = tokensUsed > 0 ? estimatedCost / tokensUsed : 0;
+    console.log(`🎯 TOKEN USAGE: ${correlationId}`);
+    console.log(`├── Prompt Tokens: ${promptTokens?.toLocaleString() || 'N/A'}`);
+    console.log(`├── Completion Tokens: ${completionTokens?.toLocaleString() || 'N/A'}`);
+    console.log(`├── Total Tokens: ${tokensUsed?.toLocaleString() || 'N/A'}`);
+    console.log(`├── Estimated Cost: $${estimatedCost?.toFixed(6) || 'N/A'}`);
+    console.log(`└── Cost per Token: $${costPerToken?.toFixed(8) || 'N/A'}`);
+
+    logger.info('Token usage details', {
+      promptTokens,
+      completionTokens,
+      totalTokens: tokensUsed,
+      estimatedCost,
+      costPerToken,
+      model: OPENAI_CONFIG.MODELS.FLAGSHIP
+    });
+
     // Parse response
     let generatedText: string;
     logger.debug('OpenAI response structure', {
@@ -479,6 +497,14 @@ Incorporate these characteristics naturally into the generated prompt while main
       });
     }
 
+    logger.success('Visual prompt generation completed successfully', {
+      promptLength: generatedText?.length || 0,
+      totalTokens: tokensUsed,
+      estimatedCost: `$${estimatedCost?.toFixed(6)}`,
+      efficiency: `${(generatedText?.length || 0) / Math.max(tokensUsed, 1)} chars/token`,
+      correlationId
+    });
+
     return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -486,7 +512,21 @@ Incorporate these characteristics naturally into the generated prompt while main
   } catch (error) {
     success = false;
     errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Error in visual-prompt-generator function', error);
+    
+    // Log token usage even on error (if available)
+    if (tokensUsed > 0) {
+      console.log(`💸 PARTIAL TOKEN USAGE ON ERROR: ${correlationId}`);
+      console.log(`├── Tokens Used: ${tokensUsed?.toLocaleString()}`);
+      console.log(`├── Estimated Cost: $${estimatedCost?.toFixed(6)}`);
+      console.log(`└── Error: ${errorMessage}`);
+    }
+    
+    logger.error('Error in visual-prompt-generator function', { 
+      error,
+      tokensUsed,
+      estimatedCost,
+      correlationId 
+    });
     console.error('❌ Error in visual-prompt-generator function:', error);
 
     // Track failed usage
