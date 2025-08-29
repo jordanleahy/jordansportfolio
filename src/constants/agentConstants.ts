@@ -52,11 +52,13 @@ export const SOCIAL_MEDIA_PLATFORMS = {
 // OpenAI Model Versions (Latest - GPT-5 models launched Aug 7, 2025)
 export const OPENAI_MODELS = {
   // Latest flagship model (launched Aug 7, 2025)
-  FLAGSHIP: 'gpt-5',
-  // Reasoning models
-  REASONING: 'o3-2025-04-16',
+  FLAGSHIP: 'gpt-5-2025-08-07',
+  FAST: 'gpt-5-mini-2025-08-07',
+  FASTEST: 'gpt-5-nano-2025-08-07',
+  // Reasoning models (now using GPT-5 flagship)
+  REASONING: 'gpt-5-2025-08-07',
   // Vision model (GPT-5 has vision capabilities)
-  VISION: 'gpt-5',
+  VISION: 'gpt-5-2025-08-07',
   // Legacy models (deprecated)
   LEGACY_GPT4O: 'gpt-4o',
   LEGACY_GPT4O_MINI: 'gpt-4o-mini',
@@ -74,19 +76,31 @@ export const DEFAULT_MODELS = {
 export const MODEL_OPTIONS = [
   {
     value: OPENAI_MODELS.FLAGSHIP,
-    label: 'gpt-5 (Flagship)',
+    label: 'gpt-5-2025-08-07 (Flagship)',
     description: 'Most capable flagship model with 128K output tokens',
     recommended: true
   },
   {
+    value: OPENAI_MODELS.FAST,
+    label: 'gpt-5-mini-2025-08-07 (Fast)',
+    description: 'Balanced speed and quality for most tasks',
+    recommended: false
+  },
+  {
+    value: OPENAI_MODELS.FASTEST,
+    label: 'gpt-5-nano-2025-08-07 (Fastest)',
+    description: 'Speed-optimized for simple tasks',
+    recommended: false
+  },
+  {
     value: OPENAI_MODELS.REASONING,
-    label: 'o3-2025-04-16 (Reasoning)',
-    description: 'Powerful reasoning model for complex problems',
+    label: 'gpt-5-2025-08-07 (Reasoning)',
+    description: 'Complex analysis and reasoning tasks',
     recommended: false
   },
   {
     value: OPENAI_MODELS.VISION,
-    label: 'gpt-5 (Vision)',
+    label: 'gpt-5-2025-08-07 (Vision)',
     description: 'Model with vision capabilities',
     recommended: false
   }

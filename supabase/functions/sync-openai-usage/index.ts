@@ -69,10 +69,11 @@ function computeImageGenerationCost(size?: string, quality: string = 'standard')
 }
 
 const TEXT_PRICING: Record<string, { input: number; output: number }> = {
-  'gpt-5-mini': { input: 0.15, output: 0.60 }, // per 1M tokens (placeholder, align with billing)
-  'gpt-4o-mini': { input: 0.15, output: 0.60 }, // per 1M tokens
-  'gpt-4o': { input: 5, output: 15 },
-  'gpt-4.1-2025-04-14': { input: 5, output: 15 },
+  'gpt-5-2025-08-07': { input: 3.0, output: 12.0 }, // GPT-5 flagship pricing per 1M tokens
+  'gpt-5-mini-2025-08-07': { input: 0.15, output: 0.60 }, // GPT-5 mini pricing per 1M tokens
+  'gpt-5-nano-2025-08-07': { input: 0.05, output: 0.20 }, // GPT-5 nano pricing per 1M tokens
+  'gpt-4o-mini': { input: 0.15, output: 0.60 }, // Legacy model
+  'gpt-4o': { input: 5, output: 15 }, // Legacy model
   default: { input: 1.5, output: 6 },
 };
 

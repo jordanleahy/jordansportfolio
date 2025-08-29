@@ -3,10 +3,12 @@
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
   MODELS: {
-    FLAGSHIP: 'gpt-5-mini-2025-08-07',
-    FAST: 'gpt-5-mini-2025-08-07',
-    REASONING: 'o3-2025-04-16',
-    VISION: 'gpt-5-mini-2025-08-07',
+    FLAGSHIP: 'gpt-5-2025-08-07',        // Most capable
+    FAST: 'gpt-5-mini-2025-08-07',       // Balanced speed/quality
+    FASTEST: 'gpt-5-nano-2025-08-07',    // Speed-optimized
+    REASONING: 'gpt-5-2025-08-07',       // Complex analysis (was o3)
+    VISION: 'gpt-5-2025-08-07',          // Vision tasks (was gpt-4.1)
+    FALLBACK: 'gpt-5-mini-2025-08-07',   // Reliable fallback
     // Legacy models (deprecated)
     LEGACY_GPT4O: 'gpt-4o',
     LEGACY_GPT4O_MINI: 'gpt-4o-mini',
