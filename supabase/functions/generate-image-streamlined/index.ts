@@ -105,7 +105,7 @@ Aspect Ratio: ${aspectRatio}
 ${colorTheme ? `Color Theme: ${colorTheme.name} (${colorTheme.visual_style})` : ''}`
             }
           ],
-          max_tokens: 1000,
+          max_tokens: 15000,
           temperature: 0.7
         }))
       });
