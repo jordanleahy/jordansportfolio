@@ -3,12 +3,12 @@
 
 export const buildGPT5Params = (baseParams: any) => {
   // Destructure to separate supported from unsupported params
-  const { temperature, max_tokens, ...supportedParams } = baseParams;
+  const { temperature, max_tokens, max_completion_tokens, ...supportedParams } = baseParams;
   
   return {
     ...supportedParams,
     // Use max_completion_tokens for GPT-5+ (required parameter)
-    max_completion_tokens: max_tokens || baseParams.max_completion_tokens || 7000,
+    max_completion_tokens: max_tokens || max_completion_tokens || 7000,
   };
 };
 
