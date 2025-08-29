@@ -97,5 +97,4 @@ export const CONTENT_LIMITS = {
 export const IMAGE_SETTINGS = {
   DEFAULT_SIZE: '1024x1024',
   DEFAULT_QUALITY: 'high',
-  PROMPT_MAX_LENGTH: 1000,
 } as const;

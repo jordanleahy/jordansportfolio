@@ -24,14 +24,6 @@ export const OPENAI_CONFIG = {
   DEFAULT_THEME_MAX_COMPLETION_TOKENS: 7000,
 } as const;
 
-// Image Generation Configuration
-export const IMAGE_CONFIG = {
-  MODEL: 'gpt-image-1',
-  SIZE: '1024x1024',
-  QUALITY: 'high',
-  PROMPT_MAX_LENGTH: 1000,
-} as const;
-
 // Progress Step Percentages for Streaming Pipeline
 export const PROGRESS_STEPS = {
   THEME_GENERATION_START: 10,
