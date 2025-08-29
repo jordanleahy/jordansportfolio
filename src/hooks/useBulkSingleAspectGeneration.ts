@@ -39,7 +39,7 @@ interface BulkSingleAspectResponse {
 }
 
 export const useBulkSingleAspectGeneration = () => {
-  const { setBulkProcessing } = useProcessingStatesContext();
+  const { setProcessing } = useProcessingStatesContext();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const generateBulkSingleAspect = useCallback(async (
@@ -56,7 +56,7 @@ export const useBulkSingleAspectGeneration = () => {
     const postIds = posts.map(p => p.id);
     
     // Set processing state for all posts
-    postIds.forEach(id => setBulkProcessing(id, true));
+    postIds.forEach(id => setProcessing(id, 'generate', true));
 
     try {
       // Validate posts have prompts for missing_only mode
@@ -135,10 +135,10 @@ export const useBulkSingleAspectGeneration = () => {
       };
     } finally {
       // Clear processing state for all posts
-      postIds.forEach(id => setBulkProcessing(id, false));
+      postIds.forEach(id => setProcessing(id, 'generate', false));
       setIsProcessing(false);
     }
-  }, [setBulkProcessing, isProcessing]);
+  }, [setProcessing, isProcessing]);
 
   return {
     generateBulkSingleAspect,

@@ -20,7 +20,7 @@ interface PostImageWithVersionsProps {
   handleRegenerateImage: (post: SocialMediaPost, e: React.MouseEvent) => void;
   onPreviewImage: (url: string, alt: string) => void;
   onGenerateImage: (postId: string, aspectRatio: string, title: string, description: string, category: string) => void;
-  isProcessingCtx: (postId: string, operation?: 'generate' | 'bulk_generate' | 'regenerate_prompt', aspectRatio?: AspectRatio) => boolean;
+  isProcessingCtx: (postId: string, operation?: 'generate' | 'regenerate_prompt', aspectRatio?: AspectRatio) => boolean;
   secondsRemaining: number;
   isRunning: boolean;
   isExpired: boolean;

@@ -13,39 +13,6 @@ export interface AspectRatioConfig {
   label: string;
 }
 
-export interface BulkImageGenerationResult {
-  aspectRatio: AspectRatio;
-  url?: string;
-  prompt?: string;
-  fileName?: string;
-  success: boolean;
-  error?: string;
-  cost: number;
-  tokens: number;
-}
-
-export interface BulkImageGenerationRequest {
-  postId: string;
-  title: string;
-  description: string;
-  category?: string;
-  theme?: string;
-  context?: BulkGenerationMode;
-  colorThemeId?: string;
-}
-
-export interface BulkImageGenerationResponse {
-  success: boolean;
-  results: BulkImageGenerationResult[];
-  failures: BulkImageGenerationResult[];
-  totalCost: number;
-  totalTokens: number;
-  imagesGenerated: number;
-  processingTimeMs: number;
-  aspectRatiosProcessed: number;
-  context?: BulkGenerationMode;
-}
-
 export interface OptimizedBulkGenerationHook {
   generateSingleAspect: (posts: SocialMediaPost[], aspectRatio: AspectRatio, mode: 'missing_only' | 'regenerate_all', category?: string) => Promise<any>;
   isGeneratingSingle: boolean;

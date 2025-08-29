@@ -229,11 +229,6 @@ export interface SystemPromptViewerProps {
 }
 
 // Image Generation Props
-export interface BulkGenerationThumbnailsProps {
-  showThumbnails: boolean;
-  className?: string;
-}
-
 export interface SingleAspectRatioSelectorProps {
   post: SocialMediaPost;
   onGenerateImage: (postId: string, aspectRatio: AspectRatioKey, title: string, description: string, category?: string) => Promise<{ success: boolean; imageUrl?: string; error?: string }>;

@@ -330,7 +330,7 @@ export const PostsTableView = memo(({
                 isAdmin
               };
 
-              const isBulk = isProcessingCtx(post.id, 'bulk_generate');
+              const isBulk = false;
               return (
               <TableRow key={post.id} className={`transition-all duration-300 ${getRowAnimationClass(post.id)}`}>
                 <TableCell className="font-medium w-48">
