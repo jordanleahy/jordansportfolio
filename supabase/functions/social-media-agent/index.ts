@@ -126,7 +126,7 @@ ${custom_context ? `Additional Context: ${custom_context}` : ''}
               content: `Transform this blog post into platform-specific social media content:\n\n${blogContent}`
             }
           ],
-          max_output_tokens: agent.max_tokens || 25000,
+          max_completion_tokens: agent.max_tokens || 25000,
         }),
       });
 

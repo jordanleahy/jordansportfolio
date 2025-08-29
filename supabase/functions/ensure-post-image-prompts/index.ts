@@ -16,7 +16,7 @@
  * - Error: { error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-4o-mini for prompt generation)
+ * - OpenAI API (GPT-5 for prompt generation)
  * - Supabase Database (social_media_posts, openai_agents, system_prompts tables)
  * 
  * USAGE:

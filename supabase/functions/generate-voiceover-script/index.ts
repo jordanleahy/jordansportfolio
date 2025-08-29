@@ -17,7 +17,7 @@
  * - Error: { error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-4o for high-quality script generation)
+ * - OpenAI API (GPT-5 for high-quality script generation)
  * - Supabase Database (openai_agents, system_prompts tables)
  * - OpenAI Attribution System (usage tracking and cost calculation)
  * 

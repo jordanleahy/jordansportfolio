@@ -15,7 +15,7 @@
  * - Error: { error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-4 Vision for image analysis)
+ * - OpenAI API (GPT-5 for image analysis)
  * 
  * USAGE:
  * Called from: Reference image upload components, prompt enhancement workflows

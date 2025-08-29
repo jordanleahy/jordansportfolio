@@ -353,8 +353,7 @@ Incorporate these characteristics naturally into the generated prompt while main
     logger.info('OpenAI chat request prepared', {
       model: openAIRequestBody.model,
       parameters: {
-        has_max_tokens: !!openAIRequestBody.max_tokens,
-        has_temperature: !!openAIRequestBody.temperature,
+        has_max_completion_tokens: !!openAIRequestBody.max_completion_tokens,
         user_set: !!openAIRequestBody.user
       },
       message_summary: {
@@ -466,7 +465,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-mini-2025-08-07',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -495,7 +494,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-mini-2025-08-07',
         requestType: 'text_generation',
         success: false,
         estimatedCost: 0,

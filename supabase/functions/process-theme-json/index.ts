@@ -14,7 +14,7 @@
  * - Error: { success: false, fixes: array, warnings: array, errors: array }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-4o-mini for intelligent data cleaning and validation)
+ * - OpenAI API (GPT-5 for intelligent data cleaning and validation)
  * - OpenAI Attribution System (usage tracking and cost calculation)
  * 
  * USAGE:
