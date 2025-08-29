@@ -110,7 +110,7 @@ Respond with a brief, focused description of the person's permanent characterist
           }
         ],
         max_completion_tokens: 300
-      })
+      }))
     });
 
     if (!analysisResponse.ok) {
