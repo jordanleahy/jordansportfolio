@@ -864,15 +864,6 @@ export default function StoriesDashboard() {
                   pauseDuration={2000}
                 />
                 
-                {/* Provider Selection */}
-                <div className="mt-4 w-full">
-                  <ProviderSelector
-                    value={currentProvider}
-                    onChange={setCurrentProvider}
-                    disabled={isGeneratingTheme}
-                    className="px-8"
-                  />
-                </div>
                 
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
@@ -900,9 +891,17 @@ export default function StoriesDashboard() {
                     </Button>
                   )}
                   
-                  {roleLoading ? <Skeleton className="h-10 w-48" /> : <Button onClick={() => setImportModalOpen(true)} variant="outline">
-                      Import Themes
-                    </Button>}
+                  {/* Provider Selection and Import Themes */}
+                  <div className="flex items-center gap-4 px-8">
+                    <ProviderSelector
+                      value={currentProvider}
+                      onChange={setCurrentProvider}
+                      disabled={isGeneratingTheme}
+                    />
+                    {roleLoading ? <Skeleton className="h-10 w-32" /> : <Button onClick={() => setImportModalOpen(true)} variant="outline">
+                        Import Themes
+                      </Button>}
+                  </div>
                 </div>}
             </div>
           </AuroraBackground>
