@@ -37,18 +37,12 @@ serve(async (req) => {
     console.log('📝 User prompt:', prompt);
 
     // First, analyze the person in the image to extract key features
-    const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(buildGPT5Params({
-        model: GPT5_MODELS.FLAGSHIP,
-        messages: [
-          {
-            role: 'system',
-            content: `You are an expert at analyzing people in photos to extract their core physical characteristics for character creation. Focus ONLY on permanent facial features and ignore clothing, backgrounds, and accessories.
+    const analysisParams = buildGPT5Params({
+      model: GPT5_MODELS.FLAGSHIP,
+      messages: [
+        {
+          role: 'system',
+          content: `You are an expert at analyzing people in photos to extract their core physical characteristics for character creation. Focus ONLY on permanent facial features and ignore clothing, backgrounds, and accessories.
 
 Analyze this person and extract:
 1. Age group (child/teen/adult)
@@ -62,25 +56,33 @@ Analyze this person and extract:
 Ignore: clothing, accessories, background, seasonal context.
 
 Respond with a brief, focused description of the person's permanent characteristics.`
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Please analyze this person and describe their key physical characteristics for character creation:'
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${image}`
-                }
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Please analyze this person and describe their key physical characteristics for character creation:'
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/jpeg;base64,${image}`
               }
-            ]
-          }
-        ],
-        max_completion_tokens: 300
-      })
+            }
+          ]
+        }
+      ],
+      max_completion_tokens: 300
+    });
+
+    const analysisResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(analysisParams)
     });
 
     if (!analysisResponse.ok) {
@@ -116,7 +118,7 @@ Respond with a brief, focused description of the person's permanent characterist
         size: '1024x1024',
         quality: 'high',
         output_format: 'png'
-      }),
+      })
     });
 
     if (!imageResponse.ok) {
