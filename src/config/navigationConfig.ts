@@ -97,11 +97,6 @@ export const getAdminItems = (): NavigationItem[] => {
       icon: Bot,
     },
     {
-      href: "/work-report",
-      label: "Work Reports",
-      icon: FileBarChart,
-    },
-    {
       href: "/admin/api-usage",
       label: "API Usage",
       icon: BarChart3,
