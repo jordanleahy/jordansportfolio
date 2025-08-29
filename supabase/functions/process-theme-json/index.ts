@@ -21,6 +21,17 @@
  * Called from: Data import workflows, theme processing pipelines, content validation systems
  * Authentication: Optional - enhanced tracking and attribution available for authenticated users
  * 
+ * IMPORTANT: OpenAI API Guidelines for this function
+ * 
+ * ✅ REQUIRED MODELS: Use GPT-5 family only
+ * - gpt-5-2025-08-07 (flagship)
+ * - gpt-5-mini-2025-08-07 (faster)  
+ * - gpt-5-nano-2025-08-07 (fastest)
+ * 
+ * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
+ * ❌ NEVER USE: temperature parameter (not supported in GPT-5)
+ * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
+ * 
  * FLOW:
  * 1. Parse incoming raw JSON data with comprehensive logging
  * 2. Apply AI-powered cleaning using OpenAI to fix syntax and structural issues

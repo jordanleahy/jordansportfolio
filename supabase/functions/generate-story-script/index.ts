@@ -16,13 +16,24 @@
  * - Error: { error: string, details: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-4.1-2025-04-14 or agent-specified model for script generation)
+ * - OpenAI API (GPT-5 for script generation)
  * - Supabase Database (openai_agents, system_prompts tables)
  * - Database Function (insert_story_telling_agent for agent creation)
  * 
  * USAGE:
  * Called from: Story creation workflows, voice recording preparation, content transformation
  * Authentication: Required - uses user context for agent management and script generation
+ * 
+ * IMPORTANT: OpenAI API Guidelines for this function
+ * 
+ * ✅ REQUIRED MODELS: Use GPT-5 family only
+ * - gpt-5-2025-08-07 (flagship)
+ * - gpt-5-mini-2025-08-07 (faster)  
+ * - gpt-5-nano-2025-08-07 (fastest)
+ * 
+ * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
+ * ❌ NEVER USE: temperature parameter (not supported in GPT-5)
+ * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
  * 
  * FLOW:
  * 1. Authenticate user and validate story type (childrens_story or convincing_story)

@@ -20,6 +20,17 @@
  * USAGE:
  * Called from: Reference image upload components, prompt enhancement workflows
  * Authentication: Required for rate limiting and usage tracking
+ * 
+ * IMPORTANT: OpenAI API Guidelines for this function
+ * 
+ * ✅ REQUIRED MODELS: Use GPT-5 family only
+ * - gpt-5-2025-08-07 (flagship)
+ * - gpt-5-mini-2025-08-07 (faster)  
+ * - gpt-5-nano-2025-08-07 (fastest)
+ * 
+ * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
+ * ❌ NEVER USE: temperature parameter (not supported in GPT-5)
+ * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
