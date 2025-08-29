@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { buildGPT5Params, GPT5_MODELS } from '../_shared/gpt5-params.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -105,15 +106,15 @@ serve(async (req) => {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
+      body: JSON.stringify(buildGPT5Params({
+        model: GPT5_MODELS.MINI,
         messages: [
           { role: 'system', content: systemPrompt.prompt_text },
           { role: 'user', content: userMessage }
         ],
         temperature: 0.1,
         max_tokens: 1000,
-      }),
+      })),
     });
 
     if (!response.ok) {

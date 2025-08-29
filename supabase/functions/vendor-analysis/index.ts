@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
+import { buildGPT5Params, GPT5_MODELS } from '../_shared/gpt5-params.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -146,8 +147,8 @@ serve(async (req) => {
           'Authorization': `Bearer ${openAIApiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          model: 'gpt-4.1-2025-04-14',
+        body: JSON.stringify(buildGPT5Params({
+          model: GPT5_MODELS.FLAGSHIP,
           messages: [
             {
               role: 'system',
@@ -211,15 +212,15 @@ Focus on competitive intelligence aspects that would be valuable to a competitor
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+      body: JSON.stringify(buildGPT5Params({
+        model: GPT5_MODELS.FLAGSHIP,
         messages: [
           { role: 'system', content: basePrompt },
           { role: 'user', content: analysisPrompt }
         ],
         temperature: 0.3,
         max_tokens: 4000,
-      }),
+      })),
     });
 
     if (!openAIResponse.ok) {

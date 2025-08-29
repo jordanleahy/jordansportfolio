@@ -72,14 +72,14 @@ Create a detailed image generation prompt for this ${theme} content${category ? 
       'Authorization': `Bearer ${openAIApiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
+    body: JSON.stringify(buildGPT5Params({
+      model: GPT5_MODELS.MINI,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
       max_completion_tokens: 500
-    }),
+    })),
   });
 
   const data = await response.json();

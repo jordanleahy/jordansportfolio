@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { buildGPT5Params, GPT5_MODELS } from '../_shared/gpt5-params.ts';
 
 // CORS headers for browser access
 const corsHeaders = {
@@ -90,14 +91,14 @@ REQUIREMENTS:
         Authorization: `Bearer ${openAIApiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "gpt-4.1-2025-04-14",
+      body: JSON.stringify(buildGPT5Params({
+        model: GPT5_MODELS.FLAGSHIP,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
         ],
         max_completion_tokens: 2500,
-      }),
+      })),
     });
 
     if (!response.ok) {

@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createLogger } from "../_shared/advanced-logger.ts";
+import { buildGPT5Params, GPT5_MODELS } from '../_shared/gpt5-params.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -144,8 +145,8 @@ Respond with JSON only:`;
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
+      body: JSON.stringify(buildGPT5Params({
+        model: GPT5_MODELS.MINI,
         messages: [
           {
             role: 'system',
@@ -159,7 +160,7 @@ Respond with JSON only:`;
         temperature: 0.3,
         max_tokens: 1000,
         response_format: { type: "json_object" }
-      }),
+      })),
     });
 
     logger.endTiming('openai_request');
