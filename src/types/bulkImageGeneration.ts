@@ -45,7 +45,7 @@ export interface BulkImageGenerationResponse {
 }
 
 export interface OptimizedBulkGenerationHook {
-  // Removed generateAllImages - functionality deprecated
+  generateAllImages: (request: BulkImageGenerationRequest) => Promise<BulkImageGenerationResponse>;
   isGenerating: (postId: string) => boolean;
   progress: {
     completed: number;

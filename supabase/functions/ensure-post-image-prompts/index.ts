@@ -1,3 +1,4 @@
+
 /**
  * EDGE FUNCTION: Ensure Post Image Prompts
  * 
@@ -11,7 +12,7 @@
  * - userId: string - User ID to filter posts and find appropriate agent
  * 
  * OUTPUTS:
- * - Success: { success: true, category: string, totalPosts: number, status: 'processing' }
+ * - Success: { success: true, category: string, totalPosts: number, successCount: number, errorCount: number, results: array }
  * - Error: { error: string }
  * 
  * DEPENDENCIES:
@@ -26,9 +27,9 @@
  * 1. Fetch all posts in specified category that lack image prompts
  * 2. Find user's Visual Prompt Generator agent
  * 3. Retrieve category-specific system prompt from system_prompts table
- * 4. Return immediate response and process in background using EdgeRuntime.waitUntil()
- * 5. For each post, generate detailed image prompt using OpenAI
- * 6. Update posts with generated prompts and timestamp
+ * 4. For each post, generate detailed image prompt using OpenAI
+ * 5. Update posts with generated prompts and timestamp
+ * 6. Return processing summary with success/error counts and details
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
@@ -164,185 +165,156 @@ serve(async (req) => {
       console.log(`✅ FALLBACK SYSTEM PROMPT: ${systemPromptData.agent_name}, length: ${systemPromptData.prompt_text.length}`);
     }
 
-    // Step 3: Return early response and process in background
-    console.log('🚀 STEP 3: Starting background image prompt generation');
-    console.log(`📊 Processing ${posts.length} posts with optimized batch processing`);
+    // Step 3: Generate image prompts for each post in batches
+    let successCount = 0;
+    let errorCount = 0;
+    const results = [];
+    const BATCH_SIZE = 7; // Increased from 3 to 7 posts per batch
+    const BATCH_DELAY_MS = 500; // Reduced from 2000ms to 500ms delay between batches
 
-    // Background processing function with improved error handling
-    const processImagePromptsInBackground = async () => {
-      let successCount = 0;
-      let errorCount = 0;
-      const results = [];
-      const BATCH_SIZE = 3; // Reduced from 7 to 3 posts per batch for better reliability
-      const BATCH_DELAY_MS = 2000; // Increased to 2000ms for more breathing room
+    console.log('🎨 STEP 3: Starting batch image prompt generation for posts');
+    console.log(`📊 Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);
 
-      console.log(`🔄 BACKGROUND: Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);
+    // Process posts in batches to prevent timeout
+    for (let i = 0; i < posts.length; i += BATCH_SIZE) {
+      const batch = posts.slice(i, i + BATCH_SIZE);
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      const totalBatches = Math.ceil(posts.length / BATCH_SIZE);
+      
+      console.log(`🔄 Processing batch ${batchNum}/${totalBatches} (${batch.length} posts)`);
 
-      try {
-        // Process posts in smaller batches to prevent timeout
-        for (let i = 0; i < posts.length; i += BATCH_SIZE) {
-          const batch = posts.slice(i, i + BATCH_SIZE);
-          const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-          const totalBatches = Math.ceil(posts.length / BATCH_SIZE);
+      // Process batch with parallel processing and reduced logging
+      const batchPromises = batch.map(async (post, index) => {
+        try {
+          console.log(`🎯 GENERATING PROMPT: Post "${post.title}" (${post.id})`);
+
+          // Use internal edge function to generate prompts consistently with retry logic
+          const invokePayload = {
+            postId: post.id,
+            themeId: post.theme_id,
+            aspectRatio: '1:1'
+          };
           
-          console.log(`🔄 BACKGROUND BATCH ${batchNum}/${totalBatches}: Processing ${batch.length} posts`);
-
-          // Process batch with parallel processing and improved error handling
-          const batchPromises = batch.map(async (post, index) => {
-            try {
-              console.log(`🎯 BACKGROUND: Generating prompt for "${post.title}" (${post.id})`);
-
-              // Use internal edge function to generate prompts consistently with retry logic
-              const invokePayload = {
-                postId: post.id,
-                themeId: post.theme_id,
-                aspectRatio: '1:1'
-              };
-              
-              let promptResp = null;
-              let promptFnError = null;
-              const maxRetries = 2; // Reduced retries to prevent excessive delays
-              
-              for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                const result = await supabase.functions.invoke('visual-prompt-generator', {
-                  body: invokePayload
-                });
-                
-                promptResp = result.data;
-                promptFnError = result.error;
-                
-                if (!promptFnError) {
-                  break; // Success, exit retry loop
-                }
-                
-                // Check if it's a retryable error (503, timeout, etc.)
-                const isRetryable = promptFnError.message?.includes('Service Unavailable') || 
-                                   promptFnError.message?.includes('503') ||
-                                   promptFnError.message?.includes('timeout');
-                
-                if (!isRetryable || attempt === maxRetries) {
-                  console.error(`❌ BACKGROUND: Prompt function error for post ${post.id} (attempt ${attempt}/${maxRetries}):`, promptFnError);
-                  break;
-                }
-                
-                console.log(`⏳ BACKGROUND: Retrying post ${post.id} (attempt ${attempt + 1}/${maxRetries}) in 1s...`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-              }
-
-              if (promptFnError) {
-                return { postId: post.id, success: false, error: promptFnError.message };
-              }
-
-              const generatedPrompt = promptResp?.generatedPrompt;
-
-              if (!generatedPrompt) {
-                console.error(`❌ BACKGROUND: No prompt generated for post ${post.id}`);
-                return { postId: post.id, success: false, error: 'No prompt generated' };
-              }
-
-              // Update the post with the generated prompt and mark as completed
-              const { error: updateError } = await supabase
-                .from('social_media_posts')
-                .update({ 
-                  generated_image_prompt: generatedPrompt.trim(),
-                  individual_prompt_status: 'completed',
-                  updated_at: new Date().toISOString()
-                })
-                .eq('id', post.id);
-
-              if (updateError) {
-                console.error(`❌ BACKGROUND: Update error for post ${post.id}:`, updateError);
-                return { postId: post.id, success: false, error: updateError.message };
-              } else {
-                console.log(`✅ BACKGROUND: Prompt generated and saved for post ${post.id}`);
-                return { 
-                  postId: post.id, 
-                  success: true, 
-                  promptLength: generatedPrompt.length 
-                };
-              }
-
-            } catch (error) {
-              console.error(`❌ BACKGROUND: Unexpected error for post ${post.id}:`, error);
-              return { postId: post.id, success: false, error: error.message };
-            }
-          });
-
-          // Wait for all posts in the batch to complete
-          const batchResults = await Promise.allSettled(batchPromises);
+          let promptResp = null;
+          let promptFnError = null;
+          const maxRetries = 3;
           
-          // Process batch results
-          batchResults.forEach((result, index) => {
-            if (result.status === 'fulfilled' && result.value) {
-              results.push(result.value);
-              if (result.value.success) {
-                successCount++;
-              } else {
-                errorCount++;
-              }
-            } else {
-              const post = batch[index];
-              console.error(`❌ BACKGROUND: Batch promise failed for post ${post.id}:`, result.reason);
-              errorCount++;
-              results.push({ 
-                postId: post.id, 
-                success: false, 
-                error: result.reason?.message || 'Promise rejected' 
-              });
+          for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            const result = await supabase.functions.invoke('visual-prompt-generator', {
+              body: invokePayload
+            });
+            
+            promptResp = result.data;
+            promptFnError = result.error;
+            
+            if (!promptFnError) {
+              break; // Success, exit retry loop
             }
-          });
-
-          // Log batch completion with more details
-          const successfulInBatch = batchResults.filter(r => r.status === 'fulfilled' && r.value?.success).length;
-          console.log(`✅ BACKGROUND BATCH ${batchNum}/${totalBatches} completed: ${successfulInBatch}/${batch.length} successful`);
-
-          // Add longer delay between batches for better system stability
-          if (i + BATCH_SIZE < posts.length) {
-            console.log(`⏱️ BACKGROUND: Waiting ${BATCH_DELAY_MS}ms before next batch...`);
-            await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
+            
+            // Check if it's a retryable error (503, timeout, etc.)
+            const isRetryable = promptFnError.message?.includes('Service Unavailable') || 
+                               promptFnError.message?.includes('503') ||
+                               promptFnError.message?.includes('timeout');
+            
+            if (!isRetryable || attempt === maxRetries) {
+              console.error(`❌ PROMPT FUNCTION ERROR for post ${post.id} (attempt ${attempt}/${maxRetries}):`, promptFnError);
+              break;
+            }
+            
+            console.log(`⏳ Retrying post ${post.id} (attempt ${attempt + 1}/${maxRetries}) in 1s...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
+
+          if (promptFnError) {
+            return { postId: post.id, success: false, error: promptFnError.message };
+          }
+
+          const generatedPrompt = promptResp?.generatedPrompt;
+
+          if (!generatedPrompt) {
+            console.error(`❌ NO PROMPT GENERATED for post ${post.id}`);
+            return { postId: post.id, success: false, error: 'No prompt generated' };
+          }
+
+          // Update the post with the generated prompt and mark as completed
+          const { error: updateError } = await supabase
+            .from('social_media_posts')
+            .update({ 
+              generated_image_prompt: generatedPrompt.trim(),
+              individual_prompt_status: 'completed',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', post.id);
+
+          if (updateError) {
+            console.error(`❌ UPDATE ERROR for post ${post.id}:`, updateError);
+            return { postId: post.id, success: false, error: updateError.message };
+          } else {
+            console.log(`✅ PROMPT GENERATED and SAVED: Post ${post.id}`);
+            return { 
+              postId: post.id, 
+              success: true, 
+              promptLength: generatedPrompt.length 
+            };
+          }
+
+        } catch (error) {
+          console.error(`❌ UNEXPECTED ERROR for post ${post.id}:`, error);
+          return { postId: post.id, success: false, error: error.message };
         }
-
-        // Final background processing results
-        console.log(`📈 BACKGROUND PROCESSING COMPLETE: {
-      category: "${category}",
-      totalPosts: ${posts.length},
-      successCount: ${successCount},
-      errorCount: ${errorCount},
-      successRate: ${((successCount / posts.length) * 100).toFixed(1)}%
-    }`);
-
-      } catch (backgroundError) {
-        console.error('❌ BACKGROUND PROCESSING ERROR:', backgroundError);
-      }
-    };
-
-    // Use EdgeRuntime.waitUntil to run background processing without blocking response
-    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
-      EdgeRuntime.waitUntil(processImagePromptsInBackground());
-      console.log('📋 BACKGROUND: Processing started with EdgeRuntime.waitUntil()');
-    } else {
-      // Fallback for environments without EdgeRuntime.waitUntil
-      processImagePromptsInBackground().catch(error => {
-        console.error('❌ BACKGROUND PROCESSING FALLBACK ERROR:', error);
       });
-      console.log('📋 BACKGROUND: Processing started with fallback method');
+
+      // Wait for all posts in the batch to complete
+      const batchResults = await Promise.allSettled(batchPromises);
+      
+      // Process batch results
+      batchResults.forEach((result, index) => {
+        if (result.status === 'fulfilled' && result.value) {
+          results.push(result.value);
+          if (result.value.success) {
+            successCount++;
+          } else {
+            errorCount++;
+          }
+        } else {
+          const post = batch[index];
+          console.error(`❌ BATCH PROMISE FAILED for post ${post.id}:`, result.reason);
+          errorCount++;
+          results.push({ 
+            postId: post.id, 
+            success: false, 
+            error: result.reason?.message || 'Promise rejected' 
+          });
+        }
+      });
+
+      console.log(`✅ Batch ${batchNum}/${totalBatches} completed: ${batchResults.filter(r => r.status === 'fulfilled' && r.value?.success).length}/${batch.length} successful`);
+
+      // Add delay between batches (except for the last batch)
+      if (i + BATCH_SIZE < posts.length) {
+        console.log(`⏱️ Waiting ${BATCH_DELAY_MS}ms before next batch...`);
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
+      }
     }
 
-    // Return immediate response to prevent timeout
+    // Step 5: Log final results
+    console.log(`📈 IMAGE PROMPT GENERATION COMPLETE: {
+  category: "${category}",
+  totalPosts: ${posts.length},
+  successCount: ${successCount},
+  errorCount: ${errorCount},
+  successRate: ${((successCount / posts.length) * 100).toFixed(1)}%
+}`);
+
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Image prompt generation started in background',
         category,
         totalPosts: posts.length,
-        status: 'processing',
-        optimizations: {
-          batchSize: 3,
-          batchDelay: '2000ms',
-          backgroundProcessing: true,
-          earlyResponse: true
-        }
+        successCount,
+        errorCount,
+        results,
+        message: `Generated image prompts for ${successCount} out of ${posts.length} posts`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

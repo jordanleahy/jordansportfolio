@@ -22,7 +22,6 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, extractUsageFromOpenAIResponse, makeOpenAIRequest } from '../_shared/openai-attribution.ts';
 import { createLogger } from '../_shared/advanced-logger.ts';
-import { buildGPT5Params, GPT5_MODELS } from '../_shared/gpt5-params.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -341,8 +340,8 @@ Incorporate these characteristics naturally into the generated prompt while main
 
     logger.startTiming('openai_request');
 
-    const openAIRequestBody = buildGPT5Params({
-      model: GPT5_MODELS.FLAGSHIP,
+    const openAIRequestBody = {
+      model: 'gpt-4.1-2025-04-14',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
@@ -350,7 +349,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       max_tokens: 3000,
       temperature: 0.7,
       user: correlationId
-    });
+    };
 
     logger.info('OpenAI chat request prepared', {
       model: openAIRequestBody.model,
@@ -450,7 +449,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       category: category,
       usedType,
       agent: 'Visual Prompt Generator',
-      model: GPT5_MODELS.FLAGSHIP,
+      model: 'gpt-4.1-2025-04-14',
       generated_at: new Date().toISOString(),
       tokens_used: tokensUsed,
       estimated_cost: estimatedCost,
@@ -468,7 +467,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: GPT5_MODELS.FLAGSHIP,
+        model: 'gpt-4.1-2025-04-14',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -497,7 +496,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: GPT5_MODELS.FLAGSHIP,
+        model: 'gpt-4.1-2025-04-14',
         requestType: 'text_generation',
         success: false,
         estimatedCost: 0,

@@ -22,7 +22,7 @@ const projects = [
     title: "Reduce clinical note review time by 8 minutes.",
     company: "Healthcare EMR Solutions",
     description: "Inpatient EMR notes are essential for assigning the correct ICD-10 codes but they are often \"duplicates\" or \"copy and pasted\" making it hard for systems and humans to assign the right codes.",
-    tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates", "#MetabolicEncephalopathy", "#UnstructuredNotes"],
+    tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates"],
     icon: FileText,
     color: "bg-orange-500",
     path: "/cases/case2"
@@ -32,7 +32,7 @@ const projects = [
     title: "Drug Prior Auth and Validation",
     company: "Digital Health Platform",
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
-    tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
+    tags: ["#PriorAuth", "#ML", "#Workflow"],
     icon: Shield,
     color: "bg-green-500",
     path: "/cases/case4"
@@ -187,7 +187,7 @@ const ProjectCardsSection = () => {
                       className="w-full" 
                       disabled={project.id === 'case2' || project.id === 'case3'}
                     >
-                      {project.id === 'case2' || project.id === 'case3' ? 'Available on Tuesday, Sep 2nd 2025' : 'View Case Study'}
+                      {project.id === 'case2' || project.id === 'case3' ? 'Coming Soon' : 'View Case Study'}
                       {project.id !== 'case2' && project.id !== 'case3' && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                   </CardContent>

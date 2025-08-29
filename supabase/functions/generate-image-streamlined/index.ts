@@ -1,7 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0'
-import { buildGPT5Params, GPT5_MODELS } from '../_shared/gpt5-params.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -78,8 +77,8 @@ serve(async (req) => {
           'Authorization': `Bearer ${openAIApiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(buildGPT5Params({
-          model: GPT5_MODELS.FLAGSHIP,
+        body: JSON.stringify({
+          model: 'gpt-4.1-2025-04-14',
           messages: [
             {
               role: 'system',
@@ -105,9 +104,9 @@ Aspect Ratio: ${aspectRatio}
 ${colorTheme ? `Color Theme: ${colorTheme.name} (${colorTheme.visual_style})` : ''}`
             }
           ],
-          max_tokens: 15000,
+          max_tokens: 1000,
           temperature: 0.7
-        }))
+        }),
       });
 
       if (!promptResponse.ok) {

@@ -36,8 +36,10 @@ Frontend (React + TS):
   - src/hooks/useUsageEnforcement.ts — Usage limit checks and alerting
   - src/hooks/useCreditCheck.ts — Exposes credit status and wraps enforcement
 - UI Components
-  - src/components/stories/GenerateImage.tsx — Individual image generation entry point
+  - src/components/stories/GenerateImage.tsx — Uploads and AI-generate entry point
   - src/components/stories/SingleAspectRatioSelector.tsx — Per-aspect ratio generation controls
+  - src/components/stories/BulkImageGenerationButton.tsx — Bulk generate action and progress
+  - src/components/stories/BulkGenerationThumbnails.tsx — Preview of bulk outputs
 - Context
   - ProcessingStatesContext — Tracks isGenerating, bulk states, etc.
 - Utilities
@@ -47,6 +49,7 @@ Frontend (React + TS):
 Supabase Edge Functions (Server):
 - generate-image-prompt-dynamic — Creates prompts from post content
 - generate-image-gpt — Generates images from prompts (base64)
+- generate-all-images-optimized — Bulk pipeline (multi-aspect)
 - streaming-image-pipeline — Streaming image pipeline (SSE/SSE-like)
 - check-usage-limits — Enforces per-user daily/monthly usage
 - get-usage-summary — Summarizes usage limits/usage
@@ -73,7 +76,8 @@ Runtime:
 
 Internal Modules:
 - Credit/Usage: useUsageEnforcement, useCreditCheck, useUsageSummary (not shown here), check-usage-limits, get-usage-summary
-- Image Gen: useImageGeneration, useImageManager
+- Image Gen: useImageGeneration, useImageManager, useImageBatchGeneration
+- Bulk: Bulk buttons/components, generate-all-images-optimized
 - Storage: imageUpload, storageImageUpload
 - Notifications: sonner, use-toast
 - Types: src/types/bulkImageGeneration.ts, src/types/imagePromptGenerator.ts
@@ -181,11 +185,9 @@ Failure Modes and Handling:
 
 ---
 
-## Flow 2 — Single Aspect Image Generation
+## Flow 2 — Bulk Image Generation (All Aspect Ratios)
 
-Primary entry points: SingleAspectRatioSelector.tsx (individual aspect generation)
-
-Note: Bulk generation functionality has been removed. Users should generate images individually per aspect ratio as needed.
+Primary entry points: BulkImageGenerationButton.tsx + useBulkImageGeneration.ts.
 
 Event-by-event sequence:
 1) User Action
@@ -211,47 +213,58 @@ Event-by-event sequence:
    - On success: optionally refetch user’s posts and update UI (BulkImageGenerationButton does this)
    - Toast summary: images generated, failures, total cost, time
 
-Sequence Diagram (Single Aspect)
+Sequence Diagram (Bulk)
 
 ```mermaid
 sequenceDiagram
   autonumber
   actor User
-  participant UI as FE UI (Aspect Selector)
+  participant UI as FE UI (Bulk Button)
   participant CC as useCreditCheck
   participant UE as useUsageEnforcement
   participant SB as Supabase Functions
+  participant DB as cached_prompts
   participant ST as Storage
   participant POSTS as DB (social_media_posts)
 
-  User->>UI: Click Generate (Aspect)
+  User->>UI: Click Bulk Generate
   UI->>CC: getCreditStatus()
   CC-->>UI: status
   alt No credits
     UI-->>User: Toast: No credits
   else Has credits
-    UI->>CC: enforceUsage('image_generation', 1)
+    UI->>CC: enforceUsage('image_generation', 4)
     CC->>UE: checkAndEnforceUsage()
     UE->>SB: invoke('check-usage-limits')
     SB-->>UE: {allowed}
     alt Not allowed
       UI-->>User: Toast: limit exceeded
     else Allowed
-      UI->>SB: invoke('generate-image-gpt')
-      SB-->>UI: {imageBase64}
-      UI->>ST: Upload image
-      ST-->>UI: {publicUrl}
-      UI->>POSTS: Update image URL + status
-      POSTS-->>UI: OK
-      UI-->>User: Toast: Image ready
+      UI->>DB: get cached prompt
+      DB-->>UI: hit/miss
+      alt Miss
+        UI->>SB: invoke('generate-image-prompt-dynamic')
+        SB-->>UI: {prompt}
+        UI->>DB: upsert cached_prompts
+      end
+      UI->>SB: invoke('generate-all-images-optimized')
+      SB-->>UI: stream/progress/results
+      loop For each aspect
+        UI->>ST: Upload image
+        ST-->>UI: {publicUrl}
+        UI->>POSTS: Update image URL + status
+        POSTS-->>UI: OK
+      end
+      UI-->>User: Toast: Bulk complete
     end
   end
 ```
 
 Failure Modes and Handling:
-- Image generation failures → show error, allow retry
-- Upload failures → retry mechanism  
-- DB update failures → non-blocking, show status
+- Partial failures (some aspect ratios fail) → Collect failures, show counts; do not rollback successes
+- Prompt cache write failure → Non-blocking; proceed without cache
+- Posts refresh failure after success → Non-blocking; user can manually refresh
+- Usage enforcement 80% email may fail → logged only (non-blocking)
 
 ---
 
@@ -279,8 +292,8 @@ Failure Modes:
   - Invokes check-usage-limits edge function
   - When usage ≥80% of limit, attempts send-usage-alert email (best-effort)
   - Handles FunctionsFetchError distinctly (service unavailable toast)
-- Single aspect path uses enforceUsage('image_generation', 1) to account for individual images
-- Recommended: standardize amount across flows (1 for single image; 1 per aspect for selector)
+- Bulk path uses enforceUsage('image_generation', 4) to account for multiple images
+- Recommended: standardize amount across flows (1 for single image; 4 for bulk; 1 per aspect for selector)
 
 Hardening:
 - Ensure every entry path calls enforceUsage before expensive operations
@@ -330,6 +343,7 @@ Where to look:
 - Supabase Function Logs (per function):
   - generate-image-prompt-dynamic
   - generate-image-gpt
+  - generate-all-images-optimized
   - check-usage-limits
   - send-usage-alert
   - streaming-image-pipeline
@@ -368,7 +382,7 @@ General
 
 Usage & Credits
 - [ ] Ensure every entry flow calls enforceUsage first
-- [ ] Align enforceUsage amounts (1 for single/selector)
+- [ ] Align enforceUsage amounts (1 for single/selector, 4 for bulk)
 - [ ] Cache 429/limit responses briefly to reduce load
 
 Prompt & Image Generation
@@ -406,6 +420,7 @@ UX/Feedback
 Edge Functions and Secrets
 - generate-image-prompt-dynamic — Requires OpenAI key (server-side secret)
 - generate-image-gpt — Requires OpenAI key (server-side secret)
+- generate-all-images-optimized — Requires OpenAI key
 - streaming-image-pipeline — Requires OpenAI key
 - check-usage-limits / get-usage-summary — DB access only (service role on server)
 - send-usage-alert — Email provider credentials (Resend configured in project)
@@ -429,11 +444,10 @@ Unit/Integration Test Cases
   - [ ] Upload success/failure
   - [ ] DB update success/failure
   - [ ] Watermark success/failure, non-blocking
-Single Aspect Generation (Individual)
-- [ ] Individual aspect generation success/failure
-- [ ] Upload success/failure
-- [ ] DB update success/failure
-- [ ] Watermark success/failure, non-blocking
+- Bulk image
+  - [ ] Cache hit/miss paths
+  - [ ] Partial success handling
+  - [ ] Progress updates correctness
 - Manual upload
   - [ ] Upload valid file
   - [ ] Invalid type rejected
@@ -441,7 +455,7 @@ Single Aspect Generation (Individual)
 
 Manual Regression Checklist
 - [ ] Generate single 16:9, all statuses correct
-- [ ] Generate individual aspects via selector, statuses correct
+- [ ] Generate bulk all ratios, partial failure summarization
 - [ ] No credits → correct toasts
 - [ ] Near limit → email sent (check function logs)
 - [ ] Public URLs load images across pages
@@ -459,15 +473,15 @@ A) Aspect Ratio Configuration
 - See src/types/bulkImageGeneration.ts — ASPECT_RATIO_CONFIGS for labels and sizes
 
 B) Example Payloads
-- SingleImageGenerationRequest: { postId, title, description, category?, theme?, aspectRatio }
+- BulkImageGenerationRequest: { postId, title, description, category?, theme?, context?, colorThemeId? }
 - check-usage-limits Request: { usage_type: 'image_generation', amount: number }
 - check-usage-limits Response: { allowed: boolean; remaining: number; limit: number; usage_type: string; message?: string }
 
 C) Related Files Index
-- Hooks: useImageGeneration.ts, useImageManager.ts, useUsageEnforcement.ts, useCreditCheck.ts
-- UI: GenerateImage.tsx, SingleAspectRatioSelector.tsx
+- Hooks: useImageGeneration.ts, useImageManager.ts, useImageBatchGeneration.ts, useUsageEnforcement.ts, useCreditCheck.ts
+- UI: GenerateImage.tsx, SingleAspectRatioSelector.tsx, BulkImageGenerationButton.tsx, BulkGenerationThumbnails.tsx
 - Utils: imageUpload.ts, storageImageUpload.ts
-- Edge Functions: generate-image-prompt-dynamic, generate-image-gpt, streaming-image-pipeline, check-usage-limits, get-usage-summary, send-usage-alert
+- Edge Functions: generate-image-prompt-dynamic, generate-image-gpt, generate-all-images-optimized, streaming-image-pipeline, check-usage-limits, get-usage-summary, send-usage-alert
 
 D) Links (Supabase Dashboard)
 - Functions: https://supabase.com/dashboard/project/wgwmzfbnkovumqcvsxgd/functions

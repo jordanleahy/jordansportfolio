@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { QUERY_KEYS, QUERY_CONFIG } from "@/constants/queryKeys";
+import { QUERY_KEYS } from "@/constants/queryKeys";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState, useCallback } from "react";
-import { useDebounce } from "./useDebounce";
+import { useEffect } from "react";
 
 export interface UsageLimits {
   daily: { limit: number; used: number; remaining: number };
@@ -32,24 +31,18 @@ const DEFAULTS: UsageSummaryData = {
 
 export const useUsageSummary = () => {
   const { user } = useAuth();
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
-  const debouncedRefetchTrigger = useDebounce(refetchTrigger, 2000);
 
   const query = useQuery<UsageSummaryData>({
     queryKey: QUERY_KEYS.usageSummary,
     queryFn: async () => {
       const queryStart = Date.now();
-      if (import.meta.env.DEV) {
-        console.log('[useUsageSummary] Starting usage summary fetch', { 
-          userId: user?.id,
-          timestamp: new Date().toISOString()
-        });
-      }
+      console.log('[useUsageSummary] Starting usage summary fetch', { 
+        userId: user?.id,
+        timestamp: new Date().toISOString()
+      });
       
       if (!user?.id) {
-        if (import.meta.env.DEV) {
-          console.log('[useUsageSummary] No user ID, returning defaults');
-        }
+        console.log('[useUsageSummary] No user ID, returning defaults');
         return DEFAULTS;
       }
 
@@ -68,20 +61,18 @@ export const useUsageSummary = () => {
         const tier = subscription?.tier;
         const subscriptionTier = tier?.name?.toLowerCase() || 'free';
         
-        if (import.meta.env.DEV) {
-          console.log('[useUsageSummary] Subscription data fetched', {
-            userId: user.id,
-            hasSubscription: !!subscription,
-            tier: tier ? {
-              id: tier.id,
-              name: tier.name,
-              daily_limit: tier.max_gpt_images_daily,
-              monthly_limit: tier.max_gpt_images_monthly
-            } : null,
-            subscriptionTier,
-            timestamp: new Date().toISOString()
-          });
-        }
+        console.log('[useUsageSummary] Subscription data fetched', {
+          userId: user.id,
+          hasSubscription: !!subscription,
+          tier: tier ? {
+            id: tier.id,
+            name: tier.name,
+            daily_limit: tier.max_gpt_images_daily,
+            monthly_limit: tier.max_gpt_images_monthly
+          } : null,
+          subscriptionTier,
+          timestamp: new Date().toISOString()
+        });
         
         // Get usage limits from subscription tier - use Free Plan defaults if no tier assigned
         const monthlyLimit = tier?.max_gpt_images_monthly ?? 30; // Default to Free Plan monthly limit
@@ -121,15 +112,13 @@ export const useUsageSummary = () => {
         const monthlyRemaining = Math.max(0, monthlyLimit - monthlyUsed);
         const dailyRemaining = Math.max(0, dailyLimit - dailyUsed);
 
-        if (import.meta.env.DEV) {
-          console.log('[useUsageSummary] Usage calculations', {
-            userId: user.id,
-            limits: { dailyLimit, monthlyLimit },
-            usage: { dailyUsed, monthlyUsed },
-            remaining: { dailyRemaining, monthlyRemaining },
-            timestamp: new Date().toISOString()
-          });
-        }
+        console.log('[useUsageSummary] Usage calculations', {
+          userId: user.id,
+          limits: { dailyLimit, monthlyLimit },
+          usage: { dailyUsed, monthlyUsed },
+          remaining: { dailyRemaining, monthlyRemaining },
+          timestamp: new Date().toISOString()
+        });
 
         // Calculate totals
         const totalCredits = monthlyLimit;
@@ -167,19 +156,17 @@ export const useUsageSummary = () => {
         };
 
         const queryTime = Date.now() - queryStart;
-        if (import.meta.env.DEV) {
-          console.log('[useUsageSummary] Query completed successfully', {
-            userId: user.id,
-            queryTimeMs: queryTime,
-            result: {
-              subscriptionTier: result.subscriptionTier,
-              totalCredits: result.totals.totalCredits,
-              usedCredits: result.totals.usedCredits,
-              remainingCredits: result.totals.remainingCredits
-            },
-            timestamp: new Date().toISOString()
-          });
-        }
+        console.log('[useUsageSummary] Query completed successfully', {
+          userId: user.id,
+          queryTimeMs: queryTime,
+          result: {
+            subscriptionTier: result.subscriptionTier,
+            totalCredits: result.totals.totalCredits,
+            usedCredits: result.totals.usedCredits,
+            remainingCredits: result.totals.remainingCredits
+          },
+          timestamp: new Date().toISOString()
+        });
         
         return result;
       } catch (err: any) {
@@ -193,15 +180,10 @@ export const useUsageSummary = () => {
         return DEFAULTS;
       }
     },
-    staleTime: QUERY_CONFIG.USAGE_SUMMARY_STALE_TIME,
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 1000, // 5 seconds - much more responsive
+    refetchOnWindowFocus: true,
     enabled: !!user?.id,
   });
-
-  // Stable refetch function
-  const triggerRefetch = useCallback(() => {
-    setRefetchTrigger(prev => prev + 1);
-  }, []);
 
   // Set up real-time subscription for immediate updates
   useEffect(() => {
@@ -218,15 +200,13 @@ export const useUsageSummary = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          if (import.meta.env.DEV) {
-            console.log('[useUsageSummary] Real-time usage update received', {
-              userId: user.id,
-              payload: payload.new,
-              timestamp: new Date().toISOString()
-            });
-          }
-          // Debounced refetch when new usage is recorded
-          triggerRefetch();
+          console.log('[useUsageSummary] Real-time usage update received', {
+            userId: user.id,
+            payload: payload.new,
+            timestamp: new Date().toISOString()
+          });
+          // Immediately refetch when new usage is recorded
+          query.refetch();
         }
       )
       .subscribe();
@@ -234,14 +214,7 @@ export const useUsageSummary = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, triggerRefetch]);
-
-  // Debounced refetch effect
-  useEffect(() => {
-    if (debouncedRefetchTrigger > 0 && query.refetch) {
-      query.refetch();
-    }
-  }, [debouncedRefetchTrigger, query.refetch]);
+  }, [user?.id, query.refetch]);
 
   return {
     ...query,

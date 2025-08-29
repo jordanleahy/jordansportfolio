@@ -138,6 +138,21 @@ const { data: industries } = useIndustries();
 const { data: stats } = useSummaryStats();
 ```
 
+### Edge Functions (Advanced Analytics)
+
+```bash
+# Industry trends analysis
+GET /functions/v1/sec-analytics/industry-trends?startDate=2024-01-01&endDate=2024-12-31
+
+# Geographic distribution
+GET /functions/v1/sec-analytics/geographic-distribution
+
+# Timeline analysis
+GET /functions/v1/sec-analytics/timeline-analysis?period=month
+
+# Amount distribution statistics
+GET /functions/v1/sec-analytics/amount-distribution
+```
 
 ## Database Schema
 

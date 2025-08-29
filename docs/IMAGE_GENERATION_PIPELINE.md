@@ -37,7 +37,7 @@ graph TB
     end
     
     subgraph "Edge Functions Layer"
-        EF1[generate-image-gpt] --> EF3[visual-prompt-generator] 
+        EF1[generate-image-gpt] --> EF2[generate-all-images-optimized]
         EF3[visual-prompt-generator] --> EF4[invoke-system-prompt-agent]
         EF5[generate-image-with-concurrency-control]
     end
@@ -94,7 +94,7 @@ sequenceDiagram
 **Entry Points:**
 - `GenerateImage.tsx` - Primary image generation interface
 - `SingleAspectRatioSelector.tsx` - Aspect-specific generation
-- Individual aspect ratio generation (bulk functionality removed)
+- `BulkImageGenerationButton.tsx` - Bulk processing interface
 
 **Validation Steps:**
 1. **Credit Check** (`useCreditCheck`)
@@ -177,10 +177,10 @@ sequenceDiagram
    - Concurrency control to prevent duplicates
    - Real-time status updates
 
-2. **Individual Generation** (`useImageGeneration`)
-   - Per-aspect ratio generation
-   - Concurrency control to prevent duplicates
-   - Real-time status updates
+2. **Bulk Generation** (`useBulkSingleAspectGeneration`, `useBulkImageGeneration`)
+   - Batch processing with progress tracking
+   - Multiple aspect ratios simultaneously
+   - Intelligent retry logic
 
 3. **Streaming Pipeline** (`streaming-image-pipeline`)
    - Real-time generation updates via SSE
@@ -311,6 +311,7 @@ export interface VisualPromptConfig {
 | Function | Purpose | Input | Output |
 |----------|---------|--------|--------|
 | `generate-image-gpt` | Single image generation | Prompt, aspect ratio, config | Base64 image data |
+| `generate-all-images-optimized` | Bulk multi-aspect generation | Post IDs, config | Batch results |
 | `generate-image-with-concurrency-control` | Controlled single generation | Post data, options | Generation result |
 | `streaming-image-pipeline` | Real-time streaming generation | Stream config | SSE stream |
 
@@ -357,8 +358,10 @@ if (result.data?.success) {
 // 1. Setup bulk job
 const posts = await getBulkPosts();
 
-// 2. Process batch (functionality removed)
-// Bulk generation has been removed - use individual generation instead
+// 2. Process batch
+const results = await supabase.functions.invoke('generate-all-images-optimized', {
+  body: {
+    posts: posts.map(p => ({ id: p.id, prompt: p.generated_image_prompt })),
     aspectRatios: ['1:1', '16:9', '9:16'],
     mode: 'missing_only'
   }
@@ -394,21 +397,20 @@ const result = await generateImage(post, {
 });
 ```
 
-#### `useImageGeneration`
-**Purpose:** Individual aspect ratio generation
+#### `useBulkImageGeneration`
+**Purpose:** Multi-aspect ratio bulk generation
 **Key Features:**
-- Single aspect generation with progress tracking
-- Real-time status updates
+- Batch processing with progress tracking
+- Intelligent retry logic
 - Cost estimation and validation
 
 ```typescript
-const { generateImage, isGenerating } = useImageGeneration();
+const { generateAllImages, isGenerating, progress } = useBulkImageGeneration();
 
-// Usage  
-const result = await generateImage({
-  postId,
-  aspectRatio: '1:1',
-  prompt: 'A beautiful landscape'
+// Usage
+const results = await generateAllImages(posts, {
+  aspectRatios: ['1:1', '16:9', '9:16'],
+  mode: 'missing_only'
 });
 ```
 
@@ -440,11 +442,11 @@ const result = await generateImage({
 - Real-time status checking
 - Visual progress indicators
 
-#### `GenerateImage.tsx`
-**Individual generation interface**
-- Individual aspect ratio generation
-- Real-time status checking
-- Visual progress indicators
+#### `BulkImageGenerationButton.tsx`
+**Bulk processing interface**
+- Batch operation controls
+- Progress tracking and cancellation
+- Results summary and error reporting
 
 ### Processing Context
 

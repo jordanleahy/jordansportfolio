@@ -24,7 +24,6 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { buildGPT5Params, GPT5_MODELS } from '../_shared/gpt5-params.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -151,8 +150,8 @@ Please respond with a JSON object containing the following structure:
 
 Focus on providing actionable information that could be used to enhance image generation prompts. Include specific hex color codes for the color analysis, and be descriptive but concise for all other aspects.`;
 
-    const requestBody = buildGPT5Params({
-      model: GPT5_MODELS.FLAGSHIP,
+    const requestBody = {
+      model: 'gpt-4o',
       messages: [
         {
           role: 'user',
@@ -164,7 +163,8 @@ Focus on providing actionable information that could be used to enhance image ge
             {
               type: 'image_url',
               image_url: {
-                url: imageData
+                url: imageData,
+                detail: 'high'
               }
             }
           ]
@@ -172,7 +172,7 @@ Focus on providing actionable information that could be used to enhance image ge
       ],
       max_tokens: 2000,
       response_format: { type: 'json_object' }
-    });
+    };
 
     console.log('🔍 Making OpenAI Vision API request...');
 
