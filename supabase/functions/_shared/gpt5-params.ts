@@ -1,14 +1,16 @@
 // GPT-5+ Parameter Builder Utility
 // Automatically handles parameter differences between GPT-5+ and legacy models
 
-export const buildGPT5Params = (baseParams: any) => ({
-  ...baseParams,
-  // Use max_completion_tokens for GPT-5+ (required parameter)
-  max_completion_tokens: baseParams.max_tokens || baseParams.max_completion_tokens || 7000,
-  // Remove temperature and max_tokens (not supported in GPT-5+)
-  temperature: undefined,
-  max_tokens: undefined
-});
+export const buildGPT5Params = (baseParams: any) => {
+  // Destructure to separate supported from unsupported params
+  const { temperature, max_tokens, ...supportedParams } = baseParams;
+  
+  return {
+    ...supportedParams,
+    // Use max_completion_tokens for GPT-5+ (required parameter)
+    max_completion_tokens: max_tokens || baseParams.max_completion_tokens || 7000,
+  };
+};
 
 // GPT-5+ Model constants
 export const GPT5_MODELS = {
