@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SocialMediaPost } from '@/types/socialMedia';
-import { useMultiProviderImageGeneration, ImageProvider } from './useMultiProviderImageGeneration';
+import { useMultiProviderImageGeneration, ImageModel } from './useMultiProviderImageGeneration';
 
 interface GenerationOptions {
   aspectRatio?: string;
@@ -12,7 +12,7 @@ interface GenerationOptions {
   managedSeedCategory?: string | null;
   seedContext?: string | null;
   category?: string | null;
-  provider?: ImageProvider;
+  provider?: ImageModel;
 }
 
 interface GenerationResult {
@@ -22,7 +22,7 @@ interface GenerationResult {
   error?: string;
   message?: string;
   currentStatus?: string;
-  provider?: ImageProvider;
+  provider?: ImageModel;
   processingTimeMs?: number;
   usage?: {
     estimated_cost: number;
@@ -49,7 +49,7 @@ export const useConcurrencyControlledImageGeneration = () => {
     checkImageStatus,
     canGenerateImage,
     isGenerating: multiProvider.isGenerating,
-    currentProvider: multiProvider.currentProvider,
-    setCurrentProvider: multiProvider.setCurrentProvider
+    currentImageModel: multiProvider.currentImageModel,
+    setCurrentImageModel: multiProvider.setCurrentImageModel
   };
 };

@@ -1,15 +1,15 @@
 import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { ImageProvider } from '@/hooks/useMultiProviderImageGeneration';
+import { ImageModel } from '@/hooks/useMultiProviderImageGeneration';
 
-interface ProviderSelectorProps {
-  value: ImageProvider;
-  onChange: (value: ImageProvider) => void;
+interface ImageModelSelectorProps {
+  value: ImageModel;
+  onChange: (value: ImageModel) => void;
   disabled?: boolean;
   className?: string;
 }
 
-export const ProviderSelector: React.FC<ProviderSelectorProps> = ({ 
+export const ImageModelSelector: React.FC<ImageModelSelectorProps> = ({ 
   value, 
   onChange, 
   disabled = false,
@@ -21,7 +21,7 @@ export const ProviderSelector: React.FC<ProviderSelectorProps> = ({
         type="single" 
         value={value} 
         onValueChange={(newValue) => {
-          if (newValue) onChange(newValue as ImageProvider);
+          if (newValue) onChange(newValue as ImageModel);
         }}
         disabled={disabled}
         className="justify-start"

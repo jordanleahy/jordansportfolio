@@ -16,8 +16,8 @@ export const useOptimizedBulkGeneration = () => {
     // Processing states
     isGeneratingSingle: singleAspectBulk.isProcessing,
     
-    // Multi-provider controls
-    currentProvider: multiProvider.currentProvider,
-    setCurrentProvider: multiProvider.setCurrentProvider
+    // Multi-model controls
+    currentImageModel: multiProvider.currentImageModel,
+    setCurrentImageModel: multiProvider.setCurrentImageModel
   };
 };

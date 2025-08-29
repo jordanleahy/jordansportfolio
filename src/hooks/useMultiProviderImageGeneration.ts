@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SocialMediaPost } from '@/types/socialMedia';
 
-export type ImageProvider = 'openai' | 'gemini';
+export type ImageModel = 'openai' | 'gemini';
 
 interface GenerationOptions {
   aspectRatio?: string;
@@ -13,7 +13,7 @@ interface GenerationOptions {
   managedSeedCategory?: string | null;
   seedContext?: string | null;
   category?: string | null;
-  provider?: ImageProvider;
+  provider?: ImageModel;
 }
 
 interface GenerationResult {
@@ -23,7 +23,7 @@ interface GenerationResult {
   error?: string;
   message?: string;
   currentStatus?: string;
-  provider?: ImageProvider;
+  provider?: ImageModel;
   processingTimeMs?: number;
   usage?: {
     estimated_cost: number;
@@ -32,7 +32,7 @@ interface GenerationResult {
 
 export const useMultiProviderImageGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [currentProvider, setCurrentProvider] = useState<ImageProvider>('openai');
+  const [currentImageModel, setCurrentImageModel] = useState<ImageModel>('openai');
   const { toast } = useToast();
 
   const generateImage = useCallback(async (
@@ -47,7 +47,7 @@ export const useMultiProviderImageGeneration = () => {
       managedSeedCategory = null,
       seedContext = null,
       category = null,
-      provider = currentProvider
+      provider = currentImageModel
     } = options;
 
     if (!post.generated_image_prompt) {
@@ -156,7 +156,7 @@ export const useMultiProviderImageGeneration = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [toast, currentProvider]);
+  }, [toast, currentImageModel]);
 
   const checkImageStatus = useCallback(async (
     postId: string,
@@ -196,7 +196,7 @@ export const useMultiProviderImageGeneration = () => {
     checkImageStatus,
     canGenerateImage,
     isGenerating,
-    currentProvider,
-    setCurrentProvider
+    currentImageModel,
+    setCurrentImageModel
   };
 };

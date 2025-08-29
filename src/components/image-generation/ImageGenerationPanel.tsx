@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Image, Zap, Brain } from 'lucide-react';
-import { ProviderSelector } from '@/components/ui/provider-selector';
+import { ImageModelSelector } from '@/components/ui/image-model-selector';
 import { useConcurrencyControlledImageGeneration } from '@/hooks/useConcurrencyControlledImageGeneration';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { SocialMediaPost } from '@/types/socialMedia';
 import { useToast } from '@/hooks/use-toast';
-import { ImageProvider } from '@/hooks/useMultiProviderImageGeneration';
+import { ImageModel } from '@/hooks/useMultiProviderImageGeneration';
 
 interface ImageGenerationPanelProps {
   post: SocialMediaPost;
@@ -31,8 +31,8 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
     checkImageStatus, 
     canGenerateImage, 
     isGenerating,
-    currentProvider,
-    setCurrentProvider
+    currentImageModel,
+    setCurrentImageModel
   } = useConcurrencyControlledImageGeneration();
   
   const { getCreditStatus } = useCreditCheck();
@@ -51,7 +51,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
       setCanGenerate(canGen);
     };
     checkStatus();
-  }, [post.id, aspectRatio, checkImageStatus, canGenerateImage, currentProvider]);
+  }, [post.id, aspectRatio, checkImageStatus, canGenerateImage, currentImageModel]);
 
   const handleGenerate = async () => {
     if (!post.generated_image_prompt) {
@@ -67,17 +67,17 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
       const result = await generateImage(post, {
         aspectRatio,
         category: post.category,
-        provider: currentProvider
+        provider: currentImageModel
       });
 
       if (result.success) {
         setCurrentStatus('completed');
         onImageGenerated?.();
         
-        const providerName = currentProvider === 'gemini' ? 'Gemini' : 'OpenAI';
+        const modelName = currentImageModel === 'gemini' ? 'Gemini' : 'OpenAI';
         toast({
           title: "Success!",
-          description: `Image generated using ${providerName}${result.usage ? ` (Cost: $${result.usage.estimated_cost.toFixed(3)})` : ''}`,
+          description: `Image generated using ${modelName}${result.usage ? ` (Cost: $${result.usage.estimated_cost.toFixed(3)})` : ''}`,
         });
       }
     } catch (error) {
@@ -86,17 +86,17 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
     }
   };
 
-  const getProviderIcon = (provider: ImageProvider) => {
-    return provider === 'gemini' ? <Brain className="h-4 w-4" /> : <Zap className="h-4 w-4" />;
+  const getModelIcon = (model: ImageModel) => {
+    return model === 'gemini' ? <Brain className="h-4 w-4" /> : <Zap className="h-4 w-4" />;
   };
 
-  const getProviderCost = (provider: ImageProvider) => {
+  const getModelCost = (model: ImageModel) => {
     // Estimated costs per generation
     const costs = {
       openai: 0.04,
       gemini: 0.025
     };
-    return costs[provider];
+    return costs[model];
   };
 
   const isButtonDisabled = disabled || 
@@ -139,9 +139,9 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <ProviderSelector
-          value={currentProvider}
-          onChange={setCurrentProvider}
+        <ImageModelSelector
+          value={currentImageModel}
+          onChange={setCurrentImageModel}
           disabled={isGenerating}
         />
         
@@ -149,11 +149,11 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
         
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            {getProviderIcon(currentProvider)}
+            {getModelIcon(currentImageModel)}
             <span>Aspect Ratio: {aspectRatio}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span>~${getProviderCost(currentProvider).toFixed(3)}</span>
+            <span>~${getModelCost(currentImageModel).toFixed(3)}</span>
           </div>
         </div>
 
@@ -175,7 +175,7 @@ export const ImageGenerationPanel: React.FC<ImageGenerationPanelProps> = ({
           size="lg"
         >
           {isGenerating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          {getProviderIcon(currentProvider)}
+          {getModelIcon(currentImageModel)}
           <span className="ml-2">{getButtonText()}</span>
         </Button>
 

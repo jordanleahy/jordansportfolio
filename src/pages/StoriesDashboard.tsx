@@ -37,7 +37,7 @@ import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSke
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
-import { ProviderSelector } from '@/components/ui/provider-selector';
+import { ImageModelSelector } from '@/components/ui/image-model-selector';
 import { useMultiProviderImageGeneration } from '@/hooks/useMultiProviderImageGeneration';
 
 // Lazy load components
@@ -62,7 +62,7 @@ export default function StoriesDashboard() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentProvider, setCurrentProvider } = useMultiProviderImageGeneration();
+  const { currentImageModel, setCurrentImageModel } = useMultiProviderImageGeneration();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
@@ -510,7 +510,7 @@ export default function StoriesDashboard() {
         body: {
           action: 'create',
           description: themeDescription,
-          provider: currentProvider
+          provider: currentImageModel
         }
       });
       
@@ -891,11 +891,11 @@ export default function StoriesDashboard() {
                     </Button>
                   )}
                   
-                  {/* Provider Selection and Import Themes */}
+                  {/* Image Model Selection and Import Themes */}
                   <div className="flex items-center gap-4 px-8">
-                    <ProviderSelector
-                      value={currentProvider}
-                      onChange={setCurrentProvider}
+                    <ImageModelSelector
+                      value={currentImageModel}
+                      onChange={setCurrentImageModel}
                       disabled={isGeneratingTheme}
                     />
                     {roleLoading ? <Skeleton className="h-10 w-32" /> : <Button onClick={() => setImportModalOpen(true)} variant="outline">
