@@ -107,7 +107,7 @@ ${colorTheme ? `Color Theme: ${colorTheme.name} (${colorTheme.visual_style})` : 
           ],
           max_tokens: 1000,
           temperature: 0.7
-        }),
+        }))
       });
 
       if (!promptResponse.ok) {
