@@ -10,6 +10,7 @@ interface ThemeLifecycleRequest {
   action: 'create' | 'complete' | 'status';
   description?: string;
   themeId?: string;
+  provider?: 'openai' | 'gemini';
 }
 
 serve(async (req) => {
@@ -85,13 +86,13 @@ serve(async (req) => {
         correlationId
       });
       
-      // Call the existing theme generation function
+      // Call the theme generation function
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        'user-idea-streaming-image-pipeline',
+        'generate-custom-theme',
         {
           body: {
             description: body.description,
-            stream: false
+            provider: body.provider || 'openai'
           },
           headers: {
             Authorization: authHeader,

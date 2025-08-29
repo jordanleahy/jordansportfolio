@@ -37,6 +37,8 @@ import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSke
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
+import { ProviderSelector } from '@/components/ui/provider-selector';
+import { useMultiProviderImageGeneration } from '@/hooks/useMultiProviderImageGeneration';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
@@ -59,6 +61,8 @@ export default function StoriesDashboard() {
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { currentProvider, setCurrentProvider } = useMultiProviderImageGeneration();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
@@ -73,10 +77,6 @@ export default function StoriesDashboard() {
 
   // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
-
-  const {
-    toast
-  } = useToast();
 
   const [showHero, setShowHero] = useState(false);
   const [duplicateInfo, setDuplicateInfo] = useState<{
@@ -509,7 +509,8 @@ export default function StoriesDashboard() {
       } = await supabase.functions.invoke('manage-theme-lifecycle', {
         body: {
           action: 'create',
-          description: themeDescription
+          description: themeDescription,
+          provider: currentProvider
         }
       });
       
@@ -862,6 +863,17 @@ export default function StoriesDashboard() {
                   deletingSpeed={40}
                   pauseDuration={2000}
                 />
+                
+                {/* Provider Selection */}
+                <div className="mt-4 w-full">
+                  <ProviderSelector
+                    value={currentProvider}
+                    onChange={setCurrentProvider}
+                    disabled={isGeneratingTheme}
+                    className="px-8"
+                  />
+                </div>
+                
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>

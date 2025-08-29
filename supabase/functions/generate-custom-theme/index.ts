@@ -63,8 +63,9 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const { description } = await req.json();
+    const { description, provider = 'openai' } = await req.json();
     console.log('📝 [generate-custom-theme] Received description:', description);
+    console.log('🎯 [generate-custom-theme] Using provider:', provider);
 
     if (!description || description.trim().length === 0) {
       console.log('❌ [generate-custom-theme] No description provided');
