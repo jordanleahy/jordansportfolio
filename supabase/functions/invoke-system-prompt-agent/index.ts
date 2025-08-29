@@ -374,6 +374,64 @@ Please generate a detailed, professional system prompt following the established
             message: 'System prompt already exists for this theme'
           });
 
+          // Link existing system prompt to theme and update lifecycle status
+          if (theme_id) {
+            console.log('🔗 LINKING EXISTING SYSTEM PROMPT TO THEME:', { theme_id, existing_prompt_id: existingPrompt.id });
+            const { error: themeUpdateError } = await supabase
+              .from('themes')
+              .update({ 
+                visual_prompt_system_prompt_id: existingPrompt.id,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', theme_id)
+              .eq('user_id', user_id);
+
+            if (themeUpdateError) {
+              console.error('❌ THEME UPDATE ERROR:', themeUpdateError);
+            } else {
+              console.log('✅ THEME UPDATED: Successfully linked existing system prompt to theme');
+              
+              // Update theme lifecycle status to mark it as ready
+              console.log('🔄 UPDATING THEME LIFECYCLE STATUS: Marking theme as ready');
+              const { error: lifecycleUpdateError } = await supabase
+                .from('themes')
+                .update({ 
+                  lifecycle_status: 'ready',
+                  prompt_generation_status: 'completed',
+                  background_processing_complete: true,
+                  user_interaction_required: false,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', theme_id)
+                .eq('user_id', user_id);
+
+              if (lifecycleUpdateError) {
+                console.error('❌ THEME LIFECYCLE UPDATE ERROR:', lifecycleUpdateError);
+              } else {
+                console.log('✅ THEME LIFECYCLE UPDATED: Theme marked as ready for prompt generation');
+                
+                // 🚀 TRIGGER BULK INDIVIDUAL PROMPT GENERATION IMMEDIATELY
+                console.log('🚀 TRIGGERING BULK INDIVIDUAL PROMPT GENERATION:', { theme_id, category: contextCategory });
+                supabase.functions.invoke('ensure-post-image-prompts', {
+                  body: { 
+                    theme_id,
+                    category: contextCategory,
+                    user_id,
+                    force_regenerate: false
+                  }
+                }).then(result => {
+                  if (result.error) {
+                    console.error('❌ BULK PROMPT GENERATION TRIGGER ERROR:', result.error);
+                  } else {
+                    console.log('✅ BULK PROMPT GENERATION TRIGGERED SUCCESSFULLY');
+                  }
+                }).catch(error => {
+                  console.error('❌ BULK PROMPT GENERATION TRIGGER CATCH ERROR:', error);
+                });
+              }
+            }
+          }
+
           return new Response(JSON.stringify({ 
             success: true, 
             system_prompt: generatedPrompt,
