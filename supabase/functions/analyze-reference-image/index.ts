@@ -151,7 +151,7 @@ Please respond with a JSON object containing the following structure:
 Focus on providing actionable information that could be used to enhance image generation prompts. Include specific hex color codes for the color analysis, and be descriptive but concise for all other aspects.`;
 
     const requestBody = {
-      model: 'gpt-4o',
+      model: 'gpt-5-2025-08-07',
       messages: [
         {
           role: 'user',
@@ -170,7 +170,7 @@ Focus on providing actionable information that could be used to enhance image ge
           ]
         }
       ],
-      max_tokens: 2000,
+      max_completion_tokens: 2000,
       response_format: { type: 'json_object' }
     };
 
