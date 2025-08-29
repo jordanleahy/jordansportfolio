@@ -19,9 +19,19 @@ export const OPENAI_CONFIG = {
     LONG_RESPONSE: 2500,
     COMPREHENSIVE: 7000,
   },
-  // Default model for theme generation
+// Default model for theme generation
   DEFAULT_THEME_MODEL: 'gpt-5-mini-2025-08-07', // Keep as FAST variant for theme generation
   DEFAULT_THEME_MAX_COMPLETION_TOKENS: 7000,
+} as const;
+
+// System Prompt Generation Configuration
+export const SYSTEM_PROMPT_CONFIG = {
+  TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
+  ESCALATION_TIMEOUTS: {
+    ATTEMPT_1: 180000,   // 180 seconds for first attempt
+    ATTEMPT_2: 240000,   // 240 seconds for second attempt  
+    ATTEMPT_3: 300000,   // 300 seconds for final attempt
+  },
 } as const;
 
 // Progress Step Percentages for Streaming Pipeline

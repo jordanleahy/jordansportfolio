@@ -2,7 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
-import { OPENAI_CONFIG } from '../_shared/config.ts';
+import { OPENAI_CONFIG, SYSTEM_PROMPT_CONFIG } from '../_shared/config.ts';
 
 // Constants - Centralized to match src/constants/
 const AGENT_NAMES = {
@@ -18,14 +18,6 @@ const SYSTEM_PROMPT_CATEGORIES = {
   SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
 } as const;
 
-const LOCAL_CONFIG = {
-  TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
-  ESCALATION_TIMEOUTS: {
-    ATTEMPT_1: 180000,   // 180 seconds for first attempt
-    ATTEMPT_2: 240000,   // 240 seconds for second attempt  
-    ATTEMPT_3: 300000,   // 300 seconds for final attempt
-  },
-} as const;
 
 const HTTP_STATUS = {
   OK: 200,
@@ -244,7 +236,7 @@ Please generate a detailed, professional system prompt following the established
       },
       body: JSON.stringify(requestBodyForOpenAI),
       correlationId,
-      timeout: LOCAL_CONFIG.TIMEOUT_MS,
+      timeout: SYSTEM_PROMPT_CONFIG.TIMEOUT_MS,
       maxRetries: 3,
       operationType: 'system_prompt',
     });
