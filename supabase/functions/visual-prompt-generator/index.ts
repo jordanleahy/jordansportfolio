@@ -3,12 +3,12 @@
  * 
  * PURPOSE:
  * Specialized function for generating visual image prompts for social media content.
- * Extracted from the monolithic generate-image-prompt-dynamic for better performance
- * and maintainability.
+ * This is the core OpenAI integration point that handles direct API calls using GPT-5
+ * models with proper parameter configuration and comprehensive usage tracking.
  * 
  * INPUTS:
  * - postId: string - Social media post ID to fetch content
- * - themeId: string (optional) - Theme ID for theme-specific prompts
+ * - themeId: string - Theme ID for theme-specific system prompts (required)
  * - aspectRatio: string (optional) - Desired aspect ratio (defaults to 1:1)
  * - systemPromptId: string (optional) - Explicit system prompt override
  * - colorTheme: object (optional) - Brand color theme configuration
@@ -16,6 +16,19 @@
  * OUTPUTS:
  * - Success: { generatedPrompt: string, category: string, agent: string, correlationId: string, usage: object }
  * - Error: { error: string }
+ * 
+ * OPENAI MODEL CONFIGURATION:
+ * ✅ USES: gpt-5-2025-08-07 flagship model (via OPENAI_CONFIG.MODELS.FLAGSHIP)
+ * ✅ PARAMETERS: max_completion_tokens: 3000 (correct for GPT-5)
+ * ✅ NO TEMPERATURE: GPT-5 models don't support temperature parameter
+ * ✅ ATTRIBUTION: Full usage tracking with correlation IDs and cost estimation
+ * 
+ * TECHNICAL IMPLEMENTATION:
+ * - Uses makeOpenAIRequest utility for proper error handling and retries
+ * - Implements extractUsageFromOpenAIResponse for accurate token tracking
+ * - Caches generated prompts in cached_prompts table for performance
+ * - Validates system prompt availability before processing
+ * - Supports both theme-specific and fallback system prompts
  */
 
 import { OPENAI_CONFIG } from '../_shared/config.ts';
