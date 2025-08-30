@@ -423,11 +423,36 @@ Incorporate these characteristics naturally into the generated prompt while main
       correlationId
     });
 
-    if (openAIData.choices?.[0]?.message?.content) {
-      generatedText = openAIData.choices[0].message.content.trim();
-      logger.debug('Extracted using message.content', { correlationId });
+    const choice = openAIData.choices?.[0];
+    const message = choice?.message;
+
+    // Check for content refusal first
+    if (message?.refusal) {
+      logger.error('OpenAI refused to generate content', { 
+        refusal: message.refusal,
+        correlationId 
+      });
+      throw new Error(`Content generation was refused: ${message.refusal}`);
+    }
+
+    // Extract content
+    if (message?.content && message.content.trim()) {
+      generatedText = message.content.trim();
+      logger.debug('Extracted using message.content', { 
+        contentLength: generatedText.length,
+        correlationId 
+      });
     } else {
-      logger.error('Missing generated text from OpenAI chat response', { error: {} });
+      // Log detailed debugging information
+      logger.error('No valid content in OpenAI response', {
+        hasMessage: !!message,
+        hasContent: !!message?.content,
+        contentEmpty: message?.content === '',
+        contentWhitespace: message?.content?.trim() === '',
+        messageKeys: message ? Object.keys(message) : [],
+        finishReason: choice?.finish_reason,
+        correlationId
+      });
       throw new Error('No generated text received from OpenAI');
     }
 
