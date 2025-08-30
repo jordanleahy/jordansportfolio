@@ -35,6 +35,7 @@ import { usePendingThemeCleanup } from '@/hooks/usePendingThemeCleanup';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
+import { AddGoToMarketPosts } from '@/components/AddGoToMarketPosts';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
@@ -920,6 +921,11 @@ export default function StoriesDashboard() {
                     {roleLoading ? <Skeleton className="h-10 w-32" /> : <Button onClick={() => setImportModalOpen(true)} variant="outline">
                         Import Themes
                       </Button>}
+                  </div>
+                  
+                  {/* Temporary: Add Go to Market Posts */}
+                  <div className="px-8">
+                    <AddGoToMarketPosts />
                   </div>
                 </div>}
             </div>
