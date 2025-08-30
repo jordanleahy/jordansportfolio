@@ -1,5 +1,8 @@
 import { useUsageSummary } from './useUsageSummary';
 import { useUsageEnforcement, type UsageType } from './useUsageEnforcement';
+import { createComponentLogger } from '@/services/logger';
+
+const logger = createComponentLogger('useCreditCheck');
 
 export interface CreditStatus {
   hasCredits: boolean;
@@ -21,7 +24,7 @@ export const useCreditCheck = () => {
   const getCreditStatus = (): CreditStatus => {
     // During loading, be conservative and assume no credits to prevent unwanted button states
     if (isLoading || !data) {
-      console.log('[useCreditCheck] Loading state - no credits assumed', { isLoading, hasData: !!data });
+      logger.debug('Loading state - no credits assumed', { isLoading, hasData: !!data });
       return {
         hasCredits: false, // FIXED: Conservative default - no credits during loading
         remainingDaily: 0,
@@ -52,7 +55,7 @@ export const useCreditCheck = () => {
     const hasCredits = remainingDaily > 0 && remainingMonthly > 0;
 
     // Debug logging for QA
-    console.log('[useCreditCheck] Credit status calculated', {
+    logger.debug('Credit status calculated', {
       hasCredits,
       remainingDaily,
       remainingMonthly,
