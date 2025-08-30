@@ -43,6 +43,12 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { 
+  OPENAI_CONFIG, 
+  API_ENDPOINTS, 
+  ERROR_MESSAGES, 
+  HTTP_CONFIG 
+} from '../_shared/config.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -61,12 +67,18 @@ serve(async (req) => {
     
     if (!openAIApiKey) {
       console.log('❌ [generate-custom-theme] OpenAI API key not configured');
-      throw new Error('OpenAI API key not configured');
+      throw new Error(ERROR_MESSAGES.OPENAI_API_KEY_MISSING);
     }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    // Initialize Supabase client with proper validation
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.log('❌ [generate-custom-theme] Supabase configuration missing');
+      throw new Error('Supabase configuration not found');
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Get user from JWT if provided (optional for this function)
@@ -129,19 +141,19 @@ User: "Marketing tips for small business"
 Output: {"category": "small-business-marketing", "theme": "Small Business Marketing", "description": "Essential marketing strategies and tactics for growing small businesses", "posts": [...8-12 posts for practical coverage...]}`;
 
     console.log('🤖 [generate-custom-theme] Calling OpenAI API');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(API_ENDPOINTS.OPENAI.CHAT_COMPLETIONS, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${description}` }
         ],
-        max_completion_tokens: 3000,
+        max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
       }),
     });
 
@@ -233,7 +245,6 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
         title: post.title,
         description: post.description,
         category: themeData.category,
-        theme: themeData.theme,
         status: 'draft'
       }));
 
