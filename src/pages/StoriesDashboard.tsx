@@ -31,6 +31,7 @@ import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 import { CollectionCard } from '@/components/library/CollectionCard';
 import { useThemeShimmer } from '@/hooks/useThemeShimmer';
+import { usePendingThemeCleanup } from '@/hooks/usePendingThemeCleanup';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
@@ -115,6 +116,12 @@ export default function StoriesDashboard() {
     shouldShowShimmer,
     completionProgress
   } = useThemeShimmer({
+    pendingTheme,
+    setPendingTheme
+  });
+
+  // Auto-cleanup stale pending themes
+  usePendingThemeCleanup({
     pendingTheme,
     setPendingTheme
   });
@@ -550,14 +557,26 @@ export default function StoriesDashboard() {
     } catch (error: any) {
       console.error('Theme generation error:', error);
       
-      // Simple error handling - just clear pending state
+      // Clear pending state and loading indicators
       clearPendingThemeState();
+      setIsGeneratingTheme(false);
+      
+      // Error handling
+      const errorMessage = typeof error === 'string' ? error : (error?.message || error?.error || 'Unknown error');
       
       toast({
-        title: "Generation Failed",
-        description: error.message || "Failed to generate custom theme",
+        title: "Theme Generation Failed",
+        description: errorMessage,
         variant: "destructive"
       });
+      
+      // Refresh themes to ensure we have the latest state
+      try {
+        const themes = await optimizedSocialMediaService.getAvailableThemes();
+        setAvailableThemes(themes);
+      } catch (refreshError) {
+        console.error('Failed to refresh themes after error:', refreshError);
+      }
     } finally {
       setIsGeneratingTheme(false);
     }

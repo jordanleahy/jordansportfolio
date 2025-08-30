@@ -118,8 +118,14 @@ serve(async (req) => {
       }
 
       console.log(`✅ [CREATE] Theme generated successfully`, {
-        correlationId
+        correlationId,
+        themeId: themeData?.theme_id || 'undefined'
       });
+
+      // Validate theme_id exists before proceeding
+      if (!themeData?.theme_id) {
+        throw new Error('Theme generation succeeded but no theme_id was returned');
+      }
 
       // Initial status update - triggers will handle the rest automatically
       const { error: updateError } = await supabase
@@ -134,8 +140,11 @@ serve(async (req) => {
       if (updateError) {
         console.error(`❌ [UPDATE] Failed to update theme lifecycle`, {
           updateError,
+          themeId: themeData.theme_id,
           correlationId
         });
+        // Don't throw error here as theme was created successfully
+        // The theme will still function, just lifecycle status won't be updated
       }
 
       // Start background processing (simplified - no polling needed)

@@ -42,7 +42,22 @@ export const useThemeShimmer = ({
 
     const fetchThemePosts = async () => {
       try {
-        console.log('📡 SHIMMER: Fetching posts for theme_id:', pendingTheme.theme_id);
+        console.log('📡 SHIMMER: Fetching theme and posts for theme_id:', pendingTheme.theme_id);
+        
+        // First check if the theme exists in the database
+        const { data: themeExists, error: themeError } = await supabase
+          .from('themes')
+          .select('id')
+          .eq('id', pendingTheme.theme_id)
+          .single();
+        
+        if (themeError || !themeExists) {
+          console.log('❌ SHIMMER: Theme not found in database, clearing pending state');
+          clearPendingThemeState();
+          return;
+        }
+        
+        // If theme exists, fetch its posts
         const { data: posts } = await supabase
           .from('social_media_posts')
           .select('id, individual_prompt_status, theme_id')
@@ -60,7 +75,9 @@ export const useThemeShimmer = ({
           setThemePosts(posts);
         }
       } catch (error) {
-        console.error('❌ SHIMMER: Error fetching theme posts:', error);
+        console.error('❌ SHIMMER: Error fetching theme data:', error);
+        // On error, clear pending state to prevent infinite loading
+        clearPendingThemeState();
       }
     };
 
