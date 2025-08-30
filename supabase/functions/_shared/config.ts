@@ -18,6 +18,7 @@ export const OPENAI_CONFIG = {
     MEDIUM_RESPONSE: 2000,
     LONG_RESPONSE: 2500,
     COMPREHENSIVE: 7000,
+    VISUAL_PROMPT_GENERATION: 10000,
   },
 // Default model for theme generation
   DEFAULT_THEME_MODEL: 'gpt-5-mini-2025-08-07', // Keep as FAST variant for theme generation
