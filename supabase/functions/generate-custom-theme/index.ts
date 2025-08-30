@@ -42,6 +42,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -61,6 +62,21 @@ serve(async (req) => {
     if (!openAIApiKey) {
       console.log('❌ [generate-custom-theme] OpenAI API key not configured');
       throw new Error('OpenAI API key not configured');
+    }
+
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Get user from JWT if provided (optional for this function)
+    const authHeader = req.headers.get('Authorization');
+    let user = null;
+    if (authHeader) {
+      const { data: { user: authUser } } = await supabase.auth.getUser(
+        authHeader.replace('Bearer ', '')
+      );
+      user = authUser;
     }
 
     const { description, provider = 'openai' } = await req.json();
@@ -181,8 +197,61 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
 
     console.log('✅ [generate-custom-theme] Theme generation successful:', themeData.category);
 
+    // Save theme to database if user is authenticated
+    let savedThemeId = null;
+    if (user) {
+      console.log('💾 [generate-custom-theme] Saving theme to database for user:', user.id);
+      
+      const { data: savedTheme, error: saveError } = await supabase
+        .from('themes')
+        .insert({
+          user_id: user.id,
+          theme_name: themeData.theme,
+          description: themeData.description,
+          category: themeData.category,
+          lifecycle_status: 'pending',
+          user_interaction_required: true,
+          background_processing_complete: false
+        })
+        .select('id')
+        .single();
+
+      if (saveError) {
+        console.error('❌ [generate-custom-theme] Failed to save theme:', saveError);
+        throw new Error('Failed to save theme to database');
+      }
+
+      savedThemeId = savedTheme.id;
+      console.log('✅ [generate-custom-theme] Theme saved with ID:', savedThemeId);
+
+      // Save posts to database
+      console.log('💾 [generate-custom-theme] Saving posts to database');
+      const postsToInsert = themeData.posts.map((post: any) => ({
+        user_id: user.id,
+        theme_id: savedThemeId,
+        day: post.day,
+        title: post.title,
+        description: post.description,
+        category: themeData.category,
+        theme: themeData.theme,
+        status: 'draft'
+      }));
+
+      const { error: postsError } = await supabase
+        .from('social_media_posts')
+        .insert(postsToInsert);
+
+      if (postsError) {
+        console.error('❌ [generate-custom-theme] Failed to save posts:', postsError);
+        // Don't throw error here as theme was saved successfully
+      } else {
+        console.log('✅ [generate-custom-theme] Posts saved successfully');
+      }
+    }
+
     return new Response(JSON.stringify({ 
       success: true, 
+      theme_id: savedThemeId,
       themeData,
       message: 'Theme generated successfully'
     }), {
