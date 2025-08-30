@@ -377,6 +377,37 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
       } else {
         console.log('✅ [generate-custom-theme] Posts saved successfully');
       }
+
+      // Trigger system prompt generation for the theme
+      console.log('🔄 [generate-custom-theme] Triggering system prompt generation');
+      try {
+        const { data: promptData, error: promptError } = await supabase.functions.invoke(
+          'invoke-system-prompt-agent',
+          {
+            body: {
+              category: themeData.category,
+              theme: themeData.theme,
+              theme_id: savedThemeId,
+              description: themeData.description || description,
+              sample_posts: themeData.posts.slice(0, 3), // Send first 3 posts as samples
+              user_id: user.id
+            },
+            headers: {
+              Authorization: authHeader,
+            }
+          }
+        );
+
+        if (promptError) {
+          console.error('❌ [generate-custom-theme] System prompt generation failed:', promptError);
+          // Don't throw error here as theme was created successfully
+        } else {
+          console.log('✅ [generate-custom-theme] System prompt generation triggered successfully');
+        }
+      } catch (promptGenError) {
+        console.error('❌ [generate-custom-theme] Error triggering system prompt:', promptGenError);
+        // Don't throw error here as theme was created successfully
+      }
     }
 
     return new Response(JSON.stringify({ 
