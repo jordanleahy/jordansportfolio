@@ -15,16 +15,25 @@
  * 
  * DEPENDENCIES:
  * - OpenAI API (GPT-5 for theme and content generation)
+ * - Supabase (optional database persistence for authenticated users)
+ * - Shared configuration (_shared/config.ts)
  * 
  * USAGE:
  * Called from: Theme creation workflows, content planning tools, social media calendar generation
- * Authentication: Not required - public content generation endpoint
+ * Authentication: Optional - supports both public generation and authenticated database persistence
+ * 
+ * CONFIGURATION:
+ * Uses shared configuration constants for:
+ * - OpenAI model: OPENAI_CONFIG.DEFAULT_THEME_MODEL (gpt-5-mini-2025-08-07)
+ * - Token limit: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS (7000)
+ * - API endpoints: API_ENDPOINTS.OPENAI.CHAT_COMPLETIONS
+ * - Error messages: ERROR_MESSAGES constants
  * 
  * IMPORTANT: OpenAI API Guidelines for this function
  * 
- * ✅ REQUIRED MODELS: Use GPT-5 family only
+ * ✅ REQUIRED MODELS: Use GPT-5 family only (configured via shared config)
  * - gpt-5-2025-08-07 (flagship)
- * - gpt-5-mini-2025-08-07 (faster)  
+ * - gpt-5-mini-2025-08-07 (default for themes)  
  * - gpt-5-nano-2025-08-07 (fastest)
  * 
  * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
@@ -32,12 +41,15 @@
  * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
  * 
  * FLOW:
- * 1. Validate description input and OpenAI API availability
- * 2. Apply detailed system prompt allowing AI to determine optimal post count (1-100)
- * 3. Generate complete theme using OpenAI with specific formatting requirements
- * 4. Parse and validate generated JSON for required fields and post structure
- * 5. Verify each post has day, title, and description fields
- * 6. Return structured theme data ready for import into content management systems
+ * 1. Validate environment variables (OpenAI API key, optional Supabase config)
+ * 2. Parse request body and validate description input
+ * 3. Extract optional user authentication from JWT token
+ * 4. Apply detailed system prompt allowing AI to determine optimal post count (1-100)
+ * 5. Generate complete theme using OpenAI with configured model and token limits
+ * 6. Parse and validate generated JSON for required fields and post structure
+ * 7. Verify each post has day, title, and description fields
+ * 8. If user is authenticated, persist theme and posts to Supabase database
+ * 9. Return structured theme data ready for import into content management systems
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
