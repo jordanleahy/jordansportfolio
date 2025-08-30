@@ -392,20 +392,25 @@ export function extractUsageFromOpenAIResponse(response: any): {
   completionTokens?: number;
   totalTokens?: number;
   estimatedCost: number;
+  openAIRequestId?: string;
 } {
   const usage = response.usage;
+  const openAIRequestId = response.id || undefined; // Extract OpenAI request ID
   
   if (!usage) {
-    return { estimatedCost: 0 };
+    return { estimatedCost: 0, openAIRequestId };
   }
 
   const promptTokens = usage.prompt_tokens || 0;
   const completionTokens = usage.completion_tokens || 0;
   const totalTokens = usage.total_tokens || promptTokens + completionTokens;
 
-  // Calculate cost based on model (simplified - should be model-specific)
-  const inputCost = promptTokens * (0.000150 / 1000); // gpt-5-mini input cost (per 1k tokens)
-  const outputCost = completionTokens * (0.000600 / 1000); // gpt-5-mini output cost (per 1k tokens)
+  // GPT-5 Flagship (gpt-5-2025-08-07) pricing - CORRECTED
+  const inputCostPer1K = 0.001000; // $0.001 per 1K input tokens
+  const outputCostPer1K = 0.002000; // $0.002 per 1K output tokens
+  
+  const inputCost = promptTokens * (inputCostPer1K / 1000);
+  const outputCost = completionTokens * (outputCostPer1K / 1000);
   const estimatedCost = inputCost + outputCost;
 
   return {
@@ -413,6 +418,7 @@ export function extractUsageFromOpenAIResponse(response: any): {
     completionTokens,
     totalTokens,
     estimatedCost,
+    openAIRequestId,
   };
 }
 

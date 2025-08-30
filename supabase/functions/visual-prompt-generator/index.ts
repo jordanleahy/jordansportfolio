@@ -7,11 +7,12 @@
  * models with proper parameter configuration and comprehensive usage tracking.
  * 
  * INPUTS:
- * - postId: string - Social media post ID to fetch content
+ * - postId: string - Social media post ID to fetch content (required)
  * - themeId: string - Theme ID for theme-specific system prompts (required)
  * - aspectRatio: string (optional) - Desired aspect ratio (defaults to 1:1)
  * - systemPromptId: string (optional) - Explicit system prompt override
  * - colorTheme: object (optional) - Brand color theme configuration
+ * - referenceAnalysis: object (optional) - Reference image analysis for style matching
  * 
  * OUTPUTS:
  * - Success: { generatedPrompt: string, category: string, agent: string, correlationId: string, usage: object }
@@ -354,7 +355,7 @@ Incorporate these characteristics naturally into the generated prompt while main
     logger.startTiming('openai_request');
 
     const openAIRequestBody = {
-      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 for optimal prompt generation
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
@@ -400,13 +401,13 @@ Incorporate these characteristics naturally into the generated prompt while main
     // Parse the response to get the actual OpenAI response data
     const openAIData = await openAIResponse.response.json();
     
-    // Extract usage and costs
+    // Extract usage and costs with proper OpenAI request ID
     const usageData = extractUsageFromOpenAIResponse(openAIData);
     promptTokens = usageData.promptTokens;
     completionTokens = usageData.completionTokens;
     tokensUsed = usageData.totalTokens;
     estimatedCost = usageData.estimatedCost;
-    openAIRequestId = usageData.openAIRequestId;
+    openAIRequestId = usageData.openAIRequestId || openAIResponse.openAIRequestId;
 
     // 🎯 TOKEN USAGE LOGGING
     const costPerToken = tokensUsed > 0 ? estimatedCost / tokensUsed : 0;
@@ -503,7 +504,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       category: category,
       usedType,
       agent: 'Visual Prompt Generator',
-      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 flagship model
       generated_at: new Date().toISOString(),
       tokens_used: tokensUsed,
       estimated_cost: estimatedCost,
@@ -521,7 +522,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 flagship model
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -572,7 +573,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 flagship model
         requestType: 'text_generation',
         success: false,
         estimatedCost: 0,
