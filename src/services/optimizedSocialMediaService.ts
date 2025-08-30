@@ -269,6 +269,7 @@ export class OptimizedSocialMediaService {
         title,
         description,
         day,
+        individual_prompt_status,
         image_16_9_url,
         image_4_3_url,
         image_9_16_url,
@@ -315,26 +316,25 @@ export class OptimizedSocialMediaService {
                       firstPost?.image_3_4_url ||
                       firstPost?.image_1_1_url;
       
-      // Fix data inconsistency: if database says completed but no posts generated, treat as pending
-      const hasActualPosts = (theme.prompt_completion_count || 0) > 0 && (theme.total_posts_count || 0) > 0;
-      const actuallyCompleted = theme.prompt_generation_status === 'completed' && hasActualPosts;
+      // Use actual post data as source of truth instead of unreliable database counters
+      const actualPostCount = posts.length;
+      const completedPosts = posts.filter(p => p.individual_prompt_status === 'completed').length;
+      const hasActualPosts = actualPostCount > 0;
       
-      // Determine lifecycle status for UI display (ignore inconsistent database lifecycle_status)
-      const isCompleted = actuallyCompleted && theme.prompt_completion_count === theme.total_posts_count;
-      const isGenerating = theme.prompt_generation_status === 'in_progress';
-      const isPending = !actuallyCompleted && (!theme.prompt_generation_status || 
-                       theme.prompt_generation_status === 'not_started' || 
-                       !hasActualPosts);
+      // Determine lifecycle status for UI display using real post data
+      const isCompleted = hasActualPosts && completedPosts === actualPostCount;
+      const isGenerating = hasActualPosts && completedPosts < actualPostCount;
+      const isPending = !hasActualPosts;
       
       return {
         id: theme.id,
         theme_name: theme.theme_name,
         description: theme.description,
         category: theme.category,
-        post_count: posts.length,
+        post_count: actualPostCount, // Use actual count instead of database counter
         prompt_generation_status: theme.prompt_generation_status,
-        prompt_completion_count: theme.prompt_completion_count || 0,
-        total_posts_count: theme.total_posts_count || 0,
+        prompt_completion_count: completedPosts, // Use actual completed count
+        total_posts_count: actualPostCount, // Use actual total count
         lifecycle_status: isCompleted ? 'ready' : isGenerating ? 'generating' : 'pending',
         user_interaction_required: !isCompleted,
         background_processing_complete: isCompleted,
