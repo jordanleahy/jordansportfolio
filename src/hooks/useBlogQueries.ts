@@ -3,6 +3,7 @@ import { BlogService } from '@/services/blogService';
 import { BlogPost, BlogPostInput, VisualSection } from '@/types/blog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/services/logger';
 
 // Query keys for consistent caching
 export const blogKeys = {
@@ -39,18 +40,18 @@ export const useBlogPost = (identifier: string | undefined, includeUnpublished =
     queryFn: async () => {
       if (!identifier) return null;
       
-      console.log('useBlogPost - Fetching post with identifier:', identifier, 'includeUnpublished:', includeUnpublished);
+      logger.debug('Fetching blog post', { identifier, includeUnpublished });
       
       // If it's a UUID, fetch by ID (for editor), otherwise by slug (for public)
       if (isUUID(identifier)) {
-        console.log('useBlogPost - Fetching by ID');
+        logger.debug('Fetching by ID');
         const result = await BlogService.getPostById(identifier);
-        console.log('useBlogPost - Result by ID:', result);
+        logger.debug('Result by ID', { hasResult: !!result });
         return result;
       } else {
-        console.log('useBlogPost - Fetching by slug');
+        logger.debug('Fetching by slug');
         const result = await BlogService.getPostBySlug(identifier, includeUnpublished);
-        console.log('useBlogPost - Result by slug:', result);
+        logger.debug('Result by slug', { hasResult: !!result });
         return result;
       }
     },
@@ -58,7 +59,7 @@ export const useBlogPost = (identifier: string | undefined, includeUnpublished =
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: (failureCount, error) => {
-      console.log('useBlogPost - Retry attempt:', failureCount, 'Error:', error);
+      logger.debug('Blog post retry attempt', { failureCount, error: error?.message });
       // Don't retry for 404s
       if (error && typeof error === 'object' && 'status' in error && error.status === 404) {
         return false;
@@ -128,7 +129,7 @@ export const useCreateBlogPost = () => {
         description: "Failed to create blog post",
         variant: "destructive",
       });
-      console.error('Create blog post error:', error);
+      logger.error('Create blog post error', error);
     },
   });
 };
@@ -162,7 +163,7 @@ export const useUpdateBlogPost = () => {
         description: "Failed to update blog post",
         variant: "destructive",
       });
-      console.error('Update blog post error:', error);
+      logger.error('Update blog post error', error);
     },
   });
 };
@@ -189,7 +190,7 @@ export const useDeleteBlogPost = () => {
         description: "Failed to delete blog post",
         variant: "destructive",
       });
-      console.error('Delete blog post error:', error);
+      logger.error('Delete blog post error', error);
     },
   });
 };

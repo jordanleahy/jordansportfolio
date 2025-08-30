@@ -16,6 +16,7 @@ import {
   List,
   Loader2
 } from 'lucide-react';
+import { logger } from '@/services/logger';
 
 interface Character {
   id: string;
@@ -60,7 +61,7 @@ export const CharacterManagement: React.FC = () => {
       if (error) throw error;
       setCharacters(data || []);
     } catch (error) {
-      console.error('Error loading characters:', error);
+      logger.error('Error loading characters', error);
       toast.error('Failed to load characters');
     } finally {
       setIsLoading(false);
@@ -78,7 +79,7 @@ export const CharacterManagement: React.FC = () => {
       if (error) throw error;
       setCharacterGenerations(data || []);
     } catch (error) {
-      console.error('Error loading character generations:', error);
+      logger.error('Error loading character generations', error);
       toast.error('Failed to load character generations');
     }
   };
@@ -95,7 +96,7 @@ export const CharacterManagement: React.FC = () => {
       setCharacters(characters.filter(char => char.id !== characterId));
       toast.success('Character deleted successfully');
     } catch (error) {
-      console.error('Error deleting character:', error);
+      logger.error('Error deleting character', error);
       toast.error('Failed to delete character');
     }
   };
@@ -110,7 +111,7 @@ export const CharacterManagement: React.FC = () => {
       document.body.removeChild(link);
       toast.success('Image downloaded successfully!');
     } catch (error) {
-      console.error('Download error:', error);
+      logger.error('Download error', error);
       toast.error('Failed to download image');
     }
   };
