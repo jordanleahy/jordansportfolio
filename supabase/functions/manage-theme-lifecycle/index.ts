@@ -1,5 +1,58 @@
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+/**
+ * ============= THEME LIFECYCLE MANAGEMENT EDGE FUNCTION =============
+ * 
+ * Manages the complete lifecycle of social media content themes including creation,
+ * completion tracking, and status monitoring with real-time updates and background processing.
+ * 
+ * FUNCTION: manage-theme-lifecycle
+ * PURPOSE: Orchestrates theme creation workflow with lifecycle management
+ * 
+ * INPUTS:
+ * - action: 'create' | 'complete' | 'status' - The lifecycle action to perform
+ * - description?: string - Theme description for creation (required for 'create')
+ * - themeId?: string - Theme ID for status operations (required for 'complete'/'status')
+ * - provider?: 'openai' | 'gemini' - AI provider preference (defaults to 'openai')
+ * 
+ * OUTPUTS:
+ * - success: boolean - Operation success indicator
+ * - theme_id?: string - Generated theme ID (for 'create' action)
+ * - lifecycle_status: string - Current theme lifecycle status
+ * - user_interaction_required?: boolean - Whether user interaction is needed
+ * - background_processing_complete?: boolean - Background processing completion status
+ * - message: string - Human-readable status message
+ * - correlationId: string - Unique request correlation identifier
+ * 
+ * DEPENDENCIES:
+ * - OpenAI model shared configuration (_shared/config.ts)
+ * - Supabase (database persistence, authentication, edge function orchestration)
+ * - generate-custom-theme edge function (for theme creation)
+ * 
+ * USAGE:
+ * Called from: Theme management workflows, lifecycle tracking systems, dashboard updates
+ * 
+ * Authentication: Required (JWT token)
+ * CORS: Enabled for web application integration
+ * 
+ * FLOW:
+ * 1. CREATE: Validates input → Calls theme generation → Updates lifecycle status → Returns theme info
+ * 2. COMPLETE: Validates theme ownership → Marks theme completed → Updates database → Confirms completion
+ * 3. STATUS: Validates theme access → Fetches current status → Returns comprehensive status info
+ * 
+ * ERROR HANDLING: Comprehensive logging with correlation IDs, graceful degradation, detailed error responses
+ */
+
+// Import Deno standard library and XHR polyfill for consistency
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+
+// Import shared configuration constants
+import { 
+  ERROR_MESSAGES, 
+  HTTP_CONFIG, 
+  EDGE_FUNCTIONS,
+  SUPABASE_CONFIG 
+} from '../_shared/config.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,7 +98,7 @@ serve(async (req) => {
     // Get user from JWT
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('No authorization header');
+      throw new Error(ERROR_MESSAGES.USER_NOT_AUTHENTICATED);
     }
 
     console.log(`🔍 [AUTH] Authentication attempt`, {
@@ -58,7 +111,7 @@ serve(async (req) => {
     );
 
     if (authError || !user) {
-      throw new Error('Authentication failed');
+      throw new Error(ERROR_MESSAGES.USER_NOT_AUTHENTICATED);
     }
 
     console.log(`✅ [AUTH] User authenticated`, {
@@ -77,7 +130,7 @@ serve(async (req) => {
 
     if (body.action === 'create') {
       if (!body.description) {
-        throw new Error('Description is required for create action');
+        throw new Error(ERROR_MESSAGES.MISSING_REQUIRED_PARAMS);
       }
 
       console.log(`🔵 [CREATE] Starting theme creation with lifecycle`, {
@@ -88,7 +141,7 @@ serve(async (req) => {
       
       // Call the theme generation function
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        'generate-custom-theme',
+        EDGE_FUNCTIONS.GENERATE_CUSTOM_THEME,
         {
           body: {
             description: body.description,
@@ -114,7 +167,7 @@ serve(async (req) => {
           themeData,
           correlationId
         });
-        throw new Error(themeData?.error || 'Failed to generate theme');
+        throw new Error(themeData?.error || ERROR_MESSAGES.THEME_GENERATION_FAILED);
       }
 
       console.log(`✅ [CREATE] Theme generated successfully`, {
@@ -124,7 +177,7 @@ serve(async (req) => {
 
       // Validate theme_id exists before proceeding
       if (!themeData?.theme_id) {
-        throw new Error('Theme generation succeeded but no theme_id was returned');
+        throw new Error(ERROR_MESSAGES.THEME_GENERATION_FAILED);
       }
 
       // Initial status update - triggers will handle the rest automatically
@@ -170,13 +223,13 @@ serve(async (req) => {
         JSON.stringify(response),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
+          status: HTTP_CONFIG.STATUS_CODES.OK,
         }
       );
 
     } else if (body.action === 'complete') {
       if (!body.themeId) {
-        throw new Error('Theme ID is required for complete action');
+        throw new Error(ERROR_MESSAGES.MISSING_REQUIRED_PARAMS);
       }
 
       console.log(`🔵 [COMPLETE] Marking theme as user-completed`, {
@@ -200,7 +253,7 @@ serve(async (req) => {
           updateError,
           correlationId
         });
-        throw new Error('Failed to mark theme as completed');
+        throw new Error(ERROR_MESSAGES.DATABASE_ERROR);
       }
 
       const response = {
@@ -219,13 +272,13 @@ serve(async (req) => {
         JSON.stringify(response),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
+          status: HTTP_CONFIG.STATUS_CODES.OK,
         }
       );
 
     } else if (body.action === 'status') {
       if (!body.themeId) {
-        throw new Error('Theme ID is required for status action');
+        throw new Error(ERROR_MESSAGES.MISSING_REQUIRED_PARAMS);
       }
 
       console.log(`🔵 [STATUS] Fetching theme status`, {
@@ -246,7 +299,7 @@ serve(async (req) => {
           fetchError,
           correlationId
         });
-        throw new Error('Failed to fetch theme status');
+        throw new Error(ERROR_MESSAGES.DATABASE_ERROR);
       }
 
       const response = {
@@ -268,12 +321,12 @@ serve(async (req) => {
         JSON.stringify(response),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
+          status: HTTP_CONFIG.STATUS_CODES.OK,
         }
       );
 
     } else {
-      throw new Error('Invalid action. Must be create, complete, or status');
+      throw new Error(ERROR_MESSAGES.INVALID_REQUEST_BODY);
     }
 
   } catch (error) {
@@ -292,7 +345,7 @@ serve(async (req) => {
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: HTTP_CONFIG.STATUS_CODES.BAD_REQUEST,
       }
     );
   }
