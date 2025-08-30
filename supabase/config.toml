@@ -1,5 +1,8 @@
 project_id = "wgwmzfbnkovumqcvsxgd"
 
+[functions.ensure-post-image-prompts]
+verify_jwt = true
+
 [functions.create-payment]
 verify_jwt = false
 
