@@ -6,7 +6,6 @@ import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
 import { useParams } from 'react-router-dom';
 import { ColorTheme } from '@/types/colorTheme';
-import { logger } from '@/services/logger';
 
 interface GenerationMetrics {
   correlationId: string;
@@ -98,7 +97,7 @@ export const useAdvancedImageGeneration = () => {
         .single();
 
       if (fetchError) {
-        logger.warn('Could not fetch theme_id for post', { error: fetchError.message, postId: post.id });
+        console.warn('Could not fetch theme_id for post:', fetchError.message);
       }
 
       const themeId = postData?.theme_id;
@@ -110,7 +109,7 @@ export const useAdvancedImageGeneration = () => {
       updateStep('Prompt Generation', 'active', 'Generating AI prompt...');
       const promptStart = Date.now();
       
-      logger.debug('Advanced Generation Color Theme Debug', {
+      console.log('🎨 Advanced Generation - Color Theme Debug:', {
         correlationId,
         colorTheme: colorTheme ? {
           name: colorTheme.name,
@@ -118,7 +117,9 @@ export const useAdvancedImageGeneration = () => {
           visual_style: colorTheme.visual_style,
           hasAllColors: !!(colorTheme.primary_color && colorTheme.secondary_color)
         } : null,
-        themeId
+        themeId,
+         // ❌ BAD: Using theme name - removed in Phase 1 migration
+         // urlTheme: theme  // REMOVED - use themeId instead
       });
 
       const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
@@ -190,7 +191,7 @@ export const useAdvancedImageGeneration = () => {
 
       // Log advanced metrics if available
       if (imageData?.metadata) {
-        logger.info('Advanced Image Generation Metrics', {
+        console.log('🔍 Advanced Image Generation Metrics:', {
           correlationId: imageData.metadata.correlationId,
           totalDuration: imageData.metadata.totalDuration_ms,
           imageSize: imageData.metadata.size,
@@ -286,7 +287,7 @@ export const useAdvancedImageGeneration = () => {
       setMetrics(finalMetrics);
 
       // Log comprehensive performance data
-      logger.info('Generation Performance Analysis', {
+      console.log('📊 Generation Performance Analysis:', {
         correlationId,
         breakdown: {
           prompt: `${promptTime}ms`,
@@ -305,7 +306,7 @@ export const useAdvancedImageGeneration = () => {
       });
 
     } catch (error) {
-      logger.error('Error in advanced image generation', error);
+      console.error('Error in advanced image generation:', error);
       
       updateStep('Generation Failed', 'error', error instanceof Error ? error.message : 'Unknown error');
       
@@ -346,7 +347,7 @@ export const useAdvancedImageGeneration = () => {
           .eq('id', postId);
       }
     } catch (error) {
-      logger.error('Background watermarking failed', error);
+      console.error('Background watermarking failed:', error);
       await supabase.from('social_media_posts')
         .update({ image_1_1_watermark_status: 'failed' })
         .eq('id', postId);

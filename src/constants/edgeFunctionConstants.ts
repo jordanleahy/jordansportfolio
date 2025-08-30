@@ -1,3 +1,5 @@
+import { OPENAI_CONFIG as SHARED_OPENAI_CONFIG } from '../../supabase/functions/_shared/config.ts';
+
 // Edge Function Names
 export const EDGE_FUNCTION_NAMES = {
   INVOKE_SYSTEM_PROMPT_AGENT: 'invoke-system-prompt-agent',
@@ -22,9 +24,10 @@ export const EDGE_FUNCTION_NAMES = {
 
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
-  MAX_TOKENS: 4000,
+  MAX_COMPLETION_TOKENS: 7000,
   DEFAULT_TEMPERATURE: 1,
-  DEFAULT_MODEL: 'gpt-5-2025-08-07', // Updated to latest flagship model
+  DEFAULT_MODEL: SHARED_OPENAI_CONFIG.MODELS.FAST, // Use FAST variant for most edge functions
+  FLAGSHIP_MODEL: SHARED_OPENAI_CONFIG.MODELS.FLAGSHIP, // Use FLAGSHIP for complex tasks
   TIMEOUT_MS: 180000, // Increased base timeout to 180 seconds (3 minutes)
   ESCALATION_TIMEOUTS: {
     ATTEMPT_1: 180000,  // 180 seconds for first attempt
@@ -94,5 +97,4 @@ export const CONTENT_LIMITS = {
 export const IMAGE_SETTINGS = {
   DEFAULT_SIZE: '1024x1024',
   DEFAULT_QUALITY: 'high',
-  PROMPT_MAX_LENGTH: 1000,
 } as const;

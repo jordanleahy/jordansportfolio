@@ -248,7 +248,7 @@ export class OptimizedSocialMediaService {
     // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, description, category, created_at, prompt_generation_status')
+      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -269,7 +269,6 @@ export class OptimizedSocialMediaService {
         title,
         description,
         day,
-        individual_prompt_status,
         image_16_9_url,
         image_4_3_url,
         image_9_16_url,
@@ -299,8 +298,13 @@ export class OptimizedSocialMediaService {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // Include all themes but mark their lifecycle status for UI display
-    const processedThemes = themes.map((theme: any) => {
+    // Filter out incomplete themes (only show themes where all prompts are completed)
+    const completedThemes = themes.filter((theme: any) => 
+      theme.prompt_generation_status === 'completed' &&
+      theme.prompt_completion_count === theme.total_posts_count
+    );
+    
+    const processedThemes = completedThemes.map((theme: any) => {
       const posts = postsByTheme[theme.id] || [];
       
       // Find Day 1 post first, then fall back to earliest post with image
@@ -316,28 +320,15 @@ export class OptimizedSocialMediaService {
                       firstPost?.image_3_4_url ||
                       firstPost?.image_1_1_url;
       
-      // Use actual post data as source of truth instead of unreliable database counters
-      const actualPostCount = posts.length;
-      const completedPosts = posts.filter(p => p.individual_prompt_status === 'completed').length;
-      const hasActualPosts = actualPostCount > 0;
-      
-      // Determine lifecycle status for UI display using real post data
-      const isCompleted = hasActualPosts && completedPosts === actualPostCount;
-      const isGenerating = hasActualPosts && completedPosts < actualPostCount;
-      const isPending = !hasActualPosts;
-      
       return {
         id: theme.id,
         theme_name: theme.theme_name,
         description: theme.description,
         category: theme.category,
-        post_count: actualPostCount, // Use actual count instead of database counter
+        post_count: posts.length,
         prompt_generation_status: theme.prompt_generation_status,
-        prompt_completion_count: completedPosts, // Use actual completed count
-        total_posts_count: actualPostCount, // Use actual total count
-        lifecycle_status: isCompleted ? 'ready' : isGenerating ? 'generating' : 'pending',
-        user_interaction_required: !isCompleted,
-        background_processing_complete: isCompleted,
+        prompt_completion_count: theme.prompt_completion_count || 0,
+        total_posts_count: theme.total_posts_count || 0,
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,

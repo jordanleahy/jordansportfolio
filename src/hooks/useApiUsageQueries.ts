@@ -2,13 +2,12 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ApiUsageRecord, UsageSummary, UsageFilters, UsageChartData } from '@/types/apiUsage';
-import { logger } from '@/services/logger';
 
 export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize = 50) => {
   return useQuery({
     queryKey: ['api-usage', filters, page, pageSize],
     queryFn: async () => {
-      logger.debug('Fetching API usage data', { filters, page, pageSize });
+      console.log('Fetching API usage data with filters:', filters);
       // Query api_usage_tracking directly
       let eventsQuery: any = (supabase as any)
         .from('api_usage_tracking')
@@ -45,7 +44,7 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
 
 
       if (error) {
-        logger.error('Error fetching API usage data', error);
+        console.error('Error fetching API usage data:', error);
         throw error;
       }
 
@@ -60,7 +59,7 @@ export const useApiUsageData = (filters: UsageFilters = {}, page = 1, pageSize =
           .select('user_id, email, full_name')
           .in('user_id', userIds as any);
         if (profilesError) {
-          logger.error('Error fetching profiles', profilesError);
+          console.error('Error fetching profiles:', profilesError);
         }
         profiles = pData as any[] | null;
       } else {
@@ -235,7 +234,7 @@ export const useUsageChartData = (filters: UsageFilters = {}) => {
   return useQuery({
     queryKey: ['usage-chart-data', filters],
     queryFn: async () => {
-      logger.debug('Fetching usage chart data');
+      console.log('Fetching usage chart data');
       
       // Get data for the last 30 days
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);

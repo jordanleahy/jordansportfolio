@@ -29,23 +29,20 @@ export const useSimpleThemeCompletion = (
 
     const checkCompletion = async () => {
       try {
-        // Get actual posts data instead of unreliable database counters
-        const { data: posts, error: postsError } = await supabase
-          .from('social_media_posts')
-          .select('individual_prompt_status')
-          .eq('theme_id', themeId);
+        const { data, error } = await supabase
+          .from('themes')
+          .select('prompt_generation_status, prompt_completion_count, total_posts_count, theme_name')
+          .eq('id', themeId)
+          .maybeSingle();
 
-        if (postsError) {
-          console.error('Error checking theme posts:', postsError);
+        if (error || !data) {
+          console.error('Error checking theme completion:', error);
           return;
         }
 
-        if (!posts || posts.length === 0) {
-          return; // No posts yet, keep waiting
-        }
-
-        const completedPosts = posts.filter(p => p.individual_prompt_status === 'completed').length;
-        const isFullyComplete = completedPosts === posts.length;
+        const isFullyComplete = 
+          data.prompt_generation_status === 'completed' &&
+          data.prompt_completion_count === data.total_posts_count;
 
         if (isFullyComplete && !hasCompletedRef.current) {
           hasCompletedRef.current = true;

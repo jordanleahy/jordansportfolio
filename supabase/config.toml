@@ -1,8 +1,5 @@
 project_id = "wgwmzfbnkovumqcvsxgd"
 
-[functions.user-idea-streaming-image-pipeline]
-verify_jwt = true
-
 [functions.create-payment]
 verify_jwt = false
 

@@ -9,7 +9,6 @@ import { Copy, RefreshCw, Sparkles, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { SOCIAL_MEDIA_PLATFORMS } from '@/constants/agentConstants';
-import { logger } from '@/services/logger';
 
 interface SocialMediaResult {
   platform: string;
@@ -60,7 +59,7 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
           setAgentExists(true);
         }
       } catch (error) {
-        logger.error('Error checking agent', error);
+        console.error('Error checking agent:', error);
       }
     };
     
@@ -86,7 +85,7 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
         throw new Error(data);
       }
     } catch (error) {
-      logger.error('Error creating agent', error);
+      console.error('Error creating agent:', error);
       toast({
         title: "Failed to create agent",
         description: error.message || "Please try again.",
@@ -154,7 +153,7 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
       });
 
     } catch (error) {
-      logger.error('Error generating social media content', error);
+      console.error('Error generating social media content:', error);
       toast({
         title: "Generation failed",
         description: error.message || "Failed to generate social media content. Please try again.",

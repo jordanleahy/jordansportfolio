@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
+import { OPENAI_CONFIG } from '../_shared/config.ts';
 
 // Constants - Centralized to match src/constants/
 const AGENT_NAMES = {
@@ -17,9 +18,7 @@ const SYSTEM_PROMPT_CATEGORIES = {
   SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
 } as const;
 
-const OPENAI_CONFIG = {
-  DEFAULT_MODEL: 'gpt-5-2025-08-07',
-  MAX_COMPLETION_TOKENS: 6000, // Optimized from 10000 for better performance
+const LOCAL_CONFIG = {
   TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
   ESCALATION_TIMEOUTS: {
     ATTEMPT_1: 180000,   // 180 seconds for first attempt
@@ -226,15 +225,15 @@ Please generate a detailed, professional system prompt following the established
 
     // Enhanced OpenAI request with correlation tracking
     const requestBodyForOpenAI = enhanceOpenAIRequestBody({
-      model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL,
+      model: agent.model_version || OPENAI_CONFIG.DEFAULT_THEME_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
+      max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
     }, correlationId);
 
-    console.log('🔎 OpenAI Request Model/Agent:', { model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, generator_agent: agent.name, correlationId });
+    console.log('🔎 OpenAI Request Model/Agent:', { model: agent.model_version || OPENAI_CONFIG.DEFAULT_THEME_MODEL, generator_agent: agent.name, correlationId });
 
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
       url: 'https://api.openai.com/v1/chat/completions',
@@ -245,7 +244,7 @@ Please generate a detailed, professional system prompt following the established
       },
       body: JSON.stringify(requestBodyForOpenAI),
       correlationId,
-      timeout: OPENAI_CONFIG.TIMEOUT_MS,
+      timeout: LOCAL_CONFIG.TIMEOUT_MS,
       maxRetries: 3,
       operationType: 'system_prompt',
     });
@@ -374,6 +373,64 @@ Please generate a detailed, professional system prompt following the established
             message: 'System prompt already exists for this theme'
           });
 
+          // Link existing system prompt to theme and update lifecycle status
+          if (theme_id) {
+            console.log('🔗 LINKING EXISTING SYSTEM PROMPT TO THEME:', { theme_id, existing_prompt_id: existingPrompt.id });
+            const { error: themeUpdateError } = await supabase
+              .from('themes')
+              .update({ 
+                visual_prompt_system_prompt_id: existingPrompt.id,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', theme_id)
+              .eq('user_id', user_id);
+
+            if (themeUpdateError) {
+              console.error('❌ THEME UPDATE ERROR:', themeUpdateError);
+            } else {
+              console.log('✅ THEME UPDATED: Successfully linked existing system prompt to theme');
+              
+              // Update theme lifecycle status to mark it as ready
+              console.log('🔄 UPDATING THEME LIFECYCLE STATUS: Marking theme as ready');
+              const { error: lifecycleUpdateError } = await supabase
+                .from('themes')
+                .update({ 
+                  lifecycle_status: 'ready',
+                  prompt_generation_status: 'completed',
+                  background_processing_complete: true,
+                  user_interaction_required: false,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', theme_id)
+                .eq('user_id', user_id);
+
+              if (lifecycleUpdateError) {
+                console.error('❌ THEME LIFECYCLE UPDATE ERROR:', lifecycleUpdateError);
+              } else {
+                console.log('✅ THEME LIFECYCLE UPDATED: Theme marked as ready for prompt generation');
+                
+                // 🚀 TRIGGER BULK INDIVIDUAL PROMPT GENERATION IMMEDIATELY
+                console.log('🚀 TRIGGERING BULK INDIVIDUAL PROMPT GENERATION:', { theme_id, category: contextCategory });
+                supabase.functions.invoke('ensure-post-image-prompts', {
+                  body: { 
+                    theme_id,
+                    category: contextCategory,
+                    user_id,
+                    force_regenerate: false
+                  }
+                }).then(result => {
+                  if (result.error) {
+                    console.error('❌ BULK PROMPT GENERATION TRIGGER ERROR:', result.error);
+                  } else {
+                    console.log('✅ BULK PROMPT GENERATION TRIGGERED SUCCESSFULLY');
+                  }
+                }).catch(error => {
+                  console.error('❌ BULK PROMPT GENERATION TRIGGER CATCH ERROR:', error);
+                });
+              }
+            }
+          }
+
           return new Response(JSON.stringify({ 
             success: true, 
             system_prompt: generatedPrompt,
@@ -449,6 +506,26 @@ Please generate a detailed, professional system prompt following the established
           console.error('❌ THEME UPDATE ERROR:', themeUpdateError);
         } else {
           console.log('✅ THEME UPDATED: Successfully linked system prompt to theme');
+          
+          // Update theme lifecycle status to mark it as ready
+          console.log('🔄 UPDATING THEME LIFECYCLE STATUS: Marking theme as ready');
+          const { error: lifecycleUpdateError } = await supabase
+            .from('themes')
+            .update({ 
+              lifecycle_status: 'ready',
+              prompt_generation_status: 'completed',
+              background_processing_complete: true,
+              user_interaction_required: false,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', theme_id)
+            .eq('user_id', user_id);
+
+          if (lifecycleUpdateError) {
+            console.error('❌ THEME LIFECYCLE UPDATE ERROR:', lifecycleUpdateError);
+          } else {
+            console.log('✅ THEME LIFECYCLE UPDATED: Theme marked as ready for prompt generation');
+          }
           
           // 🚀 TRIGGER BULK INDIVIDUAL PROMPT GENERATION IMMEDIATELY
           console.log('🚀 TRIGGERING BULK INDIVIDUAL PROMPT GENERATION:', { theme_id, category: contextCategory });

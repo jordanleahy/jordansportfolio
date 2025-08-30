@@ -36,16 +36,12 @@ import { PublicCollectionsSection } from '@/components/PublicCollectionsSection'
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
-import { createComponentLogger } from '@/services/logger';
 import shipImage from '@/assets/story-ship-bg.png';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
-
-const logger = createComponentLogger('StoriesDashboard');
-
 export default function StoriesDashboard() {
-  logger.debug('Component rendering');
+  console.log('[StoriesDashboard] Component rendering');
   
   const {
     user,
@@ -54,7 +50,7 @@ export default function StoriesDashboard() {
     roleLoading
   } = useAuth();
   
-  logger.debug('Auth state', { 
+  console.log('[StoriesDashboard] Auth state:', { 
     user: !!user, 
     loading, 
     isAdmin, 
@@ -145,7 +141,7 @@ export default function StoriesDashboard() {
   const [themesError, setThemesError] = useState<string | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
   React.useEffect(() => {
-    logger.debug('Load themes effect triggered', { 
+    console.log('[StoriesDashboard] Load themes effect triggered', { 
       userId: user?.id, 
       loading, 
       hasInitialized 
@@ -172,7 +168,7 @@ export default function StoriesDashboard() {
           // Clear textarea on page load to prevent accidental re-submission on refresh
           setCustomThemeDescription('');
         } catch (error) {
-          logger.error('Failed to fetch themes', error);
+          console.error('[StoriesDashboard] Failed to fetch themes:', error);
           setThemesError(error.message || 'Failed to load themes');
           setAvailableThemes([]);
         } finally {
@@ -190,7 +186,7 @@ export default function StoriesDashboard() {
 
   // First-visit hero visibility - always show for unauthenticated users
   useEffect(() => {
-    logger.debug('Hero visibility effect', { user: !!user });
+    console.log('[StoriesDashboard] Hero visibility effect', { user: !!user });
     if (!user) {
       setShowHero(true);
       return;
@@ -223,7 +219,7 @@ export default function StoriesDashboard() {
   };
   const handlePostUpdate = async (post: SocialMediaPost) => {
     // Refresh themes when posts are updated to keep grid in sync
-    logger.debug('Post updated', post);
+    console.log('Post updated:', post);
     try {
       const themes = await optimizedSocialMediaService.refreshAvailableThemes();
       
@@ -234,7 +230,7 @@ export default function StoriesDashboard() {
         return [...pendingThemes, ...freshThemes];
       });
     } catch (error) {
-      logger.error('Failed to refresh themes after post update', error);
+      console.error('Failed to refresh themes after post update:', error);
     }
   };
 
@@ -248,10 +244,7 @@ export default function StoriesDashboard() {
     onPostInsert: handlePostInsert,
     onPostUpdate: handlePostUpdate,
     onThemeStatusUpdate: (theme) => {
-      logger.debug('Dashboard received theme status update', { 
-        themeId: theme.id, 
-        status: theme.prompt_generation_status 
-      });
+      console.log('📡 Dashboard received theme status update:', theme.id, theme.prompt_generation_status);
       // Theme cache is already updated in the realtime hook for instant transitions
       if (theme.prompt_generation_status === 'completed') {
         // Update local state for shimmer handling
@@ -300,14 +293,14 @@ export default function StoriesDashboard() {
         .eq('user_id', user?.id)
         .like('cache_key', `%${theme.id}%`);
       
-      if (cacheError) logger.warn('Failed to delete cached prompts', cacheError);
+      if (cacheError) console.warn('Failed to delete cached prompts:', cacheError);
       
       toast({
         title: "Theme Deleted",
         description: `Successfully deleted "${category}" and all its posts`
       });
     } catch (error: any) {
-      logger.error('Delete category error', error);
+      console.error('Delete category error:', error);
       toast({
         title: "Delete Failed",
         description: error.message || "Failed to delete category",
@@ -412,7 +405,7 @@ export default function StoriesDashboard() {
             errors
           } : null);
         } catch (error) {
-          logger.error('Batch delete error', error);
+          console.error('Batch delete error:', error);
           batch.forEach(theme => {
             errors.push(`${theme.theme_name}: ${error.message}`);
           });
@@ -446,7 +439,7 @@ export default function StoriesDashboard() {
         variant: errors.length > 0 ? "destructive" : "default"
       });
     } catch (error) {
-      logger.error('Bulk delete error', error);
+      console.error('Bulk delete error:', error);
       toast({
         title: "Bulk Delete Failed",
         description: error.message || "Failed to delete themes",
@@ -458,10 +451,10 @@ export default function StoriesDashboard() {
     }
   };
   const handleGenerateCustomTheme = async () => {
-    logger.debug('handleGenerateCustomTheme called');
+    console.log('🎯 handleGenerateCustomTheme called');
     
     if (!customThemeDescription.trim()) {
-      logger.debug('No theme description provided');
+      console.log('❌ No theme description provided');
       toast({
         title: "Description Required",
         description: "Please describe the theme you want to create",
@@ -470,10 +463,10 @@ export default function StoriesDashboard() {
       return;
     }
     const themeDescription = customThemeDescription.trim();
-    logger.debug('Theme description', { themeDescription });
+    console.log('📝 Theme description:', themeDescription);
     
     if (!user) {
-      logger.debug('No user found');
+      console.log('❌ No user found');
       toast({
         title: "Sign in required",
         description: "Please sign in to generate themes."
@@ -482,10 +475,10 @@ export default function StoriesDashboard() {
       return;
     }
     
-    logger.debug('User found', { userId: user.id });
+    console.log('✅ User found:', user.id);
     setCustomThemeDescription(''); // Clear input immediately
     setIsGeneratingTheme(true);
-    logger.info('Starting theme generation...');
+    console.log('🚀 Starting theme generation...');
 
     // Generate a theme_id immediately when creating pending theme
     const themeId = crypto.randomUUID();

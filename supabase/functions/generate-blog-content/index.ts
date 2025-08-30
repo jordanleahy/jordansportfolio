@@ -156,7 +156,7 @@ Focus on providing genuine value, specific examples, and actionable insights tha
             content: blogPrompt
           }
         ],
-        max_completion_tokens: 3000,
+        max_completion_tokens: 4000,
       }),
     });
 
