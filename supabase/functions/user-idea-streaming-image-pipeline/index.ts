@@ -6,13 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Hardcoded token limits for safety
+// Hardcoded token limit for safety
 const MAX_COMPLETION_TOKENS = 5000;
-const MAX_PROMPT_TOKENS = 1000;
 
 interface ThemeRequest {
   description: string;
-  stream?: boolean;
 }
 
 serve(async (req) => {
@@ -72,7 +70,6 @@ serve(async (req) => {
 
     console.log(`🔵 [REQUEST] Processing theme generation`, {
       description: body.description,
-      hasStream: !!body.stream,
       correlationId
     });
 
@@ -183,8 +180,6 @@ Focus on educational content that provides real value. Each post should be subst
     const posts = themeData.posts.map((post: any) => ({
       user_id: user.id,
       theme_id: theme.id,
-      theme: themeData.theme,
-      category: themeData.category,
       day: post.day,
       title: post.title,
       description: post.description,
@@ -214,8 +209,7 @@ Focus on educational content that provides real value. Each post should be subst
       theme_id: theme.id,
       theme: themeData.theme,
       category: themeData.category,
-      posts_created: posts.length,
-      correlationId
+      posts_created: posts.length
     };
 
     console.log(`✅ [COMPLETE] Pipeline completed successfully`, {
@@ -242,8 +236,7 @@ Focus on educational content that provides real value. Each post should be subst
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
-        correlationId
+        error: error.message
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
