@@ -248,7 +248,7 @@ export class OptimizedSocialMediaService {
     // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
+      .select('id, theme_name, description, category, created_at, prompt_generation_status')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
