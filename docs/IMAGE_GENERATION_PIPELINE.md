@@ -1,8 +1,10 @@
 # Image Generation Pipeline - Complete Developer Guide
 
-**Version:** 2.1  
-**Last Updated:** 2025-08-24  
+**Version:** 2.2  
+**Last Updated:** 2025-08-30  
 **Audience:** Developers, Engineers, Technical Team
+
+> **🔄 Migration Update (2025-08-30):** Reverted to commit 76bb32c to restore legacy system prompt functions alongside modern theme-based approach. The system now operates in a hybrid state supporting both category-based and theme-based queries.
 
 ---
 
@@ -246,36 +248,65 @@ graph TD
 - Dynamic category mapping and routing
 
 **Query Patterns:**
-- **By Theme**: Query `system_prompts` using `theme_id` foreign key
-- **By Agent**: Query `system_prompts` using `agent_id` foreign key
-- **Category Logic**: Categories are stored in `themes` table, not `system_prompts`
+- **Modern Approach**: Query `system_prompts` using `theme_id` foreign key
+- **Legacy Approach**: Query `system_prompts` using `theme` field (category name)
+- **Agent-based**: Query `system_prompts` using `agent_id` foreign key
+- **Category Logic**: Categories stored in `themes` table for modern approach
 
 **Implementation:**
 ```typescript
 // Edge Function: invoke-system-prompt-agent
 export interface SystemPromptRequest {
-  themeId?: string;        // Primary: Query by theme relationship
+  themeId?: string;        // Modern: Query by theme relationship
   agentId?: string;        // Alternative: Query by agent relationship
-  category?: string;       // Context only: Used for agent routing
-  theme?: string;
+  category?: string;       // Legacy: Category name for backward compatibility
+  theme?: string;          // Legacy: Theme name for category lookup
   title?: string;
   description?: string;
 }
 
 // Query Pattern Examples:
-// 1. Theme-specific prompts
+// 1. Modern: Theme-specific prompts
 const { data } = await supabase
   .from('system_prompts')
   .select('prompt_text')
   .eq('theme_id', themeId)
   .single();
 
-// 2. Agent-specific prompts  
+// 2. Legacy: Category-based prompts
+const { data } = await supabase
+  .from('system_prompts')
+  .select('prompt_text')
+  .eq('theme', category)  // Uses legacy theme field
+  .single();
+
+// 3. Agent-specific prompts  
 const { data } = await supabase
   .from('system_prompts')
   .select('prompt_text')
   .eq('agent_id', agentId)
   .single();
+```
+
+### Legacy System Prompt Functions (Restored 2025-08-30)
+
+**Available Utility Functions:**
+- `triggerSystemPromptGeneration(category)`: Generate system prompt for a specific category
+- `triggerMissingSystemPrompts()`: Batch generate prompts for categories missing them
+- `regenerateAllSystemPrompts()`: Console utility for bulk regeneration
+
+**Usage Examples:**
+```typescript
+// 1. Generate for specific category
+import { triggerSystemPromptGeneration } from '@/utils/systemPromptTrigger';
+const result = await triggerSystemPromptGeneration('healthcare');
+
+// 2. Browser console utility (available globally)
+regenerateSystemPrompts(); // Processes all missing categories
+
+// 3. Programmatic batch processing
+import { triggerMissingSystemPrompts } from '@/utils/systemPromptTrigger';
+const results = await triggerMissingSystemPrompts();
 ```
 
 ### Visual Prompt Generator
@@ -525,19 +556,24 @@ interface ProcessingStatesContextType {
 | `created_at` | TIMESTAMP | Request timestamp |
 
 #### `system_prompts`
-**AI-generated system prompts with proper relationships**
+**AI-generated system prompts with hybrid relationship support**
 
 | Field | Type | Purpose |
 |-------|------|---------|
 | `id` | UUID | Primary key |
 | `prompt_text` | TEXT | Generated prompt content |
-| `theme_id` | UUID | **Foreign key to themes** |
+| `theme_id` | UUID | **Modern: Foreign key to themes** |
+| `theme` | TEXT | **Legacy: Category name for backward compatibility** |
 | `agent_id` | UUID | **Foreign key to openai_agents** |
+| `category` | TEXT | **Legacy: Content category (deprecated)** |
 | `user_id` | UUID | User identifier |
 | `created_at` | TIMESTAMP | Creation timestamp |
 | `updated_at` | TIMESTAMP | Last update timestamp |
 
-**Important:** The `category` field is stored in the `themes` table, not in `system_prompts`.
+**Migration Notes (2025-08-30):**
+- **Modern queries** use `theme_id` foreign key relationships
+- **Legacy queries** use `theme` field with category names
+- Both approaches are currently supported for backward compatibility
 
 #### `themes`
 **Theme definitions and categories**
@@ -561,36 +597,44 @@ interface ProcessingStatesContextType {
 | `supported_categories` | TEXT[] | Categories handled by agent |
 | `user_id` | UUID | User identifier |
 
-### Database Relationship Fixes (2025-08-24)
+### Migration History & Compatibility (2025-08-30)
 
-**Problem:** Several edge functions were incorrectly querying `system_prompts.category` (which doesn't exist).
+**Timeline:**
+1. **2025-08-24**: Attempted migration to pure theme-based relationships
+2. **2025-08-30**: Reverted to hybrid approach supporting both patterns
 
-**Solution:** Updated query patterns to use proper foreign key relationships:
+**Current State (Post-Revert):**
+The system now supports both modern and legacy query patterns:
 
 ```typescript
-// ❌ OLD (Incorrect): Querying non-existent column
+// ✅ Modern (Preferred): Query by theme relationship
 const { data } = await supabase
   .from('system_prompts')
   .select('prompt_text')
-  .eq('category', category);  // ❌ category column doesn't exist
+  .eq('theme_id', themeId);   // Uses foreign key
 
-// ✅ NEW (Correct): Query by theme relationship
+// ✅ Legacy (Supported): Query by category name
 const { data } = await supabase
   .from('system_prompts')
   .select('prompt_text')
-  .eq('theme_id', themeId);   // ✅ Uses proper foreign key
+  .eq('theme', category);     // Uses category name
 
-// ✅ NEW (Correct): Query by agent relationship
+// ✅ Agent-based: Query by agent relationship
 const { data } = await supabase
   .from('system_prompts')
   .select('prompt_text')
-  .eq('agent_id', agentId);   // ✅ Uses proper foreign key
+  .eq('agent_id', agentId);   // Uses agent foreign key
 ```
 
-**Updated Functions:**
-- `process-and-import-theme`: Now queries by `theme_id`
-- `input-triage`: Now finds agent first, then queries by `agent_id`
-- `vendor-analysis`: Now finds agent first, then queries by `agent_id`
+**Restored Legacy Functions:**
+- `triggerSystemPromptGeneration()`: Category-based prompt generation
+- `triggerMissingSystemPrompts()`: Batch processing for missing prompts
+- `regenerateAllSystemPrompts()`: Console utility function
+
+**Migration Recommendations:**
+- New implementations should prefer `theme_id` relationships
+- Legacy systems can continue using category names
+- Both patterns will remain supported for stability
 
 ### Storage Buckets
 
@@ -787,6 +831,8 @@ await trackOpenAIUsage({
 - UI Components: `src/components/stories/`
 - Edge Functions: `supabase/functions/`
 - Database Schema: `supabase/migrations/`
+- **Legacy Utilities**: `src/utils/systemPromptTrigger.ts`, `src/utils/runRegeneration.ts`
+- **Modern System Prompts**: Theme-based queries via `triggerSystemPromptForNewTheme()`
 
 ### Support & Troubleshooting
 - Edge Function Logs: Supabase Dashboard → Functions → Logs
@@ -796,6 +842,7 @@ await trackOpenAIUsage({
 
 ---
 
-**Last Updated:** 2025-08-24  
-**Version:** 2.1  
-**Maintainer:** Engineering Team
+**Last Updated:** 2025-08-30  
+**Version:** 2.2  
+**Maintainer:** Engineering Team  
+**Migration Status:** Hybrid system supporting both legacy category-based and modern theme-based approaches
