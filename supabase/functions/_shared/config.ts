@@ -3,12 +3,10 @@
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
   MODELS: {
-    FLAGSHIP: 'gpt-5-2025-08-07',        // Most capable
-    FAST: 'gpt-5-mini-2025-08-07',       // Balanced speed/quality
-    FASTEST: 'gpt-5-nano-2025-08-07',    // Speed-optimized
-    REASONING: 'gpt-5-2025-08-07',       // Complex analysis (was o3)
-    VISION: 'gpt-5-2025-08-07',          // Vision tasks (was gpt-4.1)
-    FALLBACK: 'gpt-5-mini-2025-08-07',   // Reliable fallback
+    FLAGSHIP: 'gpt-5-2025-08-07',
+    FAST: 'gpt-5-mini-2025-08-07',
+    REASONING: 'o3-2025-04-16',
+    VISION: 'gpt-5-2025-08-07',
     // Legacy models (deprecated)
     LEGACY_GPT4O: 'gpt-4o',
     LEGACY_GPT4O_MINI: 'gpt-4o-mini',
@@ -17,22 +15,19 @@ export const OPENAI_CONFIG = {
     SHORT_RESPONSE: 500,
     MEDIUM_RESPONSE: 2000,
     LONG_RESPONSE: 2500,
-    COMPREHENSIVE: 7000,
-    VISUAL_PROMPT_GENERATION: 10000,
+    COMPREHENSIVE: 4000,
   },
-// Default model for theme generation
-  DEFAULT_THEME_MODEL: 'gpt-5-mini-2025-08-07', // Keep as FAST variant for theme generation
-  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 7000,
+  // Default model for theme generation (gpt-5-2025-08-07 launched Aug 7, 2025)
+  DEFAULT_THEME_MODEL: 'gpt-5-2025-08-07',
+  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 4000, // Increased to prevent token limit errors
 } as const;
 
-// System Prompt Generation Configuration
-export const SYSTEM_PROMPT_CONFIG = {
-  TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
-  ESCALATION_TIMEOUTS: {
-    ATTEMPT_1: 180000,   // 180 seconds for first attempt
-    ATTEMPT_2: 240000,   // 240 seconds for second attempt  
-    ATTEMPT_3: 300000,   // 300 seconds for final attempt
-  },
+// Image Generation Configuration
+export const IMAGE_CONFIG = {
+  MODEL: 'gpt-image-1',
+  SIZE: '1024x1024',
+  QUALITY: 'high',
+  PROMPT_MAX_LENGTH: 1000,
 } as const;
 
 // Progress Step Percentages for Streaming Pipeline

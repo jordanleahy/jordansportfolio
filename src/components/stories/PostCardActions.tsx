@@ -31,7 +31,7 @@ export const PostCardActions: React.FC<PostCardActionsProps> = ({
           url: window.location.href
         });
       } catch (error) {
-        // Share cancelled or failed
+        console.log('Share cancelled or failed:', error);
       }
     } else {
       // Fallback: copy to clipboard

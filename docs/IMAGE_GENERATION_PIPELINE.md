@@ -1,7 +1,7 @@
 # Image Generation Pipeline - Complete Developer Guide
 
-**Version:** 2.2  
-**Last Updated:** 2025-08-30  
+**Version:** 2.1  
+**Last Updated:** 2025-08-24  
 **Audience:** Developers, Engineers, Technical Team
 
 ---
@@ -19,7 +19,6 @@ This guide provides a comprehensive walkthrough of the complete image generation
 - [🗄️ Database Schema](#️-database-schema)
 - [⚙️ Configuration & Settings](#️-configuration--settings)
 - [🔍 Error Handling & Monitoring](#-error-handling--monitoring)
-- [🚀 Recent Updates & Performance Improvements](#-recent-updates--performance-improvements)
 
 ---
 
@@ -292,12 +291,6 @@ const { data } = await supabase
 - **Brand Consistency**: Maintains visual identity across generations
 - **Quality Scoring**: Evaluates and improves prompt effectiveness
 
-**Token Limits & Performance:**
-- **Max Completion Tokens**: 10,000 (increased from 3,000 in v2.2)
-- **Model**: `gpt-5-2025-08-07` for optimal quality
-- **Response Time**: Average 15-30 seconds for complex prompts
-- **Success Rate**: >98% with enhanced error handling
-
 **Configuration Options:**
 ```typescript
 export interface VisualPromptConfig {
@@ -306,7 +299,6 @@ export interface VisualPromptConfig {
   industry?: string;
   brandGuidelines?: BrandConfig;
   referenceImages?: string[];
-  maxCompletionTokens?: number; // Default: 10,000
 }
 ```
 
@@ -627,31 +619,6 @@ const { data } = await supabase
 ### OpenAI Model Configuration
 
 ```typescript
-export const OPENAI_CONFIG = {
-  // Text Generation Models
-  MODELS: {
-    FLAGSHIP: 'gpt-5-2025-08-07',           // Primary model for complex tasks
-    FAST: 'gpt-5-mini-2025-08-07',         // Fast, cost-efficient variant
-    NANO: 'gpt-5-nano-2025-08-07',         // Fastest, cheapest variant
-    RELIABLE: 'gpt-4.1-2025-04-14',        // Reliable fallback
-    REASONING: 'o3-2025-04-16',             // Multi-step reasoning
-    REASONING_FAST: 'o4-mini-2025-04-16'   // Fast reasoning
-  },
-  
-  // Token Limits (v2.2 Updates)
-  MAX_COMPLETION_TOKENS: {
-    SHORT_RESPONSE: 1000,
-    MEDIUM_RESPONSE: 2000,
-    LONG_RESPONSE: 2500,
-    COMPREHENSIVE: 7000,
-    VISUAL_PROMPT_GENERATION: 10000,  // ✅ NEW: Increased for complex prompts
-  },
-  
-  // Default model assignments
-  DEFAULT_THEME_MODEL: 'gpt-5-mini-2025-08-07',
-  DEFAULT_PROMPT_MODEL: 'gpt-5-2025-08-07'
-};
-
 export const IMAGE_GENERATION_CONFIG = {
   MODELS: {
     FLAGSHIP: 'gpt-image-1',      // Primary model
@@ -732,7 +699,7 @@ export const USAGE_LIMITS = {
 
 #### Monitoring & Logging
 
-**Edge Function Logging (v2.2 - Structured Logging):**
+**Edge Function Logging:**
 ```typescript
 // Correlation ID tracking
 const correlationId = generateCorrelationId();
@@ -741,41 +708,19 @@ const logger = createLogger({
   correlationId 
 });
 
-// Structured logging with levels
+// Success tracking
 logger.info('Image generation started', { 
   postId, 
   aspectRatio, 
   promptLength: prompt.length 
 });
 
-logger.success('Generation completed successfully', {
-  postId,
-  processingTime: Date.now() - startTime,
-  imageSize: result.data?.length
-});
-
-// Error tracking with context
+// Error tracking
 logger.error('Generation failed', { 
   error: error.message, 
   postId, 
-  retryCount,
-  promptLength: prompt?.length,
-  aspectRatio
+  retryCount 
 });
-```
-
-**Frontend Logging (v2.2 - Development Only):**
-```typescript
-// ✅ Conditional development logs
-if (process.env.NODE_ENV === 'development') {
-  console.log('Debug info:', debugData);
-}
-
-// ✅ Essential error logging (always)
-console.error('Critical error:', error);
-
-// ❌ Removed: Verbose debug console logs in production
-// console.log('Every state change...') - Cleaned up in v2.2
 ```
 
 **Usage Tracking:**
@@ -851,60 +796,6 @@ await trackOpenAIUsage({
 
 ---
 
-## 🚀 Recent Updates & Performance Improvements
-
-### Version 2.2 Changes (2025-08-30)
-
-#### 🎯 Token Limit Enhancement
-- **Visual Prompt Generator**: Increased max completion tokens from 3,000 to 10,000
-- **Benefit**: Enables generation of highly detailed, complex visual prompts
-- **Impact**: Improved prompt quality and reduced "No generated text" errors
-- **Configuration**: Updated `OPENAI_CONFIG.MAX_COMPLETION_TOKENS.VISUAL_PROMPT_GENERATION`
-
-#### 🧹 Console Log Cleanup
-- **Scope**: Removed 100+ debug console logs from UI components
-- **Preserved**: Essential error logging and structured edge function logs
-- **Benefit**: Cleaner browser console, improved production performance
-- **Affected Files**: 
-  - `src/components/stories/GenerateImage.tsx`
-  - `src/components/stories/ImagePreviewModal.tsx`
-  - `src/hooks/useImageGeneration.ts`
-  - `src/pages/OptimizedCalendar.tsx`
-  - `src/pages/SubscriptionSuccess.tsx`
-
-#### ⚡ Model Configuration Updates
-- **Primary Model**: Standardized on `gpt-5-2025-08-07` for flagship operations
-- **Fast Variant**: `gpt-5-mini-2025-08-07` for theme generation
-- **Reasoning Models**: Added `o3-2025-04-16` and `o4-mini-2025-04-16` support
-- **Parameter Compatibility**: Proper `max_completion_tokens` usage for new models
-
-#### 🏗️ Architecture Improvements
-- **Shared Configuration**: Centralized OPENAI_CONFIG in `supabase/functions/_shared/config.ts`
-- **Type Safety**: Enhanced TypeScript interfaces for better development experience
-- **Error Handling**: Improved error context and correlation tracking
-- **Performance**: Optimized hook implementations and reduced unnecessary re-renders
-
-### Performance Metrics (v2.2)
-- **Generation Success Rate**: 98.5% (↑ from 95%)
-- **Average Response Time**: 18 seconds (↓ from 25 seconds)
-- **Token Utilization**: 85% efficiency (↑ from 70%)
-- **Cache Hit Rate**: 82% (↑ from 78%)
-- **Error Rate**: 1.5% (↓ from 5%)
-
-### Breaking Changes
-- **None**: All updates are backward compatible
-- **Migration**: Existing implementations continue to work without changes
-- **Deprecation**: No deprecated features in this release
-
-### Next Release Roadmap (v2.3)
-- Enhanced bulk generation performance
-- Real-time collaboration features
-- Advanced prompt analytics
-- Multi-model orchestration
-- Progressive image enhancement
-
----
-
-**Last Updated:** 2025-08-30  
-**Version:** 2.2  
+**Last Updated:** 2025-08-24  
+**Version:** 2.1  
 **Maintainer:** Engineering Team

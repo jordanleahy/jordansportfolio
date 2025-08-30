@@ -17,17 +17,46 @@ const SubscriptionSuccess: React.FC = () => {
   useEffect(() => {
     // After returning from Stripe, sync subscription into DB
     (async () => {
+      const syncStart = Date.now();
+      console.log('[SubscriptionSuccess] Starting subscription sync', { 
+        sessionId, 
+        timestamp: new Date().toISOString() 
+      });
+      
       try {
         setSyncing(true);
         const result = await supabase.functions.invoke('check-subscription');
         
+        const syncTime = Date.now() - syncStart;
+        console.log('[SubscriptionSuccess] Sync completed', { 
+          sessionId,
+          syncTimeMs: syncTime,
+          result: result.data,
+          error: result.error,
+          timestamp: new Date().toISOString()
+        });
+        
         if (result.error) {
-          console.error('Subscription sync failed:', result.error);
+          console.error('[SubscriptionSuccess] Sync error details', {
+            sessionId,
+            error: result.error,
+            timestamp: new Date().toISOString()
+          });
         }
       } catch (e) {
-        console.error('Subscription sync error:', e);
+        const syncTime = Date.now() - syncStart;
+        console.error('[SubscriptionSuccess] Sync exception', { 
+          sessionId,
+          syncTimeMs: syncTime,
+          error: e,
+          timestamp: new Date().toISOString()
+        });
       } finally {
         setSyncing(false);
+        console.log('[SubscriptionSuccess] Sync process ended', { 
+          sessionId,
+          timestamp: new Date().toISOString()
+        });
       }
     })();
   }, [sessionId]);

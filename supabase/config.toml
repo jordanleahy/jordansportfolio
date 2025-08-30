@@ -1,8 +1,5 @@
 project_id = "wgwmzfbnkovumqcvsxgd"
 
-[functions.ensure-post-image-prompts]
-verify_jwt = true
-
 [functions.create-payment]
 verify_jwt = false
 
@@ -103,7 +100,4 @@ verify_jwt = false
 verify_jwt = true
 
 [functions.aggregate-api-usage]
-verify_jwt = true
-
-[functions.generate-image-gemini]
 verify_jwt = true

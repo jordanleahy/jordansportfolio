@@ -1,58 +1,5 @@
-/**
- * ============= THEME LIFECYCLE MANAGEMENT EDGE FUNCTION =============
- * 
- * Manages the complete lifecycle of social media content themes including creation,
- * completion tracking, and status monitoring with real-time updates and background processing.
- * 
- * FUNCTION: manage-theme-lifecycle
- * PURPOSE: Orchestrates theme creation workflow with lifecycle management
- * 
- * INPUTS:
- * - action: 'create' | 'complete' | 'status' - The lifecycle action to perform
- * - description?: string - Theme description for creation (required for 'create')
- * - themeId?: string - Theme ID for status operations (required for 'complete'/'status')
- * - provider?: 'openai' | 'gemini' - AI provider preference (defaults to 'openai')
- * 
- * OUTPUTS:
- * - success: boolean - Operation success indicator
- * - theme_id?: string - Generated theme ID (for 'create' action)
- * - lifecycle_status: string - Current theme lifecycle status
- * - user_interaction_required?: boolean - Whether user interaction is needed
- * - background_processing_complete?: boolean - Background processing completion status
- * - message: string - Human-readable status message
- * - correlationId: string - Unique request correlation identifier
- * 
- * DEPENDENCIES:
- * - OpenAI model shared configuration (_shared/config.ts)
- * - Supabase (database persistence, authentication, edge function orchestration)
- * - generate-custom-theme edge function (for theme creation)
- * 
- * USAGE:
- * Called from: Theme management workflows, lifecycle tracking systems, dashboard updates
- * 
- * Authentication: Required (JWT token)
- * CORS: Enabled for web application integration
- * 
- * FLOW:
- * 1. CREATE: Validates input → Calls theme generation → Updates lifecycle status → Returns theme info
- * 2. COMPLETE: Validates theme ownership → Marks theme completed → Updates database → Confirms completion
- * 3. STATUS: Validates theme access → Fetches current status → Returns comprehensive status info
- * 
- * ERROR HANDLING: Comprehensive logging with correlation IDs, graceful degradation, detailed error responses
- */
-
-// Import Deno standard library and XHR polyfill for consistency
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
-
-// Import shared configuration constants
-import { 
-  ERROR_MESSAGES, 
-  HTTP_CONFIG, 
-  EDGE_FUNCTIONS,
-  SUPABASE_CONFIG 
-} from '../_shared/config.ts';
+import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -63,7 +10,6 @@ interface ThemeLifecycleRequest {
   action: 'create' | 'complete' | 'status';
   description?: string;
   themeId?: string;
-  provider?: 'openai' | 'gemini';
 }
 
 serve(async (req) => {
@@ -98,7 +44,7 @@ serve(async (req) => {
     // Get user from JWT
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error(ERROR_MESSAGES.USER_NOT_AUTHENTICATED);
+      throw new Error('No authorization header');
     }
 
     console.log(`🔍 [AUTH] Authentication attempt`, {
@@ -111,7 +57,7 @@ serve(async (req) => {
     );
 
     if (authError || !user) {
-      throw new Error(ERROR_MESSAGES.USER_NOT_AUTHENTICATED);
+      throw new Error('Authentication failed');
     }
 
     console.log(`✅ [AUTH] User authenticated`, {
@@ -130,7 +76,7 @@ serve(async (req) => {
 
     if (body.action === 'create') {
       if (!body.description) {
-        throw new Error(ERROR_MESSAGES.MISSING_REQUIRED_PARAMS);
+        throw new Error('Description is required for create action');
       }
 
       console.log(`🔵 [CREATE] Starting theme creation with lifecycle`, {
@@ -138,45 +84,14 @@ serve(async (req) => {
         userId: user.id,
         correlationId
       });
-
-      // Create theme record immediately in database
-      const { data: newTheme, error: createError } = await supabase
-        .from('themes')
-        .insert({
-          user_id: user.id,
-          theme_name: 'Generating...',
-          description: body.description,
-          category: 'generating',
-          lifecycle_status: 'pending',
-          user_interaction_required: true,
-          background_processing_complete: false,
-          prompt_generation_status: 'not_started'
-        })
-        .select('id')
-        .single();
-
-      if (createError || !newTheme) {
-        console.error(`❌ [CREATE] Failed to create theme record`, {
-          createError,
-          correlationId
-        });
-        throw new Error(ERROR_MESSAGES.DATABASE_ERROR);
-      }
-
-      const theme_id = newTheme.id;
-      console.log(`✅ [CREATE] Theme record created with ID`, {
-        theme_id,
-        correlationId
-      });
-
-      // Now call the theme generation function to populate content
+      
+      // Call the existing theme generation function
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        EDGE_FUNCTIONS.GENERATE_CUSTOM_THEME,
+        'user-idea-streaming-image-pipeline',
         {
           body: {
             description: body.description,
-            provider: body.provider || 'openai',
-            theme_id: theme_id // Pass the pre-created theme ID
+            stream: false
           },
           headers: {
             Authorization: authHeader,
@@ -193,47 +108,33 @@ serve(async (req) => {
       });
 
       if (themeError || !themeData?.success) {
-        console.error(`❌ [CREATE] Theme generation failed, but theme record exists`, {
-          theme_id,
+        console.error(`❌ [CREATE] Theme generation failed`, {
           themeError,
           themeData,
           correlationId
         });
-        
-        // Update theme to failed status
-        await supabase
-          .from('themes')
-          .update({
-            lifecycle_status: 'failed',
-            prompt_generation_status: 'failed'
-          })
-          .eq('id', theme_id);
-          
-        throw new Error(themeData?.error || ERROR_MESSAGES.THEME_GENERATION_FAILED);
+        throw new Error(themeData?.error || 'Failed to generate theme');
       }
 
-      console.log(`✅ [CREATE] Theme content generated successfully`, {
-        correlationId,
-        themeId: theme_id
+      console.log(`✅ [CREATE] Theme generated successfully`, {
+        correlationId
       });
 
-      // Update status to generating (content was successfully created)
+      // Initial status update - triggers will handle the rest automatically
       const { error: updateError } = await supabase
         .from('themes')
         .update({
-          lifecycle_status: 'generating',
-          prompt_generation_status: 'in_progress'
+          lifecycle_status: 'pending',
+          user_interaction_required: true,
+          background_processing_complete: false
         })
-        .eq('id', theme_id);
+        .eq('id', themeData.theme_id);
 
       if (updateError) {
         console.error(`❌ [UPDATE] Failed to update theme lifecycle`, {
           updateError,
-          themeId: themeData.theme_id,
           correlationId
         });
-        // Don't throw error here as theme was created successfully
-        // The theme will still function, just lifecycle status won't be updated
       }
 
       // Start background processing (simplified - no polling needed)
@@ -244,9 +145,9 @@ serve(async (req) => {
 
       const response = {
         success: true,
-        theme_id: theme_id, // Return the pre-created theme ID immediately
+        theme_id: themeData.theme_id,
         lifecycle_status: 'generating',
-        message: 'Theme created and content is being generated',
+        message: 'Theme created and background processing started',
         correlationId
       };
 
@@ -259,13 +160,13 @@ serve(async (req) => {
         JSON.stringify(response),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: HTTP_CONFIG.STATUS_CODES.OK,
+          status: 200,
         }
       );
 
     } else if (body.action === 'complete') {
       if (!body.themeId) {
-        throw new Error(ERROR_MESSAGES.MISSING_REQUIRED_PARAMS);
+        throw new Error('Theme ID is required for complete action');
       }
 
       console.log(`🔵 [COMPLETE] Marking theme as user-completed`, {
@@ -289,7 +190,7 @@ serve(async (req) => {
           updateError,
           correlationId
         });
-        throw new Error(ERROR_MESSAGES.DATABASE_ERROR);
+        throw new Error('Failed to mark theme as completed');
       }
 
       const response = {
@@ -308,13 +209,13 @@ serve(async (req) => {
         JSON.stringify(response),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: HTTP_CONFIG.STATUS_CODES.OK,
+          status: 200,
         }
       );
 
     } else if (body.action === 'status') {
       if (!body.themeId) {
-        throw new Error(ERROR_MESSAGES.MISSING_REQUIRED_PARAMS);
+        throw new Error('Theme ID is required for status action');
       }
 
       console.log(`🔵 [STATUS] Fetching theme status`, {
@@ -335,7 +236,7 @@ serve(async (req) => {
           fetchError,
           correlationId
         });
-        throw new Error(ERROR_MESSAGES.DATABASE_ERROR);
+        throw new Error('Failed to fetch theme status');
       }
 
       const response = {
@@ -357,12 +258,12 @@ serve(async (req) => {
         JSON.stringify(response),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: HTTP_CONFIG.STATUS_CODES.OK,
+          status: 200,
         }
       );
 
     } else {
-      throw new Error(ERROR_MESSAGES.INVALID_REQUEST_BODY);
+      throw new Error('Invalid action. Must be create, complete, or status');
     }
 
   } catch (error) {
@@ -381,7 +282,7 @@ serve(async (req) => {
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: HTTP_CONFIG.STATUS_CODES.BAD_REQUEST,
+        status: 400,
       }
     );
   }

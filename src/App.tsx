@@ -46,6 +46,8 @@ import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 
 import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
+const WorkReportPage = lazy(() => import("./pages/WorkReportPage"));
+const WorkReportDetailPage = lazy(() => import("./pages/WorkReportDetailPage"));
 
 import ComparisonDetail from "./pages/ComparisonDetail";
 import ComparisonIndex from "./pages/ComparisonIndex";
@@ -402,6 +404,30 @@ function App() {
                     <CofactorProposal />
                   </CofactorRouteWrapper>
                 } />
+                <Route 
+                  path="/work-report" 
+                  element={
+                    <AdminRoute>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <WorkReportPage />
+                        </Suspense>
+                      </AdminLayout>
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
+                  path="/work-report/:date" 
+                  element={
+                    <AdminRoute>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <WorkReportDetailPage />
+                        </Suspense>
+                      </AdminLayout>
+                    </AdminRoute>
+                  } 
+                />
                 <Route path="/chart-type-coverage--cost" element={<ChartTypeCoverageCost />} />
 
                 {/* Public Library of shared collections */}

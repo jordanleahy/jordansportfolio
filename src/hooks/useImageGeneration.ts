@@ -46,10 +46,17 @@ export const useImageGeneration = () => {
         .single();
 
       if (fetchError) {
-      console.warn('Could not fetch theme_id for post:', fetchError.message);
-    }
+        console.warn('Could not fetch theme_id for post:', fetchError.message);
+      }
 
-    const themeId = postData?.theme_id;
+      const themeId = postData?.theme_id;
+      console.log('Theme resolution debug:', {
+         // ❌ BAD: Using theme name - removed in Phase 1 migration
+         // urlTheme: theme,  // REMOVED - use themeId instead
+        fetchedThemeId: themeId,
+        postCategory: post.category,
+        colorTheme: colorTheme?.name
+      });
       
       const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
         body: {

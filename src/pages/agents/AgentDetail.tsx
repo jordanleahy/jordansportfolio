@@ -57,7 +57,7 @@ const agentSchema = z.object({
   supported_categories: z.array(z.string()).optional(),
   // Advanced settings
   temperature: z.number().min(0).max(2).optional(),
-  max_completion_tokens: z.number().min(1).max(4000).optional(),
+  max_tokens: z.number().min(1).max(4000).optional(),
   top_p: z.number().min(0).max(1).optional(),
   frequency_penalty: z.number().min(-2).max(2).optional(),
   presence_penalty: z.number().min(-2).max(2).optional(),
@@ -98,7 +98,7 @@ export const AgentDetail = () => {
       notes: '',
       supported_categories: [],
       temperature: 0.7,
-      max_completion_tokens: 1000,
+      max_tokens: 1000,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
@@ -122,7 +122,7 @@ export const AgentDetail = () => {
         notes: agent.notes || '',
         supported_categories: agent.supported_categories || [],
         temperature: agent.temperature || 0.7,
-        max_completion_tokens: agent.max_completion_tokens || 1000,
+        max_tokens: agent.max_tokens || 1000,
         top_p: agent.top_p || 1,
         frequency_penalty: agent.frequency_penalty || 0,
         presence_penalty: agent.presence_penalty || 0,
@@ -146,7 +146,7 @@ export const AgentDetail = () => {
       notes: data.notes,
       supported_categories: data.supported_categories,
       temperature: data.temperature,
-      max_completion_tokens: data.max_completion_tokens,
+      max_tokens: data.max_tokens,
       top_p: data.top_p,
       frequency_penalty: data.frequency_penalty,
       presence_penalty: data.presence_penalty,
@@ -187,7 +187,7 @@ export const AgentDetail = () => {
       notes: agent.notes || '',
       supported_categories: agent.supported_categories || [],
       temperature: agent.temperature || 0.7,
-      max_completion_tokens: agent.max_completion_tokens || 1000,
+      max_tokens: agent.max_tokens || 1000,
       top_p: agent.top_p || 1,
       frequency_penalty: agent.frequency_penalty || 0,
       presence_penalty: agent.presence_penalty || 0,
@@ -720,7 +720,7 @@ export const AgentDetail = () => {
                       />
                       <FormField
                         control={form.control}
-                        name="max_completion_tokens"
+                        name="max_tokens"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Max Tokens</FormLabel>

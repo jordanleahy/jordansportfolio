@@ -390,70 +390,29 @@ export const useUnifiedRealtime = ({
                             record.category?.includes('visual') ||
                             record.category?.includes('image');
       
-      if (isVisualPrompt) {
-        console.log(`[UnifiedRealtime] Visual Prompt Generator detected, finding associated themes...`);
+      if (isVisualPrompt && record.category) {
+        console.log(`[UnifiedRealtime] Auto-triggering image prompt generation for category: ${record.category}`);
         
         // Get current user from auth
         import('@/integrations/supabase/client').then(({ supabase }) => {
           supabase.auth.getUser().then(({ data: { user } }) => {
             if (user?.id) {
-              // First try to find themes that reference this system prompt
-              supabase
-                .from('themes')
-                .select('id, category, theme_name')
-                .eq('visual_prompt_system_prompt_id', record.id)
-                .eq('user_id', user.id)
-                .then(({ data: themes, error: themesError }) => {
-                  if (themesError) {
-                    console.error('[UnifiedRealtime] Error finding themes for system prompt:', themesError);
-                    return;
-                  }
-                  
-                  if (themes && themes.length > 0) {
-                    // Trigger prompt generation for each theme found
-                    themes.forEach(theme => {
-                      console.log(`[UnifiedRealtime] Auto-triggering image prompt generation for theme: ${theme.theme_name} (${theme.category})`);
-                      
-                      supabase.functions.invoke('ensure-post-image-prompts', {
-                        body: {
-                          category: theme.category,
-                          userId: user.id,
-                          themeId: theme.id
-                        }
-                      }).then((result) => {
-                        if (result.error) {
-                          console.error('[UnifiedRealtime] Failed to trigger image prompt generation:', result.error);
-                        } else {
-                          console.log('[UnifiedRealtime] Image prompt generation triggered successfully:', result.data);
-                          toast.success(`Generating image prompts for "${theme.theme_name}"`);
-                        }
-                      }).catch((error) => {
-                        console.error('[UnifiedRealtime] Error triggering image prompt generation:', error);
-                      });
-                    });
-                  } else if (record.category) {
-                    // Fallback: use system prompt category if available
-                    console.log(`[UnifiedRealtime] Auto-triggering image prompt generation for category: ${record.category}`);
-                    
-                    supabase.functions.invoke('ensure-post-image-prompts', {
-                      body: {
-                        category: record.category,
-                        userId: user.id
-                      }
-                    }).then((result) => {
-                      if (result.error) {
-                        console.error('[UnifiedRealtime] Failed to trigger image prompt generation:', result.error);
-                      } else {
-                        console.log('[UnifiedRealtime] Image prompt generation triggered successfully:', result.data);
-                        toast.success('Generating image prompts in background');
-                      }
-                    }).catch((error) => {
-                      console.error('[UnifiedRealtime] Error triggering image prompt generation:', error);
-                    });
-                  } else {
-                    console.warn('[UnifiedRealtime] Visual Prompt Generator created but no themes or category found');
-                  }
-                });
+              // Trigger ensure-post-image-prompts in background
+              supabase.functions.invoke('ensure-post-image-prompts', {
+                body: {
+                  category: record.category,
+                  userId: user.id
+                }
+              }).then((result) => {
+                if (result.error) {
+                  console.error('[UnifiedRealtime] Failed to trigger image prompt generation:', result.error);
+                } else {
+                  console.log('[UnifiedRealtime] Image prompt generation triggered successfully:', result.data);
+                  toast.success('Generating image prompts in background');
+                }
+              }).catch((error) => {
+                console.error('[UnifiedRealtime] Error triggering image prompt generation:', error);
+              });
             }
           });
         });

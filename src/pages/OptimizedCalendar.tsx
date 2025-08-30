@@ -78,6 +78,7 @@ export default function OptimizedCalendar() {
 
   const handleDeleteTheme = async (category: string) => {
     try {
+      console.log('Deleting theme:', category); // Debug log
       await optimizedSocialMediaService.deleteTheme(category);
       toast({
         title: "Theme Deleted",

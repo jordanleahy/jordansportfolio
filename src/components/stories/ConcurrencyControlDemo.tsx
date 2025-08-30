@@ -105,7 +105,7 @@ export const ConcurrencyControlDemo: React.FC<ConcurrencyControlDemoProps> = ({ 
                     aspectRatio={aspectRatio}
                     size="sm"
                     onImageGenerated={() => {
-                      // Image generated successfully
+                      console.log(`Image generated for ${aspectRatio}`);
                     }}
                   />
                 </div>

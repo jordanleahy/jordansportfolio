@@ -25,7 +25,7 @@ export interface OpenAIAgent {
   supported_categories?: string[];
   // Advanced model parameters
   temperature?: number;
-  max_completion_tokens?: number;
+  max_tokens?: number;
   top_p?: number;
   frequency_penalty?: number;
   presence_penalty?: number;
@@ -48,7 +48,7 @@ export interface CreateAgentData {
   supported_categories?: string[];
   // Advanced model parameters
   temperature?: number;
-  max_completion_tokens?: number;
+  max_tokens?: number;
   top_p?: number;
   frequency_penalty?: number;
   presence_penalty?: number;

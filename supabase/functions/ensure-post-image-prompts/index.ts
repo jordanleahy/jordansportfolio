@@ -3,62 +3,44 @@
  * EDGE FUNCTION: Ensure Post Image Prompts
  * 
  * PURPOSE:
- * Batch orchestrator that ensures all social media posts in a category have image prompts.
- * This function identifies posts missing prompts and delegates to the visual-prompt-generator
- * edge function for actual OpenAI API calls, providing efficient batch processing with
- * retry logic and comprehensive error handling.
+ * Automatically generates image prompts for social media posts that are missing them.
+ * Batch processes posts by category using the Visual Prompt Generator agent and category-specific
+ * system prompts to create professional, consistent image generation prompts.
  * 
  * INPUTS:
- * - category: string - Category of posts to process (e.g., 'hiv-aids', 'coding-ai', 'healthcare')
- * - userId: string - User ID to filter posts and find appropriate system prompts
- * - themeId: string (optional) - Specific theme ID to filter posts for targeted processing
+ * - category: string - Category of posts to process (e.g., 'coding ai', 'healthcare', 'contracts')
+ * - userId: string - User ID to filter posts and find appropriate agent
  * 
  * OUTPUTS:
  * - Success: { success: true, category: string, totalPosts: number, successCount: number, errorCount: number, results: array }
  * - Error: { error: string }
  * 
  * DEPENDENCIES:
- * - visual-prompt-generator edge function (handles OpenAI GPT-5 API calls)
- * - Supabase Database (social_media_posts, themes, system_prompts tables)
+ * - OpenAI API (GPT-5 for prompt generation)
+ * - Supabase Database (social_media_posts, openai_agents, system_prompts tables)
  * 
  * USAGE:
- * Called from: Real-time system prompt triggers, theme lifecycle management, manual debug operations
- * Authentication: JWT verification enabled (uses service role internally)
+ * Called from: Content management workflows, bulk processing operations
+ * Authentication: Service role access for batch operations
  * 
- * TECHNICAL DETAILS:
+ * IMPORTANT: OpenAI API Guidelines for this function
  * 
- * ✅ ARCHITECTURAL PATTERN: Orchestrator → Delegator
- * - This function orchestrates batch processing but does NOT call OpenAI directly
- * - All OpenAI API calls are handled by the visual-prompt-generator function
- * - Uses gpt-5-2025-08-07 flagship model via visual-prompt-generator
- * - Implements proper GPT-5 parameter usage (max_completion_tokens, no temperature)
+ * ✅ REQUIRED MODELS: Use GPT-5 family only
+ * - gpt-5-2025-08-07 (flagship)
+ * - gpt-5-mini-2025-08-07 (faster)  
+ * - gpt-5-nano-2025-08-07 (fastest)
  * 
- * ✅ BATCH PROCESSING OPTIMIZATIONS:
- * - Processes 12 posts per batch for optimal performance (~40% faster than 7)
- * - 200ms delays between batches (reduced from 500ms)
- * - Automatic retry logic with 3 attempts for transient failures
- * - Parallel processing within batches using Promise.allSettled
- * 
- * ✅ ERROR HANDLING & RESILIENCE:
- * - Retries on 503/timeout errors from visual-prompt-generator
- * - Graceful degradation for individual post failures
- * - Comprehensive logging with correlation IDs
- * - Detailed success/error metrics in response
+ * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
+ * ❌ NEVER USE: temperature parameter (not supported in GPT-5)
+ * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
  * 
  * FLOW:
- * 1. Validate inputs and authenticate request
- * 2. Query posts needing image prompts (with JOIN optimization for theme data)
- * 3. Cache system prompt to avoid repeated database queries
- * 4. Process posts in optimized batches with parallel execution
- * 5. For each post: invoke visual-prompt-generator with retry logic
- * 6. Update successful posts with generated prompts and completion status
- * 7. Return comprehensive processing summary with metrics
- * 
- * REAL-TIME INTEGRATION:
- * This function is automatically triggered when:
- * - Visual Prompt Generator system prompts are created/updated
- * - Theme lifecycle transitions require individual prompt generation
- * - Manual debug operations need to fix stuck themes
+ * 1. Fetch all posts in specified category that lack image prompts
+ * 2. Find user's Visual Prompt Generator agent
+ * 3. Retrieve category-specific system prompt from system_prompts table
+ * 4. For each post, generate detailed image prompt using OpenAI
+ * 5. Update posts with generated prompts and timestamp
+ * 6. Return processing summary with success/error counts and details
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
@@ -198,8 +180,8 @@ serve(async (req) => {
     let successCount = 0;
     let errorCount = 0;
     const results = [];
-    const BATCH_SIZE = 12; // Optimized: Increased from 7 to 12 posts per batch for ~40% faster processing
-    const BATCH_DELAY_MS = 200; // Optimized: Reduced from 500ms to 200ms delay between batches
+    const BATCH_SIZE = 7; // Increased from 3 to 7 posts per batch
+    const BATCH_DELAY_MS = 500; // Reduced from 2000ms to 500ms delay between batches
 
     console.log('🎨 STEP 3: Starting batch image prompt generation for posts');
     console.log(`📊 Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);

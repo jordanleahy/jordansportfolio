@@ -3,36 +3,22 @@
  * 
  * PURPOSE:
  * Specialized function for generating visual image prompts for social media content.
- * This is the core OpenAI integration point that handles direct API calls using GPT-5
- * models with proper parameter configuration and comprehensive usage tracking.
+ * Extracted from the monolithic generate-image-prompt-dynamic for better performance
+ * and maintainability.
  * 
  * INPUTS:
- * - postId: string - Social media post ID to fetch content (required)
- * - themeId: string - Theme ID for theme-specific system prompts (required)
+ * - postId: string - Social media post ID to fetch content
+ * - themeId: string (optional) - Theme ID for theme-specific prompts
  * - aspectRatio: string (optional) - Desired aspect ratio (defaults to 1:1)
  * - systemPromptId: string (optional) - Explicit system prompt override
  * - colorTheme: object (optional) - Brand color theme configuration
- * - referenceAnalysis: object (optional) - Reference image analysis for style matching
  * 
  * OUTPUTS:
  * - Success: { generatedPrompt: string, category: string, agent: string, correlationId: string, usage: object }
  * - Error: { error: string }
- * 
- * OPENAI MODEL CONFIGURATION:
- * ✅ USES: gpt-5-2025-08-07 flagship model (via OPENAI_CONFIG.MODELS.FLAGSHIP)
- * ✅ PARAMETERS: max_completion_tokens: 3000 (correct for GPT-5)
- * ✅ NO TEMPERATURE: GPT-5 models don't support temperature parameter
- * ✅ ATTRIBUTION: Full usage tracking with correlation IDs and cost estimation
- * 
- * TECHNICAL IMPLEMENTATION:
- * - Uses makeOpenAIRequest utility for proper error handling and retries
- * - Implements extractUsageFromOpenAIResponse for accurate token tracking
- * - Caches generated prompts in cached_prompts table for performance
- * - Validates system prompt availability before processing
- * - Supports both theme-specific and fallback system prompts
  */
 
-import { OPENAI_CONFIG } from '../_shared/config.ts';
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, extractUsageFromOpenAIResponse, makeOpenAIRequest } from '../_shared/openai-attribution.ts';
 import { createLogger } from '../_shared/advanced-logger.ts';
@@ -355,12 +341,12 @@ Incorporate these characteristics naturally into the generated prompt while main
     logger.startTiming('openai_request');
 
     const openAIRequestBody = {
-      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 for optimal prompt generation
+      model: 'gpt-5-mini-2025-08-07',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS.VISUAL_PROMPT_GENERATION,
+      max_completion_tokens: 3000,
       user: correlationId
     };
 
@@ -401,31 +387,13 @@ Incorporate these characteristics naturally into the generated prompt while main
     // Parse the response to get the actual OpenAI response data
     const openAIData = await openAIResponse.response.json();
     
-    // Extract usage and costs with proper OpenAI request ID
+    // Extract usage and costs
     const usageData = extractUsageFromOpenAIResponse(openAIData);
     promptTokens = usageData.promptTokens;
     completionTokens = usageData.completionTokens;
     tokensUsed = usageData.totalTokens;
     estimatedCost = usageData.estimatedCost;
-    openAIRequestId = usageData.openAIRequestId || openAIResponse.openAIRequestId;
-
-    // 🎯 TOKEN USAGE LOGGING
-    const costPerToken = tokensUsed > 0 ? estimatedCost / tokensUsed : 0;
-    console.log(`🎯 TOKEN USAGE: ${correlationId}`);
-    console.log(`├── Prompt Tokens: ${promptTokens?.toLocaleString() || 'N/A'}`);
-    console.log(`├── Completion Tokens: ${completionTokens?.toLocaleString() || 'N/A'}`);
-    console.log(`├── Total Tokens: ${tokensUsed?.toLocaleString() || 'N/A'}`);
-    console.log(`├── Estimated Cost: $${estimatedCost?.toFixed(6) || 'N/A'}`);
-    console.log(`└── Cost per Token: $${costPerToken?.toFixed(8) || 'N/A'}`);
-
-    logger.info('Token usage details', {
-      promptTokens,
-      completionTokens,
-      totalTokens: tokensUsed,
-      estimatedCost,
-      costPerToken,
-      model: OPENAI_CONFIG.MODELS.FLAGSHIP
-    });
+    openAIRequestId = usageData.openAIRequestId;
 
     // Parse response
     let generatedText: string;
@@ -437,36 +405,11 @@ Incorporate these characteristics naturally into the generated prompt while main
       correlationId
     });
 
-    const choice = openAIData.choices?.[0];
-    const message = choice?.message;
-
-    // Check for content refusal first
-    if (message?.refusal) {
-      logger.error('OpenAI refused to generate content', { 
-        refusal: message.refusal,
-        correlationId 
-      });
-      throw new Error(`Content generation was refused: ${message.refusal}`);
-    }
-
-    // Extract content
-    if (message?.content && message.content.trim()) {
-      generatedText = message.content.trim();
-      logger.debug('Extracted using message.content', { 
-        contentLength: generatedText.length,
-        correlationId 
-      });
+    if (openAIData.choices?.[0]?.message?.content) {
+      generatedText = openAIData.choices[0].message.content.trim();
+      logger.debug('Extracted using message.content', { correlationId });
     } else {
-      // Log detailed debugging information
-      logger.error('No valid content in OpenAI response', {
-        hasMessage: !!message,
-        hasContent: !!message?.content,
-        contentEmpty: message?.content === '',
-        contentWhitespace: message?.content?.trim() === '',
-        messageKeys: message ? Object.keys(message) : [],
-        finishReason: choice?.finish_reason,
-        correlationId
-      });
+      logger.error('Missing generated text from OpenAI chat response', { error: {} });
       throw new Error('No generated text received from OpenAI');
     }
 
@@ -504,7 +447,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       category: category,
       usedType,
       agent: 'Visual Prompt Generator',
-      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 flagship model
+      model: 'gpt-5-mini-2025-08-07',
       generated_at: new Date().toISOString(),
       tokens_used: tokensUsed,
       estimated_cost: estimatedCost,
@@ -522,7 +465,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 flagship model
+        model: 'gpt-5-mini-2025-08-07',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -536,14 +479,6 @@ Incorporate these characteristics naturally into the generated prompt while main
       });
     }
 
-    logger.success('Visual prompt generation completed successfully', {
-      promptLength: generatedText?.length || 0,
-      totalTokens: tokensUsed,
-      estimatedCost: `$${estimatedCost?.toFixed(6)}`,
-      efficiency: `${(generatedText?.length || 0) / Math.max(tokensUsed, 1)} chars/token`,
-      correlationId
-    });
-
     return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -551,21 +486,7 @@ Incorporate these characteristics naturally into the generated prompt while main
   } catch (error) {
     success = false;
     errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    // Log token usage even on error (if available)
-    if (tokensUsed > 0) {
-      console.log(`💸 PARTIAL TOKEN USAGE ON ERROR: ${correlationId}`);
-      console.log(`├── Tokens Used: ${tokensUsed?.toLocaleString()}`);
-      console.log(`├── Estimated Cost: $${estimatedCost?.toFixed(6)}`);
-      console.log(`└── Error: ${errorMessage}`);
-    }
-    
-    logger.error('Error in visual-prompt-generator function', { 
-      error,
-      tokensUsed,
-      estimatedCost,
-      correlationId 
-    });
+    logger.error('Error in visual-prompt-generator function', error);
     console.error('❌ Error in visual-prompt-generator function:', error);
 
     // Track failed usage
@@ -573,7 +494,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // gpt-5-2025-08-07 flagship model
+        model: 'gpt-5-mini-2025-08-07',
         requestType: 'text_generation',
         success: false,
         estimatedCost: 0,
