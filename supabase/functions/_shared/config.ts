@@ -19,7 +19,7 @@ export const OPENAI_CONFIG = {
   },
   // Default model for theme generation (gpt-5-2025-08-07 launched Aug 7, 2025)
   DEFAULT_THEME_MODEL: 'gpt-5-2025-08-07',
-  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 4000, // Increased to prevent token limit errors
+  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 5000, // Increased to prevent token limit errors
 } as const;
 
 // Image Generation Configuration
