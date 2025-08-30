@@ -16,7 +16,7 @@
  * DEPENDENCIES:
  * - OpenAI API (GPT-5 for theme and content generation)
  * - Supabase (optional database persistence for authenticated users)
- * - Shared configuration (_shared/config.ts)
+ * - OpenAI model shared configuration (_shared/config.ts)
  * 
  * USAGE:
  * Called from: Theme creation workflows, content planning tools, social media calendar generation
