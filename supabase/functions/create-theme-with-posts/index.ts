@@ -6,18 +6,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Hardcoded token limit for safety
-const MAX_COMPLETION_TOKENS = 5000;
-
 interface ThemeRequest {
   description: string;
 }
 
 serve(async (req) => {
   const startTime = Date.now();
-  const correlationId = `pipeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const correlationId = `create-theme-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   
-  console.log(`🔵 [INIT] 🚀 PIPELINE START`, {
+  console.log(`🔵 [INIT] 🚀 CREATE THEME WITH POSTS START`, {
     correlationId,
     method: req.method,
     timestamp: new Date().toISOString()
@@ -30,7 +27,6 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const openaiKey = Deno.env.get('OPENAI_API_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -73,75 +69,28 @@ serve(async (req) => {
       correlationId
     });
 
-    // Generate theme content using OpenAI
-    const systemPrompt = `You are an expert content strategist. Generate a comprehensive social media theme with exactly 5 posts based on the user's description. Each post should be educational, engaging, and valuable.
-
-Return a JSON object with this exact structure:
-{
-  "theme": "brief theme name",
-  "category": "content category",
-  "posts": [
-    {
-      "day": 1,
-      "title": "Post title",
-      "description": "Detailed post content (100-200 words)"
-    },
-    ...5 posts total
-  ]
-}`;
-
-    const userPrompt = `Create a 5-post social media series about: ${body.description}
-
-Focus on educational content that provides real value. Each post should be substantial (100-200 words) and actionable.`;
-
-    console.log(`🔵 [OPENAI] Calling GPT-5 for theme generation`, {
-      promptLength: userPrompt.length,
-      maxTokens: MAX_COMPLETION_TOKENS,
+    // Generate theme using dedicated theme generation function
+    console.log(`🔵 [THEME] Calling generate-custom-theme function`, {
+      description: body.description,
       correlationId
     });
 
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        max_completion_tokens: MAX_COMPLETION_TOKENS,
-        response_format: { type: "json_object" }
-      }),
+    const { data: themeResponse, error: themeError } = await supabase.functions.invoke('generate-custom-theme', {
+      body: { description: body.description }
     });
 
-    if (!openaiResponse.ok) {
-      const errorText = await openaiResponse.text();
-      console.error(`❌ [OPENAI] API call failed`, {
-        status: openaiResponse.status,
-        error: errorText,
+    if (themeError || !themeResponse?.success) {
+      console.error(`❌ [THEME] Theme generation failed`, {
+        themeError,
+        themeData: themeResponse,
         correlationId
       });
-      throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+      throw new Error('Failed to generate theme');
     }
 
-    const openaiData = await openaiResponse.json();
-    let themeData;
-    
-    try {
-      themeData = JSON.parse(openaiData.choices[0].message.content);
-    } catch (parseError) {
-      console.error(`❌ [PARSE] OpenAI response parsing failed`, {
-        error: parseError.message,
-        content: openaiData.choices[0].message.content,
-        correlationId
-      });
-      throw new Error('Failed to parse OpenAI response as JSON');
-    }
+    const themeData = themeResponse.themeData;
 
-    console.log(`✅ [OPENAI] Theme generated successfully`, {
+    console.log(`✅ [THEME] Theme generated successfully`, {
       theme: themeData.theme,
       category: themeData.category,
       postCount: themeData.posts?.length,
@@ -212,7 +161,7 @@ Focus on educational content that provides real value. Each post should be subst
       posts_created: posts.length
     };
 
-    console.log(`✅ [COMPLETE] Pipeline completed successfully`, {
+    console.log(`✅ [COMPLETE] Theme creation completed successfully`, {
       ...response,
       duration: `${Date.now() - startTime}ms`
     });
@@ -227,7 +176,7 @@ Focus on educational content that provides real value. Each post should be subst
 
   } catch (error) {
     const totalDuration = Date.now() - startTime;
-    console.error(`❌ [ERROR] Pipeline execution failed`, {
+    console.error(`❌ [ERROR] Theme creation failed`, {
       error: error.message,
       duration: `${totalDuration}ms`,
       correlationId
