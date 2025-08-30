@@ -39,6 +39,7 @@ import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
 import { ImageModelSelector } from '@/components/ui/image-model-selector';
 import { useMultiProviderImageGeneration } from '@/hooks/useMultiProviderImageGeneration';
+import { manuallyTriggerPromptGeneration } from '@/utils/manualPromptTrigger';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
@@ -109,6 +110,27 @@ export default function StoriesDashboard() {
 
   // Simple theme completion handling
   const { navigateToTheme } = useThemeCompletion({ themes: availableThemes, user });
+
+  const handleDebugPromptGeneration = async () => {
+    try {
+      await manuallyTriggerPromptGeneration(
+        '0b33d625-65bd-4d4c-a8d2-0fd327815634', // HIV-AIDS theme ID
+        'hiv-aids',
+        user?.id || ''
+      );
+      toast({
+        title: 'Debug: Prompt Generation Triggered',
+        description: 'Manually triggered prompt generation for HIV-AIDS theme'
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Debug: Error',
+        description: 'Failed to trigger prompt generation',
+        variant: 'destructive'
+      });
+    }
+  };
 
   // Stories filtering
   const {
@@ -834,6 +856,21 @@ export default function StoriesDashboard() {
 
             {/* Bulk Actions Toolbar */}
             <BulkActionsToolbar selectedCount={selectedThemes.size} totalCount={availableThemes.length} onDeleteSelected={() => setShowDeleteDialog(true)} onClearSelection={handleClearSelection} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} allSelected={selectedThemes.size === availableThemes.length && selectedThemes.size > 0} isDeleting={isDeletingBulk} />
+
+            {/* Debug Panel for Admin */}
+            {isAdmin && (
+              <div className="mb-6 flex items-center gap-4 p-4 border rounded-lg bg-muted/20">
+                <Button 
+                  onClick={handleDebugPromptGeneration}
+                  variant="outline" 
+                  size="sm"
+                  className="text-xs"
+                >
+                  🔧 Fix HIV-AIDS Theme
+                </Button>
+                <span className="text-xs text-muted-foreground">Debug: Manually trigger prompt generation</span>
+              </div>
+            )}
 
             {/* Simplified Batch Shimmer */}
             <SimplifiedBatchSkeleton 
