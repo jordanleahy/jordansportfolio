@@ -409,8 +409,8 @@ export function extractUsageFromOpenAIResponse(response: any): {
   const inputCostPer1K = 0.001000; // $0.001 per 1K input tokens
   const outputCostPer1K = 0.002000; // $0.002 per 1K output tokens
   
-  const inputCost = promptTokens * (inputCostPer1K / 1000);
-  const outputCost = completionTokens * (outputCostPer1K / 1000);
+  const inputCost = (promptTokens / 1000) * inputCostPer1K;
+  const outputCost = (completionTokens / 1000) * outputCostPer1K;
   const estimatedCost = inputCost + outputCost;
 
   return {
