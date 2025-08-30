@@ -77,14 +77,59 @@ serve(async (req) => {
   try {
     console.log('🚀 [generate-custom-theme] Function started');
     
+    // DETAILED ENVIRONMENT DEBUGGING
+    console.log('🔍 [DEBUG] Environment variable check:');
+    const envKeys = [
+      'OPENAI_API_KEY',
+      'SUPABASE_URL',
+      'SUPABASE_SERVICE_ROLE_KEY',
+      'SUPABASE_ANON_KEY'
+    ];
+    
+    envKeys.forEach(key => {
+      const value = Deno.env.get(key);
+      if (value) {
+        console.log(`✅ [DEBUG] ${key}: EXISTS (length: ${value.length}, starts with: ${value.substring(0, 8)}...)`);
+      } else {
+        console.log(`❌ [DEBUG] ${key}: NOT FOUND or EMPTY`);
+      }
+    });
+
+    // List all available environment variables (keys only for security)
+    console.log('🔍 [DEBUG] Available environment variables:');
+    const allEnvKeys = Object.keys(Deno.env.toObject());
+    console.log('Available env keys:', allEnvKeys.sort());
+    
+    // Detailed OpenAI API key check
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('🔑 [DEBUG] OpenAI API Key detailed analysis:');
+    console.log(`- Value type: ${typeof openAIApiKey}`);
+    console.log(`- Is null: ${openAIApiKey === null}`);
+    console.log(`- Is undefined: ${openAIApiKey === undefined}`);
+    console.log(`- Is empty string: ${openAIApiKey === ''}`);
+    console.log(`- Truthiness: ${!!openAIApiKey}`);
+    
+    if (openAIApiKey) {
+      console.log(`- Length: ${openAIApiKey.length}`);
+      console.log(`- Starts with 'sk-': ${openAIApiKey.startsWith('sk-')}`);
+      console.log(`- First 10 chars: ${openAIApiKey.substring(0, 10)}...`);
+    }
+    
     if (!openAIApiKey) {
       console.log('❌ [generate-custom-theme] OpenAI API key not configured');
+      console.log('❌ [DEBUG] Terminating due to missing OpenAI API key');
       throw new Error(ERROR_MESSAGES.OPENAI_API_KEY_MISSING);
     }
+
+    console.log('✅ [DEBUG] OpenAI API key validation passed');
 
     // Initialize Supabase client with proper validation
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    console.log('🔍 [DEBUG] Supabase configuration:');
+    console.log(`- URL exists: ${!!supabaseUrl}`);
+    console.log(`- Service key exists: ${!!supabaseKey}`);
     
     if (!supabaseUrl || !supabaseKey) {
       console.log('❌ [generate-custom-theme] Supabase configuration missing');
@@ -156,31 +201,65 @@ User: "Marketing tips for small business"
 Output: {"category": "small-business-marketing", "theme": "Small Business Marketing", "description": "Essential marketing strategies and tactics for growing small businesses", "posts": [...8-12 posts for practical coverage...]}`;
 
     console.log('🤖 [generate-custom-theme] Calling OpenAI API');
+    console.log('🔍 [DEBUG] OpenAI API call details:');
+    console.log(`- Endpoint: ${API_ENDPOINTS.OPENAI.CHAT_COMPLETIONS}`);
+    console.log(`- Model: ${OPENAI_CONFIG.DEFAULT_THEME_MODEL}`);
+    console.log(`- Max completion tokens: ${OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS}`);
+    console.log(`- API key starts with: ${openAIApiKey.substring(0, 15)}...`);
+    console.log(`- Request payload preview: description="${description.substring(0, 50)}..."`);
+    
+    const requestBody = {
+      model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Generate a social media theme for: ${description}` }
+      ],
+      max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+    };
+    
+    console.log('🔍 [DEBUG] Full request body (without system prompt):');
+    console.log(JSON.stringify({ 
+      ...requestBody, 
+      messages: [
+        { role: 'system', content: '[SYSTEM PROMPT HIDDEN FOR BREVITY]' },
+        requestBody.messages[1]
+      ]
+    }, null, 2));
+
     const response = await fetch(API_ENDPOINTS.OPENAI.CHAT_COMPLETIONS, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate a social media theme for: ${description}` }
-        ],
-        max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     console.log('📥 [generate-custom-theme] OpenAI response status:', response.status);
+    console.log('🔍 [DEBUG] Response headers:');
+    response.headers.forEach((value, key) => {
+      console.log(`  ${key}: ${value}`);
+    });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('❌ [generate-custom-theme] OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      console.error('❌ [generate-custom-theme] OpenAI API error details:');
+      console.error('- Status:', response.status);
+      console.error('- Status text:', response.statusText);
+      console.error('- Error body:', errorData);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
     }
 
+    console.log('✅ [DEBUG] OpenAI API response successful, parsing JSON...');
     const data = await response.json();
+    console.log('🔍 [DEBUG] OpenAI response structure:', {
+      hasChoices: !!data.choices,
+      choicesLength: data.choices?.length,
+      firstChoiceHasMessage: !!data.choices?.[0]?.message,
+      firstChoiceHasContent: !!data.choices?.[0]?.message?.content,
+      usage: data.usage
+    });
+    
     const generatedContent = data.choices[0].message.content.trim();
 
     console.log('📄 [generate-custom-theme] Generated content:', generatedContent);
