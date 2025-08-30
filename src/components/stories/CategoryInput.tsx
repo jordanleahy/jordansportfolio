@@ -10,6 +10,7 @@ import { QUERY_KEYS, QUERY_CONFIG } from '@/constants/queryKeys';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 import { getCategoryLabel, validateCategoryName, DEFAULT_CATEGORIES } from '@/constants/categoryConstants';
 import type { CategoryInputProps } from '@/types/stories/ui';
+import { ThemeStatusBadge } from './ThemeStatusBadge';
 
 export const CategoryInput = ({ value, onChange, placeholder = "Select or enter category...", disabled = false }: CategoryInputProps) => {
   const [open, setOpen] = useState(false);
@@ -28,7 +29,20 @@ export const CategoryInput = ({ value, onChange, placeholder = "Select or enter 
   const allCategories = React.useMemo(() => {
     const knownCategories = [...DEFAULT_CATEGORIES] as string[];
     const themeCategories = availableThemes.map(t => t.category).filter(c => !knownCategories.includes(c));
-    return [...knownCategories, ...themeCategories];
+    
+    // Create category map with theme status info
+    const categoryThemeMap = new Map();
+    availableThemes.forEach(theme => {
+      if (!categoryThemeMap.has(theme.category)) {
+        categoryThemeMap.set(theme.category, []);
+      }
+      categoryThemeMap.get(theme.category).push(theme);
+    });
+    
+    return {
+      categories: [...knownCategories, ...themeCategories],
+      themesByCategory: categoryThemeMap
+    };
   }, [availableThemes]);
 
   useEffect(() => {
@@ -135,24 +149,50 @@ export const CategoryInput = ({ value, onChange, placeholder = "Select or enter 
               </div>
             </CommandEmpty>
             <CommandGroup heading="Categories">
-              {allCategories.map((category) => (
-                <CommandItem
-                  key={category}
-                  value={category}
-                  onSelect={() => handleSelect(category)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === category ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {getCategoryLabel(category)}
-                  {DEFAULT_CATEGORIES.includes(category as any) && (
-                    <span className="ml-auto text-xs text-muted-foreground">default</span>
-                  )}
-                </CommandItem>
-              ))}
+              {allCategories.categories.map((category) => {
+                const themes = allCategories.themesByCategory.get(category) || [];
+                const hasThemes = themes.length > 0;
+                const pendingThemes = themes.filter(t => 
+                  t.prompt_generation_status !== 'completed' || 
+                  !t.background_processing_complete
+                );
+                
+                return (
+                  <CommandItem
+                    key={category}
+                    value={category}
+                    onSelect={() => handleSelect(category)}
+                    className="flex items-center justify-between"
+                  >
+                    <div className="flex items-center">
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          value === category ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {getCategoryLabel(category)}
+                      {DEFAULT_CATEGORIES.includes(category as any) && (
+                        <span className="ml-2 text-xs text-muted-foreground">default</span>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      {hasThemes && (
+                        <span className="text-xs bg-secondary/50 px-1.5 py-0.5 rounded">
+                          {themes.length}
+                        </span>
+                      )}
+                      {pendingThemes.length > 0 && (
+                        <ThemeStatusBadge 
+                          promptGenerationStatus={pendingThemes[0].prompt_generation_status}
+                          lifecycleStatus={pendingThemes[0].lifecycle_status}
+                          className="text-xs"
+                        />
+                      )}
+                    </div>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
             <CommandGroup>
               <CommandItem onSelect={handleCustomInput}>

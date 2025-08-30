@@ -298,13 +298,8 @@ export class OptimizedSocialMediaService {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // Filter out incomplete themes (only show themes where all prompts are completed)
-    const completedThemes = themes.filter((theme: any) => 
-      theme.prompt_generation_status === 'completed' &&
-      theme.prompt_completion_count === theme.total_posts_count
-    );
-    
-    const processedThemes = completedThemes.map((theme: any) => {
+    // Include all themes but mark their lifecycle status for UI display
+    const processedThemes = themes.map((theme: any) => {
       const posts = postsByTheme[theme.id] || [];
       
       // Find Day 1 post first, then fall back to earliest post with image
@@ -320,6 +315,12 @@ export class OptimizedSocialMediaService {
                       firstPost?.image_3_4_url ||
                       firstPost?.image_1_1_url;
       
+      // Determine lifecycle status for UI display
+      const isCompleted = theme.prompt_generation_status === 'completed' && 
+                         theme.prompt_completion_count === theme.total_posts_count;
+      const isGenerating = theme.prompt_generation_status === 'in_progress';
+      const isPending = !theme.prompt_generation_status || theme.prompt_generation_status === 'not_started';
+      
       return {
         id: theme.id,
         theme_name: theme.theme_name,
@@ -329,6 +330,9 @@ export class OptimizedSocialMediaService {
         prompt_generation_status: theme.prompt_generation_status,
         prompt_completion_count: theme.prompt_completion_count || 0,
         total_posts_count: theme.total_posts_count || 0,
+        lifecycle_status: isCompleted ? 'ready' : isGenerating ? 'generating' : 'pending',
+        user_interaction_required: !isCompleted,
+        background_processing_complete: isCompleted,
         first_post: firstPost ? {
           id: firstPost.id,
           title: firstPost.title,

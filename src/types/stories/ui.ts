@@ -40,6 +40,11 @@ export interface CategoryCardProps {
   isSelectionMode?: boolean;
   isGeneratingTheme?: boolean;
   onCancelGeneration?: () => Promise<void>;
+  // Theme status properties
+  promptGenerationStatus?: 'not_started' | 'in_progress' | 'completed';
+  lifecycleStatus?: 'pending' | 'generating' | 'ready' | 'completed';
+  userInteractionRequired?: boolean;
+  backgroundProcessingComplete?: boolean;
 }
 
 export interface PostCardProps {

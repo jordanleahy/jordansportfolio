@@ -45,6 +45,10 @@ export const CategoriesGrid = ({
               isSelectionMode={isSelectionMode}
               isGeneratingTheme={isGeneratingTheme}
               onCancelGeneration={onCancelGeneration}
+              promptGenerationStatus={theme.prompt_generation_status}
+              lifecycleStatus={theme.lifecycle_status}
+              userInteractionRequired={theme.user_interaction_required}
+              backgroundProcessingComplete={theme.background_processing_complete}
             />
           </div>
         );

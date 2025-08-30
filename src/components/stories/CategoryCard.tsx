@@ -11,6 +11,7 @@ import { useLongPress } from "@/hooks/useLongPress";
 import { useFailedThemeRecovery } from "@/hooks/useFailedThemeRecovery";
 import { ContextualActionMenu } from "@/components/ui/contextual-action-menu";
 import { CategoryCardProps } from '@/types/stories';
+import { ThemeStatusBadge } from './ThemeStatusBadge';
 
 export const ThemeCard = ({ 
   theme, 
@@ -28,7 +29,11 @@ export const ThemeCard = ({
   onSelect, 
   isSelectionMode, 
   isGeneratingTheme, 
-  onCancelGeneration 
+  onCancelGeneration,
+  promptGenerationStatus,
+  lifecycleStatus,
+  userInteractionRequired,
+  backgroundProcessingComplete
 }: CategoryCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -262,8 +267,8 @@ export const ThemeCard = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         )}
         
-        {/* Selection checkbox and badge */}
-        <div className="absolute top-3 right-3 flex gap-2">
+        {/* Selection checkbox and badges */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
           {isSelectionMode && (
             <div 
               className="bg-white/90 rounded-md p-1 shadow-sm"
@@ -275,9 +280,18 @@ export const ThemeCard = ({
               />
             </div>
           )}
-          <Badge variant="secondary" className="bg-white/90 text-primary hover:bg-white">
-            {postCount}
-          </Badge>
+          <div className="flex gap-1">
+            <Badge variant="secondary" className="bg-white/90 text-primary hover:bg-white text-xs">
+              {postCount}
+            </Badge>
+            <ThemeStatusBadge 
+              promptGenerationStatus={promptGenerationStatus}
+              lifecycleStatus={lifecycleStatus}
+              userInteractionRequired={userInteractionRequired}
+              backgroundProcessingComplete={backgroundProcessingComplete}
+              className="bg-white/90"
+            />
+          </div>
         </div>
       </div>
 
