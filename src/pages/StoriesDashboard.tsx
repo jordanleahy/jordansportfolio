@@ -35,8 +35,6 @@ import { usePendingThemeCleanup } from '@/hooks/usePendingThemeCleanup';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
-import { AddGoToMarketPosts } from '@/components/AddGoToMarketPosts';
-import { CreateGoToMarketPosts } from '@/components/CreateGoToMarketPosts';
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
@@ -923,11 +921,6 @@ export default function StoriesDashboard() {
                         Import Themes
                       </Button>}
                   </div>
-                  
-                  {/* Temporary: Add Go to Market Posts */}
-                  <div className="px-8">
-                    <AddGoToMarketPosts />
-                  </div>
                 </div>}
             </div>
           </AuroraBackground>
@@ -1075,9 +1068,6 @@ export default function StoriesDashboard() {
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} selectedThemes={getSelectedThemes()} onConfirm={handleBulkDelete} isDeleting={isDeletingBulk} progress={deleteProgress} />
-
-        {/* Auto-create Go to Market posts */}
-        <CreateGoToMarketPosts />
 
         {/* Duplicate Theme Modal */}
         <DuplicateThemeModal open={!!duplicateInfo} category={duplicateInfo?.category || ''} theme={duplicateInfo?.theme || ''} onCancel={() => {
