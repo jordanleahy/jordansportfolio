@@ -4,6 +4,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { PendingTheme, ThemeWithPosts } from '@/types/stories';
 import { shouldShowShimmer, areAllPostPromptsCompleted } from '@/utils/shimmerUtils';
+import { createComponentLogger } from '@/services/logger';
+
+const logger = createComponentLogger('useThemeShimmer');
 
 interface ThemeShimmerOptions {
   pendingTheme: PendingTheme | null;
@@ -27,7 +30,7 @@ export const useThemeShimmer = ({
 
   // Fetch posts for the pending theme to check individual completion
   useEffect(() => {
-    console.log('🔍 SHIMMER: Fetching posts effect triggered', {
+    logger.debug('Fetching posts effect triggered', {
       pendingTheme: pendingTheme ? {
         theme_id: pendingTheme.theme_id,
         theme_name: pendingTheme.theme_name
@@ -35,20 +38,20 @@ export const useThemeShimmer = ({
     });
     
     if (!pendingTheme?.theme_id) {
-      console.log('❌ SHIMMER: No pending theme or theme_id, clearing posts');
+      logger.debug('No pending theme or theme_id, clearing posts');
       setThemePosts([]);
       return;
     }
 
     const fetchThemePosts = async () => {
       try {
-        console.log('📡 SHIMMER: Fetching posts for theme_id:', pendingTheme.theme_id);
+        logger.debug('Fetching posts for theme', { themeId: pendingTheme.theme_id });
         const { data: posts } = await supabase
           .from('social_media_posts')
           .select('id, individual_prompt_status, theme_id')
           .eq('theme_id', pendingTheme.theme_id);
         
-        console.log('📊 SHIMMER: Posts fetched:', {
+        logger.debug('Posts fetched', {
           count: posts?.length || 0,
           posts: posts?.map(p => ({
             id: p.id,
@@ -60,7 +63,7 @@ export const useThemeShimmer = ({
           setThemePosts(posts);
         }
       } catch (error) {
-        console.error('❌ SHIMMER: Error fetching theme posts:', error);
+        logger.error('Error fetching theme posts', error);
       }
     };
 
@@ -78,7 +81,7 @@ export const useThemeShimmer = ({
           filter: `theme_id=eq.${pendingTheme.theme_id}`
         },
         (payload) => {
-          console.log('📡 Post updated:', payload.new);
+          logger.debug('Post updated via realtime', payload.new);
           setThemePosts(prev => 
             prev.map(post => 
               post.id === payload.new.id 
@@ -97,7 +100,7 @@ export const useThemeShimmer = ({
 
   // Simple cleanup function
   const clearPendingThemeState = () => {
-    console.log('🧹 Clearing pending theme state');
+    logger.debug('Clearing pending theme state');
     setPendingTheme(null);
     setThemePosts([]);
     
@@ -109,7 +112,7 @@ export const useThemeShimmer = ({
 
   // Debug effect to check dependencies
   useEffect(() => {
-    console.log('🔧 COMPLETION EFFECT DEPENDENCIES CHANGED:', {
+    logger.debug('Completion effect dependencies changed', {
       pendingTheme: !!pendingTheme,
       themePostsLength: themePosts?.length || 0,
       navigateExists: !!navigate
@@ -118,21 +121,21 @@ export const useThemeShimmer = ({
 
   // Simplified completion check - focus only on post completion
   useEffect(() => {
-    console.log('🔍 COMPLETION CHECK:', {
+    logger.debug('Completion check', {
       hasPendingTheme: !!pendingTheme,
       pendingThemeId: pendingTheme?.theme_id,
       totalThemePosts: themePosts.length
     });
 
     if (!pendingTheme?.theme_id) {
-      console.log('❌ COMPLETION: No pending theme or theme_id, skipping completion check');
+      logger.debug('No pending theme or theme_id, skipping completion check');
       return;
     }
 
     // Get posts for this theme
     const currentThemePosts = themePosts.filter(post => post.theme_id === pendingTheme.theme_id);
     
-    console.log('📊 COMPLETION: Current theme posts:', {
+    logger.debug('Current theme posts', {
       themeId: pendingTheme.theme_id,
       postsForTheme: currentThemePosts.length,
       allPosts: currentThemePosts.map(p => ({
@@ -144,13 +147,13 @@ export const useThemeShimmer = ({
     // Check if all posts are completed
     const postsCompleted = currentThemePosts.length > 0 && areAllPostPromptsCompleted(currentThemePosts);
 
-    console.log('⭐ COMPLETION STATUS:', {
+    logger.debug('Completion status', {
       postsCompleted,
       shouldNavigate: postsCompleted
     });
     
     if (postsCompleted) {
-      console.log('✅ All posts completed - clearing shimmer and navigating to theme');
+      logger.success('All posts completed - clearing shimmer and navigating to theme');
       clearPendingThemeState();
       navigate(`/stories/id/${pendingTheme.theme_id}`);
     }
@@ -162,7 +165,7 @@ export const useThemeShimmer = ({
     const lastPath = lastLocationRef.current;
     
     if (lastPath === '/stories' && currentPath !== '/stories' && pendingTheme) {
-      console.log('🚢 User navigated away from stories, clearing pending theme');
+      logger.debug('User navigated away from stories, clearing pending theme');
       clearPendingThemeState();
     }
     
@@ -180,13 +183,13 @@ export const useThemeShimmer = ({
 
   // Function to manually dismiss shimmer
   const dismissShimmer = () => {
-    console.log('❌ User manually dismissed shimmer');
+    logger.debug('User manually dismissed shimmer');
     clearPendingThemeState();
   };
 
   // Function to handle theme card click (navigation)
   const handleThemeClick = (themeId: string) => {
-    console.log('🎯 User clicked theme, clearing pending state');
+    logger.debug('User clicked theme, clearing pending state');
     clearPendingThemeState();
     
     setTimeout(() => {
@@ -196,7 +199,7 @@ export const useThemeShimmer = ({
 
   const shimmerVisible = shouldShowShimmer(pendingTheme, themePosts);
   
-  console.log('✨ SHIMMER CHECK:', {
+  logger.debug('Shimmer visibility check', {
     hasPendingTheme: !!pendingTheme,
     pendingThemeObject: pendingTheme ? {
       theme_id: pendingTheme.theme_id,

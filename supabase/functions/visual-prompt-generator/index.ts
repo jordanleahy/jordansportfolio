@@ -51,7 +51,7 @@ serve(async (req) => {
   let requestMetadata: any = {};
   let openAIRequestId: string | undefined;
 
-  console.log('🚀 FUNCTION_START: Visual Prompt Generator initiated', {
+  logger.info('Visual Prompt Generator initiated', {
     correlationId,
     timestamp: new Date().toISOString(),
     method: req.method,
@@ -63,7 +63,7 @@ serve(async (req) => {
   
   const exitHandler = (reason: string) => {
     functionExitReason = reason;
-    console.log('🏁 FUNCTION_EXIT:', {
+    logger.info('Function exit', {
       correlationId,
       reason,
       duration: Date.now() - startTime,
@@ -89,13 +89,13 @@ serve(async (req) => {
     const requestBody = await req.json();
     let { postId, themeId, aspectRatio, aspect_ratio, systemPromptId, colorTheme, referenceAnalysis } = requestBody;
 
-    logger.info('Request validation', {
-      receivedFields: Object.keys(requestBody),
-      postId: postId ? `${String(postId).slice(0, 8)}...` : null,
-      themeId: themeId ? `${String(themeId).slice(0, 8)}...` : null,
-      hasAspectRatio: !!(aspectRatio || aspect_ratio),
-      hasColorTheme: !!colorTheme
-    });
+  logger.info('Request validation', {
+    receivedFields: Object.keys(requestBody),
+    postId: postId ? `${String(postId).slice(0, 8)}...` : null,
+    themeId: themeId ? `${String(themeId).slice(0, 8)}...` : null,
+    hasAspectRatio: !!(aspectRatio || aspect_ratio),
+    hasColorTheme: !!colorTheme
+  });
 
     if (!postId || !themeId) {
       const errorDetails = {
@@ -405,12 +405,54 @@ Incorporate these characteristics naturally into the generated prompt while main
       correlationId
     });
 
+    // Handle OpenAI refusals first
+    if (openAIData.choices?.[0]?.message?.refusal) {
+      logger.error('OpenAI content refusal detected', { 
+        refusal: openAIData.choices[0].message.refusal,
+        correlationId 
+      });
+      throw new Error(`Content generation refused: ${openAIData.choices[0].message.refusal}`);
+    }
+
+    // Extract content with comprehensive validation
     if (openAIData.choices?.[0]?.message?.content) {
-      generatedText = openAIData.choices[0].message.content.trim();
-      logger.debug('Extracted using message.content', { correlationId });
+      const rawContent = openAIData.choices[0].message.content;
+      
+      // Validate content is not just whitespace or minimal
+      if (typeof rawContent === 'string' && rawContent.trim().length > 20) {
+        generatedText = rawContent.trim();
+        logger.debug('Content extracted and validated', { 
+          contentLength: generatedText.length,
+          correlationId 
+        });
+      } else {
+        logger.error('Content too short or invalid', { 
+          rawContent, 
+          contentLength: rawContent?.length || 0,
+          correlationId 
+        });
+        throw new Error('Generated content is too short or empty');
+      }
     } else {
-      logger.error('Missing generated text from OpenAI chat response', { error: {} });
-      throw new Error('No generated text received from OpenAI');
+      // Enhanced error logging for debugging
+      logger.error('Missing content in OpenAI response', { 
+        fullResponse: {
+          hasChoices: !!openAIData.choices,
+          choicesCount: openAIData.choices?.length || 0,
+          firstChoice: openAIData.choices?.[0] ? {
+            hasMessage: !!openAIData.choices[0].message,
+            messageKeys: openAIData.choices[0].message ? Object.keys(openAIData.choices[0].message) : [],
+            content: openAIData.choices[0].message?.content,
+            refusal: openAIData.choices[0].message?.refusal,
+            finishReason: openAIData.choices[0].finish_reason
+          } : null,
+          error: openAIData.error,
+          model: openAIData.model,
+          usage: openAIData.usage
+        },
+        correlationId 
+      });
+      throw new Error('No generated text received from OpenAI - content may have been filtered or refused');
     }
 
     success = true;
@@ -487,7 +529,6 @@ Incorporate these characteristics naturally into the generated prompt while main
     success = false;
     errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Error in visual-prompt-generator function', error);
-    console.error('❌ Error in visual-prompt-generator function:', error);
 
     // Track failed usage
     if (userId) {

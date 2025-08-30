@@ -3,6 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { QUERY_KEYS } from "@/constants/queryKeys";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect } from "react";
+import { createComponentLogger } from '@/services/logger';
+
+const logger = createComponentLogger('useUsageSummary');
 
 export interface UsageLimits {
   daily: { limit: number; used: number; remaining: number };
@@ -36,13 +39,13 @@ export const useUsageSummary = () => {
     queryKey: QUERY_KEYS.usageSummary,
     queryFn: async () => {
       const queryStart = Date.now();
-      console.log('[useUsageSummary] Starting usage summary fetch', { 
+      logger.debug('Starting usage summary fetch', { 
         userId: user?.id,
         timestamp: new Date().toISOString()
       });
       
       if (!user?.id) {
-        console.log('[useUsageSummary] No user ID, returning defaults');
+        logger.debug('No user ID, returning defaults');
         return DEFAULTS;
       }
 
@@ -61,7 +64,7 @@ export const useUsageSummary = () => {
         const tier = subscription?.tier;
         const subscriptionTier = tier?.name?.toLowerCase() || 'free';
         
-        console.log('[useUsageSummary] Subscription data fetched', {
+        logger.debug('Subscription data fetched', {
           userId: user.id,
           hasSubscription: !!subscription,
           tier: tier ? {
@@ -112,7 +115,7 @@ export const useUsageSummary = () => {
         const monthlyRemaining = Math.max(0, monthlyLimit - monthlyUsed);
         const dailyRemaining = Math.max(0, dailyLimit - dailyUsed);
 
-        console.log('[useUsageSummary] Usage calculations', {
+        logger.debug('Usage calculations', {
           userId: user.id,
           limits: { dailyLimit, monthlyLimit },
           usage: { dailyUsed, monthlyUsed },
@@ -156,7 +159,7 @@ export const useUsageSummary = () => {
         };
 
         const queryTime = Date.now() - queryStart;
-        console.log('[useUsageSummary] Query completed successfully', {
+        logger.debug('Query completed successfully', {
           userId: user.id,
           queryTimeMs: queryTime,
           result: {
@@ -171,7 +174,7 @@ export const useUsageSummary = () => {
         return result;
       } catch (err: any) {
         const queryTime = Date.now() - queryStart;
-        console.error('[useUsageSummary] Query error', {
+        logger.error('Query error', {
           userId: user.id,
           queryTimeMs: queryTime,
           error: err.message || err,
@@ -200,7 +203,7 @@ export const useUsageSummary = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log('[useUsageSummary] Real-time usage update received', {
+          logger.debug('Real-time usage update received', {
             userId: user.id,
             payload: payload.new,
             timestamp: new Date().toISOString()

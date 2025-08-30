@@ -11,8 +11,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { createComponentLogger } from '@/services/logger';
 import type { ImagePreviewModalProps } from '@/types/stories/ui';
 import { supabase } from '@/integrations/supabase/client';
+
+const logger = createComponentLogger('ImagePreviewModal');
 
 // Aspect ratio mapping for cleaner watermark logic
 const ASPECT_RATIO_MAPPING = {
@@ -31,7 +34,7 @@ export const ImagePreviewModal = ({
   title,
   aspectRatio
 }: ImagePreviewModalProps) => {
-  console.log('🖼️ ImagePreviewModal rendered with:', { imageUrl, aspectRatio, title });
+  logger.debug('Component rendered', { imageUrl, aspectRatio, title });
   const isMobile = useIsMobile();
 
   const formattedTitle = title && aspectRatio 
@@ -63,7 +66,7 @@ export const ImagePreviewModal = ({
     let isMounted = true;
     
     const fetchWatermarkInfo = async () => {
-      console.log('🔍 Fetching watermark info for:', imageUrl);
+      logger.debug('Fetching watermark info', { imageUrl });
       
       try {
         const { data, error } = await supabase
@@ -76,12 +79,12 @@ export const ImagePreviewModal = ({
           .maybeSingle();
 
         if (error) {
-          console.error('❌ Error fetching watermark info:', error);
+          logger.error('Error fetching watermark info', error);
           return;
         }
 
         if (!data || !isMounted) {
-          console.log('📭 No data found or component unmounted');
+          logger.debug('No data found or component unmounted');
           return;
         }
 
@@ -93,7 +96,7 @@ export const ImagePreviewModal = ({
           if (data[mapping.original] === imageUrl) {
             watermarkUrl = data[mapping.url];
             watermarkStatus = data[mapping.status] || 'none';
-            console.log(`✅ Found watermark for ${aspectKey}:`, { url: watermarkUrl, status: watermarkStatus });
+            logger.debug(`Found watermark for ${aspectKey}`, { url: watermarkUrl, status: watermarkStatus });
             break;
           }
         }
@@ -104,7 +107,7 @@ export const ImagePreviewModal = ({
         });
 
       } catch (error) {
-        console.error('❌ Unexpected error fetching watermark:', error);
+        logger.error('Unexpected error fetching watermark', error);
       }
     };
 
@@ -118,11 +121,11 @@ export const ImagePreviewModal = ({
   }, [imageUrl]);
 
   const handleDownload = async () => {
-    console.log('📥 Starting download...', { watermarkUrl: watermarkState.url, imageUrl });
+    logger.debug('Starting download', { watermarkUrl: watermarkState.url, imageUrl });
     
     try {
       const finalUrl = watermarkState.url || imageUrl;
-      console.log('📥 Downloading from:', finalUrl);
+      logger.debug('Downloading from URL', { finalUrl });
       
       const response = await fetch(finalUrl);
       const blob = await response.blob();
@@ -135,56 +138,54 @@ export const ImagePreviewModal = ({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       
-      console.log('✅ Download completed successfully');
+      logger.success('Download completed successfully');
     } catch (error) {
-      console.error('❌ Download failed:', error);
+      logger.error('Download failed', error);
       toast.error('Failed to download image');
     }
   };
 
   const handleImagePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    console.log('📋 Paste event triggered');
-    console.log('📋 Event type:', e.type);
-    console.log('📋 ClipboardData available:', !!e.clipboardData);
+    logger.debug('Paste event triggered', { eventType: e.type, hasClipboardData: !!e.clipboardData });
     
     const clipboardData = e.clipboardData;
     if (!clipboardData) {
-      console.log('❌ No clipboard data found');
+      logger.debug('No clipboard data found');
       return;
     }
 
     const items = clipboardData.items;
     if (!items) {
-      console.log('❌ No clipboard items found');
+      logger.debug('No clipboard items found');
       return;
     }
 
-    console.log('📋 Clipboard items count:', items.length);
+    logger.debug('Processing clipboard items', { count: items.length });
     
     let hasImage = false;
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-      console.log(`📋 Item ${i}: type=${item.type}, kind=${item.kind}`);
+      logger.debug(`Clipboard item ${i}`, { type: item.type, kind: item.kind });
       
       if (item.type.startsWith('image/')) {
-        console.log('🖼️ Image detected in clipboard!');
+        logger.debug('Image detected in clipboard');
         hasImage = true;
         e.preventDefault();
         e.stopPropagation();
         
         const file = item.getAsFile();
         if (file) {
-          console.log('📁 File extracted from clipboard:', { name: file.name, size: file.size, type: file.type });
+          logger.debug('File extracted from clipboard', { name: file.name, size: file.size, type: file.type });
           await processReferenceImage(file);
         } else {
-          console.log('❌ Failed to extract file from clipboard item');
+          logger.warn('Failed to extract file from clipboard item');
         }
         break;
       }
     }
     
     if (!hasImage) {
-      console.log('📝 No image in clipboard, allowing normal text paste');
+      logger.debug('No image in clipboard, allowing normal text paste');
     }
   };
 
@@ -192,28 +193,28 @@ export const ImagePreviewModal = ({
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('🔄 Drag over detected');
+    logger.debug('Drag over detected');
   };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('📁 Drop event triggered');
+    logger.debug('Drop event triggered');
     
     const files = e.dataTransfer?.files;
     if (!files || files.length === 0) {
-      console.log('❌ No files in drop event');
+      logger.debug('No files in drop event');
       return;
     }
 
-    console.log('📁 Files dropped:', files.length);
+    logger.debug('Files dropped', { count: files.length });
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      console.log(`📁 File ${i}: name=${file.name}, type=${file.type}, size=${file.size}`);
+      logger.debug(`Processing file ${i}`, { name: file.name, type: file.type, size: file.size });
       
       if (file.type.startsWith('image/')) {
-        console.log('🖼️ Processing dropped image');
+        logger.debug('Processing dropped image');
         await processReferenceImage(file);
         break; // Only process the first image
       }
@@ -222,31 +223,31 @@ export const ImagePreviewModal = ({
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log('📁 File selected from upload:', file);
+    logger.debug('File selected from upload', { file: file?.name });
     
     if (file && (file.type === 'image/png' || file.type === 'image/jpeg')) {
-      console.log('✅ Valid image file type, processing...');
+      logger.debug('Valid image file type, processing...');
       await processReferenceImage(file);
     } else {
-      console.log('❌ Invalid file type or no file selected');
+      logger.warn('Invalid file type or no file selected');
       toast.error('Please select a PNG or JPEG image');
     }
   };
 
   const processReferenceImage = async (file: File) => {
-    console.log('🔄 Processing reference image:', { name: file.name, size: file.size, type: file.type });
+    logger.debug('Processing reference image', { name: file.name, size: file.size, type: file.type });
     
     try {
       const reader = new FileReader();
       
       reader.onload = async (e) => {
         const base64 = e.target?.result as string;
-        console.log('✅ File converted to base64, length:', base64.length);
+        logger.debug('File converted to base64', { length: base64.length });
         
         setReferenceImageState(prev => ({ ...prev, image: base64 }));
         
         try {
-          console.log('🔍 Sending image for analysis...');
+          logger.debug('Sending image for analysis...');
           const { data, error } = await supabase.functions.invoke('analyze-reference-image', {
             body: { 
               image: base64.split(',')[1], // Remove data:image/jpeg;base64, prefix
@@ -255,27 +256,27 @@ export const ImagePreviewModal = ({
           });
 
           if (error) {
-            console.error('❌ Error analyzing reference image:', error);
+            logger.error('Error analyzing reference image', error);
             toast.error('Failed to analyze reference image');
           } else {
-            console.log('✅ Reference image analysis completed:', data);
+            logger.success('Reference image analysis completed', data);
             setReferenceImageState(prev => ({ ...prev, analysis: data }));
             toast.success('Reference image analyzed successfully');
           }
         } catch (error) {
-          console.error('❌ Error analyzing reference image:', error);
+          logger.error('Error analyzing reference image', error);
           toast.error('Failed to analyze reference image');
         }
       };
       
       reader.onerror = () => {
-        console.error('❌ FileReader error');
+        logger.error('FileReader error');
         toast.error('Failed to read image file');
       };
       
       reader.readAsDataURL(file);
     } catch (error) {
-      console.error('❌ Error processing reference image:', error);
+      logger.error('Error processing reference image', error);
       toast.error('Failed to process reference image');
     }
   };
@@ -294,7 +295,7 @@ export const ImagePreviewModal = ({
 
   // Enhance prompt with AI agent
   const enhancePromptWithAgent = async (userInput: string) => {
-    console.log('🤖 Calling Image Enhancement Agent with input:', userInput);
+    logger.debug('Calling Image Enhancement Agent', { userInput });
     
     try {
       const sourceContext = {
@@ -310,19 +311,19 @@ export const ImagePreviewModal = ({
         })
       };
 
-      console.log('🤖 Enhancement request:', requestBody);
+      logger.debug('Enhancement request', requestBody);
 
       const { data, error } = await supabase.functions.invoke('image-enhancement-agent', {
         body: requestBody
       });
 
       if (error) {
-        console.error('❌ Enhancement agent error:', error);
+        logger.error('Enhancement agent error', error);
         toast.error('Failed to enhance prompt, using original input');
         return userInput;
       }
 
-      console.log('✅ Enhancement result:', data);
+      logger.success('Enhancement result', data);
 
       // Show enhancement feedback to user
       if (data.confidence === 'low' && data.clarificationNeeded) {
@@ -334,7 +335,7 @@ export const ImagePreviewModal = ({
       return data.enhancedPrompt || userInput;
 
     } catch (error) {
-      console.error('❌ Enhancement agent failed:', error);
+      logger.error('Enhancement agent failed', error);
       toast.error('Failed to enhance prompt, using original input');
       return userInput;
     }
@@ -346,7 +347,7 @@ export const ImagePreviewModal = ({
       return;
     }
 
-    console.log('🎨 Starting image edit process...', { 
+    logger.debug('Starting image edit process', { 
       prompt: editState.prompt, 
       hasReference: !!referenceImageState.image,
       aspectRatio 
@@ -357,12 +358,11 @@ export const ImagePreviewModal = ({
     try {
       // First enhance the prompt with the AI agent
       const enhancedPrompt = await enhancePromptWithAgent(editState.prompt);
-      console.log('📝 Original prompt:', editState.prompt);
-      console.log('🚀 Enhanced prompt:', enhancedPrompt);
+      logger.debug('Prompt enhancement', { original: editState.prompt, enhanced: enhancedPrompt });
 
       // Then enhance with reference image if available
       const finalPrompt = enhancePromptWithReference(enhancedPrompt);
-      console.log('🎯 Final prompt with reference:', finalPrompt);
+      logger.debug('Final prompt with reference', { finalPrompt });
 
       const { data, error } = await supabase.functions.invoke('edit-image', {
         body: {
@@ -373,10 +373,10 @@ export const ImagePreviewModal = ({
       });
 
       if (error) {
-        console.error('❌ Error editing image:', error);
+        logger.error('Error editing image', error);
         toast.error('Failed to edit image');
       } else {
-        console.log('✅ Image edit completed successfully:', data);
+        logger.success('Image edit completed successfully', data);
         toast.success('Image edited successfully');
         
         // Reset all states
@@ -384,7 +384,7 @@ export const ImagePreviewModal = ({
         setReferenceImageState({ image: null, analysis: null });
       }
     } catch (error) {
-      console.error('❌ Unexpected error editing image:', error);
+      logger.error('Unexpected error editing image', error);
       toast.error('Failed to edit image');
     } finally {
       setEditState(prev => ({ ...prev, isProcessing: false }));
@@ -392,14 +392,14 @@ export const ImagePreviewModal = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    console.log('⌨️ Key pressed:', e.key, { ctrl: e.ctrlKey, meta: e.metaKey });
+    logger.debug('Key pressed', { key: e.key, ctrl: e.ctrlKey, meta: e.metaKey });
     
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-      console.log('🚀 Submitting edit via keyboard shortcut');
+      logger.debug('Submitting edit via keyboard shortcut');
       e.preventDefault();
       handleEditSubmit();
     } else if (e.key === 'Escape') {
-      console.log('❌ Closing edit sheet via Escape key');
+      logger.debug('Closing edit sheet via Escape key');
       setEditState(prev => ({ ...prev, isSheetOpen: false }));
     }
   };
@@ -480,7 +480,7 @@ export const ImagePreviewModal = ({
                 <span className="text-white text-sm">Reference Image:</span>
                 <Button
                   onClick={() => {
-                    console.log('🗑️ Removing reference image');
+                    logger.debug('Removing reference image');
                     setReferenceImageState({ image: null, analysis: null });
                   }}
                   variant="ghost"
@@ -511,7 +511,7 @@ export const ImagePreviewModal = ({
               <span className="text-white text-sm">Describe the edit:</span>
               <Button
                 onClick={() => {
-                  console.log('📁 Opening file picker');
+                  logger.debug('Opening file picker');
                   fileInputRef.current?.click();
                 }}
                 variant="ghost"
@@ -532,7 +532,7 @@ export const ImagePreviewModal = ({
               <Textarea
                 value={editState.prompt}
                 onChange={(e) => {
-                  console.log('✏️ Edit prompt changed:', e.target.value);
+                  logger.debug('Edit prompt changed', { value: e.target.value });
                   setEditState(prev => ({ ...prev, prompt: e.target.value }));
                 }}
                 onKeyDown={handleKeyDown}

@@ -7,6 +7,9 @@ import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 import { useToast } from '@/hooks/use-toast';
+import { createComponentLogger } from '@/services/logger';
+
+const logger = createComponentLogger('ConcurrencyControlledImageButton');
 
 interface ConcurrencyControlledImageButtonProps {
   post: SocialMediaPost;
@@ -36,7 +39,7 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
 
   // Debug logging for QA
   useEffect(() => {
-    console.log('[ConcurrencyControlledImageButton] Credit status update', {
+    logger.debug('Credit status update', {
       postId: post.id,
       aspectRatio,
       creditStatus: {
@@ -75,7 +78,7 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
             const newStatus = (payload.new as any)?.[statusField];
             
             if (newStatus && newStatus !== currentStatus) {
-              console.log('🔄 Real-time status update:', {
+              logger.debug('Real-time status update', {
                 postId: post.id,
                 aspectRatio,
                 oldStatus: currentStatus,
