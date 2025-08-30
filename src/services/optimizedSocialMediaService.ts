@@ -315,11 +315,16 @@ export class OptimizedSocialMediaService {
                       firstPost?.image_3_4_url ||
                       firstPost?.image_1_1_url;
       
-      // Determine lifecycle status for UI display
-      const isCompleted = theme.prompt_generation_status === 'completed' && 
-                         theme.prompt_completion_count === theme.total_posts_count;
+      // Fix data inconsistency: if database says completed but no posts generated, treat as pending
+      const hasActualPosts = (theme.prompt_completion_count || 0) > 0 && (theme.total_posts_count || 0) > 0;
+      const actuallyCompleted = theme.prompt_generation_status === 'completed' && hasActualPosts;
+      
+      // Determine lifecycle status for UI display (ignore inconsistent database lifecycle_status)
+      const isCompleted = actuallyCompleted && theme.prompt_completion_count === theme.total_posts_count;
       const isGenerating = theme.prompt_generation_status === 'in_progress';
-      const isPending = !theme.prompt_generation_status || theme.prompt_generation_status === 'not_started';
+      const isPending = !actuallyCompleted && (!theme.prompt_generation_status || 
+                       theme.prompt_generation_status === 'not_started' || 
+                       !hasActualPosts);
       
       return {
         id: theme.id,
