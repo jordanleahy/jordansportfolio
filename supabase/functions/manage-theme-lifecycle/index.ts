@@ -138,14 +138,45 @@ serve(async (req) => {
         userId: user.id,
         correlationId
       });
-      
-      // Call the theme generation function
+
+      // Create theme record immediately in database
+      const { data: newTheme, error: createError } = await supabase
+        .from('themes')
+        .insert({
+          user_id: user.id,
+          theme_name: 'Generating...',
+          description: body.description,
+          category: 'generating',
+          lifecycle_status: 'pending',
+          user_interaction_required: true,
+          background_processing_complete: false,
+          prompt_generation_status: 'not_started'
+        })
+        .select('id')
+        .single();
+
+      if (createError || !newTheme) {
+        console.error(`❌ [CREATE] Failed to create theme record`, {
+          createError,
+          correlationId
+        });
+        throw new Error(ERROR_MESSAGES.DATABASE_ERROR);
+      }
+
+      const theme_id = newTheme.id;
+      console.log(`✅ [CREATE] Theme record created with ID`, {
+        theme_id,
+        correlationId
+      });
+
+      // Now call the theme generation function to populate content
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
         EDGE_FUNCTIONS.GENERATE_CUSTOM_THEME,
         {
           body: {
             description: body.description,
-            provider: body.provider || 'openai'
+            provider: body.provider || 'openai',
+            theme_id: theme_id // Pass the pre-created theme ID
           },
           headers: {
             Authorization: authHeader,
@@ -162,33 +193,38 @@ serve(async (req) => {
       });
 
       if (themeError || !themeData?.success) {
-        console.error(`❌ [CREATE] Theme generation failed`, {
+        console.error(`❌ [CREATE] Theme generation failed, but theme record exists`, {
+          theme_id,
           themeError,
           themeData,
           correlationId
         });
+        
+        // Update theme to failed status
+        await supabase
+          .from('themes')
+          .update({
+            lifecycle_status: 'failed',
+            prompt_generation_status: 'failed'
+          })
+          .eq('id', theme_id);
+          
         throw new Error(themeData?.error || ERROR_MESSAGES.THEME_GENERATION_FAILED);
       }
 
-      console.log(`✅ [CREATE] Theme generated successfully`, {
+      console.log(`✅ [CREATE] Theme content generated successfully`, {
         correlationId,
-        themeId: themeData?.theme_id || 'undefined'
+        themeId: theme_id
       });
 
-      // Validate theme_id exists before proceeding
-      if (!themeData?.theme_id) {
-        throw new Error(ERROR_MESSAGES.THEME_GENERATION_FAILED);
-      }
-
-      // Initial status update - triggers will handle the rest automatically
+      // Update status to generating (content was successfully created)
       const { error: updateError } = await supabase
         .from('themes')
         .update({
-          lifecycle_status: 'pending',
-          user_interaction_required: true,
-          background_processing_complete: false
+          lifecycle_status: 'generating',
+          prompt_generation_status: 'in_progress'
         })
-        .eq('id', themeData.theme_id);
+        .eq('id', theme_id);
 
       if (updateError) {
         console.error(`❌ [UPDATE] Failed to update theme lifecycle`, {
@@ -208,9 +244,9 @@ serve(async (req) => {
 
       const response = {
         success: true,
-        theme_id: themeData.theme_id,
+        theme_id: theme_id, // Return the pre-created theme ID immediately
         lifecycle_status: 'generating',
-        message: 'Theme created and background processing started',
+        message: 'Theme created and content is being generated',
         correlationId
       };
 

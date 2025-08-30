@@ -103,9 +103,12 @@ serve(async (req) => {
       user = authUser;
     }
 
-    const { description, provider = 'openai' } = await req.json();
+    const { description, provider = 'openai', theme_id } = await req.json();
     console.log('📝 [generate-custom-theme] Received description:', description);
     console.log('🎯 [generate-custom-theme] Using provider:', provider);
+    if (theme_id) {
+      console.log('🆔 [generate-custom-theme] Updating existing theme ID:', theme_id);
+    }
 
     if (!description || description.trim().length === 0) {
       console.log('❌ [generate-custom-theme] No description provided');
@@ -222,31 +225,56 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
     console.log('✅ [generate-custom-theme] Theme generation successful:', themeData.category);
 
     // Save theme to database if user is authenticated
-    let savedThemeId = null;
+    let savedThemeId = theme_id; // Use provided theme_id if it exists
     if (user) {
-      console.log('💾 [generate-custom-theme] Saving theme to database for user:', user.id);
-      
-      const { data: savedTheme, error: saveError } = await supabase
-        .from('themes')
-        .insert({
-          user_id: user.id,
-          theme_name: themeData.theme,
-          description: themeData.description,
-          category: themeData.category,
-          lifecycle_status: 'pending',
-          user_interaction_required: true,
-          background_processing_complete: false
-        })
-        .select('id')
-        .single();
+      if (theme_id) {
+        // Update existing theme record
+        console.log('🔄 [generate-custom-theme] Updating existing theme for user:', user.id);
+        
+        const { error: updateError } = await supabase
+          .from('themes')
+          .update({
+            theme_name: themeData.theme,
+            description: themeData.description || description,
+            category: themeData.category,
+            lifecycle_status: 'generating',
+            prompt_generation_status: 'in_progress'
+          })
+          .eq('id', theme_id)
+          .eq('user_id', user.id);
 
-      if (saveError) {
-        console.error('❌ [generate-custom-theme] Failed to save theme:', saveError);
-        throw new Error('Failed to save theme to database');
+        if (updateError) {
+          console.error('❌ [generate-custom-theme] Failed to update theme:', updateError);
+          throw new Error('Failed to update theme in database');
+        }
+
+        console.log('✅ [generate-custom-theme] Theme updated with ID:', theme_id);
+      } else {
+        // Create new theme record (legacy path)
+        console.log('💾 [generate-custom-theme] Creating new theme for user:', user.id);
+        
+        const { data: savedTheme, error: saveError } = await supabase
+          .from('themes')
+          .insert({
+            user_id: user.id,
+            theme_name: themeData.theme,
+            description: themeData.description || description,
+            category: themeData.category,
+            lifecycle_status: 'generating',
+            user_interaction_required: true,
+            background_processing_complete: false
+          })
+          .select('id')
+          .single();
+
+        if (saveError) {
+          console.error('❌ [generate-custom-theme] Failed to save theme:', saveError);
+          throw new Error('Failed to save theme to database');
+        }
+
+        savedThemeId = savedTheme.id;
+        console.log('✅ [generate-custom-theme] Theme created with ID:', savedThemeId);
       }
-
-      savedThemeId = savedTheme.id;
-      console.log('✅ [generate-custom-theme] Theme saved with ID:', savedThemeId);
 
       // Save posts to database
       console.log('💾 [generate-custom-theme] Saving posts to database');
