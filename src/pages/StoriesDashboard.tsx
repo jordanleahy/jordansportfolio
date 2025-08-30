@@ -857,20 +857,6 @@ export default function StoriesDashboard() {
             {/* Bulk Actions Toolbar */}
             <BulkActionsToolbar selectedCount={selectedThemes.size} totalCount={availableThemes.length} onDeleteSelected={() => setShowDeleteDialog(true)} onClearSelection={handleClearSelection} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} allSelected={selectedThemes.size === availableThemes.length && selectedThemes.size > 0} isDeleting={isDeletingBulk} />
 
-            {/* Debug Panel for Admin */}
-            {isAdmin && (
-              <div className="mb-6 flex items-center gap-4 p-4 border rounded-lg bg-muted/20">
-                <Button 
-                  onClick={handleDebugPromptGeneration}
-                  variant="outline" 
-                  size="sm"
-                  className="text-xs"
-                >
-                  🔧 Fix HIV-AIDS Theme
-                </Button>
-                <span className="text-xs text-muted-foreground">Debug: Manually trigger prompt generation</span>
-              </div>
-            )}
 
             {/* Simplified Batch Shimmer */}
             <SimplifiedBatchSkeleton 
