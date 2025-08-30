@@ -18,20 +18,19 @@ import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
 import { CategoriesGrid } from '@/components/stories/CategoriesGrid';
+import { useThemeCompletion } from '@/hooks/useThemeCompletion';
 import { ThemesSkeleton } from '@/components/stories/ThemesSkeleton';
 import { BulkActionsToolbar } from '@/components/stories/BulkActionsToolbar';
 import { BulkDeleteConfirmationDialog } from '@/components/stories/BulkDeleteConfirmationDialog';
 import { StoriesGridLayout } from '@/components/stories/StoriesGridLayout';
 import { useStoriesFilters } from '@/hooks/useStoriesFilters';
-import { ThemeWithPosts, PendingTheme } from '@/types/stories';
-import type { SocialMediaPost } from '@/types/socialMedia';
+import { ThemeWithPosts } from '@/types/stories';
+import type { SocialMediaPost } from '@/types/socialMedia';  
 import { Helmet } from 'react-helmet-async';
 import { UI_FLAGS } from '@/config/uiFlags';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 import { CollectionCard } from '@/components/library/CollectionCard';
-import { useThemeShimmer } from '@/hooks/useThemeShimmer';
-import { usePendingThemeCleanup } from '@/hooks/usePendingThemeCleanup';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
 import { PublicCollectionsSection } from '@/components/PublicCollectionsSection';
 import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSkeleton';
@@ -67,14 +66,7 @@ export default function StoriesDashboard() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [customThemeDescription, setCustomThemeDescription] = useState('');
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
-  const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
-
-  // Centralized function to clear pending theme state
-  const clearPendingThemeState = () => {
-    setPendingTheme(null);
-    setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('pending-')));
-  };
 
   // Simplified state management
   const [availableThemes, setAvailableThemes] = useState<ThemeWithPosts[]>([]);
@@ -109,22 +101,14 @@ export default function StoriesDashboard() {
   // Featured collections (public view)
   const { data: featuredCollections = [], isLoading: isLoadingFeatured, error: featuredError } = useFeaturedCollections();
 
-  // Simplified theme shimmer management
-  const { 
-    dismissShimmer, 
-    handleThemeClick, 
-    shouldShowShimmer,
-    completionProgress
-  } = useThemeShimmer({
-    pendingTheme,
-    setPendingTheme
-  });
+  // Check for generating themes in database
+  const generatingThemes = availableThemes.filter(theme => 
+    theme.lifecycle_status === 'generating' || theme.prompt_generation_status === 'in_progress'
+  );
+  const shouldShowShimmer = generatingThemes.length > 0;
 
-  // Auto-cleanup stale pending themes
-  usePendingThemeCleanup({
-    pendingTheme,
-    setPendingTheme
-  });
+  // Simple theme completion handling
+  const { navigateToTheme } = useThemeCompletion({ themes: availableThemes, user });
 
   // Stories filtering
   const {
@@ -230,12 +214,8 @@ export default function StoriesDashboard() {
     try {
       const themes = await optimizedSocialMediaService.refreshAvailableThemes();
       
-      // Preserve pending themes by merging them with fresh data
-      setAvailableThemes(prevThemes => {
-        const pendingThemes = prevThemes.filter(theme => theme.id.startsWith('pending-'));
-        const freshThemes = themes.filter(theme => !theme.id.startsWith('pending-'));
-        return [...pendingThemes, ...freshThemes];
-      });
+      // Update with fresh theme data
+      setAvailableThemes(themes);
     } catch (error) {
       console.error('Failed to refresh themes after post update:', error);
     }
@@ -349,7 +329,7 @@ export default function StoriesDashboard() {
     setSelectedThemes(newSelected);
   };
   const handleSelectAll = () => {
-    const allThemeIds = availableThemes.filter(theme => !theme.id.startsWith('pending-')).map(theme => theme.id);
+    const allThemeIds = availableThemes.map(theme => theme.id);
     setSelectedThemes(new Set(allThemeIds));
   };
   const handleDeselectAll = () => {
@@ -469,14 +449,15 @@ export default function StoriesDashboard() {
       });
       return;
     }
+    
     const themeDescription = customThemeDescription.trim();
     console.log('📝 Theme description:', themeDescription);
     
     if (!user) {
-      console.log('❌ No user found');
+      console.log('❌ User not authenticated');
       toast({
-        title: "Sign in required",
-        description: "Please sign in to generate themes."
+        title: 'Sign in required',
+        description: 'Please sign in to generate themes.'
       });
       navigate('/auth');
       return;
@@ -487,17 +468,7 @@ export default function StoriesDashboard() {
     setIsGeneratingTheme(true);
     console.log('🚀 Starting theme generation...');
 
-    // Generate a theme_id immediately when creating pending theme
-    const themeId = crypto.randomUUID();
-    
-    // Set pending theme for tracking
-    setPendingTheme({
-      theme_id: themeId,
-      theme_name: themeDescription.slice(0, 50) + (themeDescription.length > 50 ? '...' : ''),
-      description: themeDescription
-    });
-
-    // Smooth scroll to cards section after setting pending theme
+    // Smooth scroll to cards section
     requestAnimationFrame(() => {
       const cardsSection = document.getElementById('cards');
       if (cardsSection) {
@@ -522,7 +493,6 @@ export default function StoriesDashboard() {
       });
       
       console.log('📡 Edge function response:', { data, error });
-      // Remove duplicate handling - always proceed with generation
       if (error) {
         console.log('❌ Edge function error:', error);
         throw new Error(`Edge function error: ${error.message}`);
@@ -534,31 +504,15 @@ export default function StoriesDashboard() {
       
       console.log('✅ Theme saved to database:', data);
       
-      // Update pending theme with the actual theme_id from the response
-      if (data?.theme_id) {
-        console.log('🔗 DASHBOARD: Updating pending theme with theme_id:', data.theme_id);
-        console.log('🎯 DASHBOARD: Theme generation successful, theme_id:', data.theme_id);
-        setPendingTheme(prev => {
-          const updated = prev ? { ...prev, theme_id: data.theme_id } : null;
-          console.log('📝 DASHBOARD: Updated pending theme state:', updated);
-          return updated;
-        });
-        
-        
-        // Refresh themes to get the new theme
-        const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
-        setAvailableThemes(refreshedThemes);
-        console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
-      }
+      // Refresh themes to get the new theme immediately
+      const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
+      setAvailableThemes(refreshedThemes);
+      console.log('🔄 DASHBOARD: Refreshed themes after theme creation');
       
-      // Success notification will be shown when ALL image prompts are completed via useSimpleThemeCompletion
-      // Theme completion and auto-navigation is now handled by useThemeLifecycleShimmer
-      console.log('✅ Theme creation started, shimmer will auto-dismiss when completed');
+      console.log('✅ Theme creation started, showing in theme grid');
     } catch (error: any) {
       console.error('Theme generation error:', error);
       
-      // Clear pending state and loading indicators
-      clearPendingThemeState();
       setIsGeneratingTheme(false);
       
       // Error handling
@@ -598,8 +552,6 @@ export default function StoriesDashboard() {
         throw new Error(data?.error || 'Failed to cancel theme generation');
       }
 
-      // Remove pending theme and reset states
-      clearPendingThemeState();
       setIsGeneratingTheme(false);
       return data;
     } catch (error) {
@@ -610,109 +562,13 @@ export default function StoriesDashboard() {
     }
   };
   const handleConfirmDuplicate = async (newCategory: string) => {
-    if (!pendingTheme?.description) {
-      setDuplicateInfo(null);
-      toast({
-        title: 'Missing description',
-        description: 'Please try again.',
-        variant: 'destructive'
-      });
-      return;
-    }
+    // This function is no longer needed with database-first approach
     setDuplicateInfo(null);
-    if (!user) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to generate themes.'
-      });
-      navigate('/auth');
-      return;
-    }
-    setIsGeneratingTheme(true);
-    try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
-        body: {
-          description: pendingTheme.description,
-          stream: false,
-          overrideCategory: newCategory
-        }
-      });
-      if (error) {
-        throw new Error(error.message);
-      }
-      if (!data?.success) {
-        throw new Error(data?.error || 'Failed to generate theme');
-      }
-      toast({
-        title: 'Theme Created!',
-        description: `Generated "${data.theme}" with ${data.postCount} posts under "${data.category}"`
-      });
-
-      // Replace pending theme with real data for duplicate case
-      clearPendingThemeState();
-      
-      const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
-      
-      setAvailableThemes(prevThemes => {
-        // Find and replace the pending theme
-        const pendingIndex = prevThemes.findIndex(theme => 
-          theme.id.startsWith('pending-')
-        );
-        
-        if (pendingIndex !== -1) {
-          const newTheme = refreshedThemes.find(theme => 
-            theme.theme_name === data.theme || theme.category === data.category
-          );
-          
-          if (newTheme) {
-            const newThemes = [...prevThemes];
-            newThemes[pendingIndex] = newTheme;
-            
-            // Filter out duplicates and add any missing themes
-            const existingIds = new Set(newThemes.map(t => t.id));
-            const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
-            
-            return [...newThemes.filter(t => !t.id.startsWith('pending-')), ...additionalThemes];
-          }
-        }
-        
-        return refreshedThemes;
-      });
-    } catch (err: any) {
-      console.error('Duplicate confirm error:', err);
-      toast({
-        title: 'Creation failed',
-        description: err.message || 'Could not create theme',
-        variant: 'destructive'
-      });
-      // Transform to error state for duplicate case failure
-      clearPendingThemeState();
-      setAvailableThemes(prev => prev.map(theme => {
-        if (theme.id.startsWith('pending-')) {
-          return {
-            ...theme,
-            id: 'error-' + Date.now(),
-            theme_name: 'Generation Failed',
-            first_post: {
-              ...theme.first_post!,
-              title: 'Error: Generation failed',
-              description: `Failed to create duplicate theme: ${err.message?.slice(0, 100) || 'Unknown error'}`
-            }
-          };
-        }
-        return theme;
-      }));
-      
-      // Auto-clear error state after 5 seconds
-      setTimeout(() => {
-        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('error-')));
-      }, 5000);
-    } finally {
-      setIsGeneratingTheme(false);
-    }
+    toast({
+      title: 'Feature removed',
+      description: 'Duplicate handling simplified with new architecture.',
+      variant: 'default'
+    });
   };
 
   // Early return with loading screen if still initializing
@@ -977,12 +833,16 @@ export default function StoriesDashboard() {
             </header>
 
             {/* Bulk Actions Toolbar */}
-            <BulkActionsToolbar selectedCount={selectedThemes.size} totalCount={availableThemes.filter(t => !t.id.startsWith('pending-')).length} onDeleteSelected={() => setShowDeleteDialog(true)} onClearSelection={handleClearSelection} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} allSelected={selectedThemes.size === availableThemes.filter(t => !t.id.startsWith('pending-')).length && selectedThemes.size > 0} isDeleting={isDeletingBulk} />
+            <BulkActionsToolbar selectedCount={selectedThemes.size} totalCount={availableThemes.length} onDeleteSelected={() => setShowDeleteDialog(true)} onClearSelection={handleClearSelection} onSelectAll={handleSelectAll} onDeselectAll={handleDeselectAll} allSelected={selectedThemes.size === availableThemes.length && selectedThemes.size > 0} isDeleting={isDeletingBulk} />
 
             {/* Simplified Batch Shimmer */}
             <SimplifiedBatchSkeleton 
               isVisible={shouldShowShimmer}
-              completionProgress={completionProgress}
+              completionProgress={{
+                total: generatingThemes.length > 0 ? generatingThemes[0].total_posts_count || 8 : 8,
+                completed: generatingThemes.length > 0 ? generatingThemes[0].prompt_completion_count || 0 : 0,
+                isComplete: false
+              }}
               className="mb-6"
             />
 
@@ -1013,8 +873,8 @@ export default function StoriesDashboard() {
                   selectedThemes={selectedThemes} 
                   onThemeSelect={handleThemeSelect} 
                   isSelectionMode={isSelectionMode} 
-                  isGeneratingTheme={isGeneratingTheme} 
-                  onCancelGeneration={cancelThemeGeneration}
+                  isGeneratingTheme={false}
+                  onCancelGeneration={async () => {}}
                   getTransitionClasses={() => ''}
                   isThemeTransitioning={() => false}
                 />
@@ -1071,9 +931,7 @@ export default function StoriesDashboard() {
 
         {/* Duplicate Theme Modal */}
         <DuplicateThemeModal open={!!duplicateInfo} category={duplicateInfo?.category || ''} theme={duplicateInfo?.theme || ''} onCancel={() => {
-      setDuplicateInfo(null);
-      // Remove the pending shimmer theme if user cancels
-      clearPendingThemeState();
-    }} onConfirm={handleConfirmDuplicate} />
+          setDuplicateInfo(null);
+        }} onConfirm={handleConfirmDuplicate} />
       </PageLayout>;
 }

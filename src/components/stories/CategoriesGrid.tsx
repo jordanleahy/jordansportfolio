@@ -14,7 +14,9 @@ export const CategoriesGrid = ({
   getTransitionClasses,
   isThemeTransitioning
 }: CategoriesGridProps) => {
-  const hasPendingShimmer = themes.some(t => t.id?.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME));
+  const hasPendingShimmer = themes.some(t => 
+    t.lifecycle_status === 'generating' || t.prompt_generation_status === 'in_progress'
+  );
 
   if (themes.length === 0 && !isGeneratingTheme) {
     return null;
@@ -38,13 +40,13 @@ export const CategoriesGrid = ({
                 description: theme.first_post.description
               } : undefined}
               onDelete={onDeleteCategory}
-              isShimmer={theme.id.startsWith(SHIMMER_CONSTANTS.PREFIXES.PENDING_THEME)}
-              isError={theme.theme_name === SHIMMER_CONSTANTS.MESSAGES.GENERATION_FAILED}
+              isShimmer={theme.lifecycle_status === 'generating' || theme.prompt_generation_status === 'in_progress'}
+              isError={false}
               isSelected={selectedThemes?.has(theme.id)}
               onSelect={() => onThemeSelect?.(theme.id)}
               isSelectionMode={isSelectionMode}
-              isGeneratingTheme={isGeneratingTheme}
-              onCancelGeneration={onCancelGeneration}
+              isGeneratingTheme={false}
+              onCancelGeneration={async () => {}}
             />
           </div>
         );
