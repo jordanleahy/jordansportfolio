@@ -613,6 +613,7 @@ Please generate a detailed, professional system prompt following the template fo
             .from('themes')
             .update({ 
               visual_prompt_system_prompt_id: insertedPrompt.id,
+              prompt_generation_status: 'completed',
               updated_at: new Date().toISOString()
             })
             .eq('id', theme_id)
