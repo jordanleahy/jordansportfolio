@@ -10,7 +10,7 @@ function estimateTokens(text: string): number {
 }
 
 // Dynamic prompt truncation to fit within token limits
-function truncatePromptIfNeeded(systemPrompt: string, userPrompt: string, maxPromptTokens: number = OPENAI_CONFIG.MAX_PROMPT_TOKENS): { systemPrompt: string, userPrompt: string, wasTruncated: boolean } {
+function truncatePromptIfNeeded(systemPrompt: string, userPrompt: string, maxPromptTokens: number = 120000): { systemPrompt: string, userPrompt: string, wasTruncated: boolean } {
   const systemTokens = estimateTokens(systemPrompt);
   const userTokens = estimateTokens(userPrompt);
   const totalTokens = systemTokens + userTokens;
@@ -331,19 +331,19 @@ Generate the complete system prompt with ALL placeholders replaced with specific
 
     // Enhanced OpenAI request with correlation tracking
     const requestBodyForOpenAI = enhanceOpenAIRequestBody({
-      model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL,
+      model: agent.model_version || 'gpt-5-mini-2025-08-07',
       messages: [
         { role: 'system', content: truncatedSystemPrompt },
         { role: 'user', content: truncatedUserPrompt }
       ],
-      max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
+      max_completion_tokens: 7000,
     }, correlationId);
 
     console.log('🔎 OpenAI Request Model/Agent:', { 
-      model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, 
+      model: agent.model_version || 'gpt-5-mini-2025-08-07', 
       generator_agent: agent.name, 
       correlationId,
-      maxCompletionTokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
+      maxCompletionTokens: 7000,
       estimatedPromptTokens: estimateTokens(truncatedSystemPrompt + truncatedUserPrompt),
       wasTruncated
     });
@@ -357,7 +357,7 @@ Generate the complete system prompt with ALL placeholders replaced with specific
       },
       body: JSON.stringify(requestBodyForOpenAI),
       correlationId,
-      timeout: OPENAI_CONFIG.TIMEOUT_MS,
+      timeout: 180000,
       maxRetries: 3,
       operationType: 'system_prompt',
     });
