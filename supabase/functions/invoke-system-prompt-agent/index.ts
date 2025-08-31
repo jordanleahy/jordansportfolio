@@ -3,51 +3,28 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
-// Constants - Centralized to match src/constants/
+// Constants - Simplified for system prompt generation focus
 const AGENT_NAMES = {
   SYSTEM_PROMPT_GENERATOR: 'System Prompt Generator',
-  VISUAL_PROMPT_GENERATOR: 'Visual Prompt Generator',
-  BLOG_CONTENT_GENERATOR: 'Blog Content Generator',
-  COVER_LETTER_GENERATOR: 'Cover Letter Generator',
-  CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',
-  ABC_LEARNING_AGENT: 'ABC Learning Agent',
-} as const;
-
-const SYSTEM_PROMPT_CATEGORIES = {
-  SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
 } as const;
 
 const OPENAI_CONFIG = {
   DEFAULT_MODEL: 'gpt-5-mini-2025-08-07',
   MAX_COMPLETION_TOKENS: 4000,
   TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
-  ESCALATION_TIMEOUTS: {
-    ATTEMPT_1: 180000,   // 180 seconds for first attempt
-    ATTEMPT_2: 240000,   // 240 seconds for second attempt  
-    ATTEMPT_3: 300000,   // 300 seconds for final attempt
-  },
 } as const;
 
 const HTTP_STATUS = {
   OK: 200,
-  CREATED: 201,
   BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
-  SERVICE_UNAVAILABLE: 503,
 } as const;
 
 const ERROR_MESSAGES = {
   OPENAI_API_KEY_MISSING: 'OpenAI API key not configured',
-  AGENT_NOT_FOUND: 'Required agent not found for this user',
-  SYSTEM_PROMPT_NOT_FOUND: 'No system prompt found for specified category',
-  INVALID_REQUEST_BODY: 'Invalid request body',
+  AGENT_NOT_FOUND: 'System Prompt Generator agent not found',
   OPENAI_API_ERROR: 'OpenAI API error',
-  USER_NOT_AUTHENTICATED: 'User not authenticated',
-  RATE_LIMIT_EXCEEDED: 'Rate limit exceeded',
-  NETWORK_ERROR: 'Network error',
 } as const;
 
 const CORS_HEADERS = {
@@ -280,10 +257,10 @@ serve(async (req) => {
 
     console.log('🤖 AI GENERATION MODE: Using OpenAI with default color theme integration');
     
-    // Get the System Prompt Generator agent (look for system/shared agents first, then user-specific)
+    // Get the System Prompt Generator agent
     let { data: agent, error: agentError } = await supabase
       .from('openai_agents')
-      .select('*')
+      .select('id, name, model_version')
       .eq('name', AGENT_NAMES.SYSTEM_PROMPT_GENERATOR)
       .single();
 
@@ -446,333 +423,104 @@ Please generate a detailed, professional system prompt following the established
       timestamp: new Date().toISOString()
     });
 
-    try {
-      // 🔍 Step 0: Check if system prompt already exists for this theme_id
-      console.log('🔍 STEP 0: Checking for existing system prompts for theme_id:', theme_id);
-      const existingPromptsQuery = supabase
-        .from('system_prompts')
-        .select('id, created_at, theme')
-        .eq('user_id', user_id);
+      try {
+        // Check if system prompt already exists for this theme
+        console.log('Checking for existing system prompts for theme:', actualTheme);
+        const existingPromptsQuery = supabase
+          .from('system_prompts')
+          .select('id, prompt_text')
+          .eq('user_id', user_id);
 
-      // Use theme_id if provided, otherwise fall back to theme name
-      if (theme_id) {
-        existingPromptsQuery.eq('theme_id', theme_id);
-      } else {
-        existingPromptsQuery.eq('theme', actualTheme);
-      }
+        // Use theme_id if provided, otherwise fall back to theme name
+        if (theme_id) {
+          existingPromptsQuery.eq('theme_id', theme_id);
+        } else {
+          existingPromptsQuery.eq('theme', actualTheme);
+        }
 
-      const { data: existingPrompts, error: checkError } = await existingPromptsQuery
-        .order('created_at', { ascending: false });
+        const { data: existingPrompts, error: checkError } = await existingPromptsQuery.limit(1);
 
-      if (checkError) {
-        console.error('❌ ERROR CHECKING EXISTING PROMPTS:', checkError);
-      } else {
-        console.log('📊 EXISTING PROMPTS FOUND:', {
-          count: existingPrompts?.length || 0,
-          prompts: existingPrompts?.map(p => ({ id: p.id, created_at: p.created_at }))
-        });
-
-        // If a prompt already exists for this theme, return the existing one
-        if (existingPrompts && existingPrompts.length > 0) {
+        if (!checkError && existingPrompts && existingPrompts.length > 0) {
           const existingPrompt = existingPrompts[0];
-          console.log('♻️ USING EXISTING SYSTEM PROMPT:', {
-            existing_prompt_id: existingPrompt.id,
-            theme: actualTheme,
-            message: 'System prompt already exists for this theme'
-          });
+          console.log('Using existing system prompt:', existingPrompt.id);
 
           return new Response(JSON.stringify({ 
             success: true, 
-            system_prompt: generatedPrompt,
+            system_prompt: existingPrompt.prompt_text,
             agent_id: agent.id,
             theme: actualTheme,
             database_record_id: existingPrompt.id,
-            message: `Using existing system prompt for "${actualTheme}" theme (found ${existingPrompts.length} existing prompts)`
+            message: `Using existing system prompt for "${actualTheme}" theme`
           }), {
             headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
           });
         }
-      }
 
-      // 📝 Step 1: Save the generated prompt to system_prompts table (only if none exists)
-      console.log('💾 STEP 1: Creating new system prompt (none found for theme)');
-      const { data: insertedPrompt, error: insertError } = await supabase
-        .from('system_prompts')
-        .insert({
-          user_id,
-          agent_id: agent.id,
-          agent_name: agent.name,
-          agent_purpose: agent.purpose,
-          agent_owner: agent.owner,
-          name: `${actualTheme} Theme System Prompt`,
-          theme: actualTheme,
-          theme_id: theme_id,
-          theme_description: description,
-          prompt_text: generatedPrompt,
-          description: `Generated system prompt for ${actualTheme} theme with ${contextCategory} context`
-        })
-        .select();
-
-      if (insertError) {
-        console.error('❌ SYSTEM_PROMPTS INSERT ERROR:', {
-          error: insertError,
-          code: insertError.code,
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint
-        });
-        
-        return new Response(JSON.stringify({ 
-          success: false, 
-          error: `Failed to save system prompt to database: ${insertError.message}`,
-          details: insertError
-        }), {
-          status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-        });
-      }
-
-        console.log('✅ SYSTEM_PROMPTS INSERT SUCCESS:', {
-          inserted_records: insertedPrompt?.length || 0,
-          first_record_id: insertedPrompt?.[0]?.id,
-          agent_name: insertedPrompt?.[0]?.agent_name,
-          updated_at: insertedPrompt?.[0]?.updated_at
-        });
-
-      // Update the themes table with the generated system prompt ID if theme_id is provided
-      if (theme_id && insertedPrompt?.[0]?.id) {
-        console.log('🔗 LINKING SYSTEM PROMPT TO THEME:', { theme_id, prompt_id: insertedPrompt[0].id });
-        
-        const { error: themeUpdateError } = await supabase
-          .from('themes')
-          .update({ 
-            visual_prompt_system_prompt_id: insertedPrompt[0].id,
-            updated_at: new Date().toISOString()
+        // Save the generated prompt to system_prompts table
+        console.log('Creating new system prompt for theme:', actualTheme);
+        const { data: insertedPrompt, error: insertError } = await supabase
+          .from('system_prompts')
+          .insert({
+            user_id,
+            agent_id: agent.id,
+            agent_name: agent.name,
+            name: `${actualTheme} Theme System Prompt`,
+            theme: actualTheme,
+            theme_id: theme_id,
+            theme_description: description,
+            prompt_text: generatedPrompt,
+            description: `Generated system prompt for ${actualTheme} theme with ${contextCategory} context`
           })
-          .eq('id', theme_id)
-          .eq('user_id', user_id); // Ensure user owns the theme
-
-        if (themeUpdateError) {
-          console.error('❌ THEME UPDATE ERROR:', themeUpdateError);
-        } else {
-          console.log('✅ THEME UPDATED: Successfully linked system prompt to theme');
-          
-          // 🚀 TRIGGER BULK INDIVIDUAL PROMPT GENERATION IMMEDIATELY
-          console.log('🚀 TRIGGERING BULK INDIVIDUAL PROMPT GENERATION:', { theme_id, category: contextCategory });
-          
-          // Use EdgeRuntime.waitUntil to start background task without blocking response
-          EdgeRuntime.waitUntil(
-            (async () => {
-              try {
-                // Small delay to ensure database consistency
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                console.log('📝 BULK TRIGGER: Calling ensure-post-image-prompts for theme completion');
-                const { data: bulkResult, error: bulkError } = await supabase.functions.invoke('ensure-post-image-prompts', {
-                  body: {
-                    category: contextCategory,
-                    userId: user_id,
-                    themeId: theme_id // Add theme_id for better targeting
-                  }
-                });
-
-                if (bulkError) {
-                  console.error('❌ BULK PROMPT GENERATION ERROR:', bulkError);
-                } else {
-                  console.log('✅ BULK PROMPT GENERATION TRIGGERED:', bulkResult);
-                }
-              } catch (bulkProcessError) {
-                console.error('❌ BULK PROCESS EXCEPTION:', bulkProcessError);
-              }
-            })()
-          );
-        }
-      }
-
-    // 🎯 Step 2: Determine target agent based on prompt type
-      let targetAgentName = null;
-      
-      // Route based on theme first, then category context
-      // Check for ABC/Alphabet learning content first
-      if (actualTheme?.toLowerCase().includes('abc') || 
-          actualTheme?.toLowerCase().includes('alphabet') ||
-          actualTheme?.toLowerCase().includes('letter') ||
-          contextCategory?.includes('abc-learning') ||
-          contextCategory?.includes('alphabet-flashcards') ||
-          contextCategory?.includes('preschool-alphabet') ||
-          description?.toLowerCase().includes('abc') ||
-          description?.toLowerCase().includes('alphabet') ||
-          description?.toLowerCase().includes('letter learning')) {
-        targetAgentName = AGENT_NAMES.ABC_LEARNING_AGENT;
-      }
-      // Visual content routing
-      else if (actualTheme?.toLowerCase().includes('visual') || 
-          ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(actualTheme) ||
-          ['healthcare', 'contracts', 'design', 'coding ai', 'cdi', 'ai agents', 'product_manager', 'product_designer'].includes(contextCategory) ||
-          description?.toLowerCase().includes('visual') || 
-          description?.toLowerCase().includes('image')) {
-        targetAgentName = AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
-      }
-      // Route to other agents based on theme or category patterns
-      else if (actualTheme?.includes('blog') || actualTheme?.includes('content') ||
-               contextCategory?.includes('blog') || contextCategory?.includes('content')) {
-        targetAgentName = AGENT_NAMES.BLOG_CONTENT_GENERATOR;
-      }
-      else if (actualTheme?.includes('cover_letter') || contextCategory?.includes('cover_letter')) {
-        targetAgentName = AGENT_NAMES.COVER_LETTER_GENERATOR;
-      }
-      else if (actualTheme?.includes('calendar') || actualTheme?.includes('json') ||
-               contextCategory?.includes('calendar') || contextCategory?.includes('theme') || contextCategory?.includes('json')) {
-        targetAgentName = AGENT_NAMES.CALENDAR_THEME_JSON_PROCESSOR;
-      }
-      else {
-        // Default to Visual Prompt Generator for unknown themes
-        targetAgentName = AGENT_NAMES.VISUAL_PROMPT_GENERATOR;
-      }
-      
-      if (targetAgentName) {
-        console.log(`🔍 STEP 2: Finding target agent "${targetAgentName}" for theme "${actualTheme}" with category context "${contextCategory}"`);
-        
-        const { data: targetAgent, error: targetAgentError } = await supabase
-          .from('openai_agents')
-          .select('*')
-          .eq('name', targetAgentName)
+          .select('id')
           .single();
 
-        if (targetAgentError || !targetAgent) {
-          console.error('❌ TARGET AGENT NOT FOUND:', {
-            target_agent_name: targetAgentName,
-            category: contextCategory,
-            error: targetAgentError
+        if (insertError) {
+          console.error('Failed to save system prompt:', insertError);
+          return new Response(JSON.stringify({ 
+            success: false, 
+            error: `Failed to save system prompt to database: ${insertError.message}`
+          }), {
+            status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+            headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
           });
-        } else {
-          console.log('✅ TARGET AGENT FOUND:', {
-            agent_name: targetAgent.name,
-            agent_id: targetAgent.id,
-            theme: actualTheme,
-            category: contextCategory,
-            routing_logic: 'theme_based'
-          });
+        }
 
-          // Update the target agent's last_run timestamp only
-          const currentTimestamp = new Date().toISOString();
-          const { error: targetUpdateError } = await supabase
-            .from('openai_agents')
+        console.log('System prompt saved successfully:', insertedPrompt.id);
+
+        // Link system prompt to theme if theme_id is provided
+        if (theme_id && insertedPrompt?.id) {
+          console.log('Linking system prompt to theme:', { theme_id, prompt_id: insertedPrompt.id });
+          
+          const { error: themeUpdateError } = await supabase
+            .from('themes')
             .update({ 
-              last_run: currentTimestamp,
-              updated_at: currentTimestamp
+              visual_prompt_system_prompt_id: insertedPrompt.id,
+              updated_at: new Date().toISOString()
             })
-            .eq('id', targetAgent.id);
+            .eq('id', theme_id)
+            .eq('user_id', user_id);
 
-          if (targetUpdateError) {
-            console.error('❌ TARGET AGENT UPDATE ERROR:', targetUpdateError);
+          if (themeUpdateError) {
+            console.error('Theme update error:', themeUpdateError);
           } else {
-            console.log('✅ TARGET AGENT UPDATED: Successfully updated target agent timestamps');
-          }
-
-          // Update the system_prompts table record to reflect the correct target agent
-          const { error: promptUpdateError } = await supabase
-            .from('system_prompts')
-            .update({
-              agent_id: targetAgent.id,
-              agent_name: targetAgent.name,
-              agent_purpose: targetAgent.purpose,
-              agent_owner: targetAgent.owner
-            })
-            .eq('id', insertedPrompt[0].id);
-
-          if (promptUpdateError) {
-            console.error('❌ PROMPT RECORD UPDATE ERROR:', promptUpdateError);
-          } else {
-            console.log('✅ PROMPT RECORD UPDATED: System prompt attribution updated', { id: insertedPrompt[0].id, agent_name: targetAgent.name });
+            console.log('Successfully linked system prompt to theme');
           }
         }
-      } else {
-        console.log(`⚠️  NO TARGET AGENT: Failed to determine target agent for category "${contextCategory}"`);
-      }
 
-      // 🔄 Step 3: Update the generator agent's last_run timestamp
-      console.log('⏰ STEP 3: Updating generator agent last_run timestamp');
-      const currentTimestamp = new Date().toISOString();
-      const { error: updateError } = await supabase
-        .from('openai_agents')
-        .update({ 
-          last_run: currentTimestamp,
-          updated_at: currentTimestamp
-        })
-        .eq('id', agent.id);
-
-      if (updateError) {
-        console.error('⚠️  AGENT UPDATE WARNING:', {
-          error: updateError,
-          message: updateError.message,
-          agent_id: agent.id
+        // Return success response
+        console.log('System prompt generated and stored successfully');
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          system_prompt: generatedPrompt,
+          agent_id: agent.id,
+          theme: actualTheme,
+          category: contextCategory,
+          database_record_id: insertedPrompt.id,
+          message: `System prompt for "${actualTheme}" generated and saved successfully`
+        }), {
+          headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
         });
-        // Non-critical error, continue
-      } else {
-        console.log('✅ AGENT UPDATE SUCCESS: Updated last_run timestamp');
-      }
-
-      // 🎨 Step 4: Ensure all posts have image prompts
-      console.log('🎨 STEP 4: Ensuring posts have image prompts');
-      if (skipEnsure) {
-        console.log('⏭️ Skipping ensure-post-image-prompts per request flag');
-      } else {
-        try {
-          // Run ensure in the background to avoid blocking the main response
-          EdgeRuntime.waitUntil((async () => {
-            const imagePromptResponse = await supabase.functions.invoke('ensure-post-image-prompts', {
-              body: { 
-                category: contextCategory,
-                theme: actualTheme,
-                userId: user_id 
-              }
-            });
-
-            if (imagePromptResponse.error) {
-              console.error('⚠️  IMAGE PROMPT GENERATION WARNING:', imagePromptResponse.error);
-            } else {
-              const promptResults = imagePromptResponse.data;
-              console.log('✅ IMAGE PROMPT GENERATION SUCCESS:', {
-                theme: actualTheme,
-                category: contextCategory,
-                totalPosts: promptResults?.totalPosts || 0,
-                successCount: promptResults?.successCount || 0,
-                errorCount: promptResults?.errorCount || 0
-              });
-            }
-          })());
-        } catch (promptError) {
-          console.error('⚠️  IMAGE PROMPT GENERATION ERROR (non-critical):', promptError);
-          // Continue with success response even if prompt generation fails
-        }
-      }
-
-      // 🎉 Final success response
-      console.log('🎉 OPERATION COMPLETE: System prompt generated and stored successfully');
-      console.log('📈 FINAL STATS:', {
-        operation: 'system_prompt_generation',
-        user_id,
-        theme: actualTheme,
-        category: contextCategory,
-        agent_id: agent.id,
-        prompt_length: generatedPrompt.length,
-        database_records_created: insertedPrompt?.length || 0,
-        success: true,
-        timestamp: currentTimestamp
-      });
-
-      return new Response(JSON.stringify({ 
-        success: true, 
-        system_prompt: generatedPrompt,
-        agent_id: agent.id,
-        theme: actualTheme,
-        category: contextCategory,
-        database_record_id: insertedPrompt?.[0]?.id,
-        message: `Theme-based system prompt for "${actualTheme}" generated and saved successfully`
-      }), {
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
 
     } catch (dbError) {
       console.error('💥 DATABASE OPERATION FAILED:', {
