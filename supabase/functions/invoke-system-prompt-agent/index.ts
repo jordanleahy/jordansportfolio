@@ -435,7 +435,7 @@ Please generate a detailed, professional system prompt following the established
           const { error: themeUpdateError } = await supabase
             .from('themes')
             .update({ 
-              system_prompt_id: insertedPrompt.id,
+              visual_prompt_system_prompt_id: insertedPrompt.id,
               updated_at: new Date().toISOString()
             })
             .eq('id', theme_id)
