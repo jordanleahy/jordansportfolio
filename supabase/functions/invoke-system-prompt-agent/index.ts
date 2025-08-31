@@ -3,14 +3,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
-// Constants - Simplified for system prompt generation focus
-const AGENT_NAMES = {
-  SYSTEM_PROMPT_GENERATOR: 'System Prompt Generator',
-} as const;
 
 const OPENAI_CONFIG = {
   DEFAULT_MODEL: 'gpt-5-mini-2025-08-07',
-  MAX_COMPLETION_TOKENS: 7000, // Increased from 4000 to 6000
+  MAX_COMPLETION_TOKENS: 6000, // Increased from 4000 to 6000
   TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
   MAX_PROMPT_TOKENS: 120000, // Reserve space for completion tokens (200k context - 6k completion - safety margin)
 } as const;
@@ -261,7 +257,7 @@ serve(async (req) => {
     let { data: agent, error: agentError } = await supabase
       .from('openai_agents')
       .select('id, name, model_version')
-      .eq('name', AGENT_NAMES.SYSTEM_PROMPT_GENERATOR)
+      .eq('name', 'System Prompt Generator')
       .single();
 
     if (agentError || !agent) {
