@@ -20,7 +20,6 @@ import BlogDetail from "./pages/BlogDetail";
 import BlogEditor from "./pages/BlogEditor";
 
 // Lazy load admin components for better performance
-const SEC = lazy(() => import("./pages/SEC"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 import CompanyPortfolio from "./pages/CompanyPortfolio";
 import AscertainToTheMoon from "./pages/AscertainToTheMoon";
@@ -36,7 +35,7 @@ import Case4 from "./pages/cases/Case4";
 import { CaseStudyRouteWrapper } from "./components/case-study/CaseStudyRouteWrapper";
 import { CofactorRouteWrapper } from "./components/cofactor/CofactorRouteWrapper";
 import Library from "./pages/Library";
-import DataDictionary from "./pages/sec/DataDictionary";
+
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
@@ -179,28 +178,6 @@ function App() {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 
-                <Route 
-                  path="/sec" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <SEC />
-                        </Suspense>
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
-                <Route 
-                  path="/sec/data-dictionary" 
-                  element={
-                    <AdminRoute>
-                      <AdminLayout>
-                        <DataDictionary />
-                      </AdminLayout>
-                    </AdminRoute>
-                  } 
-                />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
                 <Route path="/blog-editor" element={<BlogEditor />} />

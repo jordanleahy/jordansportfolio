@@ -67,11 +67,6 @@ export const getNavigationItems = (user: any, isAdmin: boolean, hideMarketingRou
 export const getAdminItems = (): NavigationItem[] => {
   return [
     {
-      href: "/sec",
-      label: "SEC Filings",
-      icon: FileBarChart,
-    },
-    {
       href: "/admin/vendors",
       label: "Vendors",
       icon: Package,
