@@ -429,7 +429,7 @@ Please generate a detailed, professional system prompt following the template fo
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
+      max_completion_tokens: Math.min(OPENAI_CONFIG.MAX_COMPLETION_TOKENS, 8000), // Increase token limit
     }, correlationId);
 
     console.log('🔎 OpenAI Request Model/Agent:', { model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, generator_agent: agent.name, correlationId });
