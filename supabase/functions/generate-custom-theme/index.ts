@@ -42,6 +42,7 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { OPENAI_CONFIG } from '../_shared/config.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -119,12 +120,12 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${description}` }
         ],
-        max_completion_tokens: 3000,
+        max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
       }),
     });
 

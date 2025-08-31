@@ -88,7 +88,7 @@ export const API_ENDPOINTS = {
 export const EDGE_FUNCTIONS = {
   INVOKE_SYSTEM_PROMPT_AGENT: 'invoke-system-prompt-agent',
   
-  USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
+  CREATE_THEME_WITH_POSTS: 'create-theme-with-posts',
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
   GENERATE_CONTENT: 'generate-content',
   
