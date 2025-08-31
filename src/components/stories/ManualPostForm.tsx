@@ -40,7 +40,7 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
         title: data.title,
         description: data.description,
         category,
-        theme_id: themeId,
+        theme_id: themeId || null,
         status: 'draft'
       };
 

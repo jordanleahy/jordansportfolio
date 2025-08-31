@@ -116,6 +116,39 @@ export class OptimizedSocialMediaService {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
+    // Calculate next day number and inherit category from theme if theme_id provided
+    let nextDay = 1;
+    let finalCategory = post.category || 'manual';
+    
+    if (post.theme_id) {
+      // Get theme data to inherit category
+      const { data: theme } = await supabase
+        .from('themes')
+        .select('category')
+        .eq('id', post.theme_id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      if (theme) {
+        finalCategory = theme.category;
+      }
+      
+      // Get the highest day number for this theme
+      const { data: maxDayResult } = await supabase
+        .from('social_media_posts')
+        .select('day')
+        .eq('theme_id', post.theme_id)
+        .eq('user_id', user.id)
+        .not('day', 'is', null)
+        .order('day', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (maxDayResult?.day) {
+        nextDay = Number(maxDayResult.day) + 1;
+      }
+    }
+
     // If no color theme is provided, use the default
     let colorThemeId = post.color_theme_id;
     if (!colorThemeId) {
@@ -133,7 +166,8 @@ export class OptimizedSocialMediaService {
       .from('social_media_posts')
       .insert({
         ...post,
-        category: post.category || 'cdi',
+        day: nextDay,
+        category: finalCategory,
         user_id: user.id,
         color_theme_id: colorThemeId,
       })
@@ -143,7 +177,10 @@ export class OptimizedSocialMediaService {
     if (error) throw error;
     
     // Invalidate relevant caches
-    this.invalidateCache(post.category);
+    this.invalidateCache(finalCategory);
+    if (post.theme_id) {
+      this.cache.delete(`theme-posts:${post.theme_id}`);
+    }
     
     return data as SocialMediaPost;
   }
