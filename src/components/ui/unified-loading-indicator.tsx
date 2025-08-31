@@ -62,7 +62,7 @@ export const UnifiedLoadingIndicator: React.FC<UnifiedLoadingIndicatorProps> = (
         "animate-spin flex-shrink-0",
         size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'
       )} />
-      <span className="truncate">{getProgressMessage()}</span>
+      <span className={cn(variant !== 'overlay' && "truncate")}>{getProgressMessage()}</span>
     </div>
   );
 };
