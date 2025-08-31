@@ -65,8 +65,7 @@ This project is built with:
 This project includes a sophisticated AI-powered image generation system that transforms text input into high-quality images using OpenAI's models and specialized AI agents.
 
 **📖 Documentation:**
-- [Complete Image Generation Pipeline Guide](docs/IMAGE_GENERATION_PIPELINE.md) - Comprehensive developer guide
-- [Technical Audit & Hardening](docs/text-to-photos-audit-and-hardening.md) - Detailed technical analysis
+- [Complete Image Generation Guide](docs/IMAGE_GENERATION_COMPLETE_GUIDE.md) - Comprehensive developer and security guide
 - [Agent Documentation](docs/agents/) - Individual agent specifications
 
 **🚀 Key Features:**
