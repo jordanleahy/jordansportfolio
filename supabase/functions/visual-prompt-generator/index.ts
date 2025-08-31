@@ -345,13 +345,12 @@ Incorporate these characteristics naturally into the generated prompt while main
     logger.startTiming('openai_request');
 
     const openAIRequestBody = {
-      model: 'gpt-4.1-2025-04-14',
+      model: 'gpt-5-nano-2025-08-07',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      max_tokens: 3000,
-      temperature: 0.7,
+      max_completion_tokens: 3000
       user: correlationId
     };
 
@@ -463,7 +462,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       category: category,
       usedType,
       agent: 'Visual Prompt Generator',
-      model: 'gpt-4.1-2025-04-14',
+      model: 'gpt-5-nano-2025-08-07',
       generated_at: new Date().toISOString(),
       tokens_used: tokensUsed,
       estimated_cost: estimatedCost,
@@ -510,7 +509,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-5-nano-2025-08-07',
         requestType: 'text_generation',
         success: false,
         estimatedCost: 0,
