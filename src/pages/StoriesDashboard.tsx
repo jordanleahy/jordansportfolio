@@ -613,9 +613,10 @@ export default function StoriesDashboard() {
       const {
         data,
         error
-      } = await supabase.functions.invoke('create-theme-with-posts', {
+      } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
         body: {
           description: pendingTheme.description,
+          stream: false,
           overrideCategory: newCategory
         }
       });

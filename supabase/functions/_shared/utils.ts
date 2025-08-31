@@ -95,7 +95,7 @@ Category: ${category}
 Create a detailed image generation prompt for this ${theme} theme content.`;
 
   const requestBody = {
-    model: 'gpt-5-mini-2025-08-07',
+    model: 'gpt-5-mini',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt }

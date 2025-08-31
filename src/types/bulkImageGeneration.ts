@@ -1,6 +1,4 @@
 // Type definitions for bulk image generation
-import type { SocialMediaPost } from '@/types/socialMedia';
-
 export type AspectRatio = '16:9' | '9:16' | '4:3' | '3:4' | '1:1';
 export type AspectRatioKey = '16_9' | '9_16' | '4_3' | '3_4' | '1_1';
 export type BulkGenerationMode = 'card' | 'table';
@@ -13,9 +11,52 @@ export interface AspectRatioConfig {
   label: string;
 }
 
+export interface BulkImageGenerationResult {
+  aspectRatio: AspectRatio;
+  url?: string;
+  prompt?: string;
+  fileName?: string;
+  success: boolean;
+  error?: string;
+  cost: number;
+  tokens: number;
+}
+
+export interface BulkImageGenerationRequest {
+  postId: string;
+  title: string;
+  description: string;
+  category?: string;
+  theme?: string;
+  context?: BulkGenerationMode;
+  colorThemeId?: string;
+}
+
+export interface BulkImageGenerationResponse {
+  success: boolean;
+  results: BulkImageGenerationResult[];
+  failures: BulkImageGenerationResult[];
+  totalCost: number;
+  totalTokens: number;
+  imagesGenerated: number;
+  processingTimeMs: number;
+  aspectRatiosProcessed: number;
+  context?: BulkGenerationMode;
+}
+
 export interface OptimizedBulkGenerationHook {
-  generateSingleAspect: (posts: SocialMediaPost[], aspectRatio: AspectRatio, mode: 'missing_only' | 'regenerate_all', category?: string) => Promise<any>;
-  isGeneratingSingle: boolean;
+  generateAllImages: (request: BulkImageGenerationRequest) => Promise<BulkImageGenerationResponse>;
+  isGenerating: (postId: string) => boolean;
+  progress: {
+    completed: number;
+    total: number;
+    currentAspectRatio?: AspectRatio;
+    isProcessing?: boolean;
+    isFinalizing?: boolean;
+  };
+  error: string | null;
+  getExistingPrompt: (request: BulkImageGenerationRequest) => Promise<string>;
+  clearCache: () => void;
 }
 
 // Utility function to convert between aspect ratio formats

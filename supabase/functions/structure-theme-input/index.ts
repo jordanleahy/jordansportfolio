@@ -91,7 +91,7 @@ REQUIREMENTS:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-5-mini-2025-08-07",
+        model: "gpt-4.1-2025-04-14",
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },

@@ -14,22 +14,11 @@
  * - Error: { success: false, error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-5 for theme and content generation)
+ * - OpenAI API (GPT-5-mini for theme and content generation)
  * 
  * USAGE:
  * Called from: Theme creation workflows, content planning tools, social media calendar generation
  * Authentication: Not required - public content generation endpoint
- * 
- * IMPORTANT: OpenAI API Guidelines for this function
- * 
- * ✅ REQUIRED MODELS: Use GPT-5 family only
- * - gpt-5-2025-08-07 (flagship)
- * - gpt-5-mini-2025-08-07 (faster)  
- * - gpt-5-nano-2025-08-07 (fastest)
- * 
- * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
- * ❌ NEVER USE: temperature parameter (not supported in GPT-5)
- * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
  * 
  * FLOW:
  * 1. Validate description input and OpenAI API availability
@@ -42,7 +31,6 @@
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { OPENAI_CONFIG } from '../_shared/config.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -120,12 +108,12 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
+        model: 'gpt-5-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Generate a social media theme for: ${description}` }
         ],
-        max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+        max_completion_tokens: 3000,
       }),
     });
 
@@ -133,29 +121,8 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
 
     if (!response.ok) {
       const errorData = await response.text();
-      const errorDetails = {
-        status: response.status,
-        statusText: response.statusText,
-        errorData: errorData,
-        requestModel: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
-        requestTokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
-        hasApiKey: !!openAIApiKey,
-        apiKeyPrefix: openAIApiKey ? openAIApiKey.substring(0, 7) + '...' : 'missing'
-      };
-      
-      console.error('❌ [generate-custom-theme] OpenAI API error - Full details:', errorDetails);
-      
-      // Provide specific error messages based on status code
-      let errorMessage = `OpenAI API error (${response.status})`;
-      if (response.status === 401) {
-        errorMessage = 'OpenAI API authentication failed. Please check your OPENAI_API_KEY.';
-      } else if (response.status === 429) {
-        errorMessage = 'OpenAI API rate limit exceeded. Please try again later.';
-      } else if (response.status === 500) {
-        errorMessage = 'OpenAI API server error. Please try again later.';
-      }
-      
-      throw new Error(errorMessage);
+      console.error('❌ [generate-custom-theme] OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -211,21 +178,10 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
     });
 
   } catch (error) {
-    const errorDetails = {
-      message: error.message,
-      stack: error.stack,
-      hasOpenAIKey: !!openAIApiKey,
-      timestamp: new Date().toISOString(),
-      functionName: 'generate-custom-theme'
-    };
-    
-    console.error('💥 [generate-custom-theme] Error in function - Full details:', errorDetails);
-    
-    // Return detailed error for debugging
+    console.error('💥 [generate-custom-theme] Error in function:', error);
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message,
-      details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
+      error: error.message 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

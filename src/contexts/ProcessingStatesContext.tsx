@@ -3,8 +3,9 @@ import { useProcessingStates } from '@/hooks/useProcessingStates';
 
 // Define the context type based on the hook's return
 interface ProcessingStatesContextValue {
-  setProcessing: (postId: string, operation: 'generate' | 'regenerate_prompt', isActive: boolean, aspectRatio?: import('@/types/bulkImageGeneration').AspectRatio) => void;
-  isProcessing: (postId: string, operation?: 'generate' | 'regenerate_prompt', aspectRatio?: import('@/types/bulkImageGeneration').AspectRatio) => boolean;
+  setProcessing: (postId: string, operation: 'generate' | 'bulk_generate' | 'regenerate_prompt', isActive: boolean, aspectRatio?: import('@/types/bulkImageGeneration').AspectRatio) => void;
+  setBulkProcessing: (postId: string, isActive: boolean) => void;
+  isProcessing: (postId: string, operation?: 'generate' | 'bulk_generate' | 'regenerate_prompt', aspectRatio?: import('@/types/bulkImageGeneration').AspectRatio) => boolean;
   isGenerating: (postId: string) => boolean;
   isAnyImageGenerating: () => boolean;
   clearProcessing: (postId: string) => void;

@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -85,12 +85,13 @@ serve(async (req) => {
         correlationId
       });
       
-      // Call the theme creation function
+      // Call the existing theme generation function
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        'create-theme-with-posts',
+        'user-idea-streaming-image-pipeline',
         {
           body: {
-            description: body.description
+            description: body.description,
+            stream: false
           },
           headers: {
             Authorization: authHeader,
@@ -103,29 +104,16 @@ serve(async (req) => {
         hasError: !!themeError,
         hasData: !!themeData,
         success: themeData?.success,
-        errorDetails: themeError ? JSON.stringify(themeError) : null,
-        dataDetails: themeData ? JSON.stringify(themeData) : null,
         correlationId
       });
 
       if (themeError || !themeData?.success) {
-        // Enhanced error logging with full details
-        const errorMessage = themeError?.message || themeData?.error || 'Failed to generate theme';
-        const errorContext = {
-          themeError: themeError ? {
-            message: themeError.message,
-            details: themeError.details || 'No additional details',
-            context: themeError.context || 'No context provided'
-          } : null,
-          themeData: themeData || null,
-          functionName: 'create-theme-with-posts',
-          userId: user.id,
-          description: body.description,
+        console.error(`❌ [CREATE] Theme generation failed`, {
+          themeError,
+          themeData,
           correlationId
-        };
-        
-        console.error(`❌ [CREATE] Theme generation failed - Enhanced error details:`, errorContext);
-        throw new Error(`Theme generation failed: ${errorMessage}`);
+        });
+        throw new Error(themeData?.error || 'Failed to generate theme');
       }
 
       console.log(`✅ [CREATE] Theme generated successfully`, {

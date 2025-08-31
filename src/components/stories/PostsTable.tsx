@@ -99,7 +99,7 @@ export default function PostsTable({
   const postIds = posts.map(post => post.id);
 const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(postIds);
 
-  const { isProcessing } = useProcessingStatesContext();
+  const { setBulkProcessing, isProcessing } = useProcessingStatesContext();
 
 
   // Animation state management

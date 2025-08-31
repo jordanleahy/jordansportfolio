@@ -18,7 +18,7 @@
  * - Error: { error: string }
  */
 
-import { OPENAI_CONFIG } from '../_shared/config.ts';
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, extractUsageFromOpenAIResponse, makeOpenAIRequest } from '../_shared/openai-attribution.ts';
 import { createLogger } from '../_shared/advanced-logger.ts';
@@ -341,19 +341,21 @@ Incorporate these characteristics naturally into the generated prompt while main
     logger.startTiming('openai_request');
 
     const openAIRequestBody = {
-      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+      model: 'gpt-4.1-2025-04-14',
       messages: [
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      max_completion_tokens: 3000,
+      max_tokens: 3000,
+      temperature: 0.7,
       user: correlationId
     };
 
     logger.info('OpenAI chat request prepared', {
       model: openAIRequestBody.model,
       parameters: {
-        has_max_completion_tokens: !!openAIRequestBody.max_completion_tokens,
+        has_max_tokens: !!openAIRequestBody.max_tokens,
+        has_temperature: !!openAIRequestBody.temperature,
         user_set: !!openAIRequestBody.user
       },
       message_summary: {
@@ -447,7 +449,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       category: category,
       usedType,
       agent: 'Visual Prompt Generator',
-      model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+      model: 'gpt-4.1-2025-04-14',
       generated_at: new Date().toISOString(),
       tokens_used: tokensUsed,
       estimated_cost: estimatedCost,
@@ -465,7 +467,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+        model: 'gpt-4.1-2025-04-14',
         requestType: 'text_generation',
         success,
         estimatedCost,
@@ -494,7 +496,7 @@ Incorporate these characteristics naturally into the generated prompt while main
       await trackOpenAIUsage({
         userId,
         functionName: 'visual-prompt-generator',
-        model: OPENAI_CONFIG.MODELS.FLAGSHIP, // Use flagship for better healthcare content handling
+        model: 'gpt-4.1-2025-04-14',
         requestType: 'text_generation',
         success: false,
         estimatedCost: 0,

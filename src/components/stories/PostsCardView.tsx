@@ -10,6 +10,7 @@ import { Copy, Trash2, Lightbulb, Mic, Sparkles, Edit2, RefreshCw, ChevronDown, 
 import { Button } from '@/components/ui/button';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 
+import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
@@ -63,6 +64,7 @@ export const PostsCardView = memo(({
   blogStatuses = {},
   onEditPost
 }: PostsTableViewProps) => {
+  const { generateAllImages, isGenerating } = useBulkImageGeneration();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { setProcessing } = useProcessingStatesContext();
   const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage } = useUnifiedRegenerateStates();
@@ -165,6 +167,19 @@ export const PostsCardView = memo(({
     });
   };
 
+  const handleGenerateAllImages = async (post: SocialMediaPost) => {
+    try {
+      await generateAllImages({
+        postId: post.id,
+        title: post.title,
+        description: post.description,
+        category: post.category
+      });
+      onPostsChange();
+    } catch (error) {
+      console.error('Batch generation failed:', error);
+    }
+  };
 
   const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
     console.log('🔄 Regenerate prompt started for post:', post.id);
@@ -418,17 +433,25 @@ export const PostsCardView = memo(({
                           />
                         )}
                        
-                        {isAdmin && (
-                          <>
-                             <ActionButton
-                               icon={<Lightbulb className="h-4 w-4" />}
-                               onClick={() => handleInstantImagePromptGeneration(post)}
-                               title="Generate image prompt"
-                               loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
-                               size="sm"
-                             />
-                          </>
-                        )}
+                       {isAdmin && (
+                         <>
+                           <ActionButton
+                             icon={<Sparkles className="h-4 w-4" />}
+                             onClick={() => handleGenerateAllImages(post)}
+                             loading={isGenerating(post.id)}
+                             title="Bulk Generate"
+                             size="sm"
+                           />
+                           
+                            <ActionButton
+                              icon={<Lightbulb className="h-4 w-4" />}
+                              onClick={() => handleInstantImagePromptGeneration(post)}
+                              title="Generate image prompt"
+                              loading={isProcessingCtx(post.id, 'generate') || isInstantGenerating(post.id)}
+                              size="sm"
+                            />
+                         </>
+                       )}
                         
                          {isUserAdmin && (
                            <ActionButton

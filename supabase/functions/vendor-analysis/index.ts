@@ -147,7 +147,7 @@ serve(async (req) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'gpt-5-mini-2025-08-07',
+          model: 'gpt-4.1-2025-04-14',
           messages: [
             {
               role: 'system',
@@ -158,7 +158,8 @@ serve(async (req) => {
               content: researchPrompt
             }
           ],
-          max_completion_tokens: 2000,
+          temperature: 0.2,
+          max_tokens: 2000,
         }),
       });
 
@@ -211,12 +212,13 @@ Focus on competitive intelligence aspects that would be valuable to a competitor
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: basePrompt },
           { role: 'user', content: analysisPrompt }
         ],
-        max_completion_tokens: 4000,
+        temperature: 0.3,
+        max_tokens: 4000,
       }),
     });
 

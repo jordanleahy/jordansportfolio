@@ -15,7 +15,7 @@
  * - Error: { error: string, details: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-5 for content generation)
+ * - OpenAI API (GPT-4o-mini for content generation)
  * - Supabase Database (cached_prompts table for storage)
  * 
  * USAGE:

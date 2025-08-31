@@ -16,23 +16,12 @@
  * - Error: { error: string, details: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-5 for sophisticated prompt generation)
+ * - OpenAI API (GPT-4.1-2025-04-14 for sophisticated prompt generation)
  * - Supabase Database (cached_prompts table for storage)
  * 
  * USAGE:
  * Called from: Job posting creation workflows, HR content generation, social media job campaigns
  * Authentication: Optional - caching only available for authenticated users
- * 
- * IMPORTANT: OpenAI API Guidelines for this function
- * 
- * ✅ REQUIRED MODELS: Use GPT-5 family only
- * - gpt-5-2025-08-07 (flagship)
- * - gpt-5-mini-2025-08-07 (faster)  
- * - gpt-5-nano-2025-08-07 (fastest)
- * 
- * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
- * ❌ NEVER USE: temperature parameter (not supported in GPT-5)
- * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
  * 
  * FLOW:
  * 1. Validate required job title and company name inputs

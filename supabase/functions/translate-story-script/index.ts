@@ -16,23 +16,12 @@
  * - Error: { error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-5 for high-quality translation)
+ * - OpenAI API (GPT-4.1-2025-04-14 for high-quality translation)
  * - OpenAI Attribution System (usage tracking and cost calculation)
  * 
  * USAGE:
  * Called from: Multi-language content workflows, global story distribution, localization pipelines
  * Authentication: Optional - enhanced tracking available for authenticated users
- * 
- * IMPORTANT: OpenAI API Guidelines for this function
- * 
- * ✅ REQUIRED MODELS: Use GPT-5 family only
- * - gpt-5-2025-08-07 (flagship)
- * - gpt-5-mini-2025-08-07 (faster)  
- * - gpt-5-nano-2025-08-07 (fastest)
- * 
- * ❌ NEVER USE: GPT-4 models (gpt-4, gpt-4o, gpt-4.1, etc.)
- * ❌ NEVER USE: temperature parameter (not supported in GPT-5)
- * ❌ NEVER USE: max_tokens parameter (use max_completion_tokens instead)
  * 
  * FLOW:
  * 1. Validate script text and target language requirements

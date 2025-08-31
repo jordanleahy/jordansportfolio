@@ -18,7 +18,7 @@
  * - Error: { success: false, error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-5 for text generation)
+ * - OpenAI API (GPT-4o-mini for text generation)
  * - Supabase Database (user_roles, job_applications, case_studies, openai_agents, system_prompts tables)
  * - OpenAI Attribution System (usage tracking and cost calculation)
  * 

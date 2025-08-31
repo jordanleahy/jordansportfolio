@@ -106,12 +106,13 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt.prompt_text },
           { role: 'user', content: userMessage }
         ],
-        max_completion_tokens: 1000,
+        temperature: 0.1,
+        max_tokens: 1000,
       }),
     });
 

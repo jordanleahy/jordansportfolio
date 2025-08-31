@@ -3,12 +3,10 @@
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
   MODELS: {
-    FLAGSHIP: 'gpt-5-2025-08-07',        // Most capable
-    FAST: 'gpt-5-mini-2025-08-07',       // Balanced speed/quality
-    FASTEST: 'gpt-5-nano-2025-08-07',    // Speed-optimized
-    REASONING: 'gpt-5-2025-08-07',       // Complex analysis (was o3)
-    VISION: 'gpt-5-2025-08-07',          // Vision tasks (was gpt-4.1)
-    FALLBACK: 'gpt-5-mini-2025-08-07',   // Reliable fallback
+    FLAGSHIP: 'gpt-5-mini',
+    FAST: 'gpt-5-mini',
+    REASONING: 'o3-2025-04-16',
+    VISION: 'gpt-5-mini',
     // Legacy models (deprecated)
     LEGACY_GPT4O: 'gpt-4o',
     LEGACY_GPT4O_MINI: 'gpt-4o-mini',
@@ -17,11 +15,19 @@ export const OPENAI_CONFIG = {
     SHORT_RESPONSE: 500,
     MEDIUM_RESPONSE: 2000,
     LONG_RESPONSE: 2500,
-    COMPREHENSIVE: 7000,
+    COMPREHENSIVE: 4000,
   },
-  // Default model for theme generation
-  DEFAULT_THEME_MODEL: 'gpt-5-mini-2025-08-07', // Keep as FAST variant for theme generation
-  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 7000,
+  // Default model for theme generation (gpt-5-mini launched Aug 7, 2025)
+  DEFAULT_THEME_MODEL: 'gpt-5-mini',
+  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 4000, // Increased to prevent token limit errors
+} as const;
+
+// Image Generation Configuration
+export const IMAGE_CONFIG = {
+  MODEL: 'gpt-image-1',
+  SIZE: '1024x1024',
+  QUALITY: 'high',
+  PROMPT_MAX_LENGTH: 1000,
 } as const;
 
 // Progress Step Percentages for Streaming Pipeline
@@ -88,7 +94,7 @@ export const API_ENDPOINTS = {
 export const EDGE_FUNCTIONS = {
   INVOKE_SYSTEM_PROMPT_AGENT: 'invoke-system-prompt-agent',
   
-  CREATE_THEME_WITH_POSTS: 'create-theme-with-posts',
+  USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
   GENERATE_CONTENT: 'generate-content',
   
