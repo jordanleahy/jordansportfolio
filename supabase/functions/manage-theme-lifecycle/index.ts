@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -103,16 +103,29 @@ serve(async (req) => {
         hasError: !!themeError,
         hasData: !!themeData,
         success: themeData?.success,
+        errorDetails: themeError ? JSON.stringify(themeError) : null,
+        dataDetails: themeData ? JSON.stringify(themeData) : null,
         correlationId
       });
 
       if (themeError || !themeData?.success) {
-        console.error(`❌ [CREATE] Theme generation failed`, {
-          themeError,
-          themeData,
+        // Enhanced error logging with full details
+        const errorMessage = themeError?.message || themeData?.error || 'Failed to generate theme';
+        const errorContext = {
+          themeError: themeError ? {
+            message: themeError.message,
+            details: themeError.details || 'No additional details',
+            context: themeError.context || 'No context provided'
+          } : null,
+          themeData: themeData || null,
+          functionName: 'create-theme-with-posts',
+          userId: user.id,
+          description: body.description,
           correlationId
-        });
-        throw new Error(themeData?.error || 'Failed to generate theme');
+        };
+        
+        console.error(`❌ [CREATE] Theme generation failed - Enhanced error details:`, errorContext);
+        throw new Error(`Theme generation failed: ${errorMessage}`);
       }
 
       console.log(`✅ [CREATE] Theme generated successfully`, {

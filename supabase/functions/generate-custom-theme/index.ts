@@ -133,8 +133,29 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('❌ [generate-custom-theme] OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorDetails = {
+        status: response.status,
+        statusText: response.statusText,
+        errorData: errorData,
+        requestModel: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
+        requestTokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+        hasApiKey: !!openAIApiKey,
+        apiKeyPrefix: openAIApiKey ? openAIApiKey.substring(0, 7) + '...' : 'missing'
+      };
+      
+      console.error('❌ [generate-custom-theme] OpenAI API error - Full details:', errorDetails);
+      
+      // Provide specific error messages based on status code
+      let errorMessage = `OpenAI API error (${response.status})`;
+      if (response.status === 401) {
+        errorMessage = 'OpenAI API authentication failed. Please check your OPENAI_API_KEY.';
+      } else if (response.status === 429) {
+        errorMessage = 'OpenAI API rate limit exceeded. Please try again later.';
+      } else if (response.status === 500) {
+        errorMessage = 'OpenAI API server error. Please try again later.';
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -190,10 +211,21 @@ Output: {"category": "small-business-marketing", "theme": "Small Business Market
     });
 
   } catch (error) {
-    console.error('💥 [generate-custom-theme] Error in function:', error);
+    const errorDetails = {
+      message: error.message,
+      stack: error.stack,
+      hasOpenAIKey: !!openAIApiKey,
+      timestamp: new Date().toISOString(),
+      functionName: 'generate-custom-theme'
+    };
+    
+    console.error('💥 [generate-custom-theme] Error in function - Full details:', errorDetails);
+    
+    // Return detailed error for debugging
     return new Response(JSON.stringify({ 
       success: false, 
-      error: error.message 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

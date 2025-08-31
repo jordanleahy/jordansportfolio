@@ -71,8 +71,16 @@ serve(async (req) => {
     });
 
     // Generate theme using dedicated theme generation function
+    // Check OpenAI API key before proceeding
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.error(`❌ [ENV] OpenAI API key not configured`, { correlationId });
+      throw new Error('OpenAI API key not configured. Please configure OPENAI_API_KEY in Supabase edge function secrets.');
+    }
+
     console.log(`🔵 [THEME] Calling generate-custom-theme function`, {
       description: body.description,
+      hasOpenAIKey: !!openAIApiKey,
       correlationId
     });
 
@@ -80,13 +88,32 @@ serve(async (req) => {
       body: { description: body.description }
     });
 
+    console.log(`📡 [THEME] generate-custom-theme response received`, {
+      hasError: !!themeError,
+      hasData: !!themeResponse,
+      success: themeResponse?.success,
+      errorMessage: themeError?.message,
+      responseError: themeResponse?.error,
+      correlationId
+    });
+
     if (themeError || !themeResponse?.success) {
-      console.error(`❌ [THEME] Theme generation failed`, {
-        themeError,
-        themeData: themeResponse,
+      // Enhanced error logging with full context
+      const errorDetails = {
+        themeError: themeError ? {
+          message: themeError.message,
+          details: themeError.details || themeError
+        } : null,
+        themeResponse: themeResponse || null,
+        functionCall: 'generate-custom-theme',
+        inputDescription: body.description,
         correlationId
-      });
-      throw new Error('Failed to generate theme');
+      };
+      
+      console.error(`❌ [THEME] Theme generation failed - Full error context:`, errorDetails);
+      
+      const errorMessage = themeError?.message || themeResponse?.error || 'Failed to generate theme';
+      throw new Error(`Theme generation failed: ${errorMessage}`);
     }
 
     const themeData = themeResponse.themeData;
