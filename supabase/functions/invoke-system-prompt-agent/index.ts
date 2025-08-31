@@ -81,7 +81,6 @@ Category: <Category>
 Theme: <Theme>  
 Audience: <Intended users>
 Use Cases: <Contexts where content will be used>
-Aspect Ratio (optional): Multiple supported (1:1, 16:9, 9:16, 4:3, 3:4)
 Style Tags: [vector, modern, professional]
 Status: active
 
