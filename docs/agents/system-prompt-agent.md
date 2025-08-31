@@ -14,8 +14,8 @@
 ### Model Configuration
 ```typescript
 {
-  model: "gpt-4.1-2025-04-14", // Flagship GPT-4 model
-  max_completion_tokens: 15000, // For comprehensive prompts
+  model: "gpt-5-mini-2025-08-07", // Flagship GPT-4 model
+  max_completion_tokens: 7000, // For comprehensive prompts
   // temperature: not supported in newer models
   deployment: "supabase-edge-function"
 }
