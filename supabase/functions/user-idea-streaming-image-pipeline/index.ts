@@ -361,116 +361,172 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
   }
 };
 
-const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string, themeId: string): Promise<void> => {
+const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string, themeId: string): Promise<{ success: boolean; systemPromptId?: string; error?: string }> => {
   console.log('🤖 Generating system prompt for theme:', themeData.theme);
 
-  const MAX_RETRIES = 2;
-  const TIMEOUT_MS = 45000; // Increased to 45 seconds to accommodate OpenAI response times
-  const SLEEP = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  try {
+    // Update theme status to indicate system prompt generation has started
+    await supabase
+      .from('themes')
+      .update({ 
+        prompt_generation_status: 'generating',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', themeId);
 
-  const invokeOnce = async () => {
-    return await supabase.functions.invoke('invoke-system-prompt-agent', {
-      body: {
-        theme: themeData.theme,
-        category: themeData.category,
-        description: themeData.theme_description,
-        sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
-        user_id: userId,
-        theme_id: themeId, // Pass theme_id for proper linking
-        skip_ensure: true, // decouple follow-up work from this call
-      },
-    });
-  };
+    const MAX_RETRIES = 3; // Increased retries
+    const TIMEOUT_MS = 60000; // Increased timeout to 60 seconds
+    const SLEEP = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  let attempt = 0;
-  let succeeded = false;
-  let lastError: any = null;
-
-  while (attempt <= MAX_RETRIES && !succeeded) {
-    attempt++;
-    const start = Date.now();
-    console.log(`🏁 System prompt attempt ${attempt}/${MAX_RETRIES + 1}`);
-
-    const resultOrTimeout = await Promise.race([
-      invokeOnce().then((res) => ({ kind: 'result' as const, res })),
-      SLEEP(TIMEOUT_MS).then(() => ({ kind: 'timeout' as const })),
-    ]);
-
-    if (resultOrTimeout.kind === 'timeout') {
-      console.warn('⏱️ invoke-system-prompt-agent timed out (soft timeout)');
-      lastError = new Error('timeout');
-    } else {
-      const { res } = resultOrTimeout;
-      if (!res.error) {
-        console.log('✅ System prompt function returned 2xx');
-        succeeded = true;
-        break;
-      }
-      console.warn('⚠️ System prompt function error:', res.error);
-      lastError = res.error;
-    }
-
-    // Exponential backoff before retrying
-    const backoff = Math.min(2000 * Math.pow(2, attempt - 1), 8000);
-    console.log(`🔁 Retrying after ${backoff}ms`);
-    await SLEEP(backoff);
-  }
-
-  // If still not succeeded, poll DB to see if the prompt actually got created
-  if (!succeeded) {
-    console.log('🔎 Falling back to DB poll for newly created system prompt');
-    const maxPolls = 3; // Reduced polling attempts
-    for (let i = 0; i < maxPolls; i++) {
-      const { data, error } = await supabase
-        .from('system_prompts')
-        .select('id, created_at, theme_id')
-        .eq('user_id', userId)
-        .eq('category', themeData.category)
-        .or(`theme.eq.${themeData.theme},theme_id.eq.${themeId}`) // Check both theme name and theme_id
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) {
-        console.warn('⚠️ DB poll error while checking system_prompts:', error);
-      }
-      if (data?.id) {
-        console.log('✅ Found system prompt via DB poll:', data.id);
-        succeeded = true;
-        break;
-      }
-
-      await SLEEP(1500); // Reduced poll delay
-    }
-  }
-
-  if (!succeeded) {
-    console.warn('⚠️ System prompt generation did not confirm; continuing pipeline gracefully', {
-      lastError: lastError?.message || String(lastError),
-    });
-    // Still continue to trigger background image generation
-  }
-
-  // Trigger ensure-post-image-prompts in the background with proper error handling
-  console.log('🎨 Triggering ensure-post-image-prompts in background');
-  
-  EdgeRuntime.waitUntil((async () => {
-    try {
-      const ensureRes = await supabase.functions.invoke('ensure-post-image-prompts', {
+    const invokeOnce = async () => {
+      console.log(`🔄 Calling invoke-system-prompt-agent for theme: ${themeData.theme}`);
+      return await supabase.functions.invoke('invoke-system-prompt-agent', {
         body: {
+          theme: themeData.theme,
           category: themeData.category,
-          userId,
+          description: themeData.theme_description,
+          sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
+          user_id: userId,
+          theme_id: themeId, // Pass theme_id for proper linking
+          skip_ensure: true, // decouple follow-up work from this call
         },
       });
-      if (ensureRes.error) {
-        console.warn('⚠️ ensure-post-image-prompts warning:', ensureRes.error);
+    };
+
+    let attempt = 0;
+    let succeeded = false;
+    let lastError: any = null;
+    let systemPromptId: string | undefined;
+
+    while (attempt <= MAX_RETRIES && !succeeded) {
+      attempt++;
+      const start = Date.now();
+      console.log(`🏁 System prompt attempt ${attempt}/${MAX_RETRIES + 1} for theme: ${themeData.theme}`);
+
+      const resultOrTimeout = await Promise.race([
+        invokeOnce().then((res) => ({ kind: 'result' as const, res })),
+        SLEEP(TIMEOUT_MS).then(() => ({ kind: 'timeout' as const })),
+      ]);
+
+      if (resultOrTimeout.kind === 'timeout') {
+        console.warn(`⏱️ invoke-system-prompt-agent timed out after ${TIMEOUT_MS}ms (attempt ${attempt})`);
+        lastError = new Error('timeout');
       } else {
-        console.log('✅ ensure-post-image-prompts queued/success:', ensureRes.data);
+        const { res } = resultOrTimeout;
+        const duration = Date.now() - start;
+        console.log(`📊 System prompt call completed in ${duration}ms (attempt ${attempt})`);
+        
+        if (!res.error && res.data?.success) {
+          console.log('✅ System prompt function succeeded:', res.data);
+          systemPromptId = res.data.system_prompt_id;
+          succeeded = true;
+          break;
+        } else {
+          console.error('⚠️ System prompt function failed:', {
+            error: res.error,
+            data: res.data,
+            attempt,
+            duration: `${duration}ms`
+          });
+          lastError = res.error || res.data?.error || 'Unknown error';
+        }
       }
-    } catch (e) {
-      console.error('⚠️ Background ensure task failed:', e);
+
+      // Exponential backoff before retrying (but not on last attempt)
+      if (attempt <= MAX_RETRIES) {
+        const backoff = Math.min(2000 * Math.pow(2, attempt - 1), 10000); // Max 10 second delay
+        console.log(`🔁 Retrying after ${backoff}ms (attempt ${attempt + 1}/${MAX_RETRIES + 1})`);
+        await SLEEP(backoff);
+      }
     }
-  })());
+
+    // If still not succeeded, poll DB to see if the prompt actually got created
+    if (!succeeded) {
+      console.log('🔎 Function call failed, checking DB for system prompt creation...');
+      const maxPolls = 5; // Increased polling attempts
+      for (let i = 0; i < maxPolls; i++) {
+        const { data, error } = await supabase
+          .from('system_prompts')
+          .select('id, created_at, theme_id')
+          .eq('user_id', userId)
+          .eq('category', themeData.category)
+          .or(`theme.eq.${themeData.theme},theme_id.eq.${themeId}`) // Check both theme name and theme_id
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.warn('⚠️ DB poll error while checking system_prompts:', error);
+        } else if (data?.id) {
+          console.log('✅ Found system prompt via DB poll:', data.id);
+          systemPromptId = data.id;
+          succeeded = true;
+          break;
+        }
+
+        if (i < maxPolls - 1) { // Don't sleep on last attempt
+          await SLEEP(2000); // Increased poll delay
+        }
+      }
+    }
+
+    // Update theme status based on result
+    if (succeeded && systemPromptId) {
+      await supabase
+        .from('themes')
+        .update({ 
+          prompt_generation_status: 'completed',
+          visual_prompt_system_prompt_id: systemPromptId,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', themeId);
+      
+      console.log('✅ System prompt generation completed successfully:', {
+        themeId,
+        systemPromptId,
+        theme: themeData.theme
+      });
+
+      return { success: true, systemPromptId };
+    } else {
+      // Mark as failed but don't throw - let the pipeline continue
+      await supabase
+        .from('themes')
+        .update({ 
+          prompt_generation_status: 'failed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', themeId);
+
+      const errorMsg = lastError?.message || String(lastError) || 'Unknown error';
+      console.error('❌ System prompt generation failed after all attempts:', {
+        themeId,
+        theme: themeData.theme,
+        attempts: attempt,
+        lastError: errorMsg
+      });
+
+      return { success: false, error: errorMsg };
+    }
+
+  } catch (error) {
+    console.error('❌ System prompt generation crashed:', error);
+    
+    // Update theme status to reflect the error
+    try {
+      await supabase
+        .from('themes')
+        .update({ 
+          prompt_generation_status: 'failed',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', themeId);
+    } catch (updateError) {
+      console.error('❌ Failed to update theme status after error:', updateError);
+    }
+
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
+  }
 };
 
 
@@ -644,13 +700,17 @@ serve(async (req) => {
               data: { status: 'Generating AI system prompts...' }
             });
 
-            // Use EdgeRuntime.waitUntil to run system prompt generation in background
-            EdgeRuntime.waitUntil(generateSystemPrompt(supabase, themeData, userId, createdThemeId));
+            // Now await system prompt generation instead of running in background
+            const systemPromptResult = await generateSystemPrompt(supabase, themeData, userId, createdThemeId);
             
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
               progress: 60,
-              data: { promptGenerated: true }
+              data: { 
+                promptGenerated: systemPromptResult.success,
+                systemPromptId: systemPromptResult.systemPromptId,
+                error: systemPromptResult.error
+              }
             });
 
             // Step 4: Set posts to generating status (80% progress)
@@ -661,8 +721,38 @@ serve(async (req) => {
             });
 
             // Step 5: Trigger background image generation (85% progress)
+            if (systemPromptResult.success) {
+              console.log('🎨 Triggering ensure-post-image-prompts in background');
+              EdgeRuntime.waitUntil((async () => {
+                try {
+                  const ensureRes = await supabase.functions.invoke('ensure-post-image-prompts', {
+                    body: {
+                      category: themeData.category,
+                      userId,
+                    },
+                  });
+                  if (ensureRes.error) {
+                    console.warn('⚠️ ensure-post-image-prompts warning:', ensureRes.error);
+                  } else {
+                    console.log('✅ ensure-post-image-prompts queued/success:', ensureRes.data);
+                  }
+                } catch (e) {
+                  console.error('⚠️ Background ensure task failed:', e);
+                }
+              })());
+            }
 
             // Step 6: Pipeline Complete (100% progress)
+            const lifecycleStatus = systemPromptResult.success ? 'completed' : 'completed_with_errors';
+            await supabase
+              .from('themes')
+              .update({ 
+                lifecycle_status: lifecycleStatus,
+                background_processing_complete: true,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', createdThemeId);
+
             sendStreamEvent(controller, {
               type: 'pipeline_complete',
               progress: 100,
@@ -671,7 +761,11 @@ serve(async (req) => {
                 category: themeData.category,
                 theme: themeData.theme,
                 postCount: insertedCount,
-                message: 'Theme created successfully!'
+                systemPromptGenerated: systemPromptResult.success,
+                systemPromptId: systemPromptResult.systemPromptId,
+                message: systemPromptResult.success 
+                  ? 'Theme created successfully!' 
+                  : 'Theme created, but system prompt generation had issues'
               }
             });
 
@@ -711,8 +805,42 @@ serve(async (req) => {
       }
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId, query);
       const themeId = createdThemeId;
-      // Use EdgeRuntime.waitUntil to run system prompt generation in background
-      EdgeRuntime.waitUntil(generateSystemPrompt(supabase, themeData, userId, themeId));
+      
+      // Now await system prompt generation to ensure completion before responding
+      const systemPromptResult = await generateSystemPrompt(supabase, themeData, userId, themeId);
+      
+      // Update lifecycle status based on system prompt generation result
+      const lifecycleStatus = systemPromptResult.success ? 'completed' : 'completed_with_errors';
+      await supabase
+        .from('themes')
+        .update({ 
+          lifecycle_status: lifecycleStatus,
+          background_processing_complete: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', themeId);
+
+      // Trigger background image generation after successful system prompt generation
+      if (systemPromptResult.success) {
+        console.log('🎨 Triggering ensure-post-image-prompts in background');
+        EdgeRuntime.waitUntil((async () => {
+          try {
+            const ensureRes = await supabase.functions.invoke('ensure-post-image-prompts', {
+              body: {
+                category: themeData.category,
+                userId,
+              },
+            });
+            if (ensureRes.error) {
+              console.warn('⚠️ ensure-post-image-prompts warning:', ensureRes.error);
+            } else {
+              console.log('✅ ensure-post-image-prompts queued/success:', ensureRes.data);
+            }
+          } catch (e) {
+            console.error('⚠️ Background ensure task failed:', e);
+          }
+        })());
+      }
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,

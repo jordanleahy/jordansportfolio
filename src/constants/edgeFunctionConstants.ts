@@ -23,15 +23,16 @@ export const EDGE_FUNCTION_NAMES = {
 // OpenAI API Configuration
 export const OPENAI_CONFIG = {
   MAX_TOKENS: 4000,
+  MAX_COMPLETION_TOKENS: 8000, // Increased for system prompt generation
   DEFAULT_TEMPERATURE: 1,
   DEFAULT_MODEL: 'gpt-5-mini', // Updated to latest flagship model
-  TIMEOUT_MS: 180000, // Increased base timeout to 180 seconds (3 minutes)
+  TIMEOUT_MS: 240000, // Increased base timeout to 240 seconds (4 minutes)
   ESCALATION_TIMEOUTS: {
-    ATTEMPT_1: 180000,  // 180 seconds for first attempt
-    ATTEMPT_2: 240000,  // 240 seconds for second attempt  
-    ATTEMPT_3: 300000,  // 300 seconds for final attempt
+    ATTEMPT_1: 240000,  // 240 seconds for first attempt
+    ATTEMPT_2: 300000,  // 300 seconds for second attempt  
+    ATTEMPT_3: 360000,  // 360 seconds for final attempt
   },
-  SYSTEM_PROMPT_TIMEOUT: 180000, // 180 seconds for complex system prompt generation
+  SYSTEM_PROMPT_TIMEOUT: 240000, // 240 seconds for complex system prompt generation
   CIRCUIT_BREAKER: {
     FAILURE_THRESHOLD: 3,
     RECOVERY_TIMEOUT: 30000, // 30 seconds before retry
