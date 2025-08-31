@@ -277,6 +277,32 @@ function getContextsForUse(category: string): string {
   return contextMappings[category.toLowerCase()] || contextMappings['general'];
 }
 
+// Category to target agent routing logic
+const CATEGORY_ROUTING: Record<string, string> = {
+  'what-is-diabetes': 'Visual Prompt Generator',
+  'cdi': 'Visual Prompt Generator', 
+  'contracts': 'Visual Prompt Generator',
+  'healthcare': 'Visual Prompt Generator',
+  'finance': 'Visual Prompt Generator',
+  'marketing': 'Visual Prompt Generator',
+  'technology': 'Visual Prompt Generator',
+  'education': 'Visual Prompt Generator',
+  'hr': 'Visual Prompt Generator',
+  'sales': 'Visual Prompt Generator',
+  'operations': 'Visual Prompt Generator',
+  'consulting': 'Visual Prompt Generator',
+  'design': 'Visual Prompt Generator',
+  'product': 'Visual Prompt Generator',
+  'blog': 'Blog Content Generator',
+  'cover-letter': 'Cover Letter Generator',
+  'general': 'Visual Prompt Generator'
+};
+
+// Helper function to get target agent name
+function getTargetAgentName(category: string): string {
+  return CATEGORY_ROUTING[category.toLowerCase()] || 'Visual Prompt Generator';
+}
+
 serve(async (req) => {
   console.log('invoke-system-prompt-agent function called');
   
@@ -545,12 +571,17 @@ Please generate a detailed, professional system prompt following the template fo
 
         // Save the generated prompt to system_prompts table
         console.log('Creating new system prompt for theme:', actualTheme);
+        
+        // Get target agent name based on category routing
+        const targetAgentName = getTargetAgentName(contextCategory);
+        console.log('Target agent for category', contextCategory, ':', targetAgentName);
+        
         const { data: insertedPrompt, error: insertError } = await supabase
           .from('system_prompts')
           .insert({
             user_id,
             agent_id: agent.id,
-            agent_name: agent.name,
+            agent_name: targetAgentName, // Use target agent name instead of generator agent name
             name: `${actualTheme} Theme System Prompt`,
             theme: actualTheme,
             theme_id: theme_id,
