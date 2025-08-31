@@ -385,4 +385,4 @@ const { data, error } = await supabase.functions.invoke('social-media-agent', {
 - [Blog Content Generator](./blog-content-generator.md)
 - [Visual Prompt Generator](./visual-prompt-generator.md)
 - [System Prompt Agent](./system-prompt-agent.md)
-- [Agent Templates](./agent-templates.md)
+- [Agent Deployment Templates](./agent-deployment-templates.md)

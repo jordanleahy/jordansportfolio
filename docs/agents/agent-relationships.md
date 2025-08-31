@@ -354,6 +354,6 @@ const dependencyAnalytics = {
 ---
 
 **Related Documentation:**
-- [Agent Templates](./agent-templates.md)
+- [Agent Deployment Templates](./agent-deployment-templates.md)
 - [Performance Monitoring](./performance-monitoring.md)
 - [System Architecture Overview](../SYSTEM_ARCHITECTURE.md)

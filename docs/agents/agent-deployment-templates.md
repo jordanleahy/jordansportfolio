@@ -89,6 +89,6 @@ interface TemplateCustomization {
 ---
 
 **Related Documentation:**
-- [Agent Template Reference](./agent-template.md)
+- [Agent Documentation Template](./agent-documentation-template.md)
 - [System Prompt Agent](./system-prompt-agent.md)
 - [Performance Guidelines](./performance-monitoring.md)

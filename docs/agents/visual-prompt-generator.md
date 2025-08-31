@@ -285,5 +285,5 @@ const { data: visualPrompts } = useRealtimePrompts();
 **Related Documentation:**
 - [System Prompt Agent](./system-prompt-agent.md)
 - [Blog Content Generator](./blog-content-generator.md)
-- [Agent Templates](./agent-templates.md)
+- [Agent Deployment Templates](./agent-deployment-templates.md)
 - [Performance Monitoring](./performance-monitoring.md)

@@ -56,7 +56,7 @@ graph TB
 
 ### System Components
 - **[Agent Relationships](./agent-relationships.md)** - Dependency management system
-- **[Agent Templates](./agent-templates.md)** - Pre-configured agent setups
+- **[Agent Deployment Templates](./agent-deployment-templates.md)** - Pre-configured agent setups
 - **[Performance Monitoring](./performance-monitoring.md)** - Metrics and analytics
 
 ## Quick Start
@@ -229,7 +229,7 @@ const rateLimits = {
 ## Contributing
 
 ### Adding New Agents
-1. Follow the [agent template](./agent-template.md)
+1. Follow the [agent documentation template](./agent-documentation-template.md)
 2. Update routing logic in System Prompt Agent
 3. Add comprehensive documentation
 4. Include performance benchmarks
