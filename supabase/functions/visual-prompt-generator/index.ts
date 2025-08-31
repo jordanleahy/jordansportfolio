@@ -2,7 +2,7 @@
  * EDGE FUNCTION: Visual Prompt Generator
  * 
  * PURPOSE:
- * Specialized function for generating visual image prompts for social media content.
+ * Specialized function for generating visual image prompts for each post item.
  * Provides optimized prompt generation with automatic safe space rule application.
  * 
  * INPUTS:
