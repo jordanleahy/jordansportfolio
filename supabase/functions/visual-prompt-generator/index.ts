@@ -195,16 +195,17 @@ serve(async (req) => {
       descriptionPreview: description?.slice(0, 50) || ''
     });
 
-    // System prompt resolution logic
+    // System prompt resolution logic - Enhanced for structured prompts
     let systemPromptData: any = null;
     let usedIdentifier: string;
     let usedType: 'systemPromptId' | 'themeId' | 'fallback';
+    let isStructuredPrompt = false;
 
     // Highest priority: explicit systemPromptId
     if (!systemPromptData && systemPromptId) {
       const { data: spById, error: spByIdError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, id, agent_name, created_at, updated_at')
+        .select('prompt_text, theme, id, agent_name, created_at, updated_at, structured_content')
         .eq('id', systemPromptId)
         .eq('is_active', true)
         .maybeSingle();
@@ -212,6 +213,7 @@ serve(async (req) => {
         systemPromptData = spById;
         usedIdentifier = spById.theme || systemPromptId;
         usedType = 'systemPromptId';
+        isStructuredPrompt = !!spById.structured_content;
       }
     }
 
@@ -226,7 +228,7 @@ serve(async (req) => {
       
       const { data: spFromTheme, error: spFromThemeErr } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, id, agent_name, created_at, updated_at')
+        .select('prompt_text, theme, id, agent_name, created_at, updated_at, structured_content')
         .eq('id', themeData.visual_prompt_system_prompt_id)
         .eq('is_active', true)
         .maybeSingle();
@@ -234,6 +236,7 @@ serve(async (req) => {
         systemPromptData = spFromTheme;
         usedIdentifier = themeData.theme_name || spFromTheme.theme || String(themeId);
         usedType = 'themeId';
+        isStructuredPrompt = !!spFromTheme.structured_content;
       }
     }
 
@@ -248,21 +251,40 @@ serve(async (req) => {
       throw new Error('Theme system prompt is not ready yet. Please wait for theme completion before generating individual prompts.');
     }
 
-    // Fallback: generic Visual Prompt Generator prompt (only for non-theme requests)
+    // Fallback: Enhanced Visual Prompt Generator prompt (only for non-theme requests)
     if (!systemPromptData) {
-      const { data: fallbackData, error: fallbackError } = await supabase
+      // Try to get enhanced Blog Visual Prompt Generator first
+      const { data: enhancedFallback, error: enhancedError } = await supabase
         .from('system_prompts')
-        .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
-        .eq('agent_name', 'Visual Prompt Generator')
+        .select('prompt_text, theme, id, agent_name, created_at, updated_at, structured_content')
+        .eq('agent_name', 'Blog Visual Prompt Generator')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (fallbackData && !fallbackError) {
-        systemPromptData = fallbackData;
-        usedIdentifier = 'fallback';
+      if (enhancedFallback && !enhancedError) {
+        systemPromptData = enhancedFallback;
+        usedIdentifier = 'enhanced_fallback';
         usedType = 'fallback';
+        isStructuredPrompt = !!enhancedFallback.structured_content;
+      } else {
+        // Original fallback
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('system_prompts')
+          .select('prompt_text, theme, id, agent_name, created_at, updated_at, structured_content')
+          .eq('agent_name', 'Visual Prompt Generator')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (fallbackData && !fallbackError) {
+          systemPromptData = fallbackData;
+          usedIdentifier = 'fallback';
+          usedType = 'fallback';
+          isStructuredPrompt = !!fallbackData.structured_content;
+        }
       }
     }
 
@@ -279,11 +301,42 @@ serve(async (req) => {
       usedType
     };
 
-    // Build user message with theme/category information
-    let userMessage = `Generate an image prompt for:
+    // Build enhanced user message leveraging structured system prompts
+    let userMessage: string;
+    
+    if (isStructuredPrompt && systemPromptData.structured_content) {
+      // Enhanced message for structured system prompts
+      userMessage = `Generate a professional visual prompt using the comprehensive framework provided in your system instructions.
+
+**CONTENT TO VISUALIZE:**
 Title: ${title}
 Description: ${description}
 Theme: ${systemPromptData.theme || usedIdentifier}
+Aspect Ratio: ${requestedAspectRatio}
+
+**FRAMEWORK ACTIVATION:**
+You have been provided with a comprehensive visual content generation framework that includes:
+- Professional design system with specific color palettes and accessibility guidelines
+- Industry-specific visual metaphors and composition requirements
+- Production specifications and export standards
+- Structured metadata and iconography standards
+
+Apply this complete framework to generate a detailed, professional image prompt that:
+1. Utilizes the specific design system elements defined in your instructions
+2. Incorporates the industry-appropriate visual metaphors
+3. Follows the accessibility and production specifications
+4. Maintains brand consistency with the provided guidelines
+5. Integrates the aspect ratio naturally (${requestedAspectRatio})
+
+**OUTPUT FORMAT:**
+Provide only the image generation prompt text - no additional formatting, labels, or metadata.`;
+    } else {
+      // Fallback message for legacy system prompts
+      userMessage = `Generate an image prompt for:
+Title: ${title}
+Description: ${description}
+Theme: ${systemPromptData.theme || usedIdentifier}
+Aspect Ratio: ${requestedAspectRatio}
 
 **FRAMEWORK ACTIVATION INSTRUCTIONS:**
 - Use the ${systemPromptData.theme || usedIdentifier} Visual Framework specified in your system instructions
@@ -291,12 +344,14 @@ Theme: ${systemPromptData.theme || usedIdentifier}
 - Follow the ${systemPromptData.theme || usedIdentifier}-specific style requirements and composition guidelines
 - Reference the detailed content analysis framework provided in your instructions
 - Incorporate the specified visual metaphors and color palette from your system prompt
+- Integrate the aspect ratio naturally in the composition (${requestedAspectRatio})
 
 **PREVENT GENERIC DEFAULTS:**
 - Do not use generic business illustrations
-- Avoid abstract professional scenes without healthcare/theme context
+- Avoid abstract professional scenes without specific theme context
 - Do not default to basic vector templates
 - Generate specific, detailed prompts based on the comprehensive guidelines in your system instructions`;
+    }
 
     // Aspect ratio will be handled by safeSpace.ts during image generation
 
@@ -335,7 +390,10 @@ Incorporate these characteristics naturally into the generated prompt while main
       userMessageLength: userMessage.length,
       hasColorTheme: !!colorTheme,
       hasReferenceAnalysis: !!referenceAnalysis,
-      aspectRatio: requestedAspectRatio
+      aspectRatio: requestedAspectRatio,
+      isStructuredPrompt,
+      usedType,
+      promptEnhanced: isStructuredPrompt ? 'enhanced_framework' : 'legacy_format'
     });
 
     logger.startTiming('openai_request');
