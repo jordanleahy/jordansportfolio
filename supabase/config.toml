@@ -18,9 +18,6 @@ verify_jwt = true
 [functions.vendor-analysis]
 verify_jwt = true
 
-[functions.generate-image-prompt-dynamic]
-verify_jwt = true
-
 [functions.generate-image-gpt]
 verify_jwt = true
 
@@ -92,9 +89,6 @@ verify_jwt = true
 
 [functions.social-media-agent]
 verify_jwt = true
-
-[functions.background-task-processor]
-verify_jwt = false
 
 [functions.check-subscription]
 verify_jwt = true
