@@ -5,9 +5,9 @@
 
 ## Overview
 
-**Purpose**: Central orchestrator for generating specialized system prompts and routing them to appropriate downstream agents based on content category.
+**Purpose**: Central orchestrator for generating specialized system prompts that other AI agents can use to create high-quality, category-specific content.
 
-**Role**: Core agent that serves as the entry point for prompt generation workflows, integrating with the latest OpenAI models and maintaining centralized prompt management.
+**Role**: Core agent that creates comprehensive system prompts by filling template placeholders with theme and category-specific content, integrating with the latest OpenAI models and maintaining centralized prompt management.
 
 ## Technical Specifications
 
