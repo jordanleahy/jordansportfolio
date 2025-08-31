@@ -267,7 +267,7 @@ export const useAdvancedImageGeneration = () => {
       const totalTime = Date.now() - startTime;
 
       // Analyze performance and provide recommendations
-      if (totalTime > 45000) { // 45+ seconds total
+      if (totalTime > 90000) { // 90+ seconds total (increased from 45s)
         bottlenecks.push(`Total generation time: ${totalTime}ms`);
         mobileOptimizations.push('Consider implementing progressive loading');
       }

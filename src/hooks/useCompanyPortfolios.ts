@@ -62,8 +62,8 @@ export const useCompanyPortfolio = (companySlug: string) => {
       };
     },
     enabled: !!companySlug,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(2000 * 1.5 ** attemptIndex, 15000),
     refetchOnWindowFocus: true,
     staleTime: 0, // Always refetch to ensure fresh data
   });

@@ -75,7 +75,7 @@ export const CORS_HEADERS = {
 // Database Settings
 export const DB_SETTINGS = {
   HTTP_TIMEOUT_MS: 10000,
-  RETRY_ATTEMPTS: 3,
+  RETRY_ATTEMPTS: 2,
 } as const;
 
 // Content Length Limits

@@ -79,8 +79,8 @@ export const useAvailableThemes = (enabled = true) => {
     gcTime: 60 * 60 * 1000, // 1 hour garbage collection
     refetchOnWindowFocus: false, // Background refetching only
     refetchOnMount: false, // Use cached data on mount
-    retry: 3, // Retry failed requests
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retry: 2, // Retry failed requests (reduced from 3)
+    retryDelay: (attemptIndex) => Math.min(2000 * 1.5 ** attemptIndex, 15000), // Less aggressive backoff
     enabled,
   });
 };

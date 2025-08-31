@@ -171,12 +171,12 @@ function getTimeoutForOperation(operationType: string = 'default', retryAttempt:
   return Math.floor(baseTimeout * multiplier);
 }
 
-// Exponential backoff with jitter
+// Less aggressive exponential backoff with jitter
 function calculateBackoffDelay(attempt: number): number {
-  const baseDelay = 1000; // 1 second base
-  const maxDelay = 10000; // 10 seconds max
-  const exponentialDelay = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay);
-  const jitter = Math.random() * 0.3; // ±30% jitter
+  const baseDelay = 2000; // 2 second base (increased from 1s)
+  const maxDelay = 8000; // 8 seconds max (reduced from 10s)
+  const exponentialDelay = Math.min(baseDelay * Math.pow(1.5, attempt - 1), maxDelay); // 1.5x instead of 2x
+  const jitter = Math.random() * 0.2; // ±20% jitter (reduced from 30%)
   return Math.floor(exponentialDelay * (1 + jitter));
 }
 
@@ -221,7 +221,7 @@ function updateCircuitBreaker(success: boolean) {
 export async function makeOpenAIRequest(options: OpenAIRequestOptions) {
   const correlationId = options.correlationId || generateCorrelationId();
   const retryAttempt = options.retryAttempt || 1;
-  const maxRetries = options.maxRetries || 3;
+  const maxRetries = options.maxRetries || 2;
   const operationType = options.operationType || 'default';
   
   // Check circuit breaker

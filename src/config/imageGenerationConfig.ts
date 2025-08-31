@@ -87,8 +87,8 @@ export const DEFAULT_IMAGE_CONFIG: ImageGenerationConfig = {
     }
   },
   
-  requestTimeoutMs: 60000, // 60 seconds
-  maxRetries: 3,
+  requestTimeoutMs: 90000, // 90 seconds (increased from 60s)
+  maxRetries: 2,
 };
 
 // Helper functions
