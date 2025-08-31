@@ -9,7 +9,6 @@
  * INPUTS:
  * - postId: string - Social media post ID to fetch content
  * - themeId: string (optional) - Theme ID for theme-specific prompts
- * - aspectRatio: string (optional) - Desired aspect ratio (defaults to 1:1)
  * - systemPromptId: string (optional) - Explicit system prompt override
  * - colorTheme: object (optional) - Brand color theme configuration
  * 
