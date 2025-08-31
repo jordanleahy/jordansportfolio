@@ -23,7 +23,6 @@ import BlogEditor from "./pages/BlogEditor";
 const SEC = lazy(() => import("./pages/SEC"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 import CompanyPortfolio from "./pages/CompanyPortfolio";
-import Agents from "./pages/Agents";
 import AscertainToTheMoon from "./pages/AscertainToTheMoon";
 import Vendors from "./pages/Vendors";
 import VendorsIndex from "./pages/VendorsIndex";
@@ -37,9 +36,6 @@ import Case4 from "./pages/cases/Case4";
 import { CaseStudyRouteWrapper } from "./components/case-study/CaseStudyRouteWrapper";
 import { CofactorRouteWrapper } from "./components/cofactor/CofactorRouteWrapper";
 import Library from "./pages/Library";
-
-import { AgentDetail } from "./pages/agents/AgentDetail";
-import { AgentEdit } from "./pages/agents/AgentEdit";
 import DataDictionary from "./pages/sec/DataDictionary";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
@@ -232,9 +228,6 @@ function App() {
                   } 
                 />
                 <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
-                 <Route path="/agents" element={<ProtectedRoute><Agents /></ProtectedRoute>} />
-                 <Route path="/agents/:id" element={<ProtectedRoute><AgentDetail /></ProtectedRoute>} />
-                 <Route path="/agents/new" element={<ProtectedRoute><AgentEdit /></ProtectedRoute>} />
                 <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/pixar" element={<PixarConverter />} />
                 {/* Vendor routes - redirect to admin namespace */}
