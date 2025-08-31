@@ -22,6 +22,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { trackOpenAIUsage, generateCorrelationId, extractUsageFromOpenAIResponse, makeOpenAIRequest } from '../_shared/openai-attribution.ts';
 import { createLogger } from '../_shared/advanced-logger.ts';
+import { appendSafeSpaceRules } from '../_shared/safeSpace.ts';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -30,7 +31,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Safe space rules are now handled by safeSpace.ts in image generation functions
+// Safe space rules are applied via appendSafeSpaceRules() to ensure proper composition
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -409,6 +410,16 @@ Incorporate these characteristics naturally into the generated prompt while main
 
     if (openAIData.choices?.[0]?.message?.content) {
       generatedText = openAIData.choices[0].message.content.trim();
+      
+      // Apply safe space rules to the generated prompt
+      generatedText = appendSafeSpaceRules(generatedText, requestedAspectRatio);
+      
+      logger.info('Applied safe space rules', { 
+        aspectRatio: requestedAspectRatio,
+        finalPromptLength: generatedText.length,
+        correlationId 
+      });
+      
       logger.debug('Extracted using message.content', { correlationId });
     } else {
       logger.error('Missing generated text from OpenAI chat response', { error: {} });
