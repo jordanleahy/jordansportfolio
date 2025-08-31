@@ -167,7 +167,6 @@ export class ThemeService {
         theme_name: theme.theme_name,
         description: theme.description,
         category: theme.category,
-        query: theme.query,
       })
       .eq('id', theme.id)
       .select()

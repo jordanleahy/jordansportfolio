@@ -33,174 +33,136 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 } as const;
 
-// New template-based system prompt for visual content generation
-const SYSTEM_PROMPT_TEMPLATE = `🖥️ System Prompt Template — Visual Content Generator
+// Hard-coded system prompt for reliability and performance
+const SYSTEM_PROMPT_GENERATOR_PROMPT = `# VISUAL PROMPT GENERATOR SYSTEM PROMPT
 
-You are an expert at creating detailed, professional image generation prompts specifically for <Category>-themed AI image generators, with a focus on <Theme>.
+You are an expert Visual Prompt Generator specializing in creating comprehensive, detailed image generation prompts for social media content. Your role is to transform user-provided content (titles, descriptions, themes) into vivid, specific, and highly effective prompts that produce engaging visual content.
 
-🧠 Prompt Metadata
+## CORE RESPONSIBILITIES
 
-Category: <Category>
+1. **Content Analysis & Understanding**
+   - Parse and deeply understand the provided title, description, and theme
+   - Identify key concepts, emotions, and visual elements that should be represented
+   - Consider the target audience and platform requirements
+   - Extract the essential message that needs visual representation
 
-Theme: <Theme>
+2. **Visual Framework Creation**
+   - Design comprehensive visual concepts that support and enhance the written content
+   - Create detailed scene compositions with specific elements, lighting, and mood
+   - Ensure visual coherence with the theme's established color palette and style
+   - Balance informative content with aesthetic appeal
 
-Audience: <Intended users>
+3. **Professional Quality Standards**
+   - Generate prompts that result in high-quality, professional-grade imagery
+   - Ensure consistency with brand guidelines and visual standards
+   - Create versatile prompts that work across different aspect ratios
+   - Maintain visual clarity and impact across various display sizes
 
-Use Cases: <Contexts where visuals will be used>
+## VISUAL PROMPT STRUCTURE TEMPLATE
 
-Aspect Ratio (optional): Multiple supported (1:1, 16:9, 9:16, 4:3, 3:4)
+For each request, structure your response using this comprehensive template:
 
-Style Tags: [vector, modern, professional]
+### Main Subject & Focus
+- **Primary Elements**: [Specific objects, people, or concepts to feature prominently]
+- **Visual Hierarchy**: [How elements should be arranged and prioritized]
+- **Key Message**: [The core idea being communicated visually]
 
-Status: active
+### Scene Composition
+- **Setting/Environment**: [Detailed description of background and context]
+- **Foreground Elements**: [What appears in front, detailed positioning]
+- **Background Elements**: [Supporting visual context and depth]
+- **Spatial Relationships**: [How elements interact and connect]
 
-📊 <Category> Content Analysis Framework
+### Visual Style & Aesthetics
+- **Art Style**: [Photography, illustration, digital art, etc.]
+- **Color Scheme**: [Primary, secondary, and accent colors with specific values]
+- **Lighting**: [Type, direction, mood, and quality of lighting]
+- **Texture & Materials**: [Surface qualities and material properties]
+- **Visual Mood**: [Emotional tone and atmosphere]
 
-When generating prompts, analyze the content through these <Category>-specific lenses:
+### Technical Specifications
+- **Image Quality**: [Resolution, clarity, and professional standards]
+- **Composition Rules**: [Rule of thirds, golden ratio, symmetry, etc.]
+- **Depth of Field**: [Focus areas and background blur specifications]
+- **Camera Perspective**: [Angle, distance, and viewpoint]
 
-Lens 1: <Define purpose/values check>
+### Brand & Theme Integration
+- **Color Palette Application**: [How to use provided brand colors effectively]
+- **Style Consistency**: [Alignment with theme guidelines]
+- **Message Reinforcement**: [How visuals support the content message]
 
-Lens 2: <Define factual/reality check>
+## THEME-SPECIFIC GUIDELINES
 
-Lens 3: <Define nuance/context considerations>
+### Healthcare & Medical Themes
+- **Color Palette**: 
+  - Primary: #2563eb (Professional Blue)
+  - Secondary: #0891b2 (Medical Teal) 
+  - Accent: #16a34a (Health Green)
+  - Text: #64748b (Professional Gray)
+  - Background: #f8fafc (Clean White)
+  - Border: #e5e7eb (Subtle Gray)
 
-(Swap in the right 2–4 "lenses" depending on the domain—e.g., financial/clinical/educational.)
+- **Visual Elements**: Clean, professional medical environments, diverse healthcare professionals, modern medical equipment, patient care scenarios
+- **Composition**: Emphasis on trust, expertise, and human connection in healthcare
+- **Lighting**: Soft, natural lighting that conveys warmth and professionalism
+- **Style**: Modern, clean, photorealistic with high attention to detail
 
-🎯 <Category> Visual Framework
-Foreground Elements (Always Include)
+### Technology & Innovation Themes  
+- **Visual Elements**: Cutting-edge technology, digital interfaces, modern workspaces, innovation concepts
+- **Composition**: Dynamic, forward-thinking layouts with emphasis on progress and efficiency
+- **Color Usage**: Tech blues, innovation greens, with high contrast for digital clarity
 
-<List the must-have subject/iconography elements>
+### Business & Professional Themes
+- **Visual Elements**: Professional environments, diverse business teams, modern office settings
+- **Composition**: Confidence-inspiring layouts with emphasis on competence and reliability
+- **Style**: Polished, contemporary business aesthetic
 
-Mid-ground Context
+### Education & Learning Themes
+- **Visual Elements**: Learning environments, educational tools, diverse learners, knowledge concepts
+- **Composition**: Engaging, accessible layouts that promote learning and growth
+- **Color Usage**: Friendly, approachable colors that enhance learning
 
-<List workflows, connectors, or background context relevant to the theme>
+## ADVANCED PROMPT ENGINEERING
 
-Background Foundation
+### Prompt Enhancement Techniques
+1. **Specificity**: Use precise descriptors rather than vague terms
+2. **Visual Weight**: Specify relative importance of elements
+3. **Emotional Resonance**: Include mood and feeling descriptors
+4. **Technical Precision**: Add photography/art technique specifications
+5. **Context Integration**: Connect visuals to the broader message
 
-<Define the setting, palette foundation, whitespace usage, gradients, or environmental details>
+### Quality Amplifiers
+- "Professional photography"
+- "High resolution, sharp focus"
+- "Studio lighting setup"
+- "Commercial quality"
+- "Award-winning composition"
+- "Ultra-detailed, photorealistic"
 
-🎨 <Category>-Specific Style Requirements
+### Composition Enhancers
+- "Rule of thirds composition"
+- "Balanced visual hierarchy"
+- "Dynamic diagonal lines"
+- "Negative space utilization"
+- "Depth layering with foreground, midground, background"
 
-Art Style: Professional vector illustration with clean, modern aesthetic
+## OUTPUT FORMAT
 
-Composition: <Define layout flow—triangular, left-to-right, modular cards, etc.>
+Generate your visual prompt as a single, comprehensive paragraph that incorporates all elements naturally. Structure it to flow logically from main subject through composition, style, and technical details.
 
-Subjects: <Define people, objects, diagrams, icons>
+**Example Output Structure:**
+"[Main subject and action] set in [detailed environment] with [specific lighting] creating [mood/atmosphere]. The composition features [foreground elements] against [background details], utilizing [color scheme] with emphasis on [primary colors]. Shot with [technical specifications] to achieve [visual quality goals], incorporating [brand elements] while maintaining [style consistency]. The overall aesthetic should convey [key message] through [specific visual techniques]."
 
-Flow Indicators: <Define arrows, loops, dotted lines, etc.>
+## CRITICAL SUCCESS FACTORS
 
-Tone: <Define tone—gentle, practical, trustworthy, empathetic>
+1. **Relevance**: Every visual element must serve the content's purpose
+2. **Professional Quality**: Ensure commercial-grade visual standards
+3. **Brand Consistency**: Integrate provided colors and style guidelines seamlessly
+4. **Engagement**: Create visually compelling content that captures attention
+5. **Clarity**: Maintain clear visual communication without clutter
+6. **Versatility**: Ensure the prompt works across different contexts and sizes
 
-🌈 <Category> Color Palette
-
-Primary: <PRIMARY_COLOR>
-
-Secondary: <SECONDARY_COLOR>
-
-Accent: <ACCENT_COLOR>
-
-Supporting: <TEXT_COLOR>
-
-Text: <TEXT_COLOR>
-
-Background: <BACKGROUND_COLOR>
-
-Border: <BORDER_COLOR>
-
-Color Usage:
-
-Primary for structural elements/backgrounds
-
-Secondary for highlights
-
-Accent for calls-to-action/alerts
-
-Supporting for text/tooling elements
-
-Always maintain clean whites and grays for readability
-
-🔍 <Category> Visual Metaphors
-
-Always incorporate these <Category>-specific metaphors:
-
-<Define metaphor 1>
-
-<Define metaphor 2>
-
-<Define metaphor 3>
-
-📋 <Category> Output Instructions
-
-Create prompts that will generate:
-
-<Overview or explainer poster>
-
-<Step-by-step card set>
-
-<Template/workflow scene>
-
-CRITICAL Requirements:
-
-Always specify exact aspect ratio when required
-
-Indicate whether text overlays are allowed or prohibited
-
-Use only professional vector illustration style
-
-✅ Safety & Generation Guidelines
-
-No external links—keep everything in descriptive text
-
-No policy-violating content—focus purely on professional, neutral scenes
-
-Fixed template—do not remove or rename any sections
-
-Only substitute placeholders—<Category>, <Theme>, etc.
-
-The goal of this to define context around the theme`;
-
-// Function to substitute placeholders in the template
-function substituteTemplatePlaceholders(template: string, values: {
-  category: string;
-  theme: string;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  textColor: string;
-  backgroundColor: string;
-  borderColor: string;
-  intendedUsers: string;
-  contextsForUse: string;
-  query?: string;
-}): string {
-  return template
-    .replace(/<Category>/g, values.category)
-    .replace(/<Theme>/g, values.theme)
-    .replace(/<PRIMARY_COLOR>/g, values.primaryColor)
-    .replace(/<SECONDARY_COLOR>/g, values.secondaryColor)
-    .replace(/<ACCENT_COLOR>/g, values.accentColor)
-    .replace(/<TEXT_COLOR>/g, values.textColor)
-    .replace(/<BACKGROUND_COLOR>/g, values.backgroundColor)
-    .replace(/<BORDER_COLOR>/g, values.borderColor)
-    .replace(/<Intended users>/g, values.intendedUsers)
-    .replace(/<Contexts where visuals will be used>/g, values.contextsForUse)
-    .replace(/<Define purpose\/values check>/g, `How does this align with ${values.category} professional standards and values?`)
-    .replace(/<Define factual\/reality check>/g, `Is the content factually accurate and realistic for ${values.category} practitioners?`)
-    .replace(/<Define nuance\/context considerations>/g, `What ${values.category}-specific context and nuances should be considered?`)
-    .replace(/<List the must-have subject\/iconography elements>/g, `Central focus on ${values.category}-specific tools, processes, or concepts related to ${values.theme}`)
-    .replace(/<List workflows, connectors, or background context relevant to the theme>/g, `Supporting ${values.category} environments and collaborative team elements working on ${values.theme}-related projects`)
-    .replace(/<Define the setting, palette foundation, whitespace usage, gradients, or environmental details>/g, `Clean, professional ${values.category} industry setting with subtle geometric patterns using the ${values.theme} color palette`)
-    .replace(/<Define layout flow—triangular, left-to-right, modular cards, etc\.>/g, `Balanced composition with good visual hierarchy suitable for ${values.category} content`)
-    .replace(/<Define people, objects, diagrams, icons>/g, `Professional figures engaged in ${values.category} activities, relevant tools, and ${values.theme}-specific elements`)
-    .replace(/<Define arrows, loops, dotted lines, etc\.>/g, `Process flow indicators showing ${values.category} workflows and ${values.theme} connections`)
-    .replace(/<Define tone—gentle, practical, trustworthy, empathetic>/g, `Professional, trustworthy, and credible tone appropriate for ${values.category} audience`)
-    .replace(/<Define metaphor 1>/g, `${values.category} expertise and professionalism in ${values.theme} context`)
-    .replace(/<Define metaphor 2>/g, `Industry-specific tools and processes relevant to ${values.theme}`)
-    .replace(/<Define metaphor 3>/g, `Success metrics and outcomes in ${values.category} related to ${values.theme}`)
-    .replace(/<Overview or explainer poster>/g, `Professional overview visuals suitable for ${values.category} ${values.theme} content`)
-    .replace(/<Step-by-step card set>/g, `Clear instructional visuals for ${values.category} ${values.theme} processes`)
-    .replace(/<Template\/workflow scene>/g, `Workflow templates and professional scenes for ${values.category} ${values.theme} scenarios`);
-}
+Always prioritize creating prompts that will result in professional, engaging, and effective visual content that enhances and supports the provided text content while maintaining consistency with the specified theme and brand guidelines.`;
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -234,74 +196,6 @@ async function getDefaultColorTheme(supabase: any): Promise<any> {
   return data;
 }
 
-// Helper functions to determine intended users and contexts based on category
-function getIntendedUsers(category: string): string {
-  const categoryMappings: Record<string, string> = {
-    'cdi': 'Clinical Documentation Specialists, Healthcare Administrators, Medical Coders',
-    'contracts': 'Legal Professionals, Contract Managers, Business Executives',
-    'healthcare': 'Healthcare Professionals, Medical Staff, Healthcare Administrators',
-    'finance': 'Financial Analysts, Investment Professionals, CFOs',
-    'marketing': 'Marketing Professionals, Brand Managers, Digital Marketers',
-    'technology': 'IT Professionals, Software Developers, Tech Leaders',
-    'education': 'Educators, Training Professionals, Academic Administrators',
-    'hr': 'HR Professionals, Talent Managers, Organizational Leaders',
-    'sales': 'Sales Professionals, Account Managers, Revenue Leaders',
-    'operations': 'Operations Managers, Process Improvement Specialists, COOs',
-    'consulting': 'Management Consultants, Strategic Advisors, Business Analysts',
-    'design': 'UX/UI Designers, Creative Directors, Design Teams',
-    'product': 'Product Managers, Product Owners, Innovation Teams',
-    'general': 'Business Professionals, Decision Makers, Industry Stakeholders'
-  };
-  
-  return categoryMappings[category.toLowerCase()] || categoryMappings['general'];
-}
-
-function getContextsForUse(category: string): string {
-  const contextMappings: Record<string, string> = {
-    'cdi': 'Medical record documentation, clinical coding workflows, compliance training materials',
-    'contracts': 'Legal document reviews, contract negotiations, compliance presentations',
-    'healthcare': 'Patient care protocols, medical education, healthcare policy communications',
-    'finance': 'Financial reports, investor presentations, risk management materials',
-    'marketing': 'Campaign materials, brand communications, social media content',
-    'technology': 'Technical documentation, software presentations, IT training materials',
-    'education': 'Learning materials, curriculum design, educational presentations',
-    'hr': 'Employee communications, training programs, organizational development',
-    'sales': 'Sales presentations, client proposals, revenue reporting',
-    'operations': 'Process documentation, operational training, efficiency reporting',
-    'consulting': 'Client presentations, strategic recommendations, business case studies',
-    'design': 'Design portfolios, creative briefs, user experience documentation',
-    'product': 'Product roadmaps, feature specifications, user journey mapping',
-    'general': 'Business presentations, professional communications, strategic planning'
-  };
-  
-  return contextMappings[category.toLowerCase()] || contextMappings['general'];
-}
-
-// Category to target agent routing logic
-const CATEGORY_ROUTING: Record<string, string> = {
-  'what-is-diabetes': 'Visual Prompt Generator',
-  'cdi': 'Visual Prompt Generator', 
-  'contracts': 'Visual Prompt Generator',
-  'healthcare': 'Visual Prompt Generator',
-  'finance': 'Visual Prompt Generator',
-  'marketing': 'Visual Prompt Generator',
-  'technology': 'Visual Prompt Generator',
-  'education': 'Visual Prompt Generator',
-  'hr': 'Visual Prompt Generator',
-  'sales': 'Visual Prompt Generator',
-  'operations': 'Visual Prompt Generator',
-  'consulting': 'Visual Prompt Generator',
-  'design': 'Visual Prompt Generator',
-  'product': 'Visual Prompt Generator',
-  'blog': 'Blog Content Generator',
-  'cover-letter': 'Cover Letter Generator',
-  'general': 'Visual Prompt Generator'
-};
-
-// Helper function to get target agent name
-function getTargetAgentName(category: string): string {
-  return CATEGORY_ROUTING[category.toLowerCase()] || 'Visual Prompt Generator';
-}
 
 serve(async (req) => {
   console.log('invoke-system-prompt-agent function called');
@@ -383,28 +277,12 @@ serve(async (req) => {
 
     console.log('Found System Prompt Generator agent:', agent.id);
 
-    // Generate dynamic system prompt using template substitution
+    // Use hard-coded system prompt for reliability and performance
+    const systemPrompt = SYSTEM_PROMPT_GENERATOR_PROMPT;
+
+    // Theme is now primary focus, category provides context
     const actualTheme = theme;
     const contextCategory = category || 'general';
-    
-    // Determine intended users and contexts based on category
-    const intendedUsers = getIntendedUsers(contextCategory);
-    const contextsForUse = getContextsForUse(contextCategory);
-    
-    // Substitute placeholders in the template
-    const systemPrompt = substituteTemplatePlaceholders(SYSTEM_PROMPT_TEMPLATE, {
-      category: contextCategory.charAt(0).toUpperCase() + contextCategory.slice(1),
-      theme: actualTheme,
-      primaryColor: defaultColorTheme.primary_color,
-      secondaryColor: defaultColorTheme.secondary_color,
-      accentColor: defaultColorTheme.accent_color,
-      textColor: defaultColorTheme.text_color,
-      backgroundColor: defaultColorTheme.background_color,
-      borderColor: defaultColorTheme.border_color,
-      intendedUsers,
-      contextsForUse,
-      query: description || ''
-    });
     
     let userPrompt = `Create a comprehensive system prompt for the "${actualTheme}" theme with "${contextCategory}" category context.
 
@@ -412,15 +290,23 @@ Primary Theme: ${actualTheme}
 Category Context: ${contextCategory}
 Description: ${description || 'No description provided'}
 
+Default Color Palette to Include:
+- Primary: ${defaultColorTheme.primary_color} (${defaultColorTheme.name} theme)
+- Secondary: ${defaultColorTheme.secondary_color}
+- Accent: ${defaultColorTheme.accent_color}
+- Text: ${defaultColorTheme.text_color}
+- Background: ${defaultColorTheme.background_color}
+- Border: ${defaultColorTheme.border_color}
+
+Visual Style: ${defaultColorTheme.visual_style}
+Color Usage: ${defaultColorTheme.color_instructions}
+
 Sample content from this theme:
 ${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}
 
-Please generate a detailed, professional system prompt following the template format provided in the system prompt. Focus primarily on "${actualTheme}" with "${contextCategory}" context, ensuring all placeholders are properly filled and the content is tailored to this specific theme and category combination.`;
+Please generate a detailed, professional system prompt following the established template format with theme-specific visual frameworks, the provided color palette, and content analysis guidelines. Focus primarily on "${actualTheme}" with "${contextCategory}" context. Include the color palette in the standard format with the exact hex values provided above.`;
 
-    // QA: Log generated system prompt for debugging
-    console.log('🎯 GENERATED SYSTEM PROMPT LENGTH:', systemPrompt.length, 'correlation:', correlationId);
-    console.log('📝 TEMPLATE PREVIEW (first 500 chars):', systemPrompt.substring(0, 500) + '...');
-    console.log('🔧 PLACEHOLDER SUBSTITUTION COMPLETE - Category:', contextCategory, 'Theme:', actualTheme);
+    console.log('Calling OpenAI with system prompt length:', systemPrompt.length, 'correlation:', correlationId);
 
     // Enhanced OpenAI request with correlation tracking
     const requestBodyForOpenAI = enhanceOpenAIRequestBody({
@@ -429,7 +315,7 @@ Please generate a detailed, professional system prompt following the template fo
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      max_completion_tokens: Math.min(OPENAI_CONFIG.MAX_COMPLETION_TOKENS, 8000), // Increase token limit
+      max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
     }, correlationId);
 
     console.log('🔎 OpenAI Request Model/Agent:', { model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, generator_agent: agent.name, correlationId });
@@ -522,7 +408,8 @@ Please generate a detailed, professional system prompt following the template fo
     }
 
     const genPreview = generatedPrompt.slice(0, 140).replace(/\n/g, ' ');
-    console.log('Generated system prompt diagnostics:', { length: generatedPrompt.length, preview: genPreview });
+    const formatHint = genPreview.startsWith('#') || genPreview.includes('VISUAL PROMPT GENERATOR') ? 'visual_template' : (genPreview.toLowerCase().startsWith('header') ? 'header_template' : 'unknown');
+    console.log('Generated system prompt diagnostics:', { length: generatedPrompt.length, preview: genPreview, formatHint });
 
     // 🔍 ENHANCED LOGGING: Starting database operations
     console.log('📊 DATABASE OPERATIONS: Starting system prompt storage');
@@ -571,17 +458,12 @@ Please generate a detailed, professional system prompt following the template fo
 
         // Save the generated prompt to system_prompts table
         console.log('Creating new system prompt for theme:', actualTheme);
-        
-        // Get target agent name based on category routing
-        const targetAgentName = getTargetAgentName(contextCategory);
-        console.log('Target agent for category', contextCategory, ':', targetAgentName);
-        
         const { data: insertedPrompt, error: insertError } = await supabase
           .from('system_prompts')
           .insert({
             user_id,
             agent_id: agent.id,
-            agent_name: targetAgentName, // Use target agent name instead of generator agent name
+            agent_name: agent.name,
             name: `${actualTheme} Theme System Prompt`,
             theme: actualTheme,
             theme_id: theme_id,
@@ -613,7 +495,6 @@ Please generate a detailed, professional system prompt following the template fo
             .from('themes')
             .update({ 
               visual_prompt_system_prompt_id: insertedPrompt.id,
-              prompt_generation_status: 'completed',
               updated_at: new Date().toISOString()
             })
             .eq('id', theme_id)
