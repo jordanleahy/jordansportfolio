@@ -1,8 +1,8 @@
 # Text-to-Photos End-to-End Flow — Audit and Hardening Guide
 
-Version: 1.0
+Version: 1.1
 Owner: Engineering
-Last updated: 2025-08-11
+Last updated: 2025-08-31
 
 ---
 
@@ -47,10 +47,12 @@ Frontend (React + TS):
   - src/utils/storageImageUpload.ts — URL → Storage uploader + public URL
 
 Supabase Edge Functions (Server):
-- generate-image-prompt-dynamic — Creates prompts from post content
+- visual-prompt-generator — Creates detailed image generation prompts from post content
 - generate-image-gpt — Generates images from prompts (base64)
+- generate-image-with-concurrency-control — Enhanced image generation with rate limiting
 - generate-all-images-optimized — Bulk pipeline (multi-aspect)
-- streaming-image-pipeline — Streaming image pipeline (SSE/SSE-like)
+- user-idea-streaming-image-pipeline — Streaming image pipeline for user ideas (SSE)
+- invoke-system-prompt-agent — Generates and manages system prompts for different content categories
 - check-usage-limits — Enforces per-user daily/monthly usage
 - get-usage-summary — Summarizes usage limits/usage
 - send-usage-alert — Emails when approaching limits (≥80%)
@@ -104,8 +106,9 @@ Event-by-event sequence:
      - If approaching ≥80% usage → checkAndEnforceUsage triggers send-usage-alert (best-effort; non-blocking)
 
 3) Prompt Generation
-   - supabase.functions.invoke('generate-image-prompt-dynamic', { title, description, theme, category, aspectRatio? })
-   - Expected output: prompt string (validated non-empty, trimmed, length ≤ IMAGE_SETTINGS.PROMPT_MAX_LENGTH)
+   - supabase.functions.invoke('visual-prompt-generator', { title, description, category, aspectRatio, themeId? })
+   - Expected output: { generatedPrompt: string } (validated non-empty, trimmed, length ≤ PROMPT_MAX_LENGTH)
+   - Note: Theme resolution now uses database themeId instead of URL-based theme names
 
 4) Image Generation
    - supabase.functions.invoke('generate-image-gpt', { prompt, aspectRatio, size/quality })
@@ -156,8 +159,8 @@ sequenceDiagram
       UI-->>User: Toast: limit exceeded
       note over UI: Abort
     else Allowed
-      UI->>SB: invoke('generate-image-prompt-dynamic')
-      SB-->>UI: {prompt}
+      UI->>SB: invoke('visual-prompt-generator')
+      SB-->>UI: {generatedPrompt}
       UI->>SB: invoke('generate-image-gpt', {prompt, ratio})
       SB-->>UI: {imageBase64}
       UI->>ST: Upload file
@@ -170,11 +173,11 @@ sequenceDiagram
 ```
 
 Data Contracts (indicative):
-- Prompt Request: { title: string; description: string; theme?: string; category?: string; aspectRatio?: '16:9'|'9:16'|'1:1'|'4:3'|'3:4' }
-- Prompt Response: { prompt: string }
-- Image Request: { prompt: string; size?: '1024x1024'|'1792x1024'|'1024x1792'; quality?: 'high' }
+- Prompt Request: { title: string; description: string; category?: string; aspectRatio?: '16:9'|'9:16'|'1:1'|'4:3'|'3:4'; themeId?: string }
+- Prompt Response: { generatedPrompt: string; category: string; agent: string; correlationId: string }
+- Image Request: { prompt: string; aspectRatio: string; size?: '1024x1024'|'1792x1024'|'1024x1792'; quality?: 'high' }
 - Image Response: { image: string(base64) or { data: string } }
-- Post Update: { image_16_9_url?: string; image_9_16_url?: string; ...; image_generation_status?: 'processing'|'complete'|'failed' }
+- Post Update: { image_16_9_url?: string; image_9_16_url?: string; ...; individual_prompt_status?: 'processing'|'complete'|'failed' }
 
 Failure Modes and Handling:
 - FunctionsFetchError → user toast + console.error; suggest retry
@@ -199,8 +202,9 @@ Event-by-event sequence:
    - If not allowed → return early (toast already displayed by enforceUsage)
 
 3) Prompt Caching + Request Preparation
-   - useBulkImageGeneration.getOrGeneratePrompt(): memory cache → DB cached_prompts → fallback to generate-image-prompt-dynamic
-   - cache key: sanitized(title/description/theme/category/context/colorThemeId)
+   - useBulkImageGeneration.getOrGeneratePrompt(): memory cache → DB cached_prompts → fallback to visual-prompt-generator
+   - cache key: sanitized(title/description/themeId/category/context/colorThemeId)
+   - Note: Theme-based system prompts are now generated via invoke-system-prompt-agent
 
 4) Bulk Generation Orchestration
    - supabase.functions.invoke('generate-all-images-optimized', request)
@@ -243,8 +247,8 @@ sequenceDiagram
       UI->>DB: get cached prompt
       DB-->>UI: hit/miss
       alt Miss
-        UI->>SB: invoke('generate-image-prompt-dynamic')
-        SB-->>UI: {prompt}
+        UI->>SB: invoke('visual-prompt-generator')
+        SB-->>UI: {generatedPrompt}
         UI->>DB: upsert cached_prompts
       end
       UI->>SB: invoke('generate-all-images-optimized')
@@ -323,7 +327,8 @@ Hardening:
 Table: social_media_posts (fields implied by code usage)
 - image_16_9_url, image_9_16_url, image_1_1_url, image_4_3_url, image_3_4_url
 - Optional watermark URLs: image_*_watermark_url
-- Status fields: theme_image_generation_status and/or per-aspect status (pending | processing | complete | failed)
+- Status fields: individual_prompt_status and/or theme_image_generation_status (pending | processing | complete | failed)
+- Theme references: theme_id (UUID) links to themes table for system prompt resolution
 
 Status Transitions:
 - pending → processing (when generation starts)
@@ -341,12 +346,14 @@ Idempotency & Concurrency:
 Where to look:
 - FE console logs and toasts (sonner)
 - Supabase Function Logs (per function):
-  - generate-image-prompt-dynamic
+  - visual-prompt-generator
   - generate-image-gpt
+  - generate-image-with-concurrency-control
   - generate-all-images-optimized
+  - user-idea-streaming-image-pipeline
+  - invoke-system-prompt-agent
   - check-usage-limits
   - send-usage-alert
-  - streaming-image-pipeline
 
 What to log (minimally):
 - Correlation ID per request (post_id + timestamp)
@@ -418,10 +425,12 @@ UX/Feedback
 ## Configuration & Dependency Matrix
 
 Edge Functions and Secrets
-- generate-image-prompt-dynamic — Requires OpenAI key (server-side secret)
+- visual-prompt-generator — Requires OpenAI key (server-side secret)
 - generate-image-gpt — Requires OpenAI key (server-side secret)
+- generate-image-with-concurrency-control — Requires OpenAI key (server-side secret)
 - generate-all-images-optimized — Requires OpenAI key
-- streaming-image-pipeline — Requires OpenAI key
+- user-idea-streaming-image-pipeline — Requires OpenAI key
+- invoke-system-prompt-agent — Requires OpenAI key (generates system prompts)
 - check-usage-limits / get-usage-summary — DB access only (service role on server)
 - send-usage-alert — Email provider credentials (Resend configured in project)
 
@@ -481,12 +490,42 @@ C) Related Files Index
 - Hooks: useImageGeneration.ts, useImageManager.ts, useImageBatchGeneration.ts, useUsageEnforcement.ts, useCreditCheck.ts
 - UI: GenerateImage.tsx, SingleAspectRatioSelector.tsx, BulkImageGenerationButton.tsx, BulkGenerationThumbnails.tsx
 - Utils: imageUpload.ts, storageImageUpload.ts
-- Edge Functions: generate-image-prompt-dynamic, generate-image-gpt, generate-all-images-optimized, streaming-image-pipeline, check-usage-limits, get-usage-summary, send-usage-alert
+- Edge Functions: visual-prompt-generator, generate-image-gpt, generate-image-with-concurrency-control, generate-all-images-optimized, user-idea-streaming-image-pipeline, invoke-system-prompt-agent, check-usage-limits, get-usage-summary, send-usage-alert
 
 D) Links (Supabase Dashboard)
 - Functions: https://supabase.com/dashboard/project/wgwmzfbnkovumqcvsxgd/functions
 - Storage: https://supabase.com/dashboard/project/wgwmzfbnkovumqcvsxgd/storage/buckets
 - SQL Editor: https://supabase.com/dashboard/project/wgwmzfbnkovumqcvsxgd/sql/new
+
+---
+
+## Additional Architecture Updates (New Section)
+
+### System Prompt Generation Flow
+- invoke-system-prompt-agent generates category-specific system prompts for visual content
+- Prompts are stored in database with theme_id relationships for reuse
+- Theme resolution migrated from URL-based theme names to database theme_id fields
+- Safe space rules are automatically integrated for aspect-ratio-specific composition
+
+### Phase 1 Migration Status  
+- Theme resolution: ✅ Migrated to theme_id database relationships
+- Edge function names: ✅ Updated (generate-image-prompt-dynamic → visual-prompt-generator)
+- System prompt architecture: ✅ Implemented with invoke-system-prompt-agent
+- Status field naming: ⚠️ Partial (individual_prompt_status vs theme_image_generation_status)
+
+### New Components Added Since v1.0
+- Advanced logging with correlation IDs across all image generation functions
+- Enhanced error handling and retry mechanisms  
+- Token management optimization (max_completion_tokens increased to 6,000)
+- Dynamic prompt truncation with cost analysis
+- Safe space rules enforcement for image composition
+
+### Updated Hardening Priorities
+- [ ] Standardize status field names across all flows (individual_prompt_status vs theme_image_generation_status)
+- [ ] Complete theme_id migration in all remaining URL-based theme references
+- [ ] Implement safe space validation for 1:1 images (25-30% margins, no edge-touching elements)
+- [ ] Add system prompt versioning and rollback capabilities
+- [ ] Enhance correlation ID tracking across multi-step flows
 
 ---
 
