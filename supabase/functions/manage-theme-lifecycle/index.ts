@@ -9,6 +9,7 @@ const corsHeaders = {
 interface ThemeLifecycleRequest {
   action: 'create' | 'complete' | 'status';
   description?: string;
+  query?: string;
   themeId?: string;
 }
 
@@ -91,6 +92,7 @@ serve(async (req) => {
         {
           body: {
             description: body.description,
+            query: body.query, // Pass the original query
             stream: false
           },
           headers: {

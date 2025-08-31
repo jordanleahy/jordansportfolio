@@ -4,6 +4,7 @@ export interface Theme {
   theme_name: string;
   description?: string;
   category: string;
+  query?: string;
   created_at: string;
   updated_at: string;
 }
@@ -12,6 +13,7 @@ export interface CreateTheme {
   theme_name: string;
   description?: string;
   category: string;
+  query?: string;
 }
 
 export interface UpdateTheme extends Partial<CreateTheme> {

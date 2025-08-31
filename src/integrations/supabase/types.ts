@@ -2708,6 +2708,7 @@ export type Database = {
           lifecycle_status: string | null
           prompt_completion_count: number | null
           prompt_generation_status: string | null
+          query: string | null
           reference_character_analysis: Json | null
           reference_character_id: string | null
           theme_name: string
@@ -2728,6 +2729,7 @@ export type Database = {
           lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
+          query?: string | null
           reference_character_analysis?: Json | null
           reference_character_id?: string | null
           theme_name: string
@@ -2748,6 +2750,7 @@ export type Database = {
           lifecycle_status?: string | null
           prompt_completion_count?: number | null
           prompt_generation_status?: string | null
+          query?: string | null
           reference_character_analysis?: Json | null
           reference_character_id?: string | null
           theme_name?: string

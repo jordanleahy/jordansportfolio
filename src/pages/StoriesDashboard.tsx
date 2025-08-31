@@ -503,15 +503,16 @@ export default function StoriesDashboard() {
     
     try {
       console.log('📡 Calling theme lifecycle orchestrator...');
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('manage-theme-lifecycle', {
-        body: {
-          action: 'create',
-          description: themeDescription
+      const { data, error } = await supabase.functions.invoke(
+        'manage-theme-lifecycle',
+        {
+          body: {
+            action: 'create',
+            description: themeDescription,
+            query: themeDescription // Store original user input as query
+          }
         }
-      });
+      );
       
       console.log('📡 Edge function response:', { data, error });
       // Remove duplicate handling - always proceed with generation

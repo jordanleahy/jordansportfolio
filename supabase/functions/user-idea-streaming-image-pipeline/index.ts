@@ -226,7 +226,7 @@ JSON STRUCTURE:
   }
 };
 
-const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<{ insertedCount: number; createdThemeId: string }> => {
+const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string, query?: string): Promise<{ insertedCount: number; createdThemeId: string }> => {
   console.log('💾 Importing theme to database:', themeData.category);
   console.log('📋 Theme data:', { theme: themeData.theme, category: themeData.category, userId, postCount: themeData.posts.length });
   console.log('🔍 DETAILED: Database connection info:', {
@@ -276,7 +276,8 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
           user_id: userId,
           theme_name: themeData.theme,
           description: themeData.theme_description,
-          category: themeData.category
+          category: themeData.category,
+          query: query // Store original user input
         })
         .select('id')
         .single();
@@ -519,7 +520,7 @@ serve(async (req) => {
       });
     }
 
-    const { description, stream = true, overrideCategory } = requestBody;
+    const { description, stream = true, overrideCategory, query } = requestBody;
 
     // Validate required fields
     if (!description || typeof description !== 'string' || !description.trim()) {
@@ -627,7 +628,7 @@ serve(async (req) => {
               data: { status: 'Importing posts to database...' }
             });
 
-            const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
+            const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId, query);
             themeId = createdThemeId;
             
             sendStreamEvent(controller, {
@@ -708,7 +709,7 @@ serve(async (req) => {
           themeData.category = slug;
         }
       }
-      const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
+      const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId, query);
       const themeId = createdThemeId;
       // Use EdgeRuntime.waitUntil to run system prompt generation in background
       EdgeRuntime.waitUntil(generateSystemPrompt(supabase, themeData, userId, themeId));
