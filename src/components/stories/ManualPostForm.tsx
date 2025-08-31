@@ -39,7 +39,7 @@ export const ManualPostForm: React.FC<ManualPostFormProps> = ({
       const postData: CreateSocialMediaPost = {
         title: data.title,
         description: data.description,
-        category,
+        ...(themeId ? {} : { category }), // Only include category if no themeId (let service inherit from theme)
         theme_id: themeId || null,
         status: 'draft'
       };

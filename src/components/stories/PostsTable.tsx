@@ -1081,12 +1081,12 @@ const { handleGenerateImage } = useImageManager({
                         />
                       )}
                       
-                      {/* Manual Post Creation */}
-                      <ManualPostForm 
-                        category={category}
-                        themeId={selectedThemeId}
-                        onPostCreated={onPostsChange}
-                      />
+                       {/* Manual Post Creation */}
+                       <ManualPostForm 
+                         category={category}
+                         themeId={themeId}
+                         onPostCreated={onPostsChange}
+                       />
                       
                       {/* Action Buttons */}
                       {category && (
