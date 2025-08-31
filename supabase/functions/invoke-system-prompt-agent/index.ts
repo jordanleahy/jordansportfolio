@@ -4,13 +4,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
 
-const OPENAI_CONFIG = {
-  DEFAULT_MODEL: 'gpt-5-mini-2025-08-07',
-  MAX_COMPLETION_TOKENS: 6000, // Increased from 4000 to 6000
-  TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
-  MAX_PROMPT_TOKENS: 120000, // Reserve space for completion tokens (200k context - 6k completion - safety margin)
-} as const;
-
 // Token estimation utility (rough approximation: 4 chars ≈ 1 token)
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4);
