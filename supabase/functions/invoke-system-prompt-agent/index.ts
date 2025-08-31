@@ -10,9 +10,58 @@ const AGENT_NAMES = {
 
 const OPENAI_CONFIG = {
   DEFAULT_MODEL: 'gpt-5-mini-2025-08-07',
-  MAX_COMPLETION_TOKENS: 4000,
+  MAX_COMPLETION_TOKENS: 6000, // Increased from 4000 to 6000
   TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
+  MAX_PROMPT_TOKENS: 120000, // Reserve space for completion tokens (200k context - 6k completion - safety margin)
 } as const;
+
+// Token estimation utility (rough approximation: 4 chars ≈ 1 token)
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4);
+}
+
+// Dynamic prompt truncation to fit within token limits
+function truncatePromptIfNeeded(systemPrompt: string, userPrompt: string, maxPromptTokens: number = OPENAI_CONFIG.MAX_PROMPT_TOKENS): { systemPrompt: string, userPrompt: string, wasTruncated: boolean } {
+  const systemTokens = estimateTokens(systemPrompt);
+  const userTokens = estimateTokens(userPrompt);
+  const totalTokens = systemTokens + userTokens;
+  
+  if (totalTokens <= maxPromptTokens) {
+    return { systemPrompt, userPrompt, wasTruncated: false };
+  }
+  
+  console.log(`⚠️ Token limit exceeded: ${totalTokens} > ${maxPromptTokens}. Truncating prompts.`);
+  
+  // Reserve 80% for system prompt, 20% for user prompt
+  const maxSystemTokens = Math.floor(maxPromptTokens * 0.8);
+  const maxUserTokens = Math.floor(maxPromptTokens * 0.2);
+  
+  let truncatedSystemPrompt = systemPrompt;
+  let truncatedUserPrompt = userPrompt;
+  
+  // Truncate system prompt if needed (preserve beginning and end)
+  if (systemTokens > maxSystemTokens) {
+    const maxSystemChars = maxSystemTokens * 4;
+    const keepStart = Math.floor(maxSystemChars * 0.7);
+    const keepEnd = Math.floor(maxSystemChars * 0.3);
+    
+    truncatedSystemPrompt = systemPrompt.slice(0, keepStart) + 
+      '\n\n[... content truncated for token limits ...]\n\n' +
+      systemPrompt.slice(-keepEnd);
+  }
+  
+  // Truncate user prompt if needed (preserve beginning)
+  if (userTokens > maxUserTokens) {
+    const maxUserChars = maxUserTokens * 4;
+    truncatedUserPrompt = userPrompt.slice(0, maxUserChars) + '\n[... truncated for token limits]';
+  }
+  
+  return { 
+    systemPrompt: truncatedSystemPrompt, 
+    userPrompt: truncatedUserPrompt, 
+    wasTruncated: true 
+  };
+}
 
 const HTTP_STATUS = {
   OK: 200,
@@ -307,18 +356,38 @@ ${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join(
 Please generate a detailed, professional system prompt following the established template format with theme-specific visual frameworks, the provided color palette, and content analysis guidelines. Focus primarily on "${actualTheme}" with "${contextCategory}" context. Include the color palette in the standard format with the exact hex values provided above.`;
 
     console.log('Calling OpenAI with system prompt length:', systemPrompt.length, 'correlation:', correlationId);
+    
+    // Apply dynamic prompt truncation with token management
+    const { systemPrompt: truncatedSystemPrompt, userPrompt: truncatedUserPrompt, wasTruncated } = truncatePromptIfNeeded(systemPrompt, userPrompt);
+    
+    if (wasTruncated) {
+      console.log('🔧 Prompts truncated for token limits:', {
+        originalSystemLength: systemPrompt.length,
+        originalUserLength: userPrompt.length,
+        truncatedSystemLength: truncatedSystemPrompt.length,
+        truncatedUserLength: truncatedUserPrompt.length,
+        estimatedTokens: estimateTokens(truncatedSystemPrompt + truncatedUserPrompt)
+      });
+    }
 
     // Enhanced OpenAI request with correlation tracking
     const requestBodyForOpenAI = enhanceOpenAIRequestBody({
       model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL,
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
+        { role: 'system', content: truncatedSystemPrompt },
+        { role: 'user', content: truncatedUserPrompt }
       ],
       max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
     }, correlationId);
 
-    console.log('🔎 OpenAI Request Model/Agent:', { model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, generator_agent: agent.name, correlationId });
+    console.log('🔎 OpenAI Request Model/Agent:', { 
+      model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, 
+      generator_agent: agent.name, 
+      correlationId,
+      maxCompletionTokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
+      estimatedPromptTokens: estimateTokens(truncatedSystemPrompt + truncatedUserPrompt),
+      wasTruncated
+    });
 
     const { response, openAIRequestId: responseOpenAIRequestId, responseTime } = await makeOpenAIRequest({
       url: 'https://api.openai.com/v1/chat/completions',

@@ -144,6 +144,12 @@ JSON STRUCTURE:
       }),
     });
 
+    console.log('🎯 Token Management:', {
+      estimatedPromptTokens: Math.ceil((systemPrompt.length + `Generate a social media theme for: ${truncatedDescription}`.length) / 4),
+      maxAllowed: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+      model: OPENAI_CONFIG.DEFAULT_THEME_MODEL
+    });
+
     console.log('📡 OpenAI Response status:', response.status);
     console.log('📡 OpenAI Response headers:', Object.fromEntries(response.headers.entries()));
 
@@ -164,12 +170,14 @@ JSON STRUCTURE:
 
     // Log token usage details
     if (data.usage) {
-      console.log('🎯 Token usage:', {
-        promptTokens: data.usage.prompt_tokens,
-        completionTokens: data.usage.completion_tokens,
-        totalTokens: data.usage.total_tokens,
+      console.log('🎯 OpenAI Usage Analysis:', {
+        promptTokens: data.usage?.prompt_tokens || 0,
+        completionTokens: data.usage?.completion_tokens || 0,
+        totalTokens: data.usage?.total_tokens || 0,
         maxAllowed: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
-        hitLimit: data.usage.completion_tokens >= OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS
+        hitLimit: (data.usage?.completion_tokens || 0) >= OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
+        estimatedCost: (((data.usage?.prompt_tokens || 0) * 0.00015 + (data.usage?.completion_tokens || 0) * 0.0006) / 1000).toFixed(6)
       });
     }
 

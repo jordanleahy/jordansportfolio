@@ -294,7 +294,7 @@ ${rawJson}`;
           },
           { role: 'user', content: prompt }
         ],
-        max_completion_tokens: 4000
+        max_completion_tokens: 6000, // Increased from 4000
       }),
     });
 

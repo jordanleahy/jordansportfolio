@@ -14,12 +14,12 @@ export const OPENAI_CONFIG = {
   MAX_COMPLETION_TOKENS: {
     SHORT_RESPONSE: 500,
     MEDIUM_RESPONSE: 2000,
-    LONG_RESPONSE: 2500,
-    COMPREHENSIVE: 4000,
+    LONG_RESPONSE: 4000, // Increased from 2500
+    COMPREHENSIVE: 6000, // Increased from 4000
   },
   // Default model for theme generation (gpt-5-mini launched Aug 7, 2025)
   DEFAULT_THEME_MODEL: 'gpt-5-mini',
-  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 4000, // Increased to prevent token limit errors
+  DEFAULT_THEME_MAX_COMPLETION_TOKENS: 6000, // Increased from 4000
 } as const;
 
 // Image Generation Configuration
