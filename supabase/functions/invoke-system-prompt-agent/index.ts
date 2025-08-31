@@ -3,6 +3,17 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { trackOpenAIUsage, generateCorrelationId, makeOpenAIRequest, enhanceOpenAIRequestBody, extractUsageFromOpenAIResponse } from '../_shared/openai-attribution.ts';
 
+// Constants - Simplified for system prompt generation focus
+const AGENT_NAMES = {
+  SYSTEM_PROMPT_GENERATOR: 'System Prompt Generator',
+} as const;
+
+const OPENAI_CONFIG = {
+  DEFAULT_MODEL: 'gpt-5-mini-2025-08-07',
+  MAX_COMPLETION_TOKENS: 6000, // Increased from 4000 to 6000
+  TIMEOUT_MS: 180000, // 180 seconds (3 minutes) for system prompt generation
+  MAX_PROMPT_TOKENS: 120000, // Reserve space for completion tokens (200k context - 6k completion - safety margin)
+} as const;
 
 // Token estimation utility (rough approximation: 4 chars ≈ 1 token)
 function estimateTokens(text: string): number {
@@ -10,7 +21,7 @@ function estimateTokens(text: string): number {
 }
 
 // Dynamic prompt truncation to fit within token limits
-function truncatePromptIfNeeded(systemPrompt: string, userPrompt: string, maxPromptTokens: number = 120000): { systemPrompt: string, userPrompt: string, wasTruncated: boolean } {
+function truncatePromptIfNeeded(systemPrompt: string, userPrompt: string, maxPromptTokens: number = OPENAI_CONFIG.MAX_PROMPT_TOKENS): { systemPrompt: string, userPrompt: string, wasTruncated: boolean } {
   const systemTokens = estimateTokens(systemPrompt);
   const userTokens = estimateTokens(userPrompt);
   const totalTokens = systemTokens + userTokens;
@@ -81,7 +92,6 @@ Category: <Category>
 Theme: <Theme>  
 Audience: <Intended users>
 Use Cases: <Contexts where content will be used>
-Aspect Ratio (optional): Multiple supported (1:1, 16:9, 9:16, 4:3, 3:4)
 Style Tags: [vector, modern, professional]
 Status: active
 
@@ -250,7 +260,7 @@ serve(async (req) => {
     let { data: agent, error: agentError } = await supabase
       .from('openai_agents')
       .select('id, name, model_version')
-      .eq('name', 'System Prompt Generator')
+      .eq('name', AGENT_NAMES.SYSTEM_PROMPT_GENERATOR)
       .single();
 
     if (agentError || !agent) {
@@ -331,19 +341,19 @@ Generate the complete system prompt with ALL placeholders replaced with specific
 
     // Enhanced OpenAI request with correlation tracking
     const requestBodyForOpenAI = enhanceOpenAIRequestBody({
-      model: agent.model_version || 'gpt-5-mini-2025-08-07',
+      model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL,
       messages: [
         { role: 'system', content: truncatedSystemPrompt },
         { role: 'user', content: truncatedUserPrompt }
       ],
-      max_completion_tokens: 7000,
+      max_completion_tokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
     }, correlationId);
 
     console.log('🔎 OpenAI Request Model/Agent:', { 
-      model: agent.model_version || 'gpt-5-mini-2025-08-07', 
+      model: agent.model_version || OPENAI_CONFIG.DEFAULT_MODEL, 
       generator_agent: agent.name, 
       correlationId,
-      maxCompletionTokens: 7000,
+      maxCompletionTokens: OPENAI_CONFIG.MAX_COMPLETION_TOKENS,
       estimatedPromptTokens: estimateTokens(truncatedSystemPrompt + truncatedUserPrompt),
       wasTruncated
     });
@@ -357,7 +367,7 @@ Generate the complete system prompt with ALL placeholders replaced with specific
       },
       body: JSON.stringify(requestBodyForOpenAI),
       correlationId,
-      timeout: 180000,
+      timeout: OPENAI_CONFIG.TIMEOUT_MS,
       maxRetries: 3,
       operationType: 'system_prompt',
     });
