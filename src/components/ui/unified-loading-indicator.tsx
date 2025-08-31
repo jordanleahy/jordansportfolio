@@ -44,7 +44,7 @@ export const UnifiedLoadingIndicator: React.FC<UnifiedLoadingIndicatorProps> = (
   };
 
   const variantClasses = {
-    overlay: "inline-flex items-center gap-2 text-white bg-black/80 backdrop-blur-sm rounded-lg shadow-lg animate-in fade-in-0 duration-200",
+    overlay: "inline-flex items-center gap-2 text-white bg-black/80 backdrop-blur-sm rounded-lg shadow-lg animate-in fade-in-0 duration-200 whitespace-nowrap min-w-fit",
     inline: "inline-flex items-center gap-2 text-muted-foreground",
     button: "inline-flex items-center gap-2"
   };
