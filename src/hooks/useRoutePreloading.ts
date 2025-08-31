@@ -115,18 +115,6 @@ export const useRoutePreloading = () => {
         });
         break;
 
-      case '/agents':
-        console.log('[Prefetch] Starting agents data prefetch');
-        await queryClient.prefetchQuery({
-          queryKey: ['openai-agents'],
-          queryFn: async () => {
-            const { supabase } = await import('@/integrations/supabase/client');
-            const { data } = await supabase.from('openai_agents').select('*').order('created_at', { ascending: false });
-            return data || [];
-          },
-          staleTime: 5 * 60 * 1000,
-        });
-        break;
     }
   };
 
