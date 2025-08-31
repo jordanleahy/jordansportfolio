@@ -31,19 +31,24 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
 
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const { isProcessing } = useProcessingStatesContext();
+  const { isProcessing: isPostGenerating } = useProcessingStatesContext();
   
   const {
     data: promptData,
     isLoading,
     
     isCompleted,
+    isProcessing,
     updatePrompt,
     isUpdating,
     regeneratePrompt,
     isRegenerating,
     refetch
   } = useIndividualPromptCache(post?.id || '', themeId);
+
+  // Allow prompt generation if theme is completed or in progress
+  // Only block if theme hasn't started yet
+  const canGeneratePrompt = isCompleted || isProcessing;
 
   console.log('🎨 [IndividualPromptViewer] Hook data received', {
     postId: post?.id,
@@ -52,7 +57,10 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     isUpdating,
     isRegenerating,
     hasPromptData: !!promptData,
-    promptLength: promptData?.prompt?.length || 0
+    promptLength: promptData?.prompt?.length || 0,
+    isCompleted,
+    isProcessing,
+    canGeneratePrompt
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -81,11 +89,11 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
 
   // Auto-close when regeneration starts
   useEffect(() => {
-    if (post && isVisible && isProcessing(post.id, 'generate')) {
+    if (post && isVisible && isPostGenerating(post.id, 'generate')) {
       console.log('🎨 [IndividualPromptViewer] Auto-closing due to regeneration', { postId: post.id });
       onClose();
     }
-  }, [post, isVisible, isProcessing, onClose]);
+  }, [post, isVisible, isPostGenerating, onClose]);
 
   const hasChanges = useMemo(() => {
     return localPrompt.trim() !== originalPrompt.trim();
@@ -191,11 +199,11 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
       ) : !promptData && !isEditing ? (
         <div className="flex flex-col items-center justify-center py-8 space-y-4">
           <div className="text-sm text-muted-foreground text-center">
-            {!isCompleted ? (
+            {!canGeneratePrompt ? (
               <>
-                Theme is not completed yet.
+                Theme generation has not started yet.
                 <br />
-                Please wait for theme completion to generate individual prompts.
+                Please wait for theme processing to begin.
               </>
             ) : (
               "No image prompt generated yet for this post."
@@ -210,12 +218,12 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
               });
               handleRegeneratePrompt();
             }}
-            disabled={isRegenerating || !isCompleted}
+            disabled={isRegenerating || !canGeneratePrompt}
             variant="outline"
             size="sm"
           >
             <Lightbulb className="h-4 w-4 mr-2" />
-            {!isCompleted ? 'Waiting for Theme Completion...' : 'Generate Initial Prompt'}
+            {!canGeneratePrompt ? 'Theme Not Started...' : 'Generate Initial Prompt'}
           </Button>
         </div>
       ) : showDiff ? (
@@ -295,10 +303,10 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
               variant="outline"
               size="sm"
               onClick={handleRegeneratePrompt}
-              disabled={isRegenerating || !isCompleted}
+              disabled={isRegenerating || !canGeneratePrompt}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              {isRegenerating ? 'Generating...' : !isCompleted ? 'Theme Completion Required' : 'Regenerate'}
+              {isRegenerating ? 'Generating...' : !canGeneratePrompt ? 'Theme Not Started' : 'Regenerate'}
             </Button>
           </>
         )}
