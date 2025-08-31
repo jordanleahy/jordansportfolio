@@ -21,8 +21,8 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
   // const params = useParams();
   // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
-  // Check theme completion status - simplified to just check if completed
-  const { isCompleted } = useSimpleThemeCompletion(themeId);
+  // Check theme completion status - allow generation for in_progress themes
+  const { isCompleted, isProcessing } = useSimpleThemeCompletion(themeId);
 
   const query = useQuery({
     queryKey: QUERY_KEYS.individualPrompt(postId),
@@ -150,7 +150,8 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
          // ❌ BAD: Using theme name - removed in Phase 1 migration
          // theme,  // REMOVED - use themeId instead
         aspectRatio,
-        isCompleted
+        isCompleted,
+        isProcessing
       });
 
       if (!postId || !themeId) {
@@ -160,10 +161,11 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
         throw new Error(errorMsg);
       }
 
-      // Validate that theme is completed before proceeding
-      if (!isCompleted) {
-        const errorMsg = 'Theme is not completed yet. Please wait for theme completion before generating individual prompts.';
-        console.error('❌ Theme completion validation failed:', errorMsg);
+      // Allow individual prompt generation for completed or in-progress themes
+      // Only block if theme is pending (not started) or failed
+      if (!isCompleted && !isProcessing) {
+        const errorMsg = 'Theme generation has not started yet. Please wait for theme processing to begin.';
+        console.error('❌ Theme not ready for individual prompts:', errorMsg);
         throw new Error(errorMsg);
       }
 
@@ -208,11 +210,11 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       });
     },
     onError: (error) => {
-      const isCompletionError = error.message?.includes('not completed yet');
+      const isThemeNotReady = error.message?.includes('not started yet');
       toast({
         title: "Error",
-        description: isCompletionError ? 
-          "Theme is not completed yet. Please wait for theme completion." : 
+        description: isThemeNotReady ? 
+          "Theme generation has not started yet. Please wait for theme processing to begin." : 
           "Failed to generate individual prompt",
         variant: "destructive",
       });
@@ -237,6 +239,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
     error: query.error,
     hasPrompt,
     isCompleted,
+    isProcessing,
     updatePrompt: updateMutation.mutate,
     isUpdating: updateMutation.isPending,
     regeneratePrompt: regenerateMutation.mutate,
