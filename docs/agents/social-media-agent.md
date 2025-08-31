@@ -1,5 +1,8 @@
 # Social Media Agent
 
+**Created:** 2024-11-10  
+**Last Updated:** 2024-12-31
+
 ## Overview
 
 **Purpose**: Multi-platform social media content generator that creates engaging, platform-specific content from blog posts and user context.

@@ -1,5 +1,8 @@
 # Agent Templates
 
+**Created:** 2024-12-01  
+**Last Updated:** 2024-12-31
+
 ## Overview
 
 Pre-configured agent templates for common use cases, enabling rapid agent deployment with best-practice configurations and proven performance patterns.

@@ -1,5 +1,8 @@
 # System Prompt Agent
 
+**Created:** 2024-10-20  
+**Last Updated:** 2024-12-31
+
 ## Overview
 
 **Purpose**: Central orchestrator for generating specialized system prompts and routing them to appropriate downstream agents based on content category.

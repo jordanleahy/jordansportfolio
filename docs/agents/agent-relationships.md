@@ -1,5 +1,8 @@
 # Agent Relationships & Dependencies
 
+**Created:** 2024-11-15  
+**Last Updated:** 2024-12-31
+
 ## Overview
 
 The Agent Relationship system manages dependencies, workflows, and interactions between agents to ensure proper execution order and data flow coordination.

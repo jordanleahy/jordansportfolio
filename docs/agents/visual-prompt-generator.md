@@ -1,5 +1,8 @@
 # Visual Prompt Generator Agent
 
+**Created:** 2024-11-01  
+**Last Updated:** 2024-12-31
+
 ## Overview
 
 **Purpose**: Specialized agent for creating detailed, professional image generation prompts with industry-specific context and brand consistency.
