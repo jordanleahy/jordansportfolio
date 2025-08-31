@@ -5,7 +5,7 @@
 
 ## Overview
 
-**Purpose**: Central orchestrator for generating specialized system prompts that other AI agents can use to create high-quality, category-specific content.
+**Purpose**: The System Prompt Generator agent takes user queries, structures them into themes with social media posts, and creates comprehensive Visual System Prompts. These system prompts enable downstream agents to convert post titles and descriptions into detailed image generation prompts. Uses hard-coded templates for enhanced reliability and performance, with theme-first organization and integrated color theme support for visual consistency.
 
 **Role**: Core agent that creates comprehensive system prompts by filling template placeholders with theme and category-specific content, integrating with the latest OpenAI models and maintaining centralized prompt management.
 
