@@ -1,6 +1,28 @@
 /**
  * Safe Space Configuration for Image Generation
  * Defines aspect-ratio-specific composition rules to prevent edge-touching elements
+ * 
+ * USER EXPERIENCE:
+ * As a user, when I request an aspect ratio image type, this system automatically
+ * appends the appropriate composition rules to my prompt, eliminating the need
+ * to manually specify safe margins and preventing prompt bloat.
+ * 
+ * ANTI-BLOAT BENEFITS:
+ * - Removes redundant safe space instructions from user prompts and system prompts
+ * - Automatically applies aspect-ratio-specific composition rules
+ * - Creates single source of truth for safe zone requirements
+ * - Ensures consistent margin enforcement across all image generation workflows
+ * 
+ * WORKFLOW:
+ * 1. User provides base prompt with desired aspect ratio
+ * 2. System automatically appends safe space rules via appendSafeSpaceRules()
+ * 3. Enhanced prompt sent to image generation API with proper composition constraints
+ * 4. Generated images respect safe boundaries without manual specification
+ * 
+ * INTEGRATION POINTS:
+ * - visual-prompt-generator: Applied to generated prompts before return
+ * - bulk-image-generation: Applied during batch processing
+ * - All image generation workflows: Ensures consistent safe space enforcement
  */
 
 export interface SafeSpaceConfig {
