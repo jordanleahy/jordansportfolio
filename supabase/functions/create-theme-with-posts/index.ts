@@ -1,5 +1,6 @@
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { OPENAI_CONFIG } from '../_shared/config.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -98,7 +99,7 @@ serve(async (req) => {
     });
 
     // Create theme record
-    const { data: theme, error: themeError } = await supabase
+    const { data: theme, error: themeCreationError } = await supabase
       .from('themes')
       .insert({
         user_id: user.id,
@@ -112,9 +113,9 @@ serve(async (req) => {
       .select()
       .single();
 
-    if (themeError) {
+    if (themeCreationError) {
       console.error(`❌ [THEME] Failed to create theme`, {
-        error: themeError,
+        error: themeCreationError,
         correlationId
       });
       throw new Error('Failed to create theme record');
