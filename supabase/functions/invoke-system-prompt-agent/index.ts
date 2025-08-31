@@ -391,7 +391,10 @@ ${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join(
 
 Please generate a detailed, professional system prompt following the template format provided in the system prompt. Focus primarily on "${actualTheme}" with "${contextCategory}" context, ensuring all placeholders are properly filled and the content is tailored to this specific theme and category combination.`;
 
-    console.log('Calling OpenAI with system prompt length:', systemPrompt.length, 'correlation:', correlationId);
+    // QA: Log generated system prompt for debugging
+    console.log('🎯 GENERATED SYSTEM PROMPT LENGTH:', systemPrompt.length, 'correlation:', correlationId);
+    console.log('📝 TEMPLATE PREVIEW (first 500 chars):', systemPrompt.substring(0, 500) + '...');
+    console.log('🔧 PLACEHOLDER SUBSTITUTION COMPLETE - Category:', contextCategory, 'Theme:', actualTheme);
 
     // Enhanced OpenAI request with correlation tracking
     const requestBodyForOpenAI = enhanceOpenAIRequestBody({
