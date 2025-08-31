@@ -33,181 +33,174 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
 } as const;
 
-// Enhanced comprehensive system prompt for professional visual content generation
-const SYSTEM_PROMPT_GENERATOR_PROMPT = `# 🎨 PROFESSIONAL VISUAL CONTENT SYSTEM GENERATOR
+// New template-based system prompt for visual content generation
+const SYSTEM_PROMPT_TEMPLATE = `🖥️ System Prompt Template — Visual Content Generator
 
-You are an expert visual content system architect that creates comprehensive, production-ready visual content generators. Transform theme and category information into sophisticated system prompts that match enterprise-level quality standards and enable consistent, professional visual asset creation.
+You are an expert at creating detailed, professional image generation prompts specifically for <Category>-themed AI image generators, with a focus on <Theme>.
 
-## PURPOSE & ROLE
+🧠 Prompt Metadata
 
-Generate complete, production-ready Visual Content Generator system prompts that establish:
-- Professional design systems with exact specifications
-- Accessibility compliance and inclusive design frameworks
-- Structured output formats with machine-readable metadata
-- Quality assurance and brand consistency standards
-- Comprehensive visual frameworks and composition guidelines
+Category: <Category>
 
-## COMPREHENSIVE TEMPLATE STRUCTURE
+Theme: <Theme>
 
-### Required Header Format
-Always begin with: "System Prompt: '{THEME}'"
-Category: {category}
-Version: 1.0
-Author: {Category} Visual Content Engine
+Audience: <Intended users>
 
-### Core Framework Sections (in exact order):
+Use Cases: <Contexts where visuals will be used>
 
-1. **Purpose & Context**
-   - Clear definition of the visual content engine's role
-   - Target audience and stakeholder alignment
-   - Primary goals and quality objectives
-   - Category-specific context and industry requirements
+Aspect Ratio (optional): Multiple supported (1:1, 16:9, 9:16, 4:3, 3:4)
 
-2. **Primary Theme & Context**
-   - Theme definition with slug prefix
-   - Comprehensive description and use case scenarios
-   - Content strategy and messaging alignment
+Style Tags: [vector, modern, professional]
 
-3. **Production Specifications**
-   - Exact pixel dimensions: 1200x1200px (primary), 1200x630px (social preview)
-   - Safe zone requirements: central 80% with 10% margins on all sides
-   - Export formats: PNG (sRGB, 72-150 dpi), SVG (optimized vectors)
-   - File naming conventions with category prefixes
-   - Asset management and placeholder URL structure
+Status: active
 
-4. **Design System & Visual Framework**
-   - Grid system: invisible 3x3 rule-of-thirds for focal placement
-   - Layout zones: header (12-16%), body (central visual), footer (8-12%)
-   - Typography specifications: minimum 48px titles, 16px body text
-   - Icon system: 3-icon framework (Action/Safety/Data) with color assignments
-   - Composition guidelines: camera angles, depth, negative space
+📊 <Category> Content Analysis Framework
 
-5. **Professional Color Palette (exact hex values)**
-   - Primary: #2563eb (Deep Professional Blue)
-   - Secondary: #0891b2 (Trustworthy Teal)
-   - Accent: #16a34a (Success Green)
-   - Text: #1f2937 (Dark Gray)
-   - Background: #ffffff (Clean White)
-   - Border: #e5e7eb (Light Gray)
-   Include detailed usage guidelines for each color
+When generating prompts, analyze the content through these <Category>-specific lenses:
 
-6. **Visual Style & Tone Requirements**
-   - Modern, professional, clean vector illustration style
-   - NO photorealistic elements or heavy textures
-   - Flat design with subtle shadows and soft corners
-   - Category-appropriate visual metaphors and iconography
-   - Brand-safe, culturally neutral representation
+Lens 1: <Define purpose/values check>
 
-7. **Accessibility & Inclusion Framework**
-   - Contrast requirements: ≥4.5:1 for body text, ≥3:1 for large titles (24px+)
-   - Alt text specifications: 10-20 words per image
-   - Inclusive representation guidelines (diversity, mobility aids, age ranges)
-   - Sensory considerations (low-motion alternatives, high-contrast variants)
-   - Font size accessibility minimums
+Lens 2: <Define factual/reality check>
 
-8. **Content Analysis Framework**
-   - Industry-specific evaluation criteria
-   - Professional audience considerations
-   - Educational value and actionable insights
-   - Category-relevant scenarios and use cases
+Lens 3: <Define nuance/context considerations>
 
-9. **Visual Framework Details**
-   - Foreground: Category-specific subjects, tools, and focal elements
-   - Mid-ground: Supporting environments and contextual elements
-   - Background: Clean, professional settings with subtle patterns
-   - Camera angle specifications (eye-level, quarter aerial, top-down)
+(Swap in the right 2–4 "lenses" depending on the domain—e.g., financial/clinical/educational.)
 
-10. **Quality Guidelines & Standards**
-    - Professional appropriateness and industry credibility
-    - Visual consistency across asset series
-    - Technical accuracy and attention to detail
-    - Brand compliance and safety standards
+🎯 <Category> Visual Framework
+Foreground Elements (Always Include)
 
-11. **Structured Output Requirements**
-    Generate prompts that include:
-    - Machine-readable JSON metadata schema
-    - Template variable system for automated generation
-    - Asset management structure with placeholder URLs
-    - Performance tracking and revision control fields
-    - Compliance status and accessibility validation
+<List the must-have subject/iconography elements>
 
-12. **Critical Formatting & Export Instructions**
-    - DO NOT include title overlays or text in generated images
-    - DO NOT add aspect ratio labels or formatting to output
-    - Integrate aspect ratio naturally within prompt description
-    - Focus purely on visual elements, composition, and professional aesthetic
-    - End prompts with periods, no additional formatting or labels
+Mid-ground Context
 
-## ENHANCED VISUAL METAPHORS & INDUSTRY ELEMENTS
+<List workflows, connectors, or background context relevant to the theme>
 
-Customize based on category:
-- **Professional Tools**: Industry-appropriate instruments and technology
-- **Workplace Environments**: Category-specific settings and contexts  
-- **Success Indicators**: Relevant metrics and outcome visualizations
-- **Collaboration Elements**: Team dynamics and stakeholder interactions
-- **Innovation Symbols**: Forward-thinking and problem-solving visuals
+Background Foundation
 
-## STRUCTURED JSON OUTPUT SCHEMA
+<Define the setting, palette foundation, whitespace usage, gradients, or environmental details>
 
-Each generated prompt must include metadata structure:
-{
-  "id": "uuid-v4",
-  "version": "1.0", 
-  "author": "{Category} Visual Content Engine",
-  "created_at": "ISO-8601 timestamp",
-  "category": "{category}",
-  "theme": "{theme}",
-  "slug": "{category-theme-slug}",
-  "visual_prompt": "complete prompt string",
-  "accessibility": {
-    "contrast_targets": {"body": "4.5:1", "large": "3:1"},
-    "alt_text_present": true,
-    "font_size_recommendations": {"title_min": "48px", "body_min": "16px"}
-  },
-  "production_specs": {
-    "dimensions": ["1200x1200", "1200x630"],
-    "safe_zone": "80% central",
-    "export_formats": ["PNG", "SVG"]
-  },
-  "quality_standards": {
-    "style": "professional vector illustration",
-    "brand_compliance": "approved",
-    "accessibility_compliant": true
-  }
+🎨 <Category>-Specific Style Requirements
+
+Art Style: Professional vector illustration with clean, modern aesthetic
+
+Composition: <Define layout flow—triangular, left-to-right, modular cards, etc.>
+
+Subjects: <Define people, objects, diagrams, icons>
+
+Flow Indicators: <Define arrows, loops, dotted lines, etc.>
+
+Tone: <Define tone—gentle, practical, trustworthy, empathetic>
+
+🌈 <Category> Color Palette
+
+Primary: <PRIMARY_COLOR>
+
+Secondary: <SECONDARY_COLOR>
+
+Accent: <ACCENT_COLOR>
+
+Supporting: <TEXT_COLOR>
+
+Text: <TEXT_COLOR>
+
+Background: <BACKGROUND_COLOR>
+
+Border: <BORDER_COLOR>
+
+Color Usage:
+
+Primary for structural elements/backgrounds
+
+Secondary for highlights
+
+Accent for calls-to-action/alerts
+
+Supporting for text/tooling elements
+
+Always maintain clean whites and grays for readability
+
+🔍 <Category> Visual Metaphors
+
+Always incorporate these <Category>-specific metaphors:
+
+<Define metaphor 1>
+
+<Define metaphor 2>
+
+<Define metaphor 3>
+
+📋 <Category> Output Instructions
+
+Create prompts that will generate:
+
+<Overview or explainer poster>
+
+<Step-by-step card set>
+
+<Template/workflow scene>
+
+CRITICAL Requirements:
+
+Always specify exact aspect ratio when required
+
+Indicate whether text overlays are allowed or prohibited
+
+Use only professional vector illustration style
+
+✅ Safety & Generation Guidelines
+
+No external links—keep everything in descriptive text
+
+No policy-violating content—focus purely on professional, neutral scenes
+
+Fixed template—do not remove or rename any sections
+
+Only substitute placeholders—<Category>, <Theme>, etc.
+
+The goal of this to define context around the theme`;
+
+// Function to substitute placeholders in the template
+function substituteTemplatePlaceholders(template: string, values: {
+  category: string;
+  theme: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  textColor: string;
+  backgroundColor: string;
+  borderColor: string;
+  intendedUsers: string;
+  contextsForUse: string;
+  query?: string;
+}): string {
+  return template
+    .replace(/<Category>/g, values.category)
+    .replace(/<Theme>/g, values.theme)
+    .replace(/<PRIMARY_COLOR>/g, values.primaryColor)
+    .replace(/<SECONDARY_COLOR>/g, values.secondaryColor)
+    .replace(/<ACCENT_COLOR>/g, values.accentColor)
+    .replace(/<TEXT_COLOR>/g, values.textColor)
+    .replace(/<BACKGROUND_COLOR>/g, values.backgroundColor)
+    .replace(/<BORDER_COLOR>/g, values.borderColor)
+    .replace(/<Intended users>/g, values.intendedUsers)
+    .replace(/<Contexts where visuals will be used>/g, values.contextsForUse)
+    .replace(/<Define purpose\/values check>/g, `How does this align with ${values.category} professional standards and values?`)
+    .replace(/<Define factual\/reality check>/g, `Is the content factually accurate and realistic for ${values.category} practitioners?`)
+    .replace(/<Define nuance\/context considerations>/g, `What ${values.category}-specific context and nuances should be considered?`)
+    .replace(/<List the must-have subject\/iconography elements>/g, `Central focus on ${values.category}-specific tools, processes, or concepts related to ${values.theme}`)
+    .replace(/<List workflows, connectors, or background context relevant to the theme>/g, `Supporting ${values.category} environments and collaborative team elements working on ${values.theme}-related projects`)
+    .replace(/<Define the setting, palette foundation, whitespace usage, gradients, or environmental details>/g, `Clean, professional ${values.category} industry setting with subtle geometric patterns using the ${values.theme} color palette`)
+    .replace(/<Define layout flow—triangular, left-to-right, modular cards, etc\.>/g, `Balanced composition with good visual hierarchy suitable for ${values.category} content`)
+    .replace(/<Define people, objects, diagrams, icons>/g, `Professional figures engaged in ${values.category} activities, relevant tools, and ${values.theme}-specific elements`)
+    .replace(/<Define arrows, loops, dotted lines, etc\.>/g, `Process flow indicators showing ${values.category} workflows and ${values.theme} connections`)
+    .replace(/<Define tone—gentle, practical, trustworthy, empathetic>/g, `Professional, trustworthy, and credible tone appropriate for ${values.category} audience`)
+    .replace(/<Define metaphor 1>/g, `${values.category} expertise and professionalism in ${values.theme} context`)
+    .replace(/<Define metaphor 2>/g, `Industry-specific tools and processes relevant to ${values.theme}`)
+    .replace(/<Define metaphor 3>/g, `Success metrics and outcomes in ${values.category} related to ${values.theme}`)
+    .replace(/<Overview or explainer poster>/g, `Professional overview visuals suitable for ${values.category} ${values.theme} content`)
+    .replace(/<Step-by-step card set>/g, `Clear instructional visuals for ${values.category} ${values.theme} processes`)
+    .replace(/<Template\/workflow scene>/g, `Workflow templates and professional scenes for ${values.category} ${values.theme} scenarios`);
 }
-
-## PROFESSIONAL QUALITY STANDARDS
-
-**CRITICAL REQUIREMENTS:**
-- Maintain calm, professional, trustworthy visual tone
-- Emphasize vector illustration with clean, modern aesthetic  
-- Include comprehensive accessibility compliance
-- Provide exact production specifications
-- Establish clear visual hierarchy and composition rules
-- Enable consistent brand representation across asset series
-- Support automated generation and quality validation
-
-## CATEGORY CUSTOMIZATION FRAMEWORK
-
-Adapt all sections based on provided category:
-- **Industry Context**: Specific professional environments and scenarios
-- **Stakeholder Audience**: Target professional roles and decision-makers  
-- **Visual Metaphors**: Category-appropriate symbols and concepts
-- **Technical Elements**: Industry-specific tools, processes, and outcomes
-- **Compliance Requirements**: Sector-specific standards and regulations
-
-## OUTPUT GENERATION INSTRUCTIONS
-
-Create a complete, comprehensive Visual Content Generator system prompt that:
-1. Follows the exact 12-section structure outlined above
-2. Incorporates all production specifications and accessibility standards
-3. Provides detailed visual frameworks and composition guidelines
-4. Includes structured JSON metadata for automated processing
-5. Establishes professional quality standards and brand consistency
-6. Enables scalable, consistent visual asset generation
-7. Maintains category-specific customization while following universal standards
-
-Transform the provided theme and category into an enterprise-level visual content generation system that produces professional, accessible, and brand-compliant visual assets.`;
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -241,6 +234,48 @@ async function getDefaultColorTheme(supabase: any): Promise<any> {
   return data;
 }
 
+// Helper functions to determine intended users and contexts based on category
+function getIntendedUsers(category: string): string {
+  const categoryMappings: Record<string, string> = {
+    'cdi': 'Clinical Documentation Specialists, Healthcare Administrators, Medical Coders',
+    'contracts': 'Legal Professionals, Contract Managers, Business Executives',
+    'healthcare': 'Healthcare Professionals, Medical Staff, Healthcare Administrators',
+    'finance': 'Financial Analysts, Investment Professionals, CFOs',
+    'marketing': 'Marketing Professionals, Brand Managers, Digital Marketers',
+    'technology': 'IT Professionals, Software Developers, Tech Leaders',
+    'education': 'Educators, Training Professionals, Academic Administrators',
+    'hr': 'HR Professionals, Talent Managers, Organizational Leaders',
+    'sales': 'Sales Professionals, Account Managers, Revenue Leaders',
+    'operations': 'Operations Managers, Process Improvement Specialists, COOs',
+    'consulting': 'Management Consultants, Strategic Advisors, Business Analysts',
+    'design': 'UX/UI Designers, Creative Directors, Design Teams',
+    'product': 'Product Managers, Product Owners, Innovation Teams',
+    'general': 'Business Professionals, Decision Makers, Industry Stakeholders'
+  };
+  
+  return categoryMappings[category.toLowerCase()] || categoryMappings['general'];
+}
+
+function getContextsForUse(category: string): string {
+  const contextMappings: Record<string, string> = {
+    'cdi': 'Medical record documentation, clinical coding workflows, compliance training materials',
+    'contracts': 'Legal document reviews, contract negotiations, compliance presentations',
+    'healthcare': 'Patient care protocols, medical education, healthcare policy communications',
+    'finance': 'Financial reports, investor presentations, risk management materials',
+    'marketing': 'Campaign materials, brand communications, social media content',
+    'technology': 'Technical documentation, software presentations, IT training materials',
+    'education': 'Learning materials, curriculum design, educational presentations',
+    'hr': 'Employee communications, training programs, organizational development',
+    'sales': 'Sales presentations, client proposals, revenue reporting',
+    'operations': 'Process documentation, operational training, efficiency reporting',
+    'consulting': 'Client presentations, strategic recommendations, business case studies',
+    'design': 'Design portfolios, creative briefs, user experience documentation',
+    'product': 'Product roadmaps, feature specifications, user journey mapping',
+    'general': 'Business presentations, professional communications, strategic planning'
+  };
+  
+  return contextMappings[category.toLowerCase()] || contextMappings['general'];
+}
 
 serve(async (req) => {
   console.log('invoke-system-prompt-agent function called');
@@ -322,12 +357,28 @@ serve(async (req) => {
 
     console.log('Found System Prompt Generator agent:', agent.id);
 
-    // Use hard-coded system prompt for reliability and performance
-    const systemPrompt = SYSTEM_PROMPT_GENERATOR_PROMPT;
-
-    // Theme is now primary focus, category provides context
+    // Generate dynamic system prompt using template substitution
     const actualTheme = theme;
     const contextCategory = category || 'general';
+    
+    // Determine intended users and contexts based on category
+    const intendedUsers = getIntendedUsers(contextCategory);
+    const contextsForUse = getContextsForUse(contextCategory);
+    
+    // Substitute placeholders in the template
+    const systemPrompt = substituteTemplatePlaceholders(SYSTEM_PROMPT_TEMPLATE, {
+      category: contextCategory.charAt(0).toUpperCase() + contextCategory.slice(1),
+      theme: actualTheme,
+      primaryColor: defaultColorTheme.primary_color,
+      secondaryColor: defaultColorTheme.secondary_color,
+      accentColor: defaultColorTheme.accent_color,
+      textColor: defaultColorTheme.text_color,
+      backgroundColor: defaultColorTheme.background_color,
+      borderColor: defaultColorTheme.border_color,
+      intendedUsers,
+      contextsForUse,
+      query: description || ''
+    });
     
     let userPrompt = `Create a comprehensive system prompt for the "${actualTheme}" theme with "${contextCategory}" category context.
 
@@ -335,21 +386,10 @@ Primary Theme: ${actualTheme}
 Category Context: ${contextCategory}
 Description: ${description || 'No description provided'}
 
-Default Color Palette to Include:
-- Primary: ${defaultColorTheme.primary_color} (${defaultColorTheme.name} theme)
-- Secondary: ${defaultColorTheme.secondary_color}
-- Accent: ${defaultColorTheme.accent_color}
-- Text: ${defaultColorTheme.text_color}
-- Background: ${defaultColorTheme.background_color}
-- Border: ${defaultColorTheme.border_color}
-
-Visual Style: ${defaultColorTheme.visual_style}
-Color Usage: ${defaultColorTheme.color_instructions}
-
 Sample content from this theme:
 ${sample_posts?.map((post: any) => `- ${post.title}: ${post.description}`).join('\n') || 'No sample posts provided'}
 
-Please generate a detailed, professional system prompt following the established template format with theme-specific visual frameworks, the provided color palette, and content analysis guidelines. Focus primarily on "${actualTheme}" with "${contextCategory}" context. Include the color palette in the standard format with the exact hex values provided above.`;
+Please generate a detailed, professional system prompt following the template format provided in the system prompt. Focus primarily on "${actualTheme}" with "${contextCategory}" context, ensuring all placeholders are properly filled and the content is tailored to this specific theme and category combination.`;
 
     console.log('Calling OpenAI with system prompt length:', systemPrompt.length, 'correlation:', correlationId);
 
