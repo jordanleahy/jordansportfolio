@@ -85,13 +85,12 @@ serve(async (req) => {
         correlationId
       });
       
-      // Call the existing theme generation function
+      // Call the theme creation function
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        'user-idea-streaming-image-pipeline',
+        'create-theme-with-posts',
         {
           body: {
-            description: body.description,
-            stream: false
+            description: body.description
           },
           headers: {
             Authorization: authHeader,
