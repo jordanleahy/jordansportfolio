@@ -3,19 +3,25 @@
  * 
  * PURPOSE:
  * Specialized function for generating visual image prompts for social media content.
- * Extracted from the monolithic generate-image-prompt-dynamic for better performance
- * and maintainability.
+ * Provides optimized prompt generation with automatic safe space rule application.
  * 
  * INPUTS:
  * - postId: string - Social media post ID to fetch content
- * - themeId: string (optional) - Theme ID for theme-specific prompts
+ * - themeId: string - Theme ID for theme-specific prompts
  * - systemPromptId: string (optional) - Explicit system prompt override
- * - colorTheme: object (optional) - Brand color theme configuration
+ * - colorTheme: object (optional) - Brand color theme configuration with colors and styling
+ * - aspectRatio: string (optional) - Desired aspect ratio (e.g., "16:9", "9:16", "1:1") - defaults to "1:1"
+ * - aspect_ratio: string (optional) - Alternative naming for aspectRatio parameter
+ * - referenceAnalysis: object (optional) - Reference image analysis data for visual characteristics matching
+ * 
+ * NOTE: Aspect ratio and safe space composition rules are automatically applied via appendSafeSpaceRules().
+ * System prompts should focus on content and style only, not aspect ratio specifications.
  * 
  * OUTPUTS:
  * - Success: { generatedPrompt: string, category: string, agent: string, correlationId: string, usage: object }
  * - Error: { error: string }
  */
+
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
