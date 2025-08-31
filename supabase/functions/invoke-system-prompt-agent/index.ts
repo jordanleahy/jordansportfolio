@@ -426,8 +426,7 @@ Please generate a detailed, professional system prompt following the established
     }
 
     const genPreview = generatedPrompt.slice(0, 140).replace(/\n/g, ' ');
-    const formatHint = genPreview.startsWith('#') || genPreview.includes('VISUAL PROMPT GENERATOR') ? 'visual_template' : (genPreview.toLowerCase().startsWith('header') ? 'header_template' : 'unknown');
-    console.log('Generated system prompt diagnostics:', { length: generatedPrompt.length, preview: genPreview, formatHint });
+    console.log('Generated system prompt diagnostics:', { length: generatedPrompt.length, preview: genPreview });
 
     // 🔍 ENHANCED LOGGING: Starting database operations
     console.log('📊 DATABASE OPERATIONS: Starting system prompt storage');
@@ -512,7 +511,7 @@ Please generate a detailed, professional system prompt following the established
           const { error: themeUpdateError } = await supabase
             .from('themes')
             .update({ 
-              visual_prompt_system_prompt_id: insertedPrompt.id,
+              system_prompt_id: insertedPrompt.id,
               updated_at: new Date().toISOString()
             })
             .eq('id', theme_id)
