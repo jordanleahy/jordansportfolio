@@ -345,237 +345,140 @@ Incorporate these characteristics naturally into the generated prompt while main
       maxTokensAllowed: 3000
     });
 
-    // Calculate dynamic token limits based on input size
-    const inputTokensEstimate = Math.ceil((categoryPrompt.prompt.length + userMessage.length) / 4);
-    logger.info('Token calculation', {
-      systemPromptLength: categoryPrompt.prompt.length,
-      userMessageLength: userMessage.length,
-      totalInputChars: categoryPrompt.prompt.length + userMessage.length,
-      estimatedInputTokens: inputTokensEstimate
+    // Hardcoded single model configuration for testing
+    const model = 'gpt-5-2025-08-07';
+    const maxTokens = 3000;
+    let generatedText: string | null = null;
+    const usedModel = model;
+
+    logger.info('Using hardcoded model', {
+      model,
+      maxTokens,
+      correlationId
     });
 
-    // GPT-5-only model fallback configuration with dynamic token limits
-    const modelConfigs = [
-      {
-        name: 'gpt-5-mini-2025-08-07',
-        maxInputTokens: 8000, // Conservative limit for GPT-5-mini
-        maxTokens: Math.max(500, Math.min(3000, 8000 - inputTokensEstimate)),
-        description: 'Primary GPT-5 Mini model'
-      },
-      {
-        name: 'gpt-5-2025-08-07',
-        maxInputTokens: 200000, // Much higher context for flagship model
-        maxTokens: Math.max(1000, Math.min(4000, 12000 - inputTokensEstimate)),
-        description: 'GPT-5 flagship model'
-      },
-      {
-        name: 'gpt-5-nano-2025-08-07',
-        maxInputTokens: 4000, // Most conservative for nano
-        maxTokens: Math.max(300, Math.min(1500, 4000 - inputTokensEstimate)),
-        description: 'GPT-5 nano fallback'
-      }
-    ];
+    logger.startTiming('openai_request');
 
-    // Validate token limits before proceeding
-    for (const config of modelConfigs) {
-      if (inputTokensEstimate > config.maxInputTokens) {
-        logger.warn('Input tokens exceed model limit', {
-          model: config.name,
-          inputTokens: inputTokensEstimate,
-          maxInputTokens: config.maxInputTokens,
-          exceedsBy: inputTokensEstimate - config.maxInputTokens
-        });
-      }
+    const openAIRequestBody = {
+      model,
+      messages: [
+        { role: 'system', content: categoryPrompt.prompt },
+        { role: 'user', content: userMessage }
+      ],
+      max_completion_tokens: maxTokens,
+      user: correlationId
+    };
+
+    logger.info('OpenAI request body prepared', {
+      model: openAIRequestBody.model,
+      messagesCount: openAIRequestBody.messages.length,
+      max_completion_tokens: openAIRequestBody.max_completion_tokens,
+      systemPromptLength: categoryPrompt.prompt.length,
+      userMessageLength: userMessage.length,
+      correlationId
+    });
+
+    const openAIResponse = await makeOpenAIRequest({
+      url: 'https://api.openai.com/v1/chat/completions',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(openAIRequestBody),
+      correlationId,
+      timeout: 180000,
+      operationType: 'content_generation'
+    });
+
+    logger.endTiming('openai_request');
+
+    const openAIData = await openAIResponse.response.json();
+    
+    logger.info('OpenAI response received', {
+      model,
+      httpStatus: openAIResponse.response.status,
+      responseOk: openAIResponse.response.ok,
+      hasData: !!openAIData,
+      correlationId
+    });
+
+    // Check for OpenAI API errors
+    if (openAIData.error) {
+      logger.error('OpenAI API error', {
+        model,
+        errorType: openAIData.error.type,
+        errorMessage: openAIData.error.message,
+        correlationId
+      });
+      throw new Error(`OpenAI API Error: ${openAIData.error.message}`);
     }
 
-    let generatedText: string | null = null;
-    let lastError: Error | null = null;
-    let usedModel: string | null = null;
+    // Extract usage and costs
+    const usageData = extractUsageFromOpenAIResponse(openAIData);
+    promptTokens = usageData.promptTokens;
+    completionTokens = usageData.completionTokens;
+    tokensUsed = usageData.totalTokens;
+    estimatedCost = usageData.estimatedCost;
+    openAIRequestId = usageData.openAIRequestId;
 
-    // Try each model in sequence until one succeeds
-    for (let attemptIndex = 0; attemptIndex < modelConfigs.length && !generatedText; attemptIndex++) {
-      const modelConfig = modelConfigs[attemptIndex];
-      
-      try {
-        logger.info('Model attempt', {
-          attemptNumber: attemptIndex + 1,
-          totalAttempts: modelConfigs.length,
-          selectedModel: modelConfig.name,
-          description: modelConfig.description,
-          correlationId
-        });
-
-        logger.startTiming(`openai_request_attempt_${attemptIndex + 1}`);
-
-        const openAIRequestBody = {
-          model: modelConfig.name,
-          messages: [
-            { role: 'system', content: categoryPrompt.prompt },
-            { role: 'user', content: userMessage }
-          ],
-          max_completion_tokens: modelConfig.maxTokens,
-          user: correlationId
-        };
-
-        // Enhanced request logging
-        logger.info('OpenAI request body prepared', {
-          model: openAIRequestBody.model,
-          messagesCount: openAIRequestBody.messages.length,
-          parameters: {
-            max_completion_tokens: openAIRequestBody.max_completion_tokens,
-            user_id_set: !!openAIRequestBody.user,
-            is_legacy_model: modelConfig.name.includes('gpt-4o')
-          },
-          message_details: {
-            system_length: categoryPrompt.prompt.length,
-            user_length: userMessage.length,
-            total_input_chars: categoryPrompt.prompt.length + userMessage.length
-          },
-          request_structure: Object.keys(openAIRequestBody),
-          correlationId
-        });
-
-        const openAIResponse = await makeOpenAIRequest({
-          url: 'https://api.openai.com/v1/chat/completions',
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openAIApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(openAIRequestBody),
-          correlationId,
-          timeout: 180000,
-          operationType: 'content_generation'
-        });
-
-        logger.endTiming(`openai_request_attempt_${attemptIndex + 1}`);
-
-        // Parse the response to get the actual OpenAI response data
-        const openAIData = await openAIResponse.response.json();
-        
-        // Comprehensive response logging
-        logger.info('OpenAI response received', {
-          attempt: attemptIndex + 1,
-          model: modelConfig.name,
-          httpStatus: openAIResponse.response.status,
-          httpStatusText: openAIResponse.response.statusText,
-          responseOk: openAIResponse.response.ok,
-          hasData: !!openAIData,
-          responseSize: JSON.stringify(openAIData).length,
-          correlationId
-        });
-
-        // Check for OpenAI API errors first
-        if (openAIData.error) {
-          logger.error('OpenAI API returned error', {
-            attempt: attemptIndex + 1,
-            model: modelConfig.name,
-            errorType: openAIData.error.type,
-            errorCode: openAIData.error.code,
-            errorMessage: openAIData.error.message,
-            errorParam: openAIData.error.param,
-            correlationId
-          });
-          throw new Error(`OpenAI API Error (${modelConfig.name}): ${openAIData.error.message}`);
-        }
-
-        // Extract usage and costs
-        const usageData = extractUsageFromOpenAIResponse(openAIData);
-        promptTokens = usageData.promptTokens;
-        completionTokens = usageData.completionTokens;
-        tokensUsed = usageData.totalTokens;
-        estimatedCost = usageData.estimatedCost;
-        openAIRequestId = usageData.openAIRequestId;
-
-        // Detailed choice analysis
-        if (!openAIData.choices || openAIData.choices.length === 0) {
-          throw new Error(`No choices in OpenAI response from ${modelConfig.name}`);
-        }
-
-        const choice = openAIData.choices[0];
-        
-        // Check for refusal (new OpenAI safety feature)
-        if (choice.message?.refusal) {
-          logger.warn('OpenAI refused content generation', {
-            attempt: attemptIndex + 1,
-            model: modelConfig.name,
-            refusalReason: choice.message.refusal,
-            correlationId
-          });
-          throw new Error(`OpenAI refused request: ${choice.message.refusal}`);
-        }
-
-        // Parse response content
-        const messageContent = choice.message?.content;
-
-        if (messageContent && messageContent.trim().length > 0) {
-          const trimmedContent = messageContent.trim();
-          
-          logger.info('Content successfully generated', {
-            attempt: attemptIndex + 1,
-            model: modelConfig.name,
-            contentLength: trimmedContent.length,
-            finishReason: choice.finish_reason,
-            correlationId
-          });
-
-          // Apply safe space rules to the generated prompt
-          const originalLength = trimmedContent.length;
-          generatedText = appendSafeSpaceRules(trimmedContent, requestedAspectRatio);
-          usedModel = modelConfig.name;
-          
-          logger.info('Safe space rules applied', { 
-            aspectRatio: requestedAspectRatio,
-            originalLength,
-            finalPromptLength: generatedText.length,
-            lengthIncrease: generatedText.length - originalLength,
-            usedModel,
-            correlationId 
-          });
-
-          // Success! Break out of the model attempt loop
-          break;
-        } else {
-          // Log the failure and continue to next model
-          logger.warn('Model returned empty content, trying next model', {
-            attempt: attemptIndex + 1,
-            model: modelConfig.name,
-            hasContent: !!messageContent,
-            contentLength: messageContent?.length || 0,
-            finishReason: choice.finish_reason,
-            correlationId
-          });
-          throw new Error(`Empty content from ${modelConfig.name}`);
-        }
-
-      } catch (error) {
-        lastError = error as Error;
-        logger.error('Model attempt failed', {
-          attempt: attemptIndex + 1,
-          model: modelConfig.name,
-          error: lastError.message,
-          willRetry: attemptIndex < modelConfigs.length - 1,
-          correlationId
-        });
-        
-        // If this was the last attempt, don't continue the loop
-        if (attemptIndex === modelConfigs.length - 1) {
-          break;
-        }
-        
-        // Small delay before next attempt
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+    if (!openAIData.choices || openAIData.choices.length === 0) {
+      throw new Error('No choices in OpenAI response');
     }
+
+    const choice = openAIData.choices[0];
+    
+    if (choice.message?.refusal) {
+      logger.warn('OpenAI refused content generation', {
+        model,
+        refusalReason: choice.message.refusal,
+        correlationId
+      });
+      throw new Error(`OpenAI refused request: ${choice.message.refusal}`);
+    }
+
+    const messageContent = choice.message?.content;
+
+    if (!messageContent || messageContent.trim().length === 0) {
+      logger.error('Empty content from OpenAI', {
+        model,
+        hasContent: !!messageContent,
+        contentLength: messageContent?.length || 0,
+        finishReason: choice.finish_reason,
+        correlationId
+      });
+      throw new Error('Empty content received from OpenAI');
+    }
+
+    const trimmedContent = messageContent.trim();
+    
+    logger.info('Content successfully generated', {
+      model,
+      contentLength: trimmedContent.length,
+      finishReason: choice.finish_reason,
+      correlationId
+    });
+
+    // Apply safe space rules to the generated prompt
+    const originalLength = trimmedContent.length;
+    generatedText = appendSafeSpaceRules(trimmedContent, requestedAspectRatio);
+    
+    logger.info('Safe space rules applied', { 
+      aspectRatio: requestedAspectRatio,
+      originalLength,
+      finalPromptLength: generatedText.length,
+      lengthIncrease: generatedText.length - originalLength,
+      usedModel,
+      correlationId 
+    });
 
     // Check if we successfully generated content
     if (!generatedText) {
-      logger.error('All models failed to generate content', {
-        totalAttempts: modelConfigs.length,
-        lastError: lastError?.message,
+      logger.error('Failed to generate content', {
+        model,
         correlationId
       });
-      throw new Error(`All models failed to generate content. Last error: ${lastError?.message || 'Unknown error'}`);
+      throw new Error('Failed to generate content from OpenAI');
     }
 
     success = true;
