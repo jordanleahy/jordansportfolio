@@ -252,10 +252,18 @@ export default function StoriesDashboard() {
   });
 
   // Image generation retry system - listens for system prompt completion
+  console.log('🔍 About to initialize useImageGenerationRetry with:', { 
+    enabled: !!user, 
+    userId: user?.id,
+    userExists: !!user 
+  });
+  
   const { isListening } = useImageGenerationRetry({
     enabled: !!user,
     userId: user?.id,
   });
+  
+  console.log('🎯 useImageGenerationRetry initialized:', { isListening });
   const handleDeleteCategory = async (category: string) => {
     try {
       // First get the theme ID from category name
