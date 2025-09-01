@@ -28,7 +28,6 @@ import type { SocialMediaPost } from '@/types/socialMedia';
 import { Helmet } from 'react-helmet-async';
 import { UI_FLAGS } from '@/config/uiFlags';
 import { AuroraBackground } from '@/components/ui/aurora-background';
-import { DuplicateThemeModal } from '@/components/stories/DuplicateThemeModal';
 import { CollectionCard } from '@/components/library/CollectionCard';
 import { useThemeShimmer } from '@/hooks/useThemeShimmer';
 import { useFeaturedCollections } from '@/hooks/useFeaturedCollections';
@@ -79,10 +78,6 @@ export default function StoriesDashboard() {
   } = useToast();
 
   const [showHero, setShowHero] = useState(false);
-  const [duplicateInfo, setDuplicateInfo] = useState<{
-    category: string;
-    theme: string;
-  } | null>(null);
 
   // Precompute SEO for /stories
   const storiesSEO = generateSEOMetadata({
@@ -589,111 +584,6 @@ export default function StoriesDashboard() {
       setIsCancelling(false);
     }
   };
-  const handleConfirmDuplicate = async (newCategory: string) => {
-    if (!pendingTheme?.description) {
-      setDuplicateInfo(null);
-      toast({
-        title: 'Missing description',
-        description: 'Please try again.',
-        variant: 'destructive'
-      });
-      return;
-    }
-    setDuplicateInfo(null);
-    if (!user) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to generate themes.'
-      });
-      navigate('/auth');
-      return;
-    }
-    setIsGeneratingTheme(true);
-    try {
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('user-idea-streaming-image-pipeline', {
-        body: {
-          description: pendingTheme.description,
-          stream: false,
-          overrideCategory: newCategory
-        }
-      });
-      if (error) {
-        throw new Error(error.message);
-      }
-      if (!data?.success) {
-        throw new Error(data?.error || 'Failed to generate theme');
-      }
-      toast({
-        title: 'Theme Created!',
-        description: `Generated "${data.theme}" with ${data.postCount} posts under "${data.category}"`
-      });
-
-      // Replace pending theme with real data for duplicate case
-      clearPendingThemeState();
-      
-      const refreshedThemes = await optimizedSocialMediaService.getAvailableThemes();
-      
-      setAvailableThemes(prevThemes => {
-        // Find and replace the pending theme
-        const pendingIndex = prevThemes.findIndex(theme => 
-          theme.id.startsWith('pending-')
-        );
-        
-        if (pendingIndex !== -1) {
-          const newTheme = refreshedThemes.find(theme => 
-            theme.theme_name === data.theme || theme.category === data.category
-          );
-          
-          if (newTheme) {
-            const newThemes = [...prevThemes];
-            newThemes[pendingIndex] = newTheme;
-            
-            // Filter out duplicates and add any missing themes
-            const existingIds = new Set(newThemes.map(t => t.id));
-            const additionalThemes = refreshedThemes.filter(rt => !existingIds.has(rt.id));
-            
-            return [...newThemes.filter(t => !t.id.startsWith('pending-')), ...additionalThemes];
-          }
-        }
-        
-        return refreshedThemes;
-      });
-    } catch (err: any) {
-      console.error('Duplicate confirm error:', err);
-      toast({
-        title: 'Creation failed',
-        description: err.message || 'Could not create theme',
-        variant: 'destructive'
-      });
-      // Transform to error state for duplicate case failure
-      clearPendingThemeState();
-      setAvailableThemes(prev => prev.map(theme => {
-        if (theme.id.startsWith('pending-')) {
-          return {
-            ...theme,
-            id: 'error-' + Date.now(),
-            theme_name: 'Generation Failed',
-            first_post: {
-              ...theme.first_post!,
-              title: 'Error: Generation failed',
-              description: `Failed to create duplicate theme: ${err.message?.slice(0, 100) || 'Unknown error'}`
-            }
-          };
-        }
-        return theme;
-      }));
-      
-      // Auto-clear error state after 5 seconds
-      setTimeout(() => {
-        setAvailableThemes(prev => prev.filter(theme => !theme.id.startsWith('error-')));
-      }, 5000);
-    } finally {
-      setIsGeneratingTheme(false);
-    }
-  };
 
   // Early return with loading screen if still initializing
   if (loading || (user && !hasInitialized)) {
@@ -1038,12 +928,5 @@ export default function StoriesDashboard() {
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} selectedThemes={getSelectedThemes()} onConfirm={handleBulkDelete} isDeleting={isDeletingBulk} progress={deleteProgress} />
-
-        {/* Duplicate Theme Modal */}
-        <DuplicateThemeModal open={!!duplicateInfo} category={duplicateInfo?.category || ''} theme={duplicateInfo?.theme || ''} onCancel={() => {
-      setDuplicateInfo(null);
-      // Remove the pending shimmer theme if user cancels
-      clearPendingThemeState();
-    }} onConfirm={handleConfirmDuplicate} />
       </PageLayout>;
 }
