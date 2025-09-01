@@ -156,7 +156,7 @@ const circuitBreaker: CircuitBreakerState = {
 // Timeout configuration based on operation type
 function getTimeoutForOperation(operationType: string = 'default', retryAttempt: number = 1): number {
   const baseTimeouts = {
-    'system_prompt': 180000,      // 180 seconds for complex system prompts
+    'system_prompt': 240000,      // 240 seconds (4 minutes) for complex system prompts
     'content_generation': 120000,  // 120 seconds for content generation
     'image_generation': 90000,    // 90 seconds for image generation
     'default': 180000             // 180 seconds default
