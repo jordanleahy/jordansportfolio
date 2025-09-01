@@ -345,24 +345,48 @@ Incorporate these characteristics naturally into the generated prompt while main
       maxTokensAllowed: 3000
     });
 
-    // Model fallback configuration
+    // Calculate dynamic token limits based on input size
+    const inputTokensEstimate = Math.ceil((categoryPrompt.prompt.length + userMessage.length) / 4);
+    logger.info('Token calculation', {
+      systemPromptLength: categoryPrompt.prompt.length,
+      userMessageLength: userMessage.length,
+      totalInputChars: categoryPrompt.prompt.length + userMessage.length,
+      estimatedInputTokens: inputTokensEstimate
+    });
+
+    // GPT-5-only model fallback configuration with dynamic token limits
     const modelConfigs = [
       {
         name: 'gpt-5-mini-2025-08-07',
-        maxTokens: 3000,
+        maxInputTokens: 8000, // Conservative limit for GPT-5-mini
+        maxTokens: Math.max(500, Math.min(3000, 8000 - inputTokensEstimate)),
         description: 'Primary GPT-5 Mini model'
       },
       {
-        name: 'gpt-4.1-2025-04-14',
-        maxTokens: 3000,
-        description: 'Fallback GPT-4.1 model'
+        name: 'gpt-5-2025-08-07',
+        maxInputTokens: 200000, // Much higher context for flagship model
+        maxTokens: Math.max(1000, Math.min(4000, 12000 - inputTokensEstimate)),
+        description: 'GPT-5 flagship model'
       },
       {
-        name: 'gpt-4o-mini',
-        maxTokens: 3000,
-        description: 'Legacy fallback model'
+        name: 'gpt-5-nano-2025-08-07',
+        maxInputTokens: 4000, // Most conservative for nano
+        maxTokens: Math.max(300, Math.min(1500, 4000 - inputTokensEstimate)),
+        description: 'GPT-5 nano fallback'
       }
     ];
+
+    // Validate token limits before proceeding
+    for (const config of modelConfigs) {
+      if (inputTokensEstimate > config.maxInputTokens) {
+        logger.warn('Input tokens exceed model limit', {
+          model: config.name,
+          inputTokens: inputTokensEstimate,
+          maxInputTokens: config.maxInputTokens,
+          exceedsBy: inputTokensEstimate - config.maxInputTokens
+        });
+      }
+    }
 
     let generatedText: string | null = null;
     let lastError: Error | null = null;
