@@ -25,13 +25,7 @@ export const OPENAI_CONFIG = {
   MAX_TOKENS: 4000,
   DEFAULT_TEMPERATURE: 1,
   DEFAULT_MODEL: 'gpt-5-mini', // Updated to latest flagship model
-  TIMEOUT_MS: 180000, // Increased base timeout to 180 seconds (3 minutes)
-  ESCALATION_TIMEOUTS: {
-    ATTEMPT_1: 180000,  // 180 seconds for first attempt
-    ATTEMPT_2: 240000,  // 240 seconds for second attempt  
-    ATTEMPT_3: 300000,  // 300 seconds for final attempt
-  },
-  SYSTEM_PROMPT_TIMEOUT: 180000, // 180 seconds for complex system prompt generation
+  TIMEOUT_MS: 180000, // Base timeout for edge functions
   CIRCUIT_BREAKER: {
     FAILURE_THRESHOLD: 3,
     RECOVERY_TIMEOUT: 30000, // 30 seconds before retry
