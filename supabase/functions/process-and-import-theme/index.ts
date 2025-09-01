@@ -497,33 +497,12 @@ async function generateBlogPostPromptsBackground(category: string, userId: strin
       return { success: false, error: 'Missing Supabase configuration' };
     }
 
-    // Call the ensure-post-image-prompts function
-    const response = await fetch(`${supabaseUrl}/functions/v1/ensure-post-image-prompts`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseServiceKey}`,
-      },
-      body: JSON.stringify({
-        category: category,
-        userId: userId
-      }),
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      console.log('✅ BLOG POST PROMPTS: Generation completed successfully:', {
-        successCount: result.successCount,
-        totalPosts: result.totalPosts,
-        category: category
-      });
-      
-      return { success: true };
-    } else {
-      const errorText = await response.text();
-      console.error('❌ BLOG POST PROMPTS: Generation failed:', errorText);
-      return { success: false, error: errorText };
-    }
+    // NOTE: No longer calling ensure-post-image-prompts here
+    // The single trigger in useUnifiedRealtime will handle this
+    // when visual_prompt_system_prompt_id is populated in themes table
+    console.log('✅ Theme imported - image generation will start when system prompt is ready');
+    
+    return { success: true };
 
   } catch (error) {
     console.error('💥 BLOG POST PROMPTS: Error in generation:', error);

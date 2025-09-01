@@ -398,25 +398,11 @@ const generateSystemPromptReactive = async (supabase: SupabaseClient, themeData:
 };
 
 const triggerBackgroundImageGeneration = (supabase: SupabaseClient, themeData: ThemeData, userId: string): void => {
-  console.log('🎨 Triggering ensure-post-image-prompts in background');
+  console.log('🎨 Image generation will be triggered when system prompt is ready');
   
-  EdgeRuntime.waitUntil((async () => {
-    try {
-      const ensureRes = await supabase.functions.invoke('ensure-post-image-prompts', {
-        body: {
-          category: themeData.category,
-          userId,
-        },
-      });
-      if (ensureRes.error) {
-        console.warn('⚠️ ensure-post-image-prompts warning:', ensureRes.error);
-      } else {
-        console.log('✅ ensure-post-image-prompts queued/success:', ensureRes.data);
-      }
-    } catch (e) {
-      console.error('⚠️ Background ensure task failed:', e);
-    }
-  })());
+  // NOTE: No longer calling ensure-post-image-prompts here
+  // The single trigger in useUnifiedRealtime will handle this
+  // when visual_prompt_system_prompt_id is populated in themes table
 };
 
 

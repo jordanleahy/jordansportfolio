@@ -241,26 +241,16 @@ serve(async (req) => {
       }
     }
 
-    // Validation: For theme-specific requests, system prompt should exist
+    // Validation: System prompt should always be available now with single-trigger approach
     if (!systemPromptData && themeId && themeData) {
-      logger.info('Theme system prompt not ready - returning graceful response', {
+      const errorMsg = `System prompt not found for theme '${themeData.theme_name}' (ID: ${themeId})`;
+      logger.error('System prompt missing', {
         themeId: themeId.slice(0, 8),
         themeName: themeData.theme_name,
         hasVisualPromptSystemPromptId: !!themeData.visual_prompt_system_prompt_id,
-        status: 'system_prompt_not_ready'
+        error: errorMsg
       });
-      
-      cleanup();
-      return new Response(JSON.stringify({
-        status: 'system_prompt_not_ready',
-        message: 'Theme system prompt is being generated. Image generation will retry automatically when ready.',
-        themeId,
-        themeName: themeData.theme_name,
-        retryAfter: 30 // seconds
-      }), {
-        status: 202, // Accepted - processing will happen later
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
+      throw new Error(errorMsg);
     }
 
     // Fallback: generic Visual Prompt Generator prompt (only for non-theme requests)

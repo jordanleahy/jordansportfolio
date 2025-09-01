@@ -14,7 +14,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
-import { useImageGenerationRetry } from '@/hooks/useImageGenerationRetry';
+// Removed useImageGenerationRetry import - using single-trigger approach now
 
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
@@ -251,19 +251,8 @@ export default function StoriesDashboard() {
     }
   });
 
-  // Image generation retry system - listens for system prompt completion
-  console.log('🔍 About to initialize useImageGenerationRetry with:', { 
-    enabled: !!user, 
-    userId: user?.id,
-    userExists: !!user 
-  });
-  
-  const { isListening } = useImageGenerationRetry({
-    enabled: !!user,
-    userId: user?.id,
-  });
-  
-  console.log('🎯 useImageGenerationRetry initialized:', { isListening });
+  // NOTE: Removed useImageGenerationRetry - now using single-trigger approach
+  // Image generation is triggered automatically when system prompt is ready via useUnifiedRealtime
   const handleDeleteCategory = async (category: string) => {
     try {
       // First get the theme ID from category name

@@ -276,24 +276,31 @@ export const useUnifiedRealtime = ({
           systemPromptLinked: systemPromptLinked ? 'YES' : 'NO',
         });
 
-        // System prompt is now linked - trigger image generation retry
+        // SINGLE TRIGGER: System prompt is now linked - trigger image generation
         if (systemPromptLinked) {
-          console.log(`🚀 REALTIME: System prompt linked to theme ${record.theme_name}, triggering image generation retry`);
+          console.log(`🚀 REALTIME: System prompt linked to theme ${record.theme_name} - triggering ensure-post-image-prompts`);
           
-          // Emit event for image generation retry
-          realtimeEventBus.emit({
-            type: 'theme-system-prompt-ready',
-            payload: {
-              themeId: record.id,
-              themeName: record.theme_name,
-              category: record.category,
-              systemPromptId: record.visual_prompt_system_prompt_id,
-              timestamp: Date.now(),
-            }
+          // Single trigger for image generation when system prompt becomes available
+          import('@/integrations/supabase/client').then(({ supabase }) => {
+            supabase.functions.invoke('ensure-post-image-prompts', {
+              body: {
+                category: record.category,
+                theme_id: record.id,
+                userId: record.user_id,
+              },
+            }).then(result => {
+              if (result.error) {
+                console.warn('⚠️ ensure-post-image-prompts warning:', result.error);
+              } else {
+                console.log('✅ ensure-post-image-prompts triggered successfully:', result.data);
+              }
+            }).catch(error => {
+              console.error('❌ ensure-post-image-prompts failed:', error);
+            });
           });
 
-          toast.success(`Theme "${record.theme_name}" enhanced`, {
-            description: 'AI prompts are ready, starting image generation',
+          toast.success(`Theme "${record.theme_name}" ready`, {
+            description: 'Starting image generation with AI prompts',
             duration: 3000,
           });
         }
@@ -401,35 +408,9 @@ export const useUnifiedRealtime = ({
         duration: 4000,
       });
 
-      // Auto-trigger background image prompt generation using theme_id
-      if (record.theme_id && record.user_id) {
-        console.log('🚀 Auto-triggering image prompt generation for theme:', record.theme_id);
-          
-        // Use EdgeRuntime.waitUntil if available, otherwise use setTimeout for background processing
-        const triggerImageGeneration = async () => {
-          try {
-            const { supabase } = await import('@/integrations/supabase/client');
-            const result = await supabase.functions.invoke('ensure-post-image-prompts', {
-              body: {
-                themeId: record.theme_id,
-                userId: record.user_id,
-                category: record.category,
-              },
-            });
-            
-            if (result.error) {
-              console.warn('⚠️ Auto image prompt generation warning:', result.error);
-            } else {
-              console.log('✅ Auto image prompt generation queued:', result.data);
-            }
-          } catch (error) {
-            console.error('❌ Auto image prompt generation failed:', error);
-          }
-        };
-
-        // Use setTimeout for background processing in frontend context
-        setTimeout(triggerImageGeneration, 100);
-      }
+      // NOTE: No longer triggering ensure-post-image-prompts here
+      // The single trigger in handleThemeStatusUpdate will handle this 
+      // when visual_prompt_system_prompt_id is linked to the theme
     }
 
     // Invalidate system prompt caches
