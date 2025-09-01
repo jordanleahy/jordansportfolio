@@ -251,63 +251,31 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
   });
   
   try {
-    // First, create or find the theme
-    console.log('🔍 Checking for existing theme with:', {
+    // Always create a new theme with unique UUID
+    console.log('🎯 Creating new theme:', {
       theme_name: themeData.theme,
       category: themeData.category,
       user_id: userId
     });
     
-    const { data: existingTheme, error: themeSelectError } = await supabase
+    const { data: newTheme, error: themeInsertError } = await supabase
       .from('themes')
+      .insert({
+        user_id: userId,
+        theme_name: themeData.theme,
+        description: themeData.theme_description,
+        category: themeData.category
+      })
       .select('id')
-      .eq('theme_name', themeData.theme)
-      .eq('category', themeData.category)
-      .eq('user_id', userId)
-      .maybeSingle();
-    
-    if (themeSelectError) {
-      console.error('❌ Theme selection error:', themeSelectError);
-      throw new Error(`Theme selection failed: ${themeSelectError.message}`);
+      .single();
+
+    if (themeInsertError) {
+      console.error('❌ Theme creation error:', themeInsertError);
+      throw new Error(`Theme creation failed: ${themeInsertError.message}`);
     }
 
-    let themeId: string;
-
-    if (existingTheme) {
-      themeId = existingTheme.id;
-      console.log('🔍 Found existing theme:', themeId);
-    } else {
-      // Create new theme
-      const { data: newTheme, error: themeInsertError } = await supabase
-        .from('themes')
-        .insert({
-          user_id: userId,
-          theme_name: themeData.theme,
-          description: themeData.theme_description,
-          category: themeData.category
-        })
-        .select('id')
-        .single();
-
-      if (themeInsertError) {
-        console.error('❌ Theme creation error:', themeInsertError);
-        const code = (themeInsertError as any)?.code;
-        if (code === '23505' || (themeInsertError as any)?.message?.includes('duplicate key value')) {
-          throw {
-            type: 'duplicate_theme',
-            code: '23505',
-            message: 'A theme with this category already exists for your account.',
-            details: themeInsertError,
-            category: themeData.category,
-            theme: themeData.theme
-          } as const;
-        }
-        throw new Error(`Theme creation failed: ${themeInsertError.message}`);
-      }
-
-      themeId = newTheme.id;
-      console.log('✅ Created new theme:', themeId);
-    }
+    const themeId = newTheme.id;
+    console.log('✅ Created new theme:', themeId);
 
     // Import posts using direct insert instead of RPC to ensure proper authentication context
     const postsToInsert = themeData.posts.map((post: ThemePost) => ({
