@@ -10,7 +10,7 @@ function estimateTokens(text: string): number {
 }
 
 // Dynamic prompt truncation to fit within token limits
-function truncatePromptIfNeeded(systemPrompt: string, userPrompt: string, maxPromptTokens: number = 120000): { systemPrompt: string, userPrompt: string, wasTruncated: boolean } {
+function truncatePromptIfNeeded(systemPrompt: string, userPrompt: string, maxPromptTokens: number = 100000): { systemPrompt: string, userPrompt: string, wasTruncated: boolean } {
   const systemTokens = estimateTokens(systemPrompt);
   const userTokens = estimateTokens(userPrompt);
   const totalTokens = systemTokens + userTokens;
