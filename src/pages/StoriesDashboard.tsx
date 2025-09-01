@@ -14,6 +14,7 @@ import { CalendarSkeletonLoader } from '@/components/performance/SkeletonLoader'
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
 
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
+import { useImageGenerationRetry } from '@/hooks/useImageGenerationRetry';
 
 import { supabase } from '@/integrations/supabase/client';
 import { QUERY_KEYS } from '@/constants/queryKeys';
@@ -248,6 +249,12 @@ export default function StoriesDashboard() {
         ));
       }
     }
+  });
+
+  // Image generation retry system - listens for system prompt completion
+  const { isListening } = useImageGenerationRetry({
+    enabled: !!user,
+    userId: user?.id,
   });
   const handleDeleteCategory = async (category: string) => {
     try {

@@ -243,13 +243,24 @@ serve(async (req) => {
 
     // Validation: For theme-specific requests, system prompt should exist
     if (!systemPromptData && themeId && themeData) {
-      logger.error('Theme system prompt validation failed', {
+      logger.info('Theme system prompt not ready - returning graceful response', {
         themeId: themeId.slice(0, 8),
         themeName: themeData.theme_name,
         hasVisualPromptSystemPromptId: !!themeData.visual_prompt_system_prompt_id,
-        errorType: 'system_prompt_not_ready'
+        status: 'system_prompt_not_ready'
       });
-      throw new Error('Theme system prompt is not ready yet. Please wait for theme completion before generating individual prompts.');
+      
+      cleanup();
+      return new Response(JSON.stringify({
+        status: 'system_prompt_not_ready',
+        message: 'Theme system prompt is being generated. Image generation will retry automatically when ready.',
+        themeId,
+        themeName: themeData.theme_name,
+        retryAfter: 30 // seconds
+      }), {
+        status: 202, // Accepted - processing will happen later
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     // Fallback: generic Visual Prompt Generator prompt (only for non-theme requests)
