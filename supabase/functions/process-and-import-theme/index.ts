@@ -215,7 +215,8 @@ serve(async (req) => {
           user_id: user.id,
           theme_name: aiResult.cleanedData.theme,
           description: aiResult.cleanedData.theme_description || null,
-          category: resolvedCategory
+          category: resolvedCategory,
+          query: JSON.stringify(rawJson)
         })
         .select('id')
         .single();
