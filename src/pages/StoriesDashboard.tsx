@@ -809,6 +809,7 @@ export default function StoriesDashboard() {
                     theme_name: categoryName,
                     description: `Imported theme: ${categoryName}`,
                     category: categoryName,
+                    query: `[Pending] ${categoryName} theme import`,
                     post_count: 0,
                     prompt_completion_count: 0,
                     total_posts_count: 10, // Assume some posts for shimmer

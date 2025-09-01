@@ -107,57 +107,74 @@ export class ThemeService {
     return theme;
   }
 
-  async createTheme(theme: CreateTheme): Promise<Theme> {
+  /**
+   * @deprecated Legacy method - use process-and-import-theme edge function instead
+   * This method doesn't have access to the original user query and should not be used for new themes.
+   * Only kept for internal compatibility.
+   */
+  private async createThemeWithoutQuery(theme: Omit<CreateTheme, 'query'>): Promise<Theme> {
     const startTime = Date.now();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
 
-    logger.setContext('createTheme', user.id);
-    logger.info('Starting theme creation', { 
+    logger.setContext('createThemeWithoutQuery', user.id);
+    logger.warn('Using deprecated createThemeWithoutQuery - missing original user query', { 
       theme_name: theme.theme_name, 
       category: theme.category 
     });
 
-    // Always create the theme - no duplicate checks
-    logger.info('Creating theme in database');
-    const dbOperationStart = Date.now();
-    const { data, error } = await supabase
-      .from('themes')
-      .insert({
-        ...theme,
+    try {
+      const themeData = {
         user_id: user.id,
-      })
-      .select()
-      .single();
-
-    logger.timing('database_insert', dbOperationStart);
-
-    if (error) {
-      logger.error('Database insertion failed', error, {
         theme_name: theme.theme_name,
+        description: theme.description,
         category: theme.category,
-        errorCode: error.code
+        query: '[Legacy] Theme created without original query' // Default for deprecated method
+      };
+
+      logger.info('Creating theme in database');
+      const dbOperationStart = Date.now();
+      const { data, error } = await supabase
+        .from('themes')
+        .insert(themeData)
+        .select()
+        .single();
+
+      logger.timing('database_insert', dbOperationStart);
+
+      if (error) {
+        logger.error('Database insertion failed', error, {
+          theme_name: theme.theme_name,
+          category: theme.category,
+          errorCode: error.code
+        });
+        throw error;
+      }
+
+      const createdTheme = data as Theme;
+
+      // Invalidate cache
+      this.invalidateAllCaches();
+
+      const totalDuration = logger.timing('createTheme_total', startTime);
+      logger.success('Theme creation completed successfully', {
+        themeId: createdTheme.id,
+        theme_name: createdTheme.theme_name,
+        category: createdTheme.category,
+        totalDuration: `${totalDuration}ms`
+      });
+
+      // Trigger background system prompt generation
+      this.triggerBackgroundSystemPrompt(createdTheme);
+
+      return createdTheme;
+    } catch (error) {
+      logger.error('Theme creation failed', error, {
+        theme_name: theme.theme_name,
+        category: theme.category
       });
       throw error;
     }
-
-    const createdTheme = data as Theme;
-
-    // Invalidate cache
-    this.invalidateAllCaches();
-
-    const totalDuration = logger.timing('createTheme_total', startTime);
-    logger.success('Theme creation completed successfully', {
-      themeId: createdTheme.id,
-      theme_name: createdTheme.theme_name,
-      category: createdTheme.category,
-      totalDuration: `${totalDuration}ms`
-    });
-
-    // Trigger background system prompt generation
-    this.triggerBackgroundSystemPrompt(createdTheme);
-
-    return createdTheme;
   }
 
   async updateTheme(theme: UpdateTheme): Promise<Theme> {
@@ -192,6 +209,10 @@ export class ThemeService {
     this.invalidateAllCaches();
   }
 
+  /**
+   * @deprecated Use process-and-import-theme edge function instead
+   * This method creates themes without preserving the original user query
+   */
   async findOrCreateTheme(theme_name: string, category: string, description?: string): Promise<Theme> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('User not authenticated');
@@ -199,8 +220,8 @@ export class ThemeService {
     logger.setContext('findOrCreateTheme', user.id);
 
     // Always create new theme - deprecating "find" behavior
-    logger.info('Creating new theme (deprecated exact match check)');
-    return this.createTheme({ theme_name, category, description });
+    logger.warn('Using deprecated findOrCreateTheme method');
+    return this.createThemeWithoutQuery({ theme_name, category, description });
   }
 
   private invalidateCache(category?: string, userId?: string) {

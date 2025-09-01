@@ -253,13 +253,27 @@ export class OptimizedSocialMediaService {
     theme_name: string;
     description: string | null;
     category: string;
+    query: string;
     post_count: number;
     prompt_generation_status?: 'not_started' | 'in_progress' | 'completed';
+    prompt_completion_count?: number;
+    total_posts_count?: number;
     first_post: {
       id: string;
       title: string;
       description: string;
+      day?: number;
       image_url?: string;
+      image_16_9_url?: string;
+      image_4_3_url?: string;
+      image_9_16_url?: string;
+      image_3_4_url?: string;
+      image_1_1_url?: string;
+      image_16_9_status?: string;
+      image_4_3_status?: string;
+      image_9_16_status?: string;
+      image_3_4_status?: string;
+      image_1_1_status?: string;
     } | null;
   }>> {
     const cacheKey = this.getCacheKey(undefined, 'themes');
@@ -285,7 +299,7 @@ export class OptimizedSocialMediaService {
     // Get all themes including those in progress
     const { data: themes, error: themesError } = await supabase
       .from('themes')
-      .select('id, theme_name, description, category, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
+      .select('id, theme_name, description, category, query, created_at, prompt_generation_status, prompt_completion_count, total_posts_count')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -362,6 +376,7 @@ export class OptimizedSocialMediaService {
         theme_name: theme.theme_name,
         description: theme.description,
         category: theme.category,
+        query: theme.query || '[Legacy] Theme created before query tracking',
         post_count: posts.length,
         prompt_generation_status: theme.prompt_generation_status,
         prompt_completion_count: theme.prompt_completion_count || 0,
