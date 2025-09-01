@@ -279,13 +279,30 @@ export const useUnifiedRealtime = ({
         // SINGLE TRIGGER: System prompt is now linked - trigger image generation
         if (systemPromptLinked) {
           console.log(`🚀 REALTIME: System prompt linked to theme ${record.theme_name} - triggering ensure-post-image-prompts`);
+          console.log(`🔍 REALTIME: Debug record data:`, {
+            id: record.id,
+            category: record.category,
+            user_id: record.user_id,
+            theme_name: record.theme_name,
+            hasValidData: !!(record.category && record.user_id && record.id)
+          });
+          
+          // Validate required fields before calling function
+          if (!record.category || !record.user_id || !record.id) {
+            console.error('❌ REALTIME: Missing required fields for ensure-post-image-prompts:', {
+              category: record.category,
+              user_id: record.user_id,
+              id: record.id
+            });
+            return;
+          }
           
           // Single trigger for image generation when system prompt becomes available
           import('@/integrations/supabase/client').then(({ supabase }) => {
             supabase.functions.invoke('ensure-post-image-prompts', {
               body: {
                 category: record.category,
-                theme_id: record.id,
+                themeId: record.id, // Fixed: was theme_id, now themeId
                 userId: record.user_id,
               },
             }).then(result => {
