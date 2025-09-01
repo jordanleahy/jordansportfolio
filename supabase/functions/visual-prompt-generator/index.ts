@@ -348,7 +348,7 @@ Incorporate these characteristics naturally into the generated prompt while main
     // Estimate input tokens (rough approximation: 1 token ≈ 4 characters)
     const inputTokensEstimate = Math.ceil((categoryPrompt.prompt.length + userMessage.length) / 4);
     
-    // Model fallback configuration with conservative token limits
+    // Model fallback configuration with GPT-5 models only
     const modelConfigs = [
       {
         name: 'gpt-5-mini-2025-08-07',
@@ -357,16 +357,16 @@ Incorporate these characteristics naturally into the generated prompt while main
         description: 'Primary GPT-5 Mini model'
       },
       {
-        name: 'gpt-4.1-2025-04-14',
-        maxTokens: Math.max(500, Math.min(2000, 12000 - inputTokensEstimate)),
-        maxInputTokens: 12000,
-        description: 'Fallback GPT-4.1 model'
+        name: 'gpt-5-2025-08-07',
+        maxTokens: Math.max(500, Math.min(3000, 200000 - inputTokensEstimate)), // Flagship model with large context
+        maxInputTokens: 200000,
+        description: 'GPT-5 flagship model fallback'
       },
       {
-        name: 'gpt-4o-mini',
-        maxTokens: Math.max(500, Math.min(2000, 12000 - inputTokensEstimate)),
-        maxInputTokens: 12000,
-        description: 'Legacy fallback model'
+        name: 'gpt-5-nano-2025-08-07',
+        maxTokens: Math.max(300, Math.min(1000, 4000 - inputTokensEstimate)), // Most conservative for reliability
+        maxInputTokens: 4000,
+        description: 'GPT-5 Nano fast fallback'
       }
     ];
 
