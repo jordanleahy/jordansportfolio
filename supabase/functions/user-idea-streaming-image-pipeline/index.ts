@@ -336,97 +336,68 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
   }
 };
 
-const generateSystemPrompt = async (supabase: SupabaseClient, themeData: ThemeData, userId: string, themeId: string): Promise<void> => {
-  console.log('🤖 Generating system prompt for theme:', themeData.theme);
+const generateSystemPromptReactive = async (supabase: SupabaseClient, themeData: ThemeData, userId: string, themeId: string): Promise<void> => {
+  console.log('🤖 Reactive system prompt generation for theme:', themeData.theme);
+  
+  // 1. Fast database check for existing system prompt (<100ms)
+  console.log('🔍 Checking for existing system prompt in database');
+  const { data: existingPrompt, error: checkError } = await supabase
+    .from('system_prompts')
+    .select('id, created_at, prompt_text')
+    .eq('user_id', userId)
+    .eq('theme_id', themeId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  const MAX_RETRIES = 2;
-  const TIMEOUT_MS = 45000; // Increased to 45 seconds to accommodate OpenAI response times
-  const SLEEP = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-  const invokeOnce = async () => {
-    return await supabase.functions.invoke('invoke-system-prompt-agent', {
-      body: {
-        theme: themeData.theme,
-        category: themeData.category,
-        description: themeData.theme_description,
-        sample_posts: themeData.posts.slice(0, 3), // First 3 posts as samples
-        user_id: userId,
-        theme_id: themeId, // Pass theme_id for proper linking
-        skip_ensure: true, // decouple follow-up work from this call
-      },
-    });
-  };
-
-  let attempt = 0;
-  let succeeded = false;
-  let lastError: any = null;
-
-  while (attempt <= MAX_RETRIES && !succeeded) {
-    attempt++;
-    const start = Date.now();
-    console.log(`🏁 System prompt attempt ${attempt}/${MAX_RETRIES + 1}`);
-
-    const resultOrTimeout = await Promise.race([
-      invokeOnce().then((res) => ({ kind: 'result' as const, res })),
-      SLEEP(TIMEOUT_MS).then(() => ({ kind: 'timeout' as const })),
-    ]);
-
-    if (resultOrTimeout.kind === 'timeout') {
-      console.warn('⏱️ invoke-system-prompt-agent timed out (soft timeout)');
-      lastError = new Error('timeout');
-    } else {
-      const { res } = resultOrTimeout;
-      if (!res.error) {
-        console.log('✅ System prompt function returned 2xx');
-        succeeded = true;
-        break;
-      }
-      console.warn('⚠️ System prompt function error:', res.error);
-      lastError = res.error;
-    }
-
-    // Exponential backoff before retrying
-    const backoff = Math.min(2000 * Math.pow(2, attempt - 1), 8000);
-    console.log(`🔁 Retrying after ${backoff}ms`);
-    await SLEEP(backoff);
+  if (checkError) {
+    console.warn('⚠️ Error checking existing system prompt:', checkError);
   }
 
-  // If still not succeeded, poll DB to see if the prompt actually got created
-  if (!succeeded) {
-    console.log('🔎 Falling back to DB poll for newly created system prompt');
-    const maxPolls = 3; // Reduced polling attempts
-    for (let i = 0; i < maxPolls; i++) {
-      const { data, error } = await supabase
-        .from('system_prompts')
-        .select('id, created_at, theme_id')
-        .eq('user_id', userId)
-        .eq('category', themeData.category)
-        .or(`theme.eq.${themeData.theme},theme_id.eq.${themeId}`) // Check both theme name and theme_id
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+  if (existingPrompt?.id) {
+    console.log('✅ System prompt already exists:', existingPrompt.id);
+    // Continue with image generation since system prompt exists
+    triggerBackgroundImageGeneration(supabase, themeData, userId);
+    return;
+  }
 
+  console.log('📝 No existing system prompt found, triggering generation');
+  
+  // 2. Fire-and-forget call to system prompt generation (no timeout, no retries)
+  console.log('🚀 Triggering fire-and-forget system prompt generation');
+  EdgeRuntime.waitUntil((async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+        body: {
+          theme: themeData.theme,
+          category: themeData.category,
+          description: themeData.theme_description,
+          sample_posts: themeData.posts.slice(0, 3),
+          user_id: userId,
+          theme_id: themeId,
+          skip_ensure: true,
+        },
+      });
+      
       if (error) {
-        console.warn('⚠️ DB poll error while checking system_prompts:', error);
+        console.warn('⚠️ System prompt generation background error:', error);
+      } else {
+        console.log('✅ System prompt generation initiated successfully');
       }
-      if (data?.id) {
-        console.log('✅ Found system prompt via DB poll:', data.id);
-        succeeded = true;
-        break;
-      }
-
-      await SLEEP(1500); // Reduced poll delay
+      
+      // The real-time system will handle updates when the prompt is ready
+    } catch (error) {
+      console.error('❌ Fire-and-forget system prompt generation failed:', error);
+      // Continue gracefully - image generation doesn't depend on system prompts
     }
-  }
+  })());
 
-  if (!succeeded) {
-    console.warn('⚠️ System prompt generation did not confirm; continuing pipeline gracefully', {
-      lastError: lastError?.message || String(lastError),
-    });
-    // Still continue to trigger background image generation
-  }
+  // 3. Continue immediately with image generation pipeline
+  console.log('⚡ Continuing with image generation pipeline immediately');
+  triggerBackgroundImageGeneration(supabase, themeData, userId);
+};
 
-  // Trigger ensure-post-image-prompts in the background with proper error handling
+const triggerBackgroundImageGeneration = (supabase: SupabaseClient, themeData: ThemeData, userId: string): void => {
   console.log('🎨 Triggering ensure-post-image-prompts in background');
   
   EdgeRuntime.waitUntil((async () => {
@@ -619,8 +590,8 @@ serve(async (req) => {
               data: { status: 'Generating AI system prompts...' }
             });
 
-            // Use EdgeRuntime.waitUntil to run system prompt generation in background
-            EdgeRuntime.waitUntil(generateSystemPrompt(supabase, themeData, userId, createdThemeId));
+    // Use EdgeRuntime.waitUntil to run system prompt generation in background
+    EdgeRuntime.waitUntil(generateSystemPromptReactive(supabase, themeData, userId, createdThemeId));
             
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
@@ -686,8 +657,9 @@ serve(async (req) => {
       }
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
       const themeId = createdThemeId;
-      // Use EdgeRuntime.waitUntil to run system prompt generation in background
-      EdgeRuntime.waitUntil(generateSystemPrompt(supabase, themeData, userId, themeId));
+    // 🤖 Step 3: Reactive system prompt generation (fire-and-forget, event-driven)
+    console.log('🤖 Starting reactive system prompt generation for theme:', themeData.theme);
+    await generateSystemPromptReactive(supabase, themeData, userId, createdThemeId);
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,

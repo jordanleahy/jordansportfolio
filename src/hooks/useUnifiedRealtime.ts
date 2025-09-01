@@ -379,45 +379,57 @@ export const useUnifiedRealtime = ({
       onSystemPromptUpdate(record);
     }
 
+    // Enhanced reactive system prompt handling
+    if (eventType === 'INSERT' && record) {
+      console.log('🎨 NEW System prompt created via real-time:', {
+        id: record.id,
+        theme_id: record.theme_id,
+        category: record.category,
+        user_id: record.user_id
+      });
+
+      // Show success notification to user
+      toast.success('AI System Prompt Ready', {
+        description: 'Enhanced prompts are now available for better image generation',
+        duration: 4000,
+      });
+
+      // Auto-trigger background image prompt generation using theme_id
+      if (record.theme_id && record.user_id) {
+        console.log('🚀 Auto-triggering image prompt generation for theme:', record.theme_id);
+          
+        // Use EdgeRuntime.waitUntil if available, otherwise use setTimeout for background processing
+        const triggerImageGeneration = async () => {
+          try {
+            const { supabase } = await import('@/integrations/supabase/client');
+            const result = await supabase.functions.invoke('ensure-post-image-prompts', {
+              body: {
+                themeId: record.theme_id,
+                userId: record.user_id,
+                category: record.category,
+              },
+            });
+            
+            if (result.error) {
+              console.warn('⚠️ Auto image prompt generation warning:', result.error);
+            } else {
+              console.log('✅ Auto image prompt generation queued:', result.data);
+            }
+          } catch (error) {
+            console.error('❌ Auto image prompt generation failed:', error);
+          }
+        };
+
+        // Use setTimeout for background processing in frontend context
+        setTimeout(triggerImageGeneration, 100);
+      }
+    }
+
     // Invalidate system prompt caches
     queryClient.invalidateQueries({ queryKey: ['system-prompts'] });
     queryClient.invalidateQueries({ queryKey: ['cached-prompts'] });
-
-    // Auto-trigger image prompt generation for visual prompts
-    if ((eventType === 'INSERT' || eventType === 'UPDATE') && record) {
-      const isVisualPrompt = record.agent_name === 'Visual Prompt Generator' || 
-                            record.description?.includes('Visual Prompt Generator') ||
-                            record.category?.includes('visual') ||
-                            record.category?.includes('image');
-      
-      if (isVisualPrompt && record.category) {
-        console.log(`[UnifiedRealtime] Auto-triggering image prompt generation for category: ${record.category}`);
-        
-        // Get current user from auth
-        import('@/integrations/supabase/client').then(({ supabase }) => {
-          supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user?.id) {
-              // Trigger ensure-post-image-prompts in background
-              supabase.functions.invoke('ensure-post-image-prompts', {
-                body: {
-                  category: record.category,
-                  userId: user.id
-                }
-              }).then((result) => {
-                if (result.error) {
-                  console.error('[UnifiedRealtime] Failed to trigger image prompt generation:', result.error);
-                } else {
-                  console.log('[UnifiedRealtime] Image prompt generation triggered successfully:', result.data);
-                  toast.success('Generating image prompts in background');
-                }
-              }).catch((error) => {
-                console.error('[UnifiedRealtime] Error triggering image prompt generation:', error);
-              });
-            }
-          });
-        });
-      }
-    }
+    queryClient.invalidateQueries({ queryKey: ['themes'] });
+    queryClient.invalidateQueries({ queryKey: ['social-media-posts'] });
 
     if (eventType === 'UPDATE') {
       toast.success('System prompt updated');
