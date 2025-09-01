@@ -330,19 +330,20 @@ Generate the complete system prompt with ALL placeholders replaced with specific
 
     // Enhanced OpenAI request with correlation tracking
     const requestBodyForOpenAI = enhanceOpenAIRequestBody({
-      model: agent.model_version || 'gpt-5-mini-2025-08-07',
+      model: 'gpt-5-2025-08-07', 
       messages: [
         { role: 'system', content: truncatedSystemPrompt },
         { role: 'user', content: truncatedUserPrompt }
       ],
-      max_completion_tokens: 7000,
+      max_completion_tokens: 8000,
     }, correlationId);
 
+
+
     console.log('🔎 OpenAI Request Model/Agent:', { 
-      model: agent.model_version || 'gpt-5-mini-2025-08-07', 
-      generator_agent: agent.name, 
+      model: 'gpt-5-2025-08-07', 
       correlationId,
-      maxCompletionTokens: 7000,
+      maxCompletionTokens: 8000,
       estimatedPromptTokens: estimateTokens(truncatedSystemPrompt + truncatedUserPrompt),
       wasTruncated
     });
