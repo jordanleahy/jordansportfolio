@@ -356,7 +356,7 @@ Generate the complete system prompt with ALL placeholders replaced with specific
       },
       body: JSON.stringify(requestBodyForOpenAI),
       correlationId,
-      timeout: 240000, // 4 minutes for system prompt generation
+      timeout: 180000,
       maxRetries: 3,
       operationType: 'system_prompt',
     });
