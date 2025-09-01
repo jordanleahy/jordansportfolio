@@ -1,3 +1,87 @@
+/**
+ * PROCESS-AND-IMPORT-THEME EDGE FUNCTION
+ * 
+ * OVERVIEW:
+ * This edge function processes raw user JSON input for themes and posts using AI,
+ * validates the data, stores it in the database, and triggers downstream processes.
+ * 
+ * HOW IT GETS TRIGGERED:
+ * - Frontend: Called from `useStreamlinedThemeImport.ts` hook via `supabase.functions.invoke()`
+ * - Endpoint: POST request to `/functions/v1/process-and-import-theme`
+ * - Payload: { rawJson: any, idempotencyKey?: string }
+ * - Authentication: Requires valid Supabase auth header
+ * 
+ * WHAT IT TRIGGERS:
+ * 1. AI Processing:
+ *    - Calls OpenAI GPT-5-mini to clean and structure the input JSON
+ *    - Validates and fixes common data issues
+ *    - Enforces schema compliance
+ * 
+ * 2. Database Operations:
+ *    - Creates theme record in `themes` table (includes original user query)
+ *    - Inserts posts via `insert_posts_for_theme` RPC function
+ *    - Links posts to theme with proper categorization
+ * 
+ * 3. Background Tasks (via EdgeRuntime.waitUntil):
+ *    - `generateSystemPromptBackground()`: Creates system prompt for image generation
+ *    - `generateBlogPostPromptsBackground()`: Prepares blog post prompts
+ * 
+ * 4. Realtime Chain Reaction:
+ *    - Database changes trigger realtime listeners in `useUnifiedRealtime.ts`
+ *    - When system prompt is linked, triggers `ensure-post-image-prompts` function
+ *    - Starts automated image generation pipeline for all posts
+ * 
+ * AI PROCESSING PROMPT DETAILS:
+ * The AI uses a specific prompt to clean and structure user input:
+ * 
+ * Template:
+ * "Clean and fix this JSON for a content calendar with the exact structure:
+ * {"category": "string", "theme": "string", "theme_description": "optional string", 
+ *  "posts": [{"day": number, "title": "string", "story_description": "string", "status": "draft"}]}
+ * 
+ * Rules: 
+ * - Fix syntax errors
+ * - Ensure title/story_description exist
+ * - Set status="draft" if missing
+ * - Limit 100 posts max
+ * - Generate day numbers if missing
+ * - Keep theme_description if provided
+ * - Map description → story_description
+ * 
+ * Return only valid JSON:"
+ * 
+ * Model: gpt-5-mini (fast, cost-efficient)
+ * Max Tokens: 2000 completion tokens
+ * 
+ * VALIDATION RULES:
+ * - Category: Optional, max 100 chars, defaults to 'general'
+ * - Theme: Required, max 200 chars
+ * - Theme Description: Optional, max 1000 chars
+ * - Posts: Required array, 1-100 posts max
+ * - Post Title: Required, max 500 chars
+ * - Post Description: Required, max 2000 chars
+ * - Post Status: Defaults to 'draft'
+ * - Post Day: Auto-generated if missing (1-based index)
+ * 
+ * SECURITY & DATA PRESERVATION:
+ * - Original user query (`rawJson`) is stored in themes.query column
+ * - Idempotency keys prevent duplicate processing
+ * - User authentication validated before any operations
+ * - All operations are user-scoped via RLS policies
+ * 
+ * ERROR HANDLING:
+ * - AI processing failures return detailed error messages
+ * - Database transaction rollback on insert failures
+ * - Background task failures are logged but don't block main response
+ * - CORS headers included for web app compatibility
+ * 
+ * PERFORMANCE CONSIDERATIONS:
+ * - Background tasks prevent blocking main response
+ * - System prompt generation only runs if not already exists
+ * - Comprehensive logging for debugging and monitoring
+ * - Graceful degradation if background tasks fail
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
