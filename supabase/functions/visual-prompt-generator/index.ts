@@ -350,7 +350,7 @@ Incorporate these characteristics naturally into the generated prompt while main
         { role: 'system', content: categoryPrompt.prompt },
         { role: 'user', content: userMessage }
       ],
-      max_completion_tokens: 3000
+      max_completion_tokens: 3000,
       user: correlationId
     };
 
