@@ -248,7 +248,7 @@ serve(async (req) => {
     // Get the System Prompt Generator agent
     let { data: agent, error: agentError } = await supabase
       .from('openai_agents')
-      .select('id, name, model_version')
+      .select('id, name')
       .eq('name', 'System Prompt Generator')
       .single();
 
