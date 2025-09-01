@@ -345,21 +345,27 @@ Incorporate these characteristics naturally into the generated prompt while main
       maxTokensAllowed: 3000
     });
 
-    // Model fallback configuration
+    // Estimate input tokens (rough approximation: 1 token ≈ 4 characters)
+    const inputTokensEstimate = Math.ceil((categoryPrompt.prompt.length + userMessage.length) / 4);
+    
+    // Model fallback configuration with conservative token limits
     const modelConfigs = [
       {
         name: 'gpt-5-mini-2025-08-07',
-        maxTokens: 3000,
+        maxTokens: Math.max(500, Math.min(1500, 8000 - inputTokensEstimate)), // Leave room for input tokens
+        maxInputTokens: 8000,
         description: 'Primary GPT-5 Mini model'
       },
       {
         name: 'gpt-4.1-2025-04-14',
-        maxTokens: 3000,
+        maxTokens: Math.max(500, Math.min(2000, 12000 - inputTokensEstimate)),
+        maxInputTokens: 12000,
         description: 'Fallback GPT-4.1 model'
       },
       {
         name: 'gpt-4o-mini',
-        maxTokens: 3000,
+        maxTokens: Math.max(500, Math.min(2000, 12000 - inputTokensEstimate)),
+        maxInputTokens: 12000,
         description: 'Legacy fallback model'
       }
     ];
@@ -373,11 +379,24 @@ Incorporate these characteristics naturally into the generated prompt while main
       const modelConfig = modelConfigs[attemptIndex];
       
       try {
+        // Pre-flight token validation
+        if (inputTokensEstimate > modelConfig.maxInputTokens) {
+          logger.warn('Input tokens exceed model limit, skipping', {
+            model: modelConfig.name,
+            inputTokensEstimate,
+            maxInputTokens: modelConfig.maxInputTokens,
+            correlationId
+          });
+          throw new Error(`Input too long for ${modelConfig.name} (${inputTokensEstimate} tokens > ${modelConfig.maxInputTokens} limit)`);
+        }
+
         logger.info('Model attempt', {
           attemptNumber: attemptIndex + 1,
           totalAttempts: modelConfigs.length,
           selectedModel: modelConfig.name,
           description: modelConfig.description,
+          inputTokensEstimate,
+          maxCompletionTokens: modelConfig.maxTokens,
           correlationId
         });
 
@@ -513,15 +532,23 @@ Incorporate these characteristics naturally into the generated prompt while main
           break;
         } else {
           // Log the failure and continue to next model
+          const isTokenLimit = choice.finish_reason === 'length';
           logger.warn('Model returned empty content, trying next model', {
             attempt: attemptIndex + 1,
             model: modelConfig.name,
             hasContent: !!messageContent,
             contentLength: messageContent?.length || 0,
             finishReason: choice.finish_reason,
+            isTokenLimit,
+            inputTokensEstimate,
+            maxCompletionTokens: modelConfig.maxTokens,
             correlationId
           });
-          throw new Error(`Empty content from ${modelConfig.name}`);
+          
+          const errorMsg = isTokenLimit 
+            ? `Token limit exceeded for ${modelConfig.name} (estimated ${inputTokensEstimate} input + ${modelConfig.maxTokens} completion tokens)`
+            : `Empty content from ${modelConfig.name}`;
+          throw new Error(errorMsg);
         }
 
       } catch (error) {
