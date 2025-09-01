@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { unifiedRealtimeManager } from '@/services/realtime/UnifiedRealtimeManager';
 import { realtimeEventBus } from '@/services/realtime/RealtimeEventBus';
-import { toast } from 'sonner';
 import { QUERY_KEYS, getThemeQueryKeys } from '@/constants/queryKeys';
+import { toast } from 'sonner';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { ColorTheme } from '@/types/colorTheme';
 
@@ -75,9 +75,9 @@ export const useUnifiedRealtime = ({
         case 'social_media_posts':
           handleSocialMediaPostUpdate(eventType, data);
           break;
-        case 'themes':
-          handleThemeStatusUpdate(eventType, data);
-          break;
+      case 'themes':
+        handleThemeStatusUpdate(eventType, data);
+        break;
         case 'color_themes':
           handleColorThemeUpdate(eventType, data);
           break;
@@ -252,76 +252,83 @@ export const useUnifiedRealtime = ({
     const record = data.new;
     const oldRecord = data.old;
 
-    console.log(`🎬 REALTIME: Theme ${eventType}: ${record?.id || oldRecord?.id}`, {
-      promptStatus: record?.prompt_generation_status,
-      oldPromptStatus: oldRecord?.prompt_generation_status,
-      lifecycleStatus: record?.lifecycle_status,
-      oldLifecycleStatus: oldRecord?.lifecycle_status,
-      theme: record?.theme_name || oldRecord?.theme_name
+    if (!record) return;
+
+    console.log(`🎨 REALTIME: Theme ${eventType} event:`, {
+      theme: record.theme_name,
+      category: record.category,
+      promptStatus: record.prompt_generation_status,
+      lifecycleStatus: record.lifecycle_status,
+      systemPromptId: record.visual_prompt_system_prompt_id,
     });
-    
-    if (eventType === 'INSERT' && record) {
-      console.log(`🎉 REALTIME: New theme created: ${record.theme_name}`);
+
+    // Handle theme updates, particularly system prompt linking and status changes
+    if (eventType === 'UPDATE' && record && oldRecord) {
+      const promptStatusChanged = record.prompt_generation_status !== oldRecord.prompt_generation_status;
+      const lifecycleStatusChanged = record.lifecycle_status !== oldRecord.lifecycle_status;
+      const systemPromptLinked = record.visual_prompt_system_prompt_id && !oldRecord.visual_prompt_system_prompt_id;
       
-      // Add new theme to cache
-      queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
-        if (!oldThemes) return [record];
-        return [...oldThemes, record];
-      });
-      
-      // Call the theme status update callback for shimmer detection
-      if (onThemeStatusUpdate) {
-        onThemeStatusUpdate(record);
-      }
-      
-      // Show toast for new theme creation
-      toast.success(`Theme "${record.theme_name}" created!`);
-      
-    } else if (eventType === 'UPDATE' && record && oldRecord) {
-      // Check if prompt_generation_status changed to 'completed'
-      const isPromptComplete = record.prompt_generation_status === 'completed' && 
-                              oldRecord.prompt_generation_status !== 'completed';
-      
-      // Check if lifecycle_status changed to final state
-      const isLifecycleComplete = (record.lifecycle_status === 'completed' || record.lifecycle_status === 'ready') &&
-                                 (oldRecord.lifecycle_status !== 'completed' && oldRecord.lifecycle_status !== 'ready');
-      
-      // Only show completion toast when BOTH statuses indicate full completion
-      const isFullyComplete = record.prompt_generation_status === 'completed' && 
-                             (!record.lifecycle_status || record.lifecycle_status === 'completed' || record.lifecycle_status === 'ready');
-      
-      if (isPromptComplete) {
-        console.log(`📝 REALTIME: Theme prompt generation completed for: ${record.theme_name}`);
-      }
-      
-      if (isLifecycleComplete) {
-        console.log(`🔄 REALTIME: Theme lifecycle completed for: ${record.theme_name}`);
-      }
-      
-      if (isFullyComplete && (isPromptComplete || isLifecycleComplete)) {
-        console.log(`🎉 REALTIME: Theme FULLY completed for: ${record.theme_name}`);
-        toast.success(`Theme "${record.theme_name}" generation completed!`);
-      }
-      
-      // Always update cache for any status change
-      queryClient.setQueryData(QUERY_KEYS.themes, (oldThemes: any) => {
-        if (!oldThemes) return oldThemes;
-        return oldThemes.map((theme: any) => 
-          theme.id === record.id ? { ...theme, ...record } : theme
-        );
-      });
-      
-      // Call the theme status update callback for shimmer transitions
-      if (onThemeStatusUpdate) {
-        onThemeStatusUpdate(record);
+      if (promptStatusChanged || lifecycleStatusChanged || systemPromptLinked) {
+        console.log(`🔄 REALTIME: Theme status change detected:`, {
+          theme: record.theme_name,
+          promptStatus: `${oldRecord.prompt_generation_status} → ${record.prompt_generation_status}`,
+          lifecycleStatus: `${oldRecord.lifecycle_status} → ${record.lifecycle_status}`,
+          systemPromptLinked: systemPromptLinked ? 'YES' : 'NO',
+        });
+
+        // System prompt is now linked - trigger image generation retry
+        if (systemPromptLinked) {
+          console.log(`🚀 REALTIME: System prompt linked to theme ${record.theme_name}, triggering image generation retry`);
+          
+          // Emit event for image generation retry
+          realtimeEventBus.emit({
+            type: 'theme-system-prompt-ready',
+            payload: {
+              themeId: record.id,
+              themeName: record.theme_name,
+              category: record.category,
+              systemPromptId: record.visual_prompt_system_prompt_id,
+              timestamp: Date.now(),
+            }
+          });
+
+          toast.success(`Theme "${record.theme_name}" enhanced`, {
+            description: 'AI prompts are ready, starting image generation',
+            duration: 3000,
+          });
+        }
+
+        // Call theme status update callback
+        if (onThemeStatusUpdate) {
+          onThemeStatusUpdate({
+            id: record.id,
+            changes: {
+              prompt_generation_status: record.prompt_generation_status,
+              lifecycle_status: record.lifecycle_status,
+              visual_prompt_system_prompt_id: record.visual_prompt_system_prompt_id,
+              updated_at: record.updated_at,
+            },
+            old_record: oldRecord,
+            new_record: record,
+          });
+        }
+
+        // Invalidate theme-related queries when status changes
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.themes });
+        
+        // Show notification for significant status changes
+        if (record.prompt_generation_status === 'completed' && oldRecord.prompt_generation_status !== 'completed') {
+          toast.success(`Theme "${record.theme_name}" is ready`, {
+            description: 'All prompts have been generated successfully',
+            duration: 3000,
+          });
+        }
       }
     }
-    
-    // Background refetch to ensure consistency
-    queryClient.refetchQueries({ 
-      queryKey: QUERY_KEYS.themes, 
-      type: 'active' 
-    });
+
+    if (onThemeUpdate) {
+      onThemeUpdate(record);
+    }
   };
 
   const handleColorThemeUpdate = (eventType: string, data: any) => {

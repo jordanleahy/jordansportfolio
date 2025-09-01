@@ -3,6 +3,7 @@ export type RealtimeEvent =
   | { type: 'update-received'; payload: { table: string; eventType: string; data: any; timestamp: number } }
   | { type: 'cache-invalidated'; payload: { keys: string[]; timestamp: number } }
   | { type: 'color-theme-changed'; payload: { action: 'created' | 'updated' | 'deleted'; theme: any; timestamp: number } }
+  | { type: 'theme-system-prompt-ready'; payload: { themeId: string; themeName: string; category: string; systemPromptId: string; timestamp: number } }
   | { type: 'error'; payload: { error: string; context: string; timestamp: number } };
 
 type EventListener<T = RealtimeEvent> = (event: T) => void;
@@ -63,6 +64,8 @@ export class RealtimeEventBus {
         return `${event.type}-${event.payload.action}-${event.payload.theme?.id || 'unknown'}`;
       case 'update-received':
         return `${event.type}-${event.payload.table}-${event.payload.eventType}-${event.payload.data?.id || 'unknown'}`;
+      case 'theme-system-prompt-ready':
+        return `${event.type}-${event.payload.themeId}`;
       default:
         return `${event.type}-${JSON.stringify(event.payload)}`;
     }

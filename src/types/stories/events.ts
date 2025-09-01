@@ -43,8 +43,11 @@ export interface ThemeUpdateEvent {
     theme_name?: string;
     description?: string;
     category?: string;
+    visual_prompt_system_prompt_id?: string;
     updated_at: string;
   };
+  old_record?: any;
+  new_record?: any;
 }
 
 // Event Handler Types
@@ -69,6 +72,7 @@ export interface ThemeEventHandlers {
   onThemeUpdate?: (theme: any) => void;
   onThemeDelete?: (themeId: string) => void;
   onCategoryDelete?: (category: string) => void;
+  onSystemPromptReady?: (themeId: string) => void;
 }
 
 export interface ImageGenerationEventHandlers {

@@ -74,6 +74,9 @@ export const useReactiveSystemPrompt = ({
 
         // Call the callback if provided
         onSystemPromptReady?.(systemPrompt);
+        
+        // Note: Theme linking happens in the edge function, which will trigger
+        // a theme UPDATE event that useUnifiedRealtime handles for image generation retry
       }
     },
     [userId, themeId, onSystemPromptReady, queryClient]
