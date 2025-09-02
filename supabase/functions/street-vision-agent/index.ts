@@ -396,14 +396,39 @@ serve(async (req)=>{
     const imageData_result = await imageResponse.json();
     const imageGenTime = Date.now() - imageGenStartTime;
     console.log(`Image generation completed in ${imageGenTime}ms`);
+    
+    // Log the actual response structure for debugging
+    console.log('Image generation response structure:', {
+      hasData: !!imageData_result.data,
+      dataLength: imageData_result.data?.length,
+      firstItemKeys: imageData_result.data?.[0] ? Object.keys(imageData_result.data[0]) : 'no data'
+    });
+    
     // Step 4: Process and upload transformed image
     const uploadStartTime = Date.now();
     console.log('Processing transformed image...');
-    // Image edits API returns URL, convert to base64 for storage
-    const transformedImageUrl = imageData_result.data[0].url;
-    const transformedResponse = await fetch(transformedImageUrl);
-    const transformedArrayBuffer = await transformedResponse.arrayBuffer();
-    const transformedImageBase64 = btoa(String.fromCharCode(...new Uint8Array(transformedArrayBuffer)));
+    
+    let transformedImageBase64;
+    
+    // Handle both gpt-image-1 (base64) and legacy (URL) response formats
+    if (imageData_result.data?.[0]?.b64_json) {
+      // gpt-image-1 returns base64 data directly - use it without additional fetch
+      console.log('Using base64 response from gpt-image-1');
+      transformedImageBase64 = imageData_result.data[0].b64_json;
+    } else if (imageData_result.data?.[0]?.url) {
+      // Legacy format returns URL - fetch and convert to base64
+      console.log('Fetching image from URL response');
+      const transformedImageUrl = imageData_result.data[0].url;
+      const transformedResponse = await fetch(transformedImageUrl);
+      if (!transformedResponse.ok) {
+        throw new Error(`Failed to fetch transformed image: ${transformedResponse.status}`);
+      }
+      const transformedArrayBuffer = await transformedResponse.arrayBuffer();
+      transformedImageBase64 = btoa(String.fromCharCode(...new Uint8Array(transformedArrayBuffer)));
+    } else {
+      console.error('Unexpected image response format:', imageData_result);
+      throw new Error('Image generation response missing expected data format (no b64_json or url found)');
+    }
     // Upload transformed image to storage
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
     const transformedImageBuffer = Uint8Array.from(atob(transformedImageBase64), (c)=>c.charCodeAt(0));
