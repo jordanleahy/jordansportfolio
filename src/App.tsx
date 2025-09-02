@@ -39,6 +39,7 @@ import Library from "./pages/Library";
 import HomeHealth from "./pages/HomeHealth";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import AICityPlanner from "./pages/AICityPlanner";
 
 import ChartTypeCoverageCost from "./pages/ChartTypeCoverageCost";
 const WorkReportPage = lazy(() => import("./pages/WorkReportPage"));
@@ -177,6 +178,7 @@ function App() {
                  />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/aicityplanner" element={<AICityPlanner />} />
                 
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
