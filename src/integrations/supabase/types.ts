@@ -2032,10 +2032,13 @@ export type Database = {
           created_at: string
           error_message: string | null
           id: string
+          image_generation_prompt: string | null
           image_model: string
           original_filename: string | null
           original_image_url: string
           processing_time_ms: number | null
+          prompt_created_at: string | null
+          prompt_creation_status: string | null
           prompt_model: string
           status: string
           transformed_image_url: string | null
@@ -2048,10 +2051,13 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          image_generation_prompt?: string | null
           image_model?: string
           original_filename?: string | null
           original_image_url: string
           processing_time_ms?: number | null
+          prompt_created_at?: string | null
+          prompt_creation_status?: string | null
           prompt_model?: string
           status?: string
           transformed_image_url?: string | null
@@ -2064,10 +2070,13 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          image_generation_prompt?: string | null
           image_model?: string
           original_filename?: string | null
           original_image_url?: string
           processing_time_ms?: number | null
+          prompt_created_at?: string | null
+          prompt_creation_status?: string | null
           prompt_model?: string
           status?: string
           transformed_image_url?: string | null

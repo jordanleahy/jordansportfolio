@@ -285,14 +285,30 @@ serve(async (req) => {
     const analysis = visionData.choices[0].message.content;
     console.log('Street analysis completed');
 
-    // Update database with analysis
-    await supabase
+    // Update database with vision analysis - with comprehensive error handling
+    console.log('Updating database with analysis. Analysis length:', analysis?.length || 0);
+    console.log('Analysis preview:', analysis?.substring(0, 200) + '...');
+    
+    const { data: analysisUpdateData, error: analysisUpdateError } = await supabase
       .from('street_vision_generations')
       .update({ 
         vision_analysis: analysis,
         status: 'generating'
       })
-      .eq('id', recordId);
+      .eq('id', recordId)
+      .select();
+
+    if (analysisUpdateError) {
+      console.error('Error updating analysis:', analysisUpdateError);
+      throw new Error(`Failed to store vision analysis: ${analysisUpdateError.message}`);
+    }
+
+    if (!analysisUpdateData || analysisUpdateData.length === 0) {
+      console.error('No rows updated when storing analysis for record:', recordId);
+      throw new Error('Failed to update analysis - no rows affected');
+    }
+
+    console.log('Street analysis stored successfully. Updated rows:', analysisUpdateData.length);
 
     // Step 2: Generate transformation image using the system prompt + analysis + user input
     console.log('Generating street transformation...');
@@ -306,6 +322,30 @@ ${userPrompt}
 
 **Instructions:**
 Create a photorealistic transformation of this street that implements the user's vision while following the urban design principles above. Focus on making the street safer, more walkable, and people-centered while preserving the existing buildings and neighborhood character.`;
+
+    // Store the generated prompt and update prompt creation status
+    console.log('Storing image generation prompt. Length:', imagePrompt.length);
+    const { data: promptUpdateData, error: promptUpdateError } = await supabase
+      .from('street_vision_generations')
+      .update({
+        image_generation_prompt: imagePrompt,
+        prompt_creation_status: 'created',
+        prompt_created_at: new Date().toISOString()
+      })
+      .eq('id', recordId)
+      .select();
+
+    if (promptUpdateError) {
+      console.error('Error storing image prompt:', promptUpdateError);
+      throw new Error(`Failed to store image generation prompt: ${promptUpdateError.message}`);
+    }
+
+    if (!promptUpdateData || promptUpdateData.length === 0) {
+      console.error('No rows updated when storing prompt for record:', recordId);
+      throw new Error('Failed to update prompt - no rows affected');
+    }
+
+    console.log('Image generation prompt stored successfully. Updated rows:', promptUpdateData.length);
 
     const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -403,6 +443,7 @@ Create a photorealistic transformation of this street that implements the user's
           .from('street_vision_generations')
           .update({ 
             status: 'failed',
+            prompt_creation_status: 'failed',
             error_message: error.message || 'Unknown error occurred',
             processing_time_ms: Date.now() - startTime
           })
