@@ -47,7 +47,6 @@ import { Upload, Image, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { optimizeImage, blobToFile } from '@/utils/clientImageOptimization';
 
 /**
  * Component props interface for image upload functionality
@@ -111,10 +110,158 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
   }, []);
 
   /**
-   * Validates and processes uploaded files with client-side optimization
-   * Performs type validation, client-side resizing/compression, then uploads optimized file
+   * Isolated client-side PNG conversion function
+   * Takes any image file and converts it to PNG under 3MB through iterative resizing
    * 
-   * @param file - File object to validate, optimize, and upload
+   * @param file - Input image file of any format
+   * @returns Promise<File> - PNG file guaranteed to be under 3MB
+   */
+  const convertToPngUnder3MB = useCallback(async (file: File): Promise<File> => {
+    console.log('🔄 Starting PNG conversion for:', {
+      originalName: file.name,
+      originalSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+      originalType: file.type,
+      targetFormat: 'PNG',
+      maxSize: '3MB'
+    });
+
+    return new Promise((resolve, reject) => {
+      const img = new window.Image();
+      
+      img.onload = async () => {
+        console.log('📐 Original image dimensions:', {
+          width: img.width,
+          height: img.height,
+          aspectRatio: (img.width / img.height).toFixed(2)
+        });
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+
+        // Start with original dimensions and iteratively reduce if needed
+        let currentWidth = img.width;
+        let currentHeight = img.height;
+        let attempt = 0;
+        const maxAttempts = 10;
+        const targetSizeBytes = 3 * 1024 * 1024; // 3MB
+        const reductionFactor = 0.9; // Reduce by 10% each iteration
+
+        const tryConversion = async (): Promise<Blob> => {
+          attempt++;
+          console.log(`🎯 Conversion attempt #${attempt}:`, {
+            dimensions: `${currentWidth}x${currentHeight}`,
+            aspectRatio: (currentWidth / currentHeight).toFixed(2)
+          });
+
+          // Set canvas dimensions
+          canvas.width = currentWidth;
+          canvas.height = currentHeight;
+
+          // Clear canvas and draw image
+          ctx.clearRect(0, 0, currentWidth, currentHeight);
+          ctx.drawImage(img, 0, 0, currentWidth, currentHeight);
+
+          // Convert to PNG blob
+          return new Promise<Blob>((resolveBlob, rejectBlob) => {
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                rejectBlob(new Error('Failed to create PNG blob'));
+                return;
+              }
+              resolveBlob(blob);
+            }, 'image/png', 1.0); // Maximum quality for PNG
+          });
+        };
+
+        // Iterative conversion until under 3MB
+        let finalBlob: Blob;
+        
+        do {
+          finalBlob = await tryConversion();
+          
+          console.log(`📊 Attempt #${attempt} results:`, {
+            dimensions: `${currentWidth}x${currentHeight}`,
+            sizeBytes: finalBlob.size,
+            sizeMB: `${(finalBlob.size / 1024 / 1024).toFixed(2)} MB`,
+            underTarget: finalBlob.size <= targetSizeBytes,
+            compressionFromOriginal: `${((1 - finalBlob.size / file.size) * 100).toFixed(1)}%`
+          });
+
+          // If still too large and we haven't hit max attempts
+          if (finalBlob.size > targetSizeBytes && attempt < maxAttempts) {
+            // Reduce dimensions while maintaining aspect ratio
+            const aspectRatio = currentWidth / currentHeight;
+            currentWidth = Math.floor(currentWidth * reductionFactor);
+            currentHeight = Math.floor(currentWidth / aspectRatio);
+            
+            console.log(`📉 Size too large, reducing dimensions by ${((1-reductionFactor)*100)}%`);
+          }
+        } while (finalBlob.size > targetSizeBytes && attempt < maxAttempts);
+
+        // Validate PNG format by checking file headers
+        const arrayBuffer = await finalBlob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const isPngSignature = uint8Array[0] === 0x89 && 
+                              uint8Array[1] === 0x50 && 
+                              uint8Array[2] === 0x4E && 
+                              uint8Array[3] === 0x47;
+
+        console.log('✅ PNG format validation:', {
+          isPngSignature,
+          fileHeaderHex: Array.from(uint8Array.slice(0, 8))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join(' ')
+        });
+
+        // Final conversion metrics
+        console.log('🎉 PNG conversion completed:', {
+          success: true,
+          finalSize: `${(finalBlob.size / 1024 / 1024).toFixed(2)} MB`,
+          finalDimensions: `${currentWidth}x${currentHeight}`,
+          totalAttempts: attempt,
+          compressionRatio: `${((file.size / finalBlob.size)).toFixed(2)}x`,
+          sizeReduction: `${((1 - finalBlob.size / file.size) * 100).toFixed(1)}%`,
+          formatConfirmed: isPngSignature ? '✅ PNG' : '❌ Invalid PNG'
+        });
+
+        // Create new File object with PNG extension
+        const originalNameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+        const pngFileName = `${originalNameWithoutExt}.png`;
+        
+        const pngFile = new File([finalBlob], pngFileName, {
+          type: 'image/png',
+          lastModified: Date.now()
+        });
+
+        console.log('📄 Final PNG file created:', {
+          name: pngFile.name,
+          type: pngFile.type,
+          size: `${(pngFile.size / 1024 / 1024).toFixed(2)} MB`,
+          lastModified: new Date(pngFile.lastModified).toISOString()
+        });
+
+        resolve(pngFile);
+      };
+
+      img.onerror = () => {
+        console.error('❌ Failed to load image for PNG conversion');
+        reject(new Error('Failed to load image'));
+      };
+
+      // Load the image
+      img.src = URL.createObjectURL(file);
+    });
+  }, []);
+
+  /**
+   * Validates and processes uploaded files with client-side PNG conversion
+   * Performs type validation, PNG conversion under 3MB, then uploads
+   * 
+   * @param file - File object to validate, convert, and upload
    */
   const handleFile = useCallback(async (file: File) => {
     // Validate file type - only allow image files
@@ -140,41 +287,32 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
     setIsProcessing(true);
 
     try {
-      // Client-side image optimization
-      console.log('Starting client-side image optimization...');
-      const optimizationResult = await optimizeImage(file, {
-        maxDimension: 1024,
-        quality: 0.85,
-        maxSizeBytes: 3 * 1024 * 1024, // 3MB target
-        format: 'png'
-      });
+      // Convert to PNG format under 3MB
+      console.log('🚀 Starting PNG conversion process...');
+      const pngFile = await convertToPngUnder3MB(file);
 
-      console.log(`Image optimized: ${optimizationResult.originalSize} → ${optimizationResult.optimizedSize} bytes`);
-      
-      // Convert optimized blob back to File object
-      const optimizedFile = blobToFile(optimizationResult.blob, file.name);
-
-      // Upload optimized file to storage
-      const { path, filename } = await uploadToStorage(optimizedFile);
+      // Upload PNG file to storage
+      const { path, filename } = await uploadToStorage(pngFile);
       onImageUpload(path, filename);
       
-      // Show success notification with optimization details
+      // Show success notification with conversion details
+      const compressionPercent = Math.round((1 - pngFile.size / file.size) * 100);
       toast({
         title: "Image uploaded",
-        description: `Your street photo has been optimized and uploaded successfully. Size reduced by ${Math.round((1 - 1/optimizationResult.compressionRatio) * 100)}%.`
+        description: `Street photo converted to PNG and uploaded successfully. ${compressionPercent > 0 ? `Size reduced by ${compressionPercent}%.` : 'Format standardized to PNG.'}`
       });
     } catch (error) {
-      // Handle upload errors with user-friendly messages
-      console.error('Upload error:', error);
+      // Handle conversion/upload errors
+      console.error('❌ PNG conversion/upload error:', error);
       toast({
         title: "Upload failed",
-        description: error instanceof Error ? error.message : "Failed to upload the image. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to convert and upload the image. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
     }
-  }, [onImageUpload, uploadToStorage]);
+  }, [onImageUpload, uploadToStorage, convertToPngUnder3MB]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
