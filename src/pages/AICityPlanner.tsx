@@ -3,13 +3,22 @@ import { PageLayout } from '@/components/layout/PageLayout';
 import { ImageUploadArea } from '@/components/ai-city-planner/ImageUploadArea';
 import { PromptInput } from '@/components/ai-city-planner/PromptInput';
 import { RunButton } from '@/components/ai-city-planner/RunButton';
+import { StreetVisionResults } from '@/components/ai-city-planner/StreetVisionResults';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { useStreetVisionProcessing } from '@/hooks/useStreetVisionProcessing';
 
 const AICityPlanner: React.FC = () => {
   const [uploadedImage, setUploadedImage] = useState<string>('');
   const [prompt, setPrompt] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const { 
+    currentRecord, 
+    isProcessing, 
+    startProcessing, 
+    clearProcessing, 
+    error 
+  } = useStreetVisionProcessing();
 
   const handleImageUpload = (base64Image: string) => {
     setUploadedImage(base64Image);
@@ -38,26 +47,17 @@ const AICityPlanner: React.FC = () => {
       return;
     }
 
-    setIsLoading(true);
-    
-    try {
-      // This will be connected to the street-vision-agent later
-      toast({
-        title: "Coming soon!",
-        description: "Street vision transformation will be available shortly.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to process transformation. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+    await startProcessing(uploadedImage, prompt);
+  };
+
+  const handleRetry = () => {
+    if (uploadedImage && prompt.trim()) {
+      clearProcessing();
+      handleRun();
     }
   };
 
-  const canRun = uploadedImage && prompt.trim() && !isLoading;
+  const canRun = uploadedImage && prompt.trim() && !isProcessing;
 
   return (
     <PageLayout>
@@ -75,7 +75,7 @@ const AICityPlanner: React.FC = () => {
               <RunButton
                 onClick={handleRun}
                 disabled={!canRun}
-                loading={isLoading}
+                loading={isProcessing}
               />
             </div>
           </div>
@@ -104,25 +104,22 @@ const AICityPlanner: React.FC = () => {
                   <PromptInput
                     value={prompt}
                     onChange={setPrompt}
+                    onEnterPress={canRun ? handleRun : undefined}
+                    disabled={isProcessing}
                   />
                 </div>
 
               </CardContent>
             </Card>
 
-            {/* Results Section - Placeholder for future implementation */}
-            {isLoading && (
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center space-y-2">
-                      <div className="h-8 w-8 mx-auto animate-spin border-2 border-accent border-t-transparent rounded-full"></div>
-                      <p className="text-muted-foreground">Analyzing street and generating transformation...</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Results Section */}
+            <StreetVisionResults
+              record={currentRecord}
+              isProcessing={isProcessing}
+              error={error}
+              originalImageBase64={uploadedImage}
+              onRetry={handleRetry}
+            />
 
           </div>
         </div>

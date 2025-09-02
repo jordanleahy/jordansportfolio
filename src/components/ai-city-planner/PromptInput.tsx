@@ -5,15 +5,23 @@ import { cn } from '@/lib/utils';
 interface PromptInputProps {
   value: string;
   onChange: (value: string) => void;
+  onEnterPress?: () => void;
   className?: string;
   placeholder?: string;
   disabled?: boolean;
 }
 
 export const PromptInput = forwardRef<HTMLTextAreaElement, PromptInputProps>(
-  ({ value, onChange, className, placeholder, disabled, ...props }, ref) => {
+  ({ value, onChange, onEnterPress, className, placeholder, disabled, ...props }, ref) => {
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       onChange(e.target.value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey && onEnterPress) {
+        e.preventDefault();
+        onEnterPress();
+      }
     };
 
     return (
@@ -25,6 +33,7 @@ export const PromptInput = forwardRef<HTMLTextAreaElement, PromptInputProps>(
           ref={ref}
           value={value}
           onChange={handleChange}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder || "Describe how you want to transform this street. For example: 'Add protected bike lanes, expand sidewalks for outdoor dining, and include more trees and greenery for a pedestrian-friendly environment.'"}
           disabled={disabled}
           className={cn(
@@ -37,6 +46,7 @@ export const PromptInput = forwardRef<HTMLTextAreaElement, PromptInputProps>(
         />
         <p className="text-xs text-muted-foreground">
           Be specific about bike lanes, sidewalk improvements, greenery, and pedestrian safety features you'd like to see.
+          <span className="text-accent ml-2">Press Enter to run, Shift+Enter for new line</span>
         </p>
       </div>
     );
