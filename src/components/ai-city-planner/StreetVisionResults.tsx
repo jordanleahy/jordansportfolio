@@ -136,18 +136,6 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
             </div>
           </div>
 
-          {/* Vision Analysis */}
-          {record?.vision_analysis && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-muted-foreground">Analysis & Recommendations</h3>
-              <div className="bg-muted/30 rounded-lg p-4 border border-border">
-                <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                  {record.vision_analysis}
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* User Prompt */}
           {record?.user_prompt && (
             <div className="space-y-3">
@@ -155,6 +143,18 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
               <div className="bg-accent/5 rounded-lg p-4 border border-accent/20">
                 <p className="text-foreground italic">
                   "{record.user_prompt}"
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Vision Analysis */}
+          {record?.vision_analysis && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">Analysis & Recommendations</h3>
+              <div className="bg-muted/30 rounded-lg p-4 border border-border">
+                <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                  {record.vision_analysis}
                 </p>
               </div>
             </div>
