@@ -1,41 +1,103 @@
+/**
+ * IMAGE UPLOAD AREA COMPONENT - Multi-Method File Upload with Validation
+ * 
+ * PURPOSE:
+ * This component provides a comprehensive image upload interface supporting multiple input
+ * methods (drag & drop, file browser, clipboard paste) with validation, error handling,
+ * and seamless integration with Supabase storage for the Street Vision feature.
+ * 
+ * UPLOAD METHODS SUPPORTED:
+ * 1. Drag & Drop: Users can drag images directly onto the upload area
+ * 2. File Browser: Click to open system file selection dialog
+ * 3. Clipboard Paste: Ctrl+V to paste images from clipboard (global listener)
+ * 4. Keyboard Navigation: Enter/Space key support for accessibility
+ * 
+ * VALIDATION FEATURES:
+ * - File type validation (images only: JPG, PNG, etc.)
+ * - File size validation (10MB maximum)
+ * - User-friendly error messages via toast notifications
+ * - Visual feedback for different interaction states
+ * 
+ * SUPABASE INTEGRATION:
+ * - Authenticated uploads to street-vision storage bucket
+ * - Organized file structure: {userId}/originals/{timestamp}_{filename}
+ * - Automatic public URL generation for immediate display
+ * - Error handling for storage failures
+ * 
+ * UX ENHANCEMENTS:
+ * - Visual drag-over feedback with scaling animation
+ * - Hover states with enhanced styling and hints
+ * - Loading states during upload process
+ * - Preview of uploaded image with remove functionality
+ * - Responsive design for mobile and desktop
+ * 
+ * STATE MANAGEMENT:
+ * - isDragOver: Visual feedback during drag operations
+ * - isHovering: Enhanced styling on mouse hover
+ * - isUploading: Loading state during upload process (from parent)
+ * 
+ * ACCESSIBILITY:
+ * - Keyboard navigation support
+ * - ARIA labels and roles for screen readers
+ * - Focus management for file input
+ */
+
 import React, { useCallback, useRef, useState } from 'react';
 import { Upload, Image, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * Component props interface for image upload functionality
+ */
 interface ImageUploadAreaProps {
-  onImageUpload: (imagePath: string, filename: string) => void;
-  uploadedImageUrl?: string;
-  onRemoveImage: () => void;
-  isUploading?: boolean;
+  onImageUpload: (imagePath: string, filename: string) => void; // Callback when upload completes successfully
+  uploadedImageUrl?: string;                                    // URL of uploaded image for preview
+  onRemoveImage: () => void;                                   // Callback to remove current image
+  isUploading?: boolean;                                       // Loading state flag during upload
 }
 
+/**
+ * Image Upload Area component with multi-method upload support
+ * Handles drag & drop, file selection, and clipboard paste
+ */
 export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
-  onImageUpload,
-  uploadedImageUrl,
-  onRemoveImage,
-  isUploading = false,
+  onImageUpload,    // Callback for successful uploads
+  uploadedImageUrl, // Current image URL for preview mode
+  onRemoveImage,    // Callback for image removal
+  isUploading = false, // Loading state
 }) => {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // Visual state for interactive feedback
+  const [isDragOver, setIsDragOver] = useState(false);    // Drag & drop feedback
+  const [isHovering, setIsHovering] = useState(false);    // Hover state styling
+  const fileInputRef = useRef<HTMLInputElement>(null);    // Hidden file input reference
 
+  /**
+   * Uploads file to Supabase storage with user-specific organization
+   * Creates structured path: {userId}/originals/{timestamp}_{filename}
+   * 
+   * @param file - File object to upload to storage
+   * @returns Object with storage path and original filename
+   */
   const uploadToStorage = useCallback(async (file: File): Promise<{ path: string; filename: string }> => {
+    // Verify user authentication before upload
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('User not authenticated');
     }
 
+    // Generate organized storage path with timestamp for uniqueness
     const fileExt = file.name.split('.').pop();
     const timestamp = Date.now();
     const filename = `${user.id}/originals/${timestamp}_${file.name}`;
 
+    // Upload to Supabase storage with caching and error handling
     const { error: uploadError } = await supabase.storage
-      .from('street-vision')
+      .from('street-vision')      // Storage bucket for street photos
       .upload(filename, file, {
-        cacheControl: '3600',
-        upsert: false
+        cacheControl: '3600',     // 1 hour cache for performance
+        upsert: false            // Prevent overwriting existing files
       });
 
     if (uploadError) {
@@ -46,7 +108,14 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
     return { path: filename, filename: file.name };
   }, []);
 
+  /**
+   * Validates and processes uploaded files with comprehensive error handling
+   * Performs type and size validation before calling storage upload
+   * 
+   * @param file - File object to validate and upload
+   */
   const handleFile = useCallback(async (file: File) => {
+    // Validate file type - only allow image files
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Invalid file type",
@@ -56,6 +125,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
       return;
     }
 
+    // Validate file size - limit to 10MB for reasonable upload times
     if (file.size > 10 * 1024 * 1024) { // 10MB limit
       toast({
         title: "File too large",
@@ -66,14 +136,17 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
     }
 
     try {
+      // Upload to storage and notify parent component
       const { path, filename } = await uploadToStorage(file);
       onImageUpload(path, filename);
       
+      // Show success notification
       toast({
         title: "Image uploaded",
         description: "Your street photo has been uploaded successfully."
       });
     } catch (error) {
+      // Handle upload errors with user-friendly messages
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",

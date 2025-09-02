@@ -1,3 +1,38 @@
+/**
+ * STREET VISION RESULTS COMPONENT - AI Transformation Results Display
+ * 
+ * PURPOSE:
+ * This component displays the results of street photo AI transformations in a comprehensive
+ * and user-friendly format. It shows original vs transformed images side-by-side, displays
+ * the user's prompt and AI analysis, and provides download and retry functionality.
+ * 
+ * DISPLAY FEATURES:
+ * - Side-by-side comparison of original and transformed street photos
+ * - Real-time processing status indicators with descriptive messages
+ * - User's transformation prompt display for reference
+ * - GPT-5 vision analysis and recommendations
+ * - Processing time statistics when completed
+ * - Download functionality for transformed images
+ * - Retry mechanism for failed transformations
+ * 
+ * STATE HANDLING:
+ * - Shows loading shimmers during processing phases
+ * - Displays appropriate messages for each processing status
+ * - Handles error states with user-friendly messages and retry options
+ * - Gracefully handles missing or incomplete data
+ * 
+ * USER EXPERIENCE:
+ * - Hover effects reveal download button on transformed images
+ * - Clear visual hierarchy with labeled sections
+ * - Responsive grid layout for mobile and desktop
+ * - Consistent styling with design system tokens
+ * 
+ * INTEGRATION POINTS:
+ * - Receives data from useStreetVisionProcessing hook
+ * - Downloads images directly from Supabase storage URLs
+ * - Triggers retry functionality through parent component callbacks
+ */
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
@@ -5,49 +40,70 @@ import { UnifiedLoadingIndicator } from '@/components/ui/unified-loading-indicat
 import { Button } from '@/components/ui/button';
 import { Download, RefreshCw } from 'lucide-react';
 
+/**
+ * Database record structure for street vision transformations
+ * Contains all data needed for result display and user interaction
+ */
 interface StreetVisionRecord {
-  id: string;
-  user_prompt: string;
-  original_image_url: string;
-  transformed_image_url?: string;
-  vision_analysis?: string;
-  status: 'pending' | 'analyzing' | 'generating' | 'completed' | 'failed';
-  error_message?: string;
-  processing_time_ms?: number;
+  id: string;                           // Unique record identifier
+  user_prompt: string;                  // User's transformation description
+  original_image_url: string;           // URL of uploaded street photo
+  transformed_image_url?: string;       // URL of AI-generated transformation
+  vision_analysis?: string;             // GPT-5's street analysis and recommendations
+  status: 'pending' | 'analyzing' | 'generating' | 'completed' | 'failed'; // Processing status
+  error_message?: string;               // Error details for user display
+  processing_time_ms?: number;          // Total processing duration
 }
 
+/**
+ * Component props interface defining all required and optional properties
+ */
 interface StreetVisionResultsProps {
-  record: StreetVisionRecord | null;
-  isProcessing: boolean;
-  error: string | null;
-  originalImageUrl?: string;
-  onRetry?: () => void;
+  record: StreetVisionRecord | null;    // Database record with transformation data
+  isProcessing: boolean;                // Processing status flag for loading states
+  error: string | null;                 // Error message for display
+  originalImageUrl?: string;            // Fallback original image URL for immediate display
+  onRetry?: () => void;                 // Callback function to retry failed processing
 }
 
+/**
+ * Converts database status codes into user-friendly messages
+ * Used by loading indicators to show current processing phase
+ * 
+ * @param status - Current processing status from database record
+ * @returns User-friendly status message
+ */
 const getStatusMessage = (status: string): string => {
   switch (status) {
     case 'pending':
-      return 'Initializing processing...';
+      return 'Initializing processing...';      // Initial state after edge function call
     case 'analyzing':
-      return 'Analyzing street conditions...';
+      return 'Analyzing street conditions...';   // GPT-5 vision analysis phase
     case 'generating':
-      return 'Generating transformation...';
+      return 'Generating transformation...';     // Image generation phase
     case 'completed':
-      return 'Processing complete!';
+      return 'Processing complete!';            // Successfully finished
     case 'failed':
-      return 'Processing failed';
+      return 'Processing failed';               // Error occurred
     default:
-      return 'Processing...';
+      return 'Processing...';                   // Fallback for unknown states
   }
 };
 
+/**
+ * Street Vision Results component
+ * Displays transformation results with side-by-side image comparison
+ * 
+ * @param props - Component properties including record data and callbacks
+ */
 export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
-  record,
-  isProcessing,
-  error,
-  originalImageUrl,
-  onRetry
+  record,          // Database record with transformation data
+  isProcessing,    // Processing status for loading states
+  error,           // Error message for user display
+  originalImageUrl, // Fallback original image URL
+  onRetry          // Retry callback function
 }) => {
+  // Don't render anything if no processing has started
   if (!record && !isProcessing) return null;
 
   return (

@@ -1,3 +1,43 @@
+/**
+ * AI CITY PLANNER - Main Page Component for Street Vision Feature
+ * 
+ * OVERVIEW:
+ * This is the main orchestrator component for the Street Vision feature, which allows users
+ * to upload street photos and transform them into AI-generated visions of safer, more livable
+ * urban spaces. It coordinates all UI components and manages the complete workflow from
+ * image upload to result display.
+ * 
+ * WORKFLOW COORDINATION:
+ * 1. Image Upload Phase: User selects/uploads a street photo
+ * 2. Prompt Input Phase: User describes their transformation vision
+ * 3. Processing Phase: Triggers AI transformation via edge function
+ * 4. Results Phase: Displays original vs transformed images with analysis
+ * 
+ * STATE MANAGEMENT:
+ * - imagePath: Storage path of uploaded image in Supabase
+ * - imageUrl: Public URL for displaying the uploaded image
+ * - originalFilename: Original filename for user reference
+ * - prompt: User's transformation description text
+ * - isUploading: Loading state during image upload process
+ * 
+ * KEY INTEGRATIONS:
+ * - useStreetVisionProcessing: Custom hook managing AI processing workflow
+ * - ImageUploadArea: Component handling drag/drop, file selection, storage upload
+ * - PromptInput: Component for user input with validation and UX features
+ * - StreetVisionResults: Component displaying transformation results and analysis
+ * 
+ * ERROR HANDLING:
+ * - Validates image upload before processing
+ * - Validates prompt input before processing
+ * - Shows user-friendly error messages via toast notifications
+ * - Provides retry functionality for failed processing
+ * 
+ * DATABASE INTEGRATION:
+ * - Connects to Supabase storage for image persistence
+ * - Tracks processing records via useStreetVisionProcessing hook
+ * - Real-time updates for processing status changes
+ */
+
 import React, { useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ImageUploadArea } from '@/components/ai-city-planner/ImageUploadArea';
@@ -9,32 +49,46 @@ import { toast } from '@/hooks/use-toast';
 import { useStreetVisionProcessing } from '@/hooks/useStreetVisionProcessing';
 import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * Main AI City Planner page component
+ * Orchestrates the entire Street Vision transformation workflow
+ */
 const AICityPlanner: React.FC = () => {
-  const [imagePath, setImagePath] = useState<string>('');
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [originalFilename, setOriginalFilename] = useState<string>('');
-  const [prompt, setPrompt] = useState<string>('');
-  const [isUploading, setIsUploading] = useState(false);
+  // Local state for UI components
+  const [imagePath, setImagePath] = useState<string>('');       // Supabase storage path
+  const [imageUrl, setImageUrl] = useState<string>('');         // Public URL for display
+  const [originalFilename, setOriginalFilename] = useState<string>(''); // User reference
+  const [prompt, setPrompt] = useState<string>('');             // Transformation description
+  const [isUploading, setIsUploading] = useState(false);        // Upload loading state
   
+  // Processing state and actions from custom hook
   const { 
-    currentRecord, 
-    isProcessing, 
-    startProcessing, 
-    clearProcessing, 
-    error 
+    currentRecord,    // Database record with processing status and results
+    isProcessing,     // Boolean indicating if AI transformation is active
+    startProcessing,  // Function to initiate the AI transformation workflow
+    clearProcessing,  // Function to reset processing state and cleanup
+    error            // Error message if processing fails
   } = useStreetVisionProcessing();
 
+  /**
+   * Handles successful image upload from ImageUploadArea component
+   * Updates local state with image details for processing and display
+   * 
+   * @param path - Supabase storage path of the uploaded image
+   * @param filename - Original filename for user reference
+   */
   const handleImageUpload = async (path: string, filename: string) => {
     setIsUploading(true);
     try {
-      // Get public URL for display
+      // Get public URL for immediate display in UI
       const { data } = supabase.storage
         .from('street-vision')
         .getPublicUrl(path);
       
-      setImagePath(path);
-      setImageUrl(data.publicUrl);
-      setOriginalFilename(filename);
+      // Update state with image details
+      setImagePath(path);           // Storage path needed for processing
+      setImageUrl(data.publicUrl);  // Public URL for display
+      setOriginalFilename(filename); // User-friendly filename
     } catch (error) {
       console.error('Failed to get image URL:', error);
     } finally {
@@ -42,14 +96,23 @@ const AICityPlanner: React.FC = () => {
     }
   };
 
+  /**
+   * Removes currently uploaded image and resets related state
+   * Also clears any ongoing or completed processing
+   */
   const handleRemoveImage = () => {
-    setImagePath('');
-    setImageUrl('');
-    setOriginalFilename('');
-    clearProcessing();
+    setImagePath('');       // Clear storage path
+    setImageUrl('');        // Clear display URL
+    setOriginalFilename(''); // Clear filename
+    clearProcessing();      // Reset processing state via hook
   };
 
+  /**
+   * Initiates the AI street transformation process
+   * Validates inputs and triggers the street-vision-agent edge function
+   */
   const handleRun = async () => {
+    // Validate required image upload
     if (!imagePath) {
       toast({
         title: "Image required",
@@ -59,6 +122,7 @@ const AICityPlanner: React.FC = () => {
       return;
     }
 
+    // Validate required prompt input
     if (!prompt.trim()) {
       toast({
         title: "Prompt required", 
@@ -68,13 +132,19 @@ const AICityPlanner: React.FC = () => {
       return;
     }
 
+    // Trigger processing workflow via custom hook
+    // This will: 1) Call edge function, 2) Create DB record, 3) Setup real-time updates
     await startProcessing(imagePath, prompt.trim(), originalFilename);
   };
 
+  /**
+   * Retries failed processing with current image and prompt
+   * Clears previous state and re-initiates the workflow
+   */
   const handleRetry = () => {
     if (imagePath && prompt.trim()) {
-      clearProcessing();
-      handleRun();
+      clearProcessing(); // Reset processing state and cleanup subscriptions
+      handleRun();       // Re-trigger the AI transformation
     }
   };
 
