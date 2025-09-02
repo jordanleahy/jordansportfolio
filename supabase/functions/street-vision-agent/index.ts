@@ -88,37 +88,34 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Hardcoded system prompt for street vision transformation
-const STREET_VISION_SYSTEM_PROMPT = `## System Prompt (City Street Transformation for Public Space & Safety)
+// Enhanced system prompt for image-to-image street transformation
+const STREET_VISION_SYSTEM_PROMPT = `## Image Editing Prompt (Street-Level Transformation Only)
 
-**Role & Scope**
-You are an **urban design visualization model**. Your purpose is to take a real photo of any city street and create a photorealistic transformation that reimagines the *street and sidewalks only* into safer, more livable public spaces.
+**CRITICAL: PRESERVE BUILDINGS EXACTLY**
+- Keep ALL buildings, facades, windows, signage, architectural details, and skyline elements EXACTLY as they appear in the original image
+- Maintain the exact same camera angle, perspective, and proportions
+- Preserve the exact aspect ratio and overall composition
+- DO NOT alter any structures above street level
 
-**Rules**
+**EDIT ONLY STREET LEVEL**
+- Transform ONLY the street surface, sidewalks, curbs, and street-level elements
+- Replace cars with protected bike lanes featuring clear lane markings and physical barriers
+- Add street trees, planters, and green infrastructure at street level
+- Include pedestrian-friendly elements: wider sidewalks, outdoor seating, bike parking
+- Maintain the same street width proportions - do not change the distance between buildings
 
-1. **Preserve Buildings & Context**
-   * Keep all buildings, storefronts, signage, and background elements exactly as they appear in the uploaded photo.
-   * Do not alter façades, windows, or skyline elements.
+**TRANSFORMATION FOCUS**
+- Protected bike lanes with physical separation (planters, barriers, or raised surfaces)
+- Expanded pedestrian space with trees and seating areas
+- Reduced car infrastructure while maintaining emergency access
+- High-quality urban materials (attractive paving, modern street furniture)
+- Enhanced lighting and wayfinding at street level
 
-2. **Editable Zones**
-   * Only the **street, curbs, sidewalks, and immediate streetscape features** (cars, pavement, trees, street furniture, lighting) may be redesigned.
-   * Transformations must respect the original proportions and perspective.
-
-3. **User Intent (Public Space & Safe Streets)**
-   * Always interpret user input with a focus on:
-     * **Creating bike lanes** (protected, clearly separated).
-     * **Expanding sidewalks** for pedestrians, families, and gathering spaces.
-     * **Adding greenery, trees, and seating** to improve livability.
-     * **Reducing car dominance** by limiting lanes or removing parking.
-     * **Improving safety** for people walking, biking, and using public space.
-   * User prompts may specify particular changes, but all transformations should align with the goal of making streets safer, greener, and more people-centered.
-
-4. **Output Quality**
-   * The rendering must be **photorealistic**, daylight quality, and visually consistent with the original city context.
-   * Maintain the **authentic character of the neighborhood** (e.g., a New York street should look like New York, not a generic European plaza).
-
-**Goal**
-Enable anyone to upload a photo of a street, specify how they want it redesigned, and receive a **photorealistic visualization that transforms car-oriented streets into safer, people-focused public spaces with bike lanes, greenery, and walkable design.**`;
+**TECHNICAL REQUIREMENTS**
+- Keep the exact same lighting conditions and time of day
+- Maintain photorealistic quality that matches the original image style
+- Preserve all background elements, building textures, and architectural details
+- Ensure the transformation looks like a realistic renovation of this specific location`;
 
 serve(async (req) => {
   const startTime = Date.now();
@@ -318,25 +315,27 @@ serve(async (req) => {
 
     console.log('Street analysis stored successfully. Updated rows:', analysisUpdateData.length);
 
-    // Step 2: Generate transformation image using the system prompt + analysis + user input
-    console.log('Generating street transformation...');
-    const imagePrompt = `${STREET_VISION_SYSTEM_PROMPT}
+    // Step 2: Download original image and prepare for image editing
+    console.log('Downloading original image for editing...');
+    const originalImageResponse = await fetch(originalImageUrlData.publicUrl);
+    if (!originalImageResponse.ok) {
+      throw new Error('Failed to download original image');
+    }
+    const originalImageBuffer = await originalImageResponse.arrayBuffer();
 
-**Current Street Analysis:**
-${analysis}
+    // Create editing prompt focused on street-level transformation only
+    const editingPrompt = `${STREET_VISION_SYSTEM_PROMPT}
 
-**User Transformation Request:**
-${userPrompt}
+User Request: ${userPrompt}
 
-**Instructions:**
-Create a photorealistic transformation of this street that implements the user's vision while following the urban design principles above. Focus on making the street safer, more walkable, and people-centered while preserving the existing buildings and neighborhood character.`;
+Transform only the street surface and sidewalk areas while keeping all buildings exactly the same. ${analysis.substring(0, 500)}...`;
 
     // Store the generated prompt and update prompt creation status
-    console.log('Storing image generation prompt. Length:', imagePrompt.length);
+    console.log('Storing image editing prompt. Length:', editingPrompt.length);
     const { data: promptUpdateData, error: promptUpdateError } = await supabase
       .from('street_vision_generations')
       .update({
-        image_generation_prompt: imagePrompt,
+        image_generation_prompt: editingPrompt,
         prompt_creation_status: 'created',
         prompt_created_at: new Date().toISOString()
       })
@@ -353,21 +352,21 @@ Create a photorealistic transformation of this street that implements the user's
       throw new Error('Failed to update prompt - no rows affected');
     }
 
-    console.log('Image generation prompt stored successfully. Updated rows:', promptUpdateData.length);
+    console.log('Image editing prompt stored successfully. Updated rows:', promptUpdateData.length);
 
-    const imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
+    // Use image editing API instead of generation
+    const formData = new FormData();
+    formData.append('image', new Blob([originalImageBuffer], { type: 'image/png' }));
+    formData.append('prompt', editingPrompt);
+    formData.append('size', '1024x1024');
+    formData.append('n', '1');
+
+    const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'gpt-image-1',
-        prompt: imagePrompt,
-        size: '1024x1024',
-        quality: 'high',
-        n: 1,
-      }),
+      body: formData,
     });
 
     if (!imageResponse.ok) {
@@ -389,8 +388,11 @@ Create a photorealistic transformation of this street that implements the user's
 
     const imageData_result = await imageResponse.json();
     
-    // gpt-image-1 returns base64 data directly
-    const transformedImageBase64 = imageData_result.data[0].b64_json;
+    // Image edits API returns URL, convert to base64 for storage
+    const transformedImageUrl = imageData_result.data[0].url;
+    const transformedResponse = await fetch(transformedImageUrl);
+    const transformedArrayBuffer = await transformedResponse.arrayBuffer();
+    const transformedImageBase64 = btoa(String.fromCharCode(...new Uint8Array(transformedArrayBuffer)));
     
     // Upload transformed image to storage
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
