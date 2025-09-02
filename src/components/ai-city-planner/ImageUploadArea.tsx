@@ -109,7 +109,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
           <img 
             src={`data:image/jpeg;base64,${uploadedImage}`}
             alt="Uploaded street"
-            className="w-full h-48 object-cover"
+            className="w-full aspect-video object-cover"
           />
           <Button
             variant="destructive"
