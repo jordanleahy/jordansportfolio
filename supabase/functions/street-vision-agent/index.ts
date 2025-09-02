@@ -289,38 +289,18 @@ serve(async (req) => {
 
     console.log('Street analysis stored successfully. Updated rows:', analysisUpdateData.length);
 
-    // Step 2: Download and convert image to PNG format
+    // Step 2: Download original image (already optimized by client)
     console.log('Downloading client-optimized image...');
     const originalImageResponse = await fetch(originalImageUrlData.publicUrl);
     if (!originalImageResponse.ok) {
       throw new Error('Failed to download original image');
     }
     const originalImageBuffer = await originalImageResponse.arrayBuffer();
-    console.log(`Downloaded image: ${originalImageBuffer.byteLength} bytes`);
-    
-    // Convert to PNG format using Canvas API (required by OpenAI image editing)
-    console.log('Converting image to PNG format for OpenAI...');
-    const originalBlob = new Blob([originalImageBuffer]);
-    const imageBitmap = await createImageBitmap(originalBlob);
-    
-    // Create canvas and draw image
-    const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      throw new Error('Failed to get canvas context');
-    }
-    
-    ctx.drawImage(imageBitmap, 0, 0);
-    
-    // Convert to PNG blob
-    const pngBlob = await canvas.convertToBlob({ type: 'image/png' });
-    const pngArrayBuffer = await pngBlob.arrayBuffer();
-    
-    console.log(`Image converted to PNG: ${pngArrayBuffer.byteLength} bytes`);
+    console.log(`Using client-optimized image: ${originalImageBuffer.byteLength} bytes`);
     
     // Check size limit (4MB for OpenAI)
-    if (pngArrayBuffer.byteLength > 4 * 1024 * 1024) {
-      throw new Error(`PNG image is too large: ${Math.round(pngArrayBuffer.byteLength / 1024 / 1024)}MB. Must be under 4MB.`);
+    if (originalImageBuffer.byteLength > 4 * 1024 * 1024) {
+      throw new Error(`Image is too large: ${Math.round(originalImageBuffer.byteLength / 1024 / 1024)}MB. Must be under 4MB.`);
     }
 
     // Create editing prompt focused on street-level transformation only (max 1000 chars)
@@ -366,9 +346,9 @@ serve(async (req) => {
 
     console.log('Image editing prompt stored successfully. Updated rows:', promptUpdateData.length);
 
-    // Use image editing API with PNG-converted image
+    // Use image editing API with client-optimized image
     const formData = new FormData();
-    formData.append('image', new File([pngArrayBuffer], "input.png", { type: 'image/png' }));
+    formData.append('image', new File([originalImageBuffer], "input.png", { type: 'image/png' }));
     formData.append('prompt', editingPrompt);
     formData.append('size', '1024x1024');
     formData.append('n', '1');
