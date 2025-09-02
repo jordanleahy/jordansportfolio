@@ -48,6 +48,13 @@ export const getSocialMediaAgentName = (): string => {
   return AGENT_NAMES.SOCIAL_MEDIA_AGENT;
 };
 
+/**
+ * Get the Street Vision Agent name
+ */
+export const getStreetVisionAgentName = (): string => {
+  return AGENT_NAMES.STREET_VISION_AGENT;
+};
+
 // Agent Name Comparison Functions
 
 /**
@@ -66,6 +73,15 @@ export const isVisualPromptGenerator = (agentName: string): boolean => {
  */
 export const isSocialMediaAgent = (agentName: string): boolean => {
   return agentName === AGENT_NAMES.SOCIAL_MEDIA_AGENT;
+};
+
+/**
+ * Check if an agent name matches the Street Vision Agent
+ * @param agentName - The agent name to check
+ * @returns true if the name matches the Street Vision Agent
+ */
+export const isStreetVisionAgent = (agentName: string): boolean => {
+  return agentName === AGENT_NAMES.STREET_VISION_AGENT;
 };
 
 /**

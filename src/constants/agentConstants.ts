@@ -7,6 +7,7 @@ export const AGENT_NAMES = {
   CALENDAR_THEME_JSON_PROCESSOR: 'Calendar Theme JSON Processor',
   STORY_TELLING_AGENT: 'Story Telling Agent',
   SOCIAL_MEDIA_AGENT: 'Social Media Agent',
+  STREET_VISION_AGENT: 'Street Vision Agent',
 } as const;
 
 // System Prompt Categories
@@ -22,6 +23,7 @@ export const SYSTEM_PROMPT_CATEGORIES = {
   LINKEDIN: 'linkedin',
   INSTAGRAM: 'instagram',
   TWITTER_X: 'twitter_x',
+  URBAN_DESIGN: 'urban_design',
 } as const;
 
 // Social Media Platforms Configuration

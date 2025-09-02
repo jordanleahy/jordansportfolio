@@ -17,6 +17,7 @@ export const EDGE_FUNCTION_NAMES = {
   COVER_LETTER_AGENT: 'cover-letter-agent',
   STREAMING_IMAGE_PIPELINE: 'streaming-image-pipeline',
   USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
+  STREET_VISION_AGENT: 'street-vision-agent',
   
 } as const;
 
