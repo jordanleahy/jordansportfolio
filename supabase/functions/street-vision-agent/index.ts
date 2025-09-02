@@ -282,7 +282,15 @@ serve(async (req) => {
     }
 
     const visionData = await visionResponse.json();
-    const analysis = visionData.choices[0].message.content;
+    
+    // Debug: Log the full vision response structure
+    console.log('Vision API Response Structure:', JSON.stringify(visionData, null, 2));
+    console.log('Vision API Choices:', visionData.choices);
+    console.log('First Choice:', visionData.choices?.[0]);
+    console.log('First Choice Message:', visionData.choices?.[0]?.message);
+    
+    const analysis = visionData.choices?.[0]?.message?.content;
+    console.log('Extracted Analysis:', analysis);
     console.log('Street analysis completed');
 
     // Update database with vision analysis - with comprehensive error handling
