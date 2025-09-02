@@ -2,33 +2,49 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Upload, Image, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ImageUploadAreaProps {
-  onImageUpload: (base64Image: string) => void;
-  uploadedImage?: string;
+  onImageUpload: (imagePath: string, filename: string) => void;
+  uploadedImageUrl?: string;
   onRemoveImage: () => void;
+  isUploading?: boolean;
 }
 
 export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
   onImageUpload,
-  uploadedImage,
+  uploadedImageUrl,
   onRemoveImage,
+  isUploading = false,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        resolve(result.split(',')[1]); // Remove data:image/jpeg;base64, prefix
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
+  const uploadToStorage = useCallback(async (file: File): Promise<{ path: string; filename: string }> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const timestamp = Date.now();
+    const filename = `${user.id}/originals/${timestamp}_${file.name}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('street-vision')
+      .upload(filename, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw new Error('Failed to upload image to storage');
+    }
+
+    return { path: filename, filename: file.name };
+  }, []);
 
   const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -50,16 +66,22 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
     }
 
     try {
-      const base64 = await convertToBase64(file);
-      onImageUpload(base64);
+      const { path, filename } = await uploadToStorage(file);
+      onImageUpload(path, filename);
+      
+      toast({
+        title: "Image uploaded",
+        description: "Your street photo has been uploaded successfully."
+      });
     } catch (error) {
+      console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: "Failed to process the image. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to upload the image. Please try again.",
         variant: "destructive",
       });
     }
-  }, [onImageUpload]);
+  }, [onImageUpload, uploadToStorage]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -103,11 +125,11 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
     fileInputRef.current?.click();
   };
 
-  if (uploadedImage) {
+  if (uploadedImageUrl) {
     return (
       <div className="relative rounded-lg overflow-hidden border border-border bg-card group">
         <img 
-          src={`data:image/jpeg;base64,${uploadedImage}`}
+          src={uploadedImageUrl}
           alt="Uploaded street"
           className="w-full h-48 object-cover"
         />
@@ -116,6 +138,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
           size="sm"
           className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
           onClick={onRemoveImage}
+          disabled={isUploading}
         >
           <X className="h-4 w-4" />
         </Button>
@@ -178,9 +201,9 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
             </p>
           </div>
           
-          <Button variant="outline" className="mt-4">
+          <Button variant="outline" className="mt-4" disabled={isUploading}>
             <Upload className="mr-2 h-4 w-4" />
-            Choose File
+            {isUploading ? 'Uploading...' : 'Choose File'}
           </Button>
         </div>
       </div>

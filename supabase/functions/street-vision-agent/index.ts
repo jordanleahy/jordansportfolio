@@ -180,16 +180,21 @@ serve(async (req) => {
     console.log('Authenticated user:', userId);
 
     // Parse and validate request body
-    const { imageData, userPrompt } = await req.json();
+    const { originalImagePath, userPrompt, originalFilename } = await req.json();
 
-    if (!imageData || !userPrompt) {
-      return new Response(JSON.stringify({ error: 'Missing imageData or userPrompt' }), {
+    if (!originalImagePath || !userPrompt) {
+      return new Response(JSON.stringify({ error: 'Missing originalImagePath or userPrompt' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     console.log('Processing street vision request with user prompt:', userPrompt);
+
+    // Get the public URL for the original image
+    const { data: originalImageUrlData } = supabase.storage
+      .from('street-vision')
+      .getPublicUrl(originalImagePath);
 
     // Create initial database record
     console.log('Creating database record...');
@@ -198,7 +203,8 @@ serve(async (req) => {
       .insert({
         user_id: userId,
         user_prompt: userPrompt,
-        original_image_url: `data:image/jpeg;base64,${imageData}`,
+        original_image_url: originalImageUrlData.publicUrl,
+        original_filename: originalFilename,
         status: 'pending',
         prompt_model: 'gpt-5-2025-08-07',
         image_model: 'gpt-image-1'
@@ -248,7 +254,7 @@ serve(async (req) => {
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:image/jpeg;base64,${imageData}`
+                  url: originalImageUrlData.publicUrl
                 }
               }
             ]
@@ -337,6 +343,29 @@ Create a photorealistic transformation of this street that implements the user's
     
     // gpt-image-1 returns base64 data directly
     const transformedImageBase64 = imageData_result.data[0].b64_json;
+    
+    // Upload transformed image to storage
+    const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
+    const transformedImageBuffer = Uint8Array.from(atob(transformedImageBase64), c => c.charCodeAt(0));
+    
+    const { error: uploadError } = await supabase.storage
+      .from('street-vision')
+      .upload(transformedFilename, transformedImageBuffer, {
+        contentType: 'image/png',
+        cacheControl: '3600',
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error('Failed to upload transformed image:', uploadError);
+      throw new Error('Failed to upload transformed image');
+    }
+
+    // Get public URL for transformed image
+    const { data: transformedUrlData } = supabase.storage
+      .from('street-vision')
+      .getPublicUrl(transformedFilename);
+
     const processingTime = Date.now() - startTime;
     
     console.log('Street transformation completed successfully');
@@ -345,7 +374,7 @@ Create a photorealistic transformation of this street that implements the user's
     await supabase
       .from('street_vision_generations')
       .update({
-        transformed_image_url: `data:image/png;base64,${transformedImageBase64}`,
+        transformed_image_url: transformedUrlData.publicUrl,
         processing_time_ms: processingTime,
         status: 'completed'
       })
@@ -356,7 +385,7 @@ Create a photorealistic transformation of this street that implements the user's
     return new Response(JSON.stringify({
       recordId,
       analysis,
-      transformedImageBase64,
+      transformedImageUrl: transformedUrlData.publicUrl,
       originalPrompt: userPrompt,
       processingTimeMs: processingTime,
       success: true

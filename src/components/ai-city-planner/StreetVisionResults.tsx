@@ -20,7 +20,7 @@ interface StreetVisionResultsProps {
   record: StreetVisionRecord | null;
   isProcessing: boolean;
   error: string | null;
-  originalImageBase64?: string;
+  originalImageUrl?: string;
   onRetry?: () => void;
 }
 
@@ -45,7 +45,7 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
   record,
   isProcessing,
   error,
-  originalImageBase64,
+  originalImageUrl,
   onRetry
 }) => {
   if (!record && !isProcessing) return null;
@@ -74,18 +74,10 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
             {/* Original Image */}
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-muted-foreground">Original Street</h3>
-              {originalImageBase64 ? (
+              {originalImageUrl || record?.original_image_url ? (
                 <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video">
                   <img 
-                    src={`data:image/jpeg;base64,${originalImageBase64}`}
-                    alt="Original street"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : record?.original_image_url ? (
-                <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video">
-                  <img 
-                    src={record.original_image_url}
+                    src={originalImageUrl || record?.original_image_url}
                     alt="Original street"
                     className="w-full h-full object-cover"
                   />

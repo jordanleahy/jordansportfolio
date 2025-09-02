@@ -7,10 +7,14 @@ import { StreetVisionResults } from '@/components/ai-city-planner/StreetVisionRe
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { useStreetVisionProcessing } from '@/hooks/useStreetVisionProcessing';
+import { supabase } from '@/integrations/supabase/client';
 
 const AICityPlanner: React.FC = () => {
-  const [uploadedImage, setUploadedImage] = useState<string>('');
+  const [imagePath, setImagePath] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [originalFilename, setOriginalFilename] = useState<string>('');
   const [prompt, setPrompt] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
   
   const { 
     currentRecord, 
@@ -20,16 +24,33 @@ const AICityPlanner: React.FC = () => {
     error 
   } = useStreetVisionProcessing();
 
-  const handleImageUpload = (base64Image: string) => {
-    setUploadedImage(base64Image);
+  const handleImageUpload = async (path: string, filename: string) => {
+    setIsUploading(true);
+    try {
+      // Get public URL for display
+      const { data } = supabase.storage
+        .from('street-vision')
+        .getPublicUrl(path);
+      
+      setImagePath(path);
+      setImageUrl(data.publicUrl);
+      setOriginalFilename(filename);
+    } catch (error) {
+      console.error('Failed to get image URL:', error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRemoveImage = () => {
-    setUploadedImage('');
+    setImagePath('');
+    setImageUrl('');
+    setOriginalFilename('');
+    clearProcessing();
   };
 
   const handleRun = async () => {
-    if (!uploadedImage) {
+    if (!imagePath) {
       toast({
         title: "Image required",
         description: "Please upload a street photo first",
@@ -47,17 +68,17 @@ const AICityPlanner: React.FC = () => {
       return;
     }
 
-    await startProcessing(uploadedImage, prompt);
+    await startProcessing(imagePath, prompt.trim(), originalFilename);
   };
 
   const handleRetry = () => {
-    if (uploadedImage && prompt.trim()) {
+    if (imagePath && prompt.trim()) {
       clearProcessing();
       handleRun();
     }
   };
 
-  const canRun = uploadedImage && prompt.trim() && !isProcessing;
+  const canRun = imagePath && prompt.trim() && !isProcessing && !isUploading;
 
   return (
     <PageLayout>
@@ -92,11 +113,12 @@ const AICityPlanner: React.FC = () => {
                 {/* Image Upload */}
                 <div>
                   <h2 className="text-lg font-medium mb-4 text-foreground">Street Photo</h2>
-                  <ImageUploadArea
-                    onImageUpload={handleImageUpload}
-                    uploadedImage={uploadedImage}
-                    onRemoveImage={handleRemoveImage}
-                  />
+        <ImageUploadArea
+          onImageUpload={handleImageUpload}
+          uploadedImageUrl={imageUrl}
+          onRemoveImage={handleRemoveImage}
+          isUploading={isUploading}
+        />
                 </div>
 
                 {/* Prompt Input */}
@@ -117,7 +139,7 @@ const AICityPlanner: React.FC = () => {
               record={currentRecord}
               isProcessing={isProcessing}
               error={error}
-              originalImageBase64={uploadedImage}
+              originalImageUrl={imageUrl}
               onRetry={handleRetry}
             />
 

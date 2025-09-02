@@ -2033,6 +2033,7 @@ export type Database = {
           error_message: string | null
           id: string
           image_model: string
+          original_filename: string | null
           original_image_url: string
           processing_time_ms: number | null
           prompt_model: string
@@ -2048,6 +2049,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           image_model?: string
+          original_filename?: string | null
           original_image_url: string
           processing_time_ms?: number | null
           prompt_model?: string
@@ -2063,6 +2065,7 @@ export type Database = {
           error_message?: string | null
           id?: string
           image_model?: string
+          original_filename?: string | null
           original_image_url?: string
           processing_time_ms?: number | null
           prompt_model?: string

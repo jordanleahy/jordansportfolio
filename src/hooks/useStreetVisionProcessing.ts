@@ -19,7 +19,7 @@ interface StreetVisionRecord {
 interface UseStreetVisionProcessingReturn {
   currentRecord: StreetVisionRecord | null;
   isProcessing: boolean;
-  startProcessing: (imageBase64: string, prompt: string) => Promise<void>;
+  startProcessing: (imagePath: string, prompt: string, originalFilename: string) => Promise<void>;
   clearProcessing: () => void;
   error: string | null;
 }
@@ -103,7 +103,7 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
     subscriptionRef.current = channel;
   }, []);
 
-  const startProcessing = useCallback(async (imageBase64: string, prompt: string) => {
+  const startProcessing = useCallback(async (imagePath: string, prompt: string, originalFilename: string) => {
     setError(null);
     setIsProcessing(true);
 
@@ -111,24 +111,20 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
       // Get the current session
       const { data: { session } } = await supabase.auth.getSession();
       
-      // Call the street-vision-agent edge function
-      const response = await fetch('/functions/v1/street-vision-agent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token || ''}`
-        },
-        body: JSON.stringify({
-          imageBase64,
-          prompt
-        })
+      // Call the street-vision-agent edge function with the full project URL
+      const response = await supabase.functions.invoke('street-vision-agent', {
+        body: {
+          originalImagePath: imagePath,
+          userPrompt: prompt,
+          originalFilename
+        }
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.error) {
+        throw new Error(response.error);
       }
 
-      const result = await response.json();
+      const result = response.data;
       
       if (result.error) {
         throw new Error(result.error);
@@ -137,9 +133,9 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
       // Set initial record and start real-time subscription
       const initialRecord: StreetVisionRecord = {
         id: result.recordId,
-        user_id: result.userId,
+        user_id: result.userId || '',
         user_prompt: prompt,
-        original_image_url: result.originalImageUrl,
+        original_image_url: result.originalImageUrl || '',
         status: 'pending',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
