@@ -38,24 +38,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 /**
  * Database record structure for street vision transformations
- * Mirrors the street_vision_generations table schema
+ * Uses the actual database schema for type safety
  */
-interface StreetVisionRecord {
-  id: string;                           // Unique record identifier
-  user_id: string;                      // Authenticated user ID
-  user_prompt: string;                  // User's transformation description
-  original_image_url: string;           // Public URL of uploaded street photo
-  transformed_image_url?: string;       // Public URL of AI-generated result
-  vision_analysis?: string;             // GPT-5's analysis of street conditions
-  status: 'pending' | 'analyzing' | 'generating' | 'completed' | 'failed'; // Processing status
-  error_message?: string;               // Error details if processing fails
-  processing_time_ms?: number;          // Total processing time in milliseconds
-  created_at: string;                   // Record creation timestamp
-  updated_at: string;                   // Last update timestamp
-}
+type StreetVisionRecord = Database['public']['Tables']['street_vision_generations']['Row'];
 
 /**
  * Hook return interface defining all available state and actions
@@ -120,11 +109,17 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
         },
         (payload) => {
           console.log('Street vision update received:', payload);
+          console.log('Payload new data:', payload.new);
+          
           const updatedRecord = payload.new as StreetVisionRecord;
+          console.log('Updated record status:', updatedRecord.status);
+          console.log('Updated record transformed_image_url:', updatedRecord.transformed_image_url);
+          
           setCurrentRecord(updatedRecord);              // Update local state
 
           // Handle completion - show success and cleanup
           if (updatedRecord.status === 'completed') {
+            console.log('Processing completed! Setting isProcessing to false');
             setIsProcessing(false);
             toast({
               title: "Street transformation complete!",
@@ -141,6 +136,7 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
             
           // Handle failure - show error and cleanup  
           } else if (updatedRecord.status === 'failed') {
+            console.log('Processing failed! Setting isProcessing to false');
             setIsProcessing(false);
             setError(updatedRecord.error_message || 'Processing failed');
             toast({
@@ -203,15 +199,27 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
       }
 
       // Create initial local record to display immediately
-      const initialRecord: StreetVisionRecord = {
+      // This is a partial record until we get real-time updates with complete data
+      const initialRecord = {
         id: result.recordId,
         user_id: result.userId || '',
         user_prompt: prompt,
         original_image_url: result.originalImageUrl || '',
-        status: 'pending',                    // Initial status
+        status: 'pending' as const,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+        updated_at: new Date().toISOString(),
+        // Set default values for required fields
+        error_message: null,
+        image_generation_prompt: null,
+        image_model: 'gpt-image-1',
+        processing_time_ms: null,
+        prompt_created_at: null,
+        prompt_creation_status: null,
+        prompt_model: 'gpt-5-2025-08-07',
+        transformed_image_url: null,
+        vision_analysis: null,
+        original_filename: originalFilename
+      } as StreetVisionRecord;
 
       setCurrentRecord(initialRecord);           // Update local state
       setupRealtimeSubscription(result.recordId); // Start monitoring updates

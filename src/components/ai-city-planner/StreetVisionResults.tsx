@@ -39,21 +39,13 @@ import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { UnifiedLoadingIndicator } from '@/components/ui/unified-loading-indicator';
 import { Button } from '@/components/ui/button';
 import { Download, RefreshCw } from 'lucide-react';
+import { Database } from '@/integrations/supabase/types';
 
 /**
  * Database record structure for street vision transformations
- * Contains all data needed for result display and user interaction
+ * Uses the actual database schema for type safety
  */
-interface StreetVisionRecord {
-  id: string;                           // Unique record identifier
-  user_prompt: string;                  // User's transformation description
-  original_image_url: string;           // URL of uploaded street photo
-  transformed_image_url?: string;       // URL of AI-generated transformation
-  vision_analysis?: string;             // GPT-5's street analysis and recommendations
-  status: 'pending' | 'analyzing' | 'generating' | 'completed' | 'failed'; // Processing status
-  error_message?: string;               // Error details for user display
-  processing_time_ms?: number;          // Total processing duration
-}
+type StreetVisionRecord = Database['public']['Tables']['street_vision_generations']['Row'];
 
 /**
  * Component props interface defining all required and optional properties
@@ -149,46 +141,63 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
             {/* Transformed Image */}
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-muted-foreground">Transformed Vision</h3>
-              {record?.transformed_image_url ? (
-                <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video group">
-                  <img 
-                    src={record.transformed_image_url}
-                    alt="Transformed street"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="secondary" 
-                      size="sm"
-                      onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = record.transformed_image_url!;
-                        link.download = 'street-transformation.png';
-                        link.click();
-                      }}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ) : isProcessing || (record && record.status !== 'failed') ? (
-                <SimpleShimmer 
-                  aspectRatio="16/9" 
-                  className="rounded-lg border border-border"
-                />
-              ) : (
-                <div className="aspect-video rounded-lg border border-border bg-muted/30 flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <p className="text-muted-foreground">No transformation available</p>
-                    {onRetry && (
-                      <Button variant="outline" size="sm" onClick={onRetry}>
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Retry
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
+              {(() => {
+                console.log('StreetVisionResults render - transformed image decision:');
+                console.log('- record?.transformed_image_url:', record?.transformed_image_url);
+                console.log('- isProcessing:', isProcessing);
+                console.log('- record?.status:', record?.status);
+                console.log('- condition for shimmer:', isProcessing || (record && record.status !== 'failed'));
+                
+                if (record?.transformed_image_url) {
+                  console.log('Showing actual transformed image');
+                  return (
+                    <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video group">
+                      <img 
+                        src={record.transformed_image_url}
+                        alt="Transformed street"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="secondary" 
+                          size="sm"
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = record.transformed_image_url!;
+                            link.download = 'street-transformation.png';
+                            link.click();
+                          }}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                } else if (isProcessing || (record && record.status !== 'failed')) {
+                  console.log('Showing shimmer (loading state)');
+                  return (
+                    <SimpleShimmer 
+                      aspectRatio="16/9" 
+                      className="rounded-lg border border-border"
+                    />
+                  );
+                } else {
+                  console.log('Showing error/retry state');
+                  return (
+                    <div className="aspect-video rounded-lg border border-border bg-muted/30 flex items-center justify-center">
+                      <div className="text-center space-y-2">
+                        <p className="text-muted-foreground">No transformation available</p>
+                        {onRetry && (
+                          <Button variant="outline" size="sm" onClick={onRetry}>
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Retry
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+              })()}
             </div>
           </div>
 
