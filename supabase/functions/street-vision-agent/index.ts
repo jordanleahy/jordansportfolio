@@ -74,7 +74,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
-import { toRgbaPngUnderSize } from './_img.ts';
 
 // Environment variables and client setup
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
@@ -290,26 +289,14 @@ serve(async (req) => {
 
     console.log('Street analysis stored successfully. Updated rows:', analysisUpdateData.length);
 
-    // Step 2: Download original image and prepare for image editing
-    console.log('Downloading original image for editing...');
+    // Step 2: Download original image (already optimized by client)
+    console.log('Downloading client-optimized image...');
     const originalImageResponse = await fetch(originalImageUrlData.publicUrl);
     if (!originalImageResponse.ok) {
       throw new Error('Failed to download original image');
     }
     const originalImageBuffer = await originalImageResponse.arrayBuffer();
-    
-    // Convert to RGBA PNG format and optimize size
-    console.log('Converting image to optimized RGBA PNG format...');
-    const originalBytes = new Uint8Array(originalImageBuffer);
-    const result = await toRgbaPngUnderSize(originalBytes, {
-      initialMaxDim: 1024,
-      targetMaxBytes: 3_500_000,
-      log: (msg: string, extra?: unknown) => console.log(`Image optimization - ${msg}:`, extra)
-    });
-    
-    console.log(`Image optimization complete: ${originalBytes.byteLength} → ${result.png.byteLength} bytes (${result.width}×${result.height}, ${result.iterations} iterations)`);
-    
-    const rgbaImageBytes = result.png;
+    console.log(`Using client-optimized image: ${originalImageBuffer.byteLength} bytes`);
 
     // Create editing prompt focused on street-level transformation only (max 1000 chars)
     const basePrompt = `${STREET_VISION_SYSTEM_PROMPT}. User Request: ${userPrompt}`;
@@ -354,9 +341,9 @@ serve(async (req) => {
 
     console.log('Image editing prompt stored successfully. Updated rows:', promptUpdateData.length);
 
-    // Use image editing API instead of generation
+    // Use image editing API with client-optimized image
     const formData = new FormData();
-    formData.append('image', new File([rgbaImageBytes], "input.png", { type: 'image/png' }));
+    formData.append('image', new File([originalImageBuffer], "input.png", { type: 'image/png' }));
     formData.append('prompt', editingPrompt);
     formData.append('size', '1024x1024');
     formData.append('n', '1');

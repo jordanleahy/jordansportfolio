@@ -43,10 +43,11 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
-import { Upload, Image, X } from 'lucide-react';
+import { Upload, Image, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { optimizeImage, blobToFile } from '@/utils/clientImageOptimization';
 
 /**
  * Component props interface for image upload functionality
@@ -71,6 +72,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
   // Visual state for interactive feedback
   const [isDragOver, setIsDragOver] = useState(false);    // Drag & drop feedback
   const [isHovering, setIsHovering] = useState(false);    // Hover state styling
+  const [isProcessing, setIsProcessing] = useState(false); // Client-side image processing
   const fileInputRef = useRef<HTMLInputElement>(null);    // Hidden file input reference
 
   /**
@@ -109,10 +111,10 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
   }, []);
 
   /**
-   * Validates and processes uploaded files with comprehensive error handling
-   * Performs type and size validation before calling storage upload
+   * Validates and processes uploaded files with client-side optimization
+   * Performs type validation, client-side resizing/compression, then uploads optimized file
    * 
-   * @param file - File object to validate and upload
+   * @param file - File object to validate, optimize, and upload
    */
   const handleFile = useCallback(async (file: File) => {
     // Validate file type - only allow image files
@@ -125,25 +127,41 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
       return;
     }
 
-    // Validate file size - limit to 10MB for reasonable upload times
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    // Validate file size - limit to 50MB for client processing
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit for client-side processing
       toast({
         title: "File too large",
-        description: "Please upload an image smaller than 10MB",
+        description: "Please upload an image smaller than 50MB",
         variant: "destructive",
       });
       return;
     }
 
+    setIsProcessing(true);
+
     try {
-      // Upload to storage and notify parent component
-      const { path, filename } = await uploadToStorage(file);
+      // Client-side image optimization
+      console.log('Starting client-side image optimization...');
+      const optimizationResult = await optimizeImage(file, {
+        maxDimension: 1024,
+        quality: 0.85,
+        maxSizeBytes: 3 * 1024 * 1024, // 3MB target
+        format: file.type.includes('png') ? 'png' : 'jpeg'
+      });
+
+      console.log(`Image optimized: ${optimizationResult.originalSize} → ${optimizationResult.optimizedSize} bytes`);
+      
+      // Convert optimized blob back to File object
+      const optimizedFile = blobToFile(optimizationResult.blob, file.name);
+
+      // Upload optimized file to storage
+      const { path, filename } = await uploadToStorage(optimizedFile);
       onImageUpload(path, filename);
       
-      // Show success notification
+      // Show success notification with optimization details
       toast({
         title: "Image uploaded",
-        description: "Your street photo has been uploaded successfully."
+        description: `Your street photo has been optimized and uploaded successfully. Size reduced by ${Math.round((1 - 1/optimizationResult.compressionRatio) * 100)}%.`
       });
     } catch (error) {
       // Handle upload errors with user-friendly messages
@@ -153,6 +171,8 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
         description: error instanceof Error ? error.message : "Failed to upload the image. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   }, [onImageUpload, uploadToStorage]);
 
@@ -206,13 +226,13 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
           alt="Uploaded street"
           className="w-full h-48 object-cover"
         />
-        <Button
-          variant="destructive"
-          size="sm"
-          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={onRemoveImage}
-          disabled={isUploading}
-        >
+          <Button
+            variant="destructive"
+            size="sm"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={onRemoveImage}
+            disabled={isUploading || isProcessing}
+          >
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -274,9 +294,18 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
             </p>
           </div>
           
-          <Button variant="outline" className="mt-4" disabled={isUploading}>
-            <Upload className="mr-2 h-4 w-4" />
-            {isUploading ? 'Uploading...' : 'Choose File'}
+          <Button variant="outline" className="mt-4" disabled={isUploading || isProcessing}>
+            {isProcessing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Optimizing...
+              </>
+            ) : (
+              <>
+                <Upload className="mr-2 h-4 w-4" />
+                {isUploading ? 'Uploading...' : 'Choose File'}
+              </>
+            )}
           </Button>
         </div>
       </div>
