@@ -1,3 +1,47 @@
+/**
+ * STREET VISION AGENT - AI-Powered Urban Design Transformation
+ * 
+ * PURPOSE:
+ * This edge function transforms real street photos into AI-generated visions of safer, 
+ * more livable urban spaces. It takes user-uploaded street photos and redesigns them 
+ * to be more pedestrian-friendly, with protected bike lanes, expanded sidewalks, 
+ * greenery, and reduced car dominance.
+ * 
+ * WORKFLOW:
+ * 1. Accept base64 street photo + user transformation description
+ * 2. Use GPT-5 Vision API to analyze current street conditions
+ * 3. Apply specialized urban design system prompt (hardcoded below)
+ * 4. Generate photorealistic transformation using GPT-Image-1
+ * 5. Return analysis + transformed street visualization
+ * 
+ * INPUT:
+ * - imageData: base64-encoded street photo
+ * - userPrompt: user's vision for street transformation
+ * 
+ * OUTPUT:
+ * - analysis: GPT-5's assessment of current street conditions
+ * - transformedImageBase64: AI-generated transformed street image
+ * - originalPrompt: user's original transformation request
+ * - success: boolean status indicator
+ * 
+ * TRANSFORMATION FOCUS:
+ * - Protected bike lanes and cycling infrastructure
+ * - Expanded sidewalks for pedestrians and families
+ * - Added greenery, trees, and public seating
+ * - Reduced car lanes and parking dominance
+ * - Enhanced safety for walking and biking
+ * - Preserved existing buildings and neighborhood character
+ * 
+ * MODELS USED:
+ * - GPT-5 (gpt-5-2025-08-07): Street analysis and urban design planning
+ * - GPT-Image-1: Photorealistic street transformation generation
+ * 
+ * REQUIREMENTS:
+ * - OPENAI_API_KEY environment variable must be configured
+ * - Input images should be actual street photos for best results
+ * - Function maintains CORS compatibility for web app integration
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
