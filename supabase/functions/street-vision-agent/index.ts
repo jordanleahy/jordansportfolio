@@ -390,11 +390,10 @@ serve(async (req) => {
     console.log('Starting image generation...');
     
     const formData = new FormData();
-    formData.append('model', 'gpt-image-1'); // CRITICAL: Add model parameter for gpt-image-1
+    formData.append('model', 'gpt-image-1');
     formData.append('image', new File([originalImageBuffer], "input.png", { type: 'image/png' }));
     formData.append('prompt', editingPrompt);
     formData.append('size', '1024x1024');
-    formData.append('n', '1');
     
     console.log('Image generation parameters:', {
       model: 'gpt-image-1',
