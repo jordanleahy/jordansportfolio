@@ -15,6 +15,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
   onRemoveImage,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const convertToBase64 = (file: File): Promise<string> => {
@@ -104,22 +105,20 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
 
   if (uploadedImage) {
     return (
-      <div className="relative group">
-        <div className="relative rounded-lg overflow-hidden border border-border bg-card">
-          <img 
-            src={`data:image/jpeg;base64,${uploadedImage}`}
-            alt="Uploaded street"
-            className="w-full h-48 object-cover"
-          />
-          <Button
-            variant="destructive"
-            size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={onRemoveImage}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+      <div className="relative rounded-lg overflow-hidden border border-border bg-card group">
+        <img 
+          src={`data:image/jpeg;base64,${uploadedImage}`}
+          alt="Uploaded street"
+          className="w-full h-48 object-cover"
+        />
+        <Button
+          variant="destructive"
+          size="sm"
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={onRemoveImage}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
@@ -127,9 +126,11 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
   return (
     <div className="space-y-4">
       <div
-        className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+        className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
           isDragOver 
-            ? 'border-accent bg-accent/5' 
+            ? 'border-accent bg-accent/5 scale-[1.02]' 
+            : isHovering
+            ? 'border-accent/60 bg-accent/5 shadow-lg'
             : 'border-border bg-muted/30 hover:bg-muted/50'
         }`}
         onDrop={handleDrop}
@@ -138,6 +139,8 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
           setIsDragOver(true);
         }}
         onDragLeave={() => setIsDragOver(false)}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
         onClick={triggerFileInput}
         role="button"
         tabIndex={0}
@@ -165,6 +168,11 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
             <p className="text-sm text-muted-foreground">
               Drag and drop, click to browse, or paste from clipboard
             </p>
+            {isHovering && (
+              <p className="text-xs text-accent font-medium animate-pulse">
+                ✨ Paste an image with Ctrl+V
+              </p>
+            )}
             <p className="text-xs text-muted-foreground">
               Supports JPG, PNG (max 10MB)
             </p>
