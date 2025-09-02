@@ -396,9 +396,9 @@ serve(async (req) => {
       size: '1024x1024'
     });
 
-    // Create AbortController for image generation timeout
-    const imageController = new AbortController();
-    const imageTimeout = setTimeout(() => imageController.abort(), 60000); // 60 second timeout for image generation
+    // Log detailed image generation start timing
+    console.log('Image generation started at:', new Date().toISOString());
+    console.log('Expected processing time: 60-120 seconds for complex urban transformations');
 
     const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
@@ -407,9 +407,6 @@ serve(async (req) => {
         'Connection': 'keep-alive',
       },
       body: formData,
-      signal: imageController.signal,
-    }).finally(() => {
-      clearTimeout(imageTimeout);
     });
 
     if (!imageResponse.ok) {
