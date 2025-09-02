@@ -88,34 +88,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Enhanced system prompt for image-to-image street transformation
-const STREET_VISION_SYSTEM_PROMPT = `## Image Editing Prompt (Street-Level Transformation Only)
-
-**CRITICAL: PRESERVE BUILDINGS EXACTLY**
-- Keep ALL buildings, facades, windows, signage, architectural details, and skyline elements EXACTLY as they appear in the original image
-- Maintain the exact same camera angle, perspective, and proportions
-- Preserve the exact aspect ratio and overall composition
-- DO NOT alter any structures above street level
-
-**EDIT ONLY STREET LEVEL**
-- Transform ONLY the street surface, sidewalks, curbs, and street-level elements
-- Replace cars with protected bike lanes featuring clear lane markings and physical barriers
-- Add street trees, planters, and green infrastructure at street level
-- Include pedestrian-friendly elements: wider sidewalks, outdoor seating, bike parking
-- Maintain the same street width proportions - do not change the distance between buildings
-
-**TRANSFORMATION FOCUS**
-- Protected bike lanes with physical separation (planters, barriers, or raised surfaces)
-- Expanded pedestrian space with trees and seating areas
-- Reduced car infrastructure while maintaining emergency access
-- High-quality urban materials (attractive paving, modern street furniture)
-- Enhanced lighting and wayfinding at street level
-
-**TECHNICAL REQUIREMENTS**
-- Keep the exact same lighting conditions and time of day
-- Maintain photorealistic quality that matches the original image style
-- Preserve all background elements, building textures, and architectural details
-- Ensure the transformation looks like a realistic renovation of this specific location`;
+// Concise system prompt for image editing (max 1000 chars)
+const STREET_VISION_SYSTEM_PROMPT = `Transform ONLY the street surface and sidewalks while keeping ALL buildings exactly the same. Replace cars with protected bike lanes, add street trees and wider sidewalks. Maintain exact camera angle, perspective, lighting, and building proportions. Do not change any structures above street level, architectural details, or the distance between buildings. Create photorealistic street-level improvements only.`;
 
 serve(async (req) => {
   const startTime = Date.now();
@@ -323,12 +297,24 @@ serve(async (req) => {
     }
     const originalImageBuffer = await originalImageResponse.arrayBuffer();
 
-    // Create editing prompt focused on street-level transformation only
-    const editingPrompt = `${STREET_VISION_SYSTEM_PROMPT}
-
-User Request: ${userPrompt}
-
-Transform only the street surface and sidewalk areas while keeping all buildings exactly the same. ${analysis.substring(0, 500)}...`;
+    // Create editing prompt focused on street-level transformation only (max 1000 chars)
+    const basePrompt = `${STREET_VISION_SYSTEM_PROMPT}. User Request: ${userPrompt}`;
+    
+    // Calculate remaining space for analysis (leaving buffer for safety)
+    const maxPromptLength = 950; // Leave buffer under 1000 char limit
+    const remainingSpace = maxPromptLength - basePrompt.length;
+    
+    let editingPrompt = basePrompt;
+    if (remainingSpace > 50 && analysis) {
+      // Add truncated analysis if there's space
+      const analysisSnippet = analysis.substring(0, Math.max(0, remainingSpace - 10));
+      editingPrompt += ` Context: ${analysisSnippet}`;
+    }
+    
+    // Final safety check
+    if (editingPrompt.length > 1000) {
+      editingPrompt = editingPrompt.substring(0, 997) + '...';
+    }
 
     // Store the generated prompt and update prompt creation status
     console.log('Storing image editing prompt. Length:', editingPrompt.length);
