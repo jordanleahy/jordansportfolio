@@ -2027,6 +2027,54 @@ export type Database = {
           },
         ]
       }
+      street_vision_generations: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          image_model: string
+          original_image_url: string
+          processing_time_ms: number | null
+          prompt_model: string
+          status: string
+          transformed_image_url: string | null
+          updated_at: string
+          user_id: string
+          user_prompt: string
+          vision_analysis: string | null
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_model?: string
+          original_image_url: string
+          processing_time_ms?: number | null
+          prompt_model?: string
+          status?: string
+          transformed_image_url?: string | null
+          updated_at?: string
+          user_id: string
+          user_prompt: string
+          vision_analysis?: string | null
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_model?: string
+          original_image_url?: string
+          processing_time_ms?: number | null
+          prompt_model?: string
+          status?: string
+          transformed_image_url?: string | null
+          updated_at?: string
+          user_id?: string
+          user_prompt?: string
+          vision_analysis?: string | null
+        }
+        Relationships: []
+      }
       submission_logs: {
         Row: {
           created_at: string
