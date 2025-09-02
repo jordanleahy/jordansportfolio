@@ -88,8 +88,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Concise system prompt for image editing (max 1000 chars)
-const STREET_VISION_SYSTEM_PROMPT = `Transform ONLY the street surface and sidewalks while keeping ALL buildings exactly the same. Replace cars with protected bike lanes, add street trees and wider sidewalks. Maintain exact camera angle, perspective, lighting, and building proportions. Do not change any structures above street level, architectural details, or the distance between buildings. Create photorealistic street-level improvements only.`;
+// Ultra-concise system prompt for optimal performance (targeting 500-1000 total chars)
+const STREET_VISION_SYSTEM_PROMPT = `Transform street-level only. Keep all buildings unchanged. Add bike lanes, wider sidewalks, street trees. Maintain exact perspective and lighting. Photorealistic results.`;
 
 serve(async (req) => {
   const startTime = Date.now();
@@ -335,23 +335,30 @@ serve(async (req) => {
       console.log(`Warning: Image size ${imageSizeMB}MB is above optimal 1MB threshold. This may slow processing.`);
     }
 
-    // Create editing prompt focused on street-level transformation only (max 32000 chars for gpt-image-1)
-    const basePrompt = `${STREET_VISION_SYSTEM_PROMPT}. User Request: ${userPrompt}`;
-    
-    // Calculate remaining space for analysis (leaving buffer for safety)
-    const maxPromptLength = 31500; // Leave buffer under 32000 char limit
-    const remainingSpace = maxPromptLength - basePrompt.length;
+    // Create ultra-concise editing prompt (targeting 500-1000 characters for optimal performance)
+    const maxPromptLength = 1000; // Target optimal range
+    const basePrompt = `${STREET_VISION_SYSTEM_PROMPT} Goal: ${userPrompt}`;
     
     let editingPrompt = basePrompt;
-    if (remainingSpace > 50 && analysis) {
-      // Add truncated analysis if there's space
-      const analysisSnippet = analysis.substring(0, Math.max(0, remainingSpace - 10));
-      editingPrompt += ` Context: ${analysisSnippet}`;
+    const remainingSpace = maxPromptLength - basePrompt.length;
+    
+    // Add only essential analysis insights if space allows
+    if (remainingSpace > 100 && analysis) {
+      // Extract key infrastructure details only (roads, sidewalks, parking)
+      const analysisWords = analysis.split(' ');
+      const keyTerms = analysisWords.filter(word => 
+        /lanes?|sidewalks?|parking|trees?|bikes?|pedestrian|traffic|safety|width/i.test(word)
+      );
+      
+      if (keyTerms.length > 0) {
+        const keyInsights = keyTerms.slice(0, Math.floor(remainingSpace / 10)).join(' ');
+        editingPrompt += ` Current: ${keyInsights}`;
+      }
     }
     
-    // Final safety check - ensure we stay under gpt-image-1 limit
-    if (editingPrompt.length > 32000) {
-      editingPrompt = editingPrompt.substring(0, 31997) + '...';
+    // Ensure we stay within optimal range
+    if (editingPrompt.length > maxPromptLength) {
+      editingPrompt = editingPrompt.substring(0, maxPromptLength - 3) + '...';
     }
 
     // Store the generated prompt and update prompt creation status
