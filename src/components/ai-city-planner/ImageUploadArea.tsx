@@ -146,7 +146,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
         maxDimension: 1024,
         quality: 0.85,
         maxSizeBytes: 3 * 1024 * 1024, // 3MB target
-        format: file.type.includes('png') ? 'png' : 'jpeg'
+        format: 'png'
       });
 
       console.log(`Image optimized: ${optimizationResult.originalSize} → ${optimizationResult.optimizedSize} bytes`);
