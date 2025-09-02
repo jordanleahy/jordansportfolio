@@ -69,154 +69,157 @@
  * - OpenAI API failures (vision analysis, image generation)
  * - Input validation errors
  * - Processing timeouts and resource limits
- */
-
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
+ */ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
-
 // Environment variables and client setup
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 // Initialize Supabase client with service role for database operations
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 };
-
 // Ultra-concise system prompt for optimal performance (targeting 500-1000 total chars)
 const STREET_VISION_SYSTEM_PROMPT = `Transform street-level only. Keep all buildings unchanged. Add bike lanes, wider sidewalks, street trees. Maintain exact perspective and lighting. Photorealistic results.`;
-
-serve(async (req) => {
+serve(async (req)=>{
   const startTime = Date.now();
-  let recordId: string | null = null;
-  
+  let recordId = null;
   console.log('Street Vision Agent called with database integration');
-  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    return new Response(null, {
+      headers: corsHeaders
     });
   }
-
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({
+      error: 'Method not allowed'
+    }), {
+      status: 405,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
+  }
   // Validate environment variables
   if (!openAIApiKey) {
     console.error('OPENAI_API_KEY not found');
-    return new Response(JSON.stringify({ error: 'OpenAI API key not configured' }), {
+    return new Response(JSON.stringify({
+      error: 'OpenAI API key not configured'
+    }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
     });
   }
-
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Supabase configuration missing');
-    return new Response(JSON.stringify({ error: 'Database configuration missing' }), {
+    return new Response(JSON.stringify({
+      error: 'Database configuration missing'
+    }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
     });
   }
-
   try {
     // Extract and validate user authentication
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Authorization header required' }), {
+      return new Response(JSON.stringify({
+        error: 'Authorization header required'
+      }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
-
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
     if (authError || !user) {
       console.error('Authentication error:', authError);
-      return new Response(JSON.stringify({ error: 'Invalid authentication token' }), {
+      return new Response(JSON.stringify({
+        error: 'Invalid authentication token'
+      }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
-
     const userId = user.id;
     console.log('Authenticated user:', userId);
-
     // Parse and validate request body
     const { originalImagePath, userPrompt, originalFilename } = await req.json();
-
     if (!originalImagePath || !userPrompt) {
-      return new Response(JSON.stringify({ error: 'Missing originalImagePath or userPrompt' }), {
+      return new Response(JSON.stringify({
+        error: 'Missing originalImagePath or userPrompt'
+      }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
-
     console.log('Processing street vision request with user prompt:', userPrompt);
-
     // Get the public URL for the original image
-    const { data: originalImageUrlData } = supabase.storage
-      .from('street-vision')
-      .getPublicUrl(originalImagePath);
-
+    const { data: originalImageUrlData } = supabase.storage.from('street-vision').getPublicUrl(originalImagePath);
     // Create initial database record
     console.log('Creating database record...');
-    const { data: record, error: insertError } = await supabase
-      .from('street_vision_generations')
-      .insert({
-        user_id: userId,
-        user_prompt: userPrompt,
-        original_image_url: originalImageUrlData.publicUrl,
-        original_filename: originalFilename,
-        status: 'pending',
-        prompt_model: 'gpt-4.1-2025-04-14',
-        image_model: 'gpt-image-1'
-      })
-      .select()
-      .single();
-
+    const { data: record, error: insertError } = await supabase.from('street_vision_generations').insert({
+      user_id: userId,
+      user_prompt: userPrompt,
+      original_image_url: originalImageUrlData.publicUrl,
+      original_filename: originalFilename,
+      status: 'pending',
+      prompt_model: 'gpt-5-2025-08-07',
+      image_model: 'gpt-image-1'
+    }).select().single();
     if (insertError || !record) {
       console.error('Database insert error:', insertError);
-      return new Response(JSON.stringify({ error: 'Failed to create database record' }), {
+      return new Response(JSON.stringify({
+        error: 'Failed to create database record'
+      }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
-
     recordId = record.id;
     console.log('Database record created:', recordId);
-
     // Update status to analyzing
-    await supabase
-      .from('street_vision_generations')
-      .update({ status: 'analyzing' })
-      .eq('id', recordId);
-
-    // Step 1: Analyze the street photo using GPT-4.1 Vision (optimized for speed)
+    await supabase.from('street_vision_generations').update({
+      status: 'analyzing'
+    }).eq('id', recordId);
+    // Step 1: Analyze the street photo using GPT-5.1 Vision (optimized for speed)
     const visionStartTime = Date.now();
-    console.log('Analyzing street photo with GPT-4.1...');
-    
+    console.log('Analyzing street photo with GPT-5.1...');
     // Create AbortController for timeout handling
     const visionController = new AbortController();
-    const visionTimeout = setTimeout(() => visionController.abort(), 30000); // 30 second timeout
-    
+    const visionTimeout = setTimeout(()=>visionController.abort(), 30000); // 30 second timeout
     const visionResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
-        'Connection': 'keep-alive', // Connection pooling hint
+        'Connection': 'keep-alive'
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14', // Faster vision model
+        model: 'gpt-5-2025-08-07',
         messages: [
           {
             role: 'system',
@@ -238,14 +241,12 @@ serve(async (req) => {
             ]
           }
         ],
-        max_completion_tokens: 800, // Reduced from 2000 for faster processing
-        temperature: 0.7, // GPT-4.1 supports temperature
+        max_completion_tokens: 800
       }),
-      signal: visionController.signal,
-    }).finally(() => {
+      signal: visionController.signal
+    }).finally(()=>{
       clearTimeout(visionTimeout);
     });
-
     if (!visionResponse.ok) {
       const errorText = await visionResponse.text();
       const visionTime = Date.now() - visionStartTime;
@@ -254,167 +255,126 @@ serve(async (req) => {
         error: errorText,
         timingMs: visionTime
       });
-      
       // Update database with error
-      await supabase
-        .from('street_vision_generations')
-        .update({ 
-          status: 'failed',
-          error_message: `Vision API error: ${visionResponse.status} - ${errorText}`,
-          processing_time_ms: Date.now() - startTime
-        })
-        .eq('id', recordId);
-      
+      await supabase.from('street_vision_generations').update({
+        status: 'failed',
+        error_message: `Vision API error: ${visionResponse.status} - ${errorText}`,
+        processing_time_ms: Date.now() - startTime
+      }).eq('id', recordId);
       throw new Error(`Vision API error: ${visionResponse.status}`);
     }
-
     const visionData = await visionResponse.json();
     const visionTime = Date.now() - visionStartTime;
-    
     const analysis = visionData.choices?.[0]?.message?.content;
     console.log(`Street analysis completed in ${visionTime}ms. Analysis length: ${analysis?.length || 0}`);
-
     // Update database with vision analysis - with comprehensive error handling
     console.log('Updating database with analysis. Analysis length:', analysis?.length || 0);
     console.log('Analysis preview:', analysis?.substring(0, 200) + '...');
-    
-    const { data: analysisUpdateData, error: analysisUpdateError } = await supabase
-      .from('street_vision_generations')
-      .update({ 
-        vision_analysis: analysis,
-        status: 'generating'
-      })
-      .eq('id', recordId)
-      .select();
-
+    const { data: analysisUpdateData, error: analysisUpdateError } = await supabase.from('street_vision_generations').update({
+      vision_analysis: analysis,
+      status: 'generating'
+    }).eq('id', recordId).select();
     if (analysisUpdateError) {
       console.error('Error updating analysis:', analysisUpdateError);
       throw new Error(`Failed to store vision analysis: ${analysisUpdateError.message}`);
     }
-
     if (!analysisUpdateData || analysisUpdateData.length === 0) {
       console.error('No rows updated when storing analysis for record:', recordId);
       throw new Error('Failed to update analysis - no rows affected');
     }
-
     console.log('Street analysis stored successfully. Updated rows:', analysisUpdateData.length);
-
     // Step 2: Download original image (optimized for 1MB target)
     const downloadStartTime = Date.now();
     console.log('Downloading client-optimized image...');
-    
     const downloadController = new AbortController();
-    const downloadTimeout = setTimeout(() => downloadController.abort(), 15000); // 15 second timeout
-    
+    const downloadTimeout = setTimeout(()=>downloadController.abort(), 15000); // 15 second timeout
     const originalImageResponse = await fetch(originalImageUrlData.publicUrl, {
       signal: downloadController.signal,
       headers: {
-        'Connection': 'keep-alive',
+        'Connection': 'keep-alive'
       }
-    }).finally(() => {
+    }).finally(()=>{
       clearTimeout(downloadTimeout);
     });
-    
     if (!originalImageResponse.ok) {
       throw new Error('Failed to download original image');
     }
-    
     const originalImageBuffer = await originalImageResponse.arrayBuffer();
     const downloadTime = Date.now() - downloadStartTime;
     const imageSizeMB = Math.round(originalImageBuffer.byteLength / 1024 / 1024 * 100) / 100;
-    
     console.log(`Image downloaded in ${downloadTime}ms. Size: ${imageSizeMB}MB`);
-    
     // Check size limit - prefer 1MB for optimal performance, max 5MB
     if (originalImageBuffer.byteLength > 5 * 1024 * 1024) {
       throw new Error(`Image is too large: ${imageSizeMB}MB. Please compress to under 5MB for optimal performance.`);
     }
-    
     // Warn if image is larger than optimal
     if (originalImageBuffer.byteLength > 1024 * 1024) {
       console.log(`Warning: Image size ${imageSizeMB}MB is above optimal 1MB threshold. This may slow processing.`);
     }
-
     // Create ultra-concise editing prompt (targeting 500-1000 characters for optimal performance)
     const maxPromptLength = 1000; // Target optimal range
     const basePrompt = `${STREET_VISION_SYSTEM_PROMPT} Goal: ${userPrompt}`;
-    
     let editingPrompt = basePrompt;
     const remainingSpace = maxPromptLength - basePrompt.length;
-    
     // Add only essential analysis insights if space allows
     if (remainingSpace > 100 && analysis) {
       // Extract key infrastructure details only (roads, sidewalks, parking)
       const analysisWords = analysis.split(' ');
-      const keyTerms = analysisWords.filter(word => 
-        /lanes?|sidewalks?|parking|trees?|bikes?|pedestrian|traffic|safety|width/i.test(word)
-      );
-      
+      const keyTerms = analysisWords.filter((word)=>/lanes?|sidewalks?|parking|trees?|bikes?|pedestrian|traffic|safety|width/i.test(word));
       if (keyTerms.length > 0) {
         const keyInsights = keyTerms.slice(0, Math.floor(remainingSpace / 10)).join(' ');
         editingPrompt += ` Current: ${keyInsights}`;
       }
     }
-    
     // Ensure we stay within optimal range
     if (editingPrompt.length > maxPromptLength) {
       editingPrompt = editingPrompt.substring(0, maxPromptLength - 3) + '...';
     }
-
     // Store the generated prompt and update prompt creation status
     console.log('Storing image editing prompt. Length:', editingPrompt.length);
-    const { data: promptUpdateData, error: promptUpdateError } = await supabase
-      .from('street_vision_generations')
-      .update({
-        image_generation_prompt: editingPrompt,
-        prompt_creation_status: 'created',
-        prompt_created_at: new Date().toISOString()
-      })
-      .eq('id', recordId)
-      .select();
-
+    const { data: promptUpdateData, error: promptUpdateError } = await supabase.from('street_vision_generations').update({
+      image_generation_prompt: editingPrompt,
+      prompt_creation_status: 'created',
+      prompt_created_at: new Date().toISOString()
+    }).eq('id', recordId).select();
     if (promptUpdateError) {
       console.error('Error storing image prompt:', promptUpdateError);
       throw new Error(`Failed to store image generation prompt: ${promptUpdateError.message}`);
     }
-
     if (!promptUpdateData || promptUpdateData.length === 0) {
       console.error('No rows updated when storing prompt for record:', recordId);
       throw new Error('Failed to update prompt - no rows affected');
     }
-
     console.log('Image editing prompt stored successfully. Updated rows:', promptUpdateData.length);
-
     // Step 3: Generate transformed image with timeout handling
     const imageGenStartTime = Date.now();
     console.log('Starting image generation...');
-    
     const formData = new FormData();
     formData.append('model', 'gpt-image-1');
-    formData.append('image', new File([originalImageBuffer], "input.png", { type: 'image/png' }));
+    formData.append('image', new File([
+      originalImageBuffer
+    ], "input.png", {
+      type: 'image/png'
+    }));
     formData.append('prompt', editingPrompt);
     formData.append('size', '1024x1024');
-    
     console.log('Image generation parameters:', {
       model: 'gpt-image-1',
       imageSize: `${Math.round(originalImageBuffer.byteLength / 1024)}KB`,
       promptLength: editingPrompt.length,
       size: '1024x1024'
     });
-
     // Log detailed image generation start timing
     console.log('Image generation started at:', new Date().toISOString());
     console.log('Expected processing time: 60-120 seconds for complex urban transformations');
-
     const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
-        'Connection': 'keep-alive',
+        'Connection': 'keep-alive'
       },
-      body: formData,
+      body: formData
     });
-
     if (!imageResponse.ok) {
       const errorText = await imageResponse.text();
       const imageGenTime = Date.now() - imageGenStartTime;
@@ -425,72 +385,49 @@ serve(async (req) => {
         timingMs: imageGenTime,
         headers: Object.fromEntries(imageResponse.headers.entries())
       });
-      
       // Update database with error
-      await supabase
-        .from('street_vision_generations')
-        .update({ 
-          status: 'failed',
-          error_message: `Image generation error: ${imageResponse.status} - ${errorText}`,
-          processing_time_ms: Date.now() - startTime
-        })
-        .eq('id', recordId);
-      
+      await supabase.from('street_vision_generations').update({
+        status: 'failed',
+        error_message: `Image generation error: ${imageResponse.status} - ${errorText}`,
+        processing_time_ms: Date.now() - startTime
+      }).eq('id', recordId);
       throw new Error(`Image generation error: ${imageResponse.status} - ${errorText}`);
     }
-
     const imageData_result = await imageResponse.json();
     const imageGenTime = Date.now() - imageGenStartTime;
     console.log(`Image generation completed in ${imageGenTime}ms`);
-    
     // Step 4: Process and upload transformed image
     const uploadStartTime = Date.now();
     console.log('Processing transformed image...');
-    
     // Image edits API returns URL, convert to base64 for storage
     const transformedImageUrl = imageData_result.data[0].url;
     const transformedResponse = await fetch(transformedImageUrl);
     const transformedArrayBuffer = await transformedResponse.arrayBuffer();
     const transformedImageBase64 = btoa(String.fromCharCode(...new Uint8Array(transformedArrayBuffer)));
-    
     // Upload transformed image to storage
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
-    const transformedImageBuffer = Uint8Array.from(atob(transformedImageBase64), c => c.charCodeAt(0));
-    
-    const { error: uploadError } = await supabase.storage
-      .from('street-vision')
-      .upload(transformedFilename, transformedImageBuffer, {
-        contentType: 'image/png',
-        cacheControl: '3600',
-        upsert: true
-      });
-
+    const transformedImageBuffer = Uint8Array.from(atob(transformedImageBase64), (c)=>c.charCodeAt(0));
+    const { error: uploadError } = await supabase.storage.from('street-vision').upload(transformedFilename, transformedImageBuffer, {
+      contentType: 'image/png',
+      cacheControl: '3600',
+      upsert: true
+    });
     if (uploadError) {
       console.error('Failed to upload transformed image:', uploadError);
       throw new Error('Failed to upload transformed image');
     }
-
     // Get public URL for transformed image
-    const { data: transformedUrlData } = supabase.storage
-      .from('street-vision')
-      .getPublicUrl(transformedFilename);
-
+    const { data: transformedUrlData } = supabase.storage.from('street-vision').getPublicUrl(transformedFilename);
     const uploadTime = Date.now() - uploadStartTime;
     const processingTime = Date.now() - startTime;
-    
     console.log(`Upload completed in ${uploadTime}ms`);
     console.log('Street transformation completed successfully');
-
     // Final database update with results and performance metrics
-    await supabase
-      .from('street_vision_generations')
-      .update({
-        transformed_image_url: transformedUrlData.publicUrl,
-        processing_time_ms: processingTime,
-        status: 'completed'
-      })
-      .eq('id', recordId);
-
+    await supabase.from('street_vision_generations').update({
+      transformed_image_url: transformedUrlData.publicUrl,
+      processing_time_ms: processingTime,
+      status: 'completed'
+    }).eq('id', recordId);
     // Log detailed performance metrics
     console.log(`=== PERFORMANCE SUMMARY ===`);
     console.log(`Vision Analysis: ${visionTime}ms`);
@@ -499,7 +436,6 @@ serve(async (req) => {
     console.log(`Upload Processing: ${uploadTime}ms`);
     console.log(`Total Processing: ${processingTime}ms`);
     console.log(`Record ID: ${recordId}`);
-
     return new Response(JSON.stringify({
       recordId,
       analysis,
@@ -508,36 +444,36 @@ serve(async (req) => {
       processingTimeMs: processingTime,
       success: true
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
     });
-
   } catch (error) {
     console.error('Error in street-vision-agent:', error);
-    
     // Update database with error if we have a record ID
     if (recordId) {
       try {
-        await supabase
-          .from('street_vision_generations')
-          .update({ 
-            status: 'failed',
-            prompt_creation_status: 'failed',
-            error_message: error.message || 'Unknown error occurred',
-            processing_time_ms: Date.now() - startTime
-          })
-          .eq('id', recordId);
+        await supabase.from('street_vision_generations').update({
+          status: 'failed',
+          prompt_creation_status: 'failed',
+          error_message: error.message || 'Unknown error occurred',
+          processing_time_ms: Date.now() - startTime
+        }).eq('id', recordId);
       } catch (dbError) {
         console.error('Failed to update database with error:', dbError);
       }
     }
-    
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       recordId,
       error: error.message || 'Failed to process street transformation',
-      success: false 
+      success: false
     }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
     });
   }
 });
