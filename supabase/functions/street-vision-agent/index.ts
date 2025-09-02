@@ -260,7 +260,7 @@ serve(async (req) => {
             ]
           }
         ],
-        max_completion_tokens: 1000,
+        max_completion_tokens: 2000,
       }),
     });
 
