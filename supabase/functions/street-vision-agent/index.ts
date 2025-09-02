@@ -178,7 +178,7 @@ serve(async (req) => {
         original_filename: originalFilename,
         status: 'pending',
         prompt_model: 'gpt-4.1-2025-04-14',
-        image_model: 'gpt-image-1'
+        image_model: 'dall-e-2'
       })
       .select()
       .single();
@@ -390,14 +390,14 @@ serve(async (req) => {
     console.log('Starting image generation...');
     
     const formData = new FormData();
-    formData.append('model', 'gpt-image-1'); // CRITICAL: Add model parameter for gpt-image-1
+    formData.append('model', 'dall-e-2'); // Use dall-e-2 for image edits
     formData.append('image', new File([originalImageBuffer], "input.png", { type: 'image/png' }));
     formData.append('prompt', editingPrompt);
     formData.append('size', '1024x1024');
     formData.append('n', '1');
     
     console.log('Image generation parameters:', {
-      model: 'gpt-image-1',
+      model: 'dall-e-2',
       imageSize: `${Math.round(originalImageBuffer.byteLength / 1024)}KB`,
       promptLength: editingPrompt.length,
       size: '1024x1024'
@@ -405,7 +405,7 @@ serve(async (req) => {
 
     // Log detailed image generation start timing
     console.log('Image generation started at:', new Date().toISOString());
-    console.log('Expected processing time: 60-120 seconds for complex urban transformations');
+    console.log('Expected processing time: 20-40 seconds for street transformations with dall-e-2');
 
     const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
@@ -448,8 +448,11 @@ serve(async (req) => {
     const uploadStartTime = Date.now();
     console.log('Processing transformed image...');
     
-    // Image edits API returns URL, convert to base64 for storage
+    // dall-e-2 edits API returns URL, fetch the transformed image
     const transformedImageUrl = imageData_result.data[0].url;
+    if (!transformedImageUrl) {
+      throw new Error('No transformed image URL returned from OpenAI API');
+    }
     const transformedResponse = await fetch(transformedImageUrl);
     const transformedArrayBuffer = await transformedResponse.arrayBuffer();
     const transformedImageBase64 = btoa(String.fromCharCode(...new Uint8Array(transformedArrayBuffer)));
