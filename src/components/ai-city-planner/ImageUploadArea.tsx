@@ -111,18 +111,18 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
 
   /**
    * Isolated client-side PNG conversion function
-   * Takes any image file and converts it to PNG under 3MB through iterative resizing
+   * Takes any image file and converts it to PNG under 1MB through iterative resizing
    * 
    * @param file - Input image file of any format
-   * @returns Promise<File> - PNG file guaranteed to be under 3MB
+   * @returns Promise<File> - PNG file guaranteed to be under 1MB
    */
-  const convertToPngUnder3MB = useCallback(async (file: File): Promise<File> => {
+  const convertToPngUnder1MB = useCallback(async (file: File): Promise<File> => {
     console.log('🔄 Starting PNG conversion for:', {
       originalName: file.name,
       originalSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
       originalType: file.type,
       targetFormat: 'PNG',
-      maxSize: '3MB'
+      maxSize: '1MB'
     });
 
     return new Promise((resolve, reject) => {
@@ -147,8 +147,8 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
         let currentHeight = img.height;
         let attempt = 0;
         const maxAttempts = 10;
-        const targetSizeBytes = 3 * 1024 * 1024; // 3MB
-        const reductionFactor = 0.9; // Reduce by 10% each iteration
+        const targetSizeBytes = 1 * 1024 * 1024; // 1MB
+        const reductionFactor = 0.85; // Reduce by 15% each iteration for faster convergence
 
         const tryConversion = async (): Promise<Blob> => {
           attempt++;
@@ -177,7 +177,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
           });
         };
 
-        // Iterative conversion until under 3MB
+        // Iterative conversion until under 1MB
         let finalBlob: Blob;
         
         do {
@@ -259,7 +259,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
 
   /**
    * Validates and processes uploaded files with client-side PNG conversion
-   * Performs type validation, PNG conversion under 3MB, then uploads
+   * Performs type validation, PNG conversion under 1MB, then uploads
    * 
    * @param file - File object to validate, convert, and upload
    */
@@ -287,9 +287,9 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
     setIsProcessing(true);
 
     try {
-      // Convert to PNG format under 3MB
+      // Convert to PNG format under 1MB
       console.log('🚀 Starting PNG conversion process...');
-      const pngFile = await convertToPngUnder3MB(file);
+      const pngFile = await convertToPngUnder1MB(file);
 
       // Upload PNG file to storage
       const { path, filename } = await uploadToStorage(pngFile);
@@ -299,7 +299,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
       const compressionPercent = Math.round((1 - pngFile.size / file.size) * 100);
       toast({
         title: "Image uploaded",
-        description: `Street photo converted to PNG and uploaded successfully. ${compressionPercent > 0 ? `Size reduced by ${compressionPercent}%.` : 'Format standardized to PNG.'}`
+        description: `Street photo optimized to under 1MB and uploaded successfully. ${compressionPercent > 0 ? `Size reduced by ${compressionPercent}%.` : 'Format standardized to PNG.'}`
       });
     } catch (error) {
       // Handle conversion/upload errors
@@ -312,7 +312,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
     } finally {
       setIsProcessing(false);
     }
-  }, [onImageUpload, uploadToStorage, convertToPngUnder3MB]);
+  }, [onImageUpload, uploadToStorage, convertToPngUnder1MB]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
