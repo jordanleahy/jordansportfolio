@@ -104,22 +104,20 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({
 
   if (uploadedImage) {
     return (
-      <div className="relative group">
-        <div className="relative rounded-lg overflow-hidden border border-border bg-card">
-          <img 
-            src={`data:image/jpeg;base64,${uploadedImage}`}
-            alt="Uploaded street"
-            className="w-full aspect-video object-cover"
-          />
-          <Button
-            variant="destructive"
-            size="sm"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={onRemoveImage}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+      <div className="relative group rounded-lg overflow-hidden border border-border bg-card">
+        <img 
+          src={`data:image/jpeg;base64,${uploadedImage}`}
+          alt="Uploaded street"
+          className="w-full aspect-video object-cover"
+        />
+        <Button
+          variant="destructive"
+          size="sm"
+          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={onRemoveImage}
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
     );
   }
