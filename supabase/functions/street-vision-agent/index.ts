@@ -177,7 +177,7 @@ serve(async (req) => {
         original_image_url: originalImageUrlData.publicUrl,
         original_filename: originalFilename,
         status: 'pending',
-        prompt_model: 'gpt-5-2025-08-07',
+        prompt_model: 'gpt-4.1-2025-04-14',
         image_model: 'gpt-image-1'
       })
       .select()
@@ -200,27 +200,34 @@ serve(async (req) => {
       .update({ status: 'analyzing' })
       .eq('id', recordId);
 
-    // Step 1: Analyze the street photo using GPT-5 Vision
-    console.log('Analyzing street photo...');
+    // Step 1: Analyze the street photo using GPT-4.1 Vision (optimized for speed)
+    const visionStartTime = Date.now();
+    console.log('Analyzing street photo with GPT-4.1...');
+    
+    // Create AbortController for timeout handling
+    const visionController = new AbortController();
+    const visionTimeout = setTimeout(() => visionController.abort(), 30000); // 30 second timeout
+    
     const visionResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
+        'Connection': 'keep-alive', // Connection pooling hint
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4.1-2025-04-14', // Faster vision model
         messages: [
           {
             role: 'system',
-            content: 'You are a street and urban design analyst. Describe what you see in this street photo, focusing on current infrastructure, traffic patterns, safety concerns, and opportunities for improvement.'
+            content: 'You are a street analyst. Analyze this street photo concisely: current infrastructure, safety issues, and improvement opportunities. Be brief and focused.'
           },
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: `Please analyze this street photo and identify current conditions, then suggest how to transform it based on this user request: "${userPrompt}"`
+                text: `Analyze this street photo and suggest improvements for: "${userPrompt}"`
               },
               {
                 type: 'image_url',
@@ -231,13 +238,22 @@ serve(async (req) => {
             ]
           }
         ],
-        max_completion_tokens: 2000,
+        max_completion_tokens: 800, // Reduced from 2000 for faster processing
+        temperature: 0.7, // GPT-4.1 supports temperature
       }),
+      signal: visionController.signal,
+    }).finally(() => {
+      clearTimeout(visionTimeout);
     });
 
     if (!visionResponse.ok) {
       const errorText = await visionResponse.text();
-      console.error('Vision API error:', errorText);
+      const visionTime = Date.now() - visionStartTime;
+      console.error('Vision API error:', {
+        status: visionResponse.status,
+        error: errorText,
+        timingMs: visionTime
+      });
       
       // Update database with error
       await supabase
@@ -253,16 +269,10 @@ serve(async (req) => {
     }
 
     const visionData = await visionResponse.json();
-    
-    // Debug: Log the full vision response structure
-    console.log('Vision API Response Structure:', JSON.stringify(visionData, null, 2));
-    console.log('Vision API Choices:', visionData.choices);
-    console.log('First Choice:', visionData.choices?.[0]);
-    console.log('First Choice Message:', visionData.choices?.[0]?.message);
+    const visionTime = Date.now() - visionStartTime;
     
     const analysis = visionData.choices?.[0]?.message?.content;
-    console.log('Extracted Analysis:', analysis);
-    console.log('Street analysis completed');
+    console.log(`Street analysis completed in ${visionTime}ms. Analysis length: ${analysis?.length || 0}`);
 
     // Update database with vision analysis - with comprehensive error handling
     console.log('Updating database with analysis. Analysis length:', analysis?.length || 0);
@@ -289,18 +299,40 @@ serve(async (req) => {
 
     console.log('Street analysis stored successfully. Updated rows:', analysisUpdateData.length);
 
-    // Step 2: Download original image (already optimized by client)
+    // Step 2: Download original image (optimized for 1MB target)
+    const downloadStartTime = Date.now();
     console.log('Downloading client-optimized image...');
-    const originalImageResponse = await fetch(originalImageUrlData.publicUrl);
+    
+    const downloadController = new AbortController();
+    const downloadTimeout = setTimeout(() => downloadController.abort(), 15000); // 15 second timeout
+    
+    const originalImageResponse = await fetch(originalImageUrlData.publicUrl, {
+      signal: downloadController.signal,
+      headers: {
+        'Connection': 'keep-alive',
+      }
+    }).finally(() => {
+      clearTimeout(downloadTimeout);
+    });
+    
     if (!originalImageResponse.ok) {
       throw new Error('Failed to download original image');
     }
-    const originalImageBuffer = await originalImageResponse.arrayBuffer();
-    console.log(`Using client-optimized image: ${originalImageBuffer.byteLength} bytes`);
     
-    // Check size limit (50MB for gpt-image-1)
-    if (originalImageBuffer.byteLength > 50 * 1024 * 1024) {
-      throw new Error(`Image is too large: ${Math.round(originalImageBuffer.byteLength / 1024 / 1024)}MB. Must be under 50MB.`);
+    const originalImageBuffer = await originalImageResponse.arrayBuffer();
+    const downloadTime = Date.now() - downloadStartTime;
+    const imageSizeMB = Math.round(originalImageBuffer.byteLength / 1024 / 1024 * 100) / 100;
+    
+    console.log(`Image downloaded in ${downloadTime}ms. Size: ${imageSizeMB}MB`);
+    
+    // Check size limit - prefer 1MB for optimal performance, max 5MB
+    if (originalImageBuffer.byteLength > 5 * 1024 * 1024) {
+      throw new Error(`Image is too large: ${imageSizeMB}MB. Please compress to under 5MB for optimal performance.`);
+    }
+    
+    // Warn if image is larger than optimal
+    if (originalImageBuffer.byteLength > 1024 * 1024) {
+      console.log(`Warning: Image size ${imageSizeMB}MB is above optimal 1MB threshold. This may slow processing.`);
     }
 
     // Create editing prompt focused on street-level transformation only (max 32000 chars for gpt-image-1)
@@ -346,7 +378,10 @@ serve(async (req) => {
 
     console.log('Image editing prompt stored successfully. Updated rows:', promptUpdateData.length);
 
-    // Use image editing API with client-optimized image
+    // Step 3: Generate transformed image with timeout handling
+    const imageGenStartTime = Date.now();
+    console.log('Starting image generation...');
+    
     const formData = new FormData();
     formData.append('model', 'gpt-image-1'); // CRITICAL: Add model parameter for gpt-image-1
     formData.append('image', new File([originalImageBuffer], "input.png", { type: 'image/png' }));
@@ -354,27 +389,37 @@ serve(async (req) => {
     formData.append('size', '1024x1024');
     formData.append('n', '1');
     
-    console.log('FormData parameters:', {
+    console.log('Image generation parameters:', {
       model: 'gpt-image-1',
       imageSize: `${Math.round(originalImageBuffer.byteLength / 1024)}KB`,
       promptLength: editingPrompt.length,
       size: '1024x1024'
     });
 
+    // Create AbortController for image generation timeout
+    const imageController = new AbortController();
+    const imageTimeout = setTimeout(() => imageController.abort(), 60000); // 60 second timeout for image generation
+
     const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
+        'Connection': 'keep-alive',
       },
       body: formData,
+      signal: imageController.signal,
+    }).finally(() => {
+      clearTimeout(imageTimeout);
     });
 
     if (!imageResponse.ok) {
       const errorText = await imageResponse.text();
+      const imageGenTime = Date.now() - imageGenStartTime;
       console.error('Image generation API error:', {
         status: imageResponse.status,
         statusText: imageResponse.statusText,
         error: errorText,
+        timingMs: imageGenTime,
         headers: Object.fromEntries(imageResponse.headers.entries())
       });
       
@@ -392,6 +437,12 @@ serve(async (req) => {
     }
 
     const imageData_result = await imageResponse.json();
+    const imageGenTime = Date.now() - imageGenStartTime;
+    console.log(`Image generation completed in ${imageGenTime}ms`);
+    
+    // Step 4: Process and upload transformed image
+    const uploadStartTime = Date.now();
+    console.log('Processing transformed image...');
     
     // Image edits API returns URL, convert to base64 for storage
     const transformedImageUrl = imageData_result.data[0].url;
@@ -421,11 +472,13 @@ serve(async (req) => {
       .from('street-vision')
       .getPublicUrl(transformedFilename);
 
+    const uploadTime = Date.now() - uploadStartTime;
     const processingTime = Date.now() - startTime;
     
+    console.log(`Upload completed in ${uploadTime}ms`);
     console.log('Street transformation completed successfully');
 
-    // Final database update with results
+    // Final database update with results and performance metrics
     await supabase
       .from('street_vision_generations')
       .update({
@@ -435,7 +488,14 @@ serve(async (req) => {
       })
       .eq('id', recordId);
 
-    console.log(`Processing completed in ${processingTime}ms for record ${recordId}`);
+    // Log detailed performance metrics
+    console.log(`=== PERFORMANCE SUMMARY ===`);
+    console.log(`Vision Analysis: ${visionTime}ms`);
+    console.log(`Image Download: ${downloadTime}ms`);
+    console.log(`Image Generation: ${imageGenTime}ms`);
+    console.log(`Upload Processing: ${uploadTime}ms`);
+    console.log(`Total Processing: ${processingTime}ms`);
+    console.log(`Record ID: ${recordId}`);
 
     return new Response(JSON.stringify({
       recordId,
