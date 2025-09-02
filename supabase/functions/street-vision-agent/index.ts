@@ -298,16 +298,16 @@ serve(async (req) => {
     const originalImageBuffer = await originalImageResponse.arrayBuffer();
     console.log(`Using client-optimized image: ${originalImageBuffer.byteLength} bytes`);
     
-    // Check size limit (4MB for OpenAI)
-    if (originalImageBuffer.byteLength > 4 * 1024 * 1024) {
-      throw new Error(`Image is too large: ${Math.round(originalImageBuffer.byteLength / 1024 / 1024)}MB. Must be under 4MB.`);
+    // Check size limit (50MB for gpt-image-1)
+    if (originalImageBuffer.byteLength > 50 * 1024 * 1024) {
+      throw new Error(`Image is too large: ${Math.round(originalImageBuffer.byteLength / 1024 / 1024)}MB. Must be under 50MB.`);
     }
 
-    // Create editing prompt focused on street-level transformation only (max 1000 chars)
+    // Create editing prompt focused on street-level transformation only (max 32000 chars for gpt-image-1)
     const basePrompt = `${STREET_VISION_SYSTEM_PROMPT}. User Request: ${userPrompt}`;
     
     // Calculate remaining space for analysis (leaving buffer for safety)
-    const maxPromptLength = 950; // Leave buffer under 1000 char limit
+    const maxPromptLength = 31500; // Leave buffer under 32000 char limit
     const remainingSpace = maxPromptLength - basePrompt.length;
     
     let editingPrompt = basePrompt;
@@ -317,9 +317,9 @@ serve(async (req) => {
       editingPrompt += ` Context: ${analysisSnippet}`;
     }
     
-    // Final safety check
-    if (editingPrompt.length > 1000) {
-      editingPrompt = editingPrompt.substring(0, 997) + '...';
+    // Final safety check - ensure we stay under gpt-image-1 limit
+    if (editingPrompt.length > 32000) {
+      editingPrompt = editingPrompt.substring(0, 31997) + '...';
     }
 
     // Store the generated prompt and update prompt creation status
@@ -348,10 +348,18 @@ serve(async (req) => {
 
     // Use image editing API with client-optimized image
     const formData = new FormData();
+    formData.append('model', 'gpt-image-1'); // CRITICAL: Add model parameter for gpt-image-1
     formData.append('image', new File([originalImageBuffer], "input.png", { type: 'image/png' }));
     formData.append('prompt', editingPrompt);
     formData.append('size', '1024x1024');
     formData.append('n', '1');
+    
+    console.log('FormData parameters:', {
+      model: 'gpt-image-1',
+      imageSize: `${Math.round(originalImageBuffer.byteLength / 1024)}KB`,
+      promptLength: editingPrompt.length,
+      size: '1024x1024'
+    });
 
     const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
       method: 'POST',
@@ -363,7 +371,12 @@ serve(async (req) => {
 
     if (!imageResponse.ok) {
       const errorText = await imageResponse.text();
-      console.error('Image generation error:', errorText);
+      console.error('Image generation API error:', {
+        status: imageResponse.status,
+        statusText: imageResponse.statusText,
+        error: errorText,
+        headers: Object.fromEntries(imageResponse.headers.entries())
+      });
       
       // Update database with error
       await supabase
@@ -375,7 +388,7 @@ serve(async (req) => {
         })
         .eq('id', recordId);
       
-      throw new Error(`Image generation error: ${imageResponse.status}`);
+      throw new Error(`Image generation error: ${imageResponse.status} - ${errorText}`);
     }
 
     const imageData_result = await imageResponse.json();
