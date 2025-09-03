@@ -396,7 +396,7 @@ const { handleGenerateImage } = useImageManager({
   };
 
   // Publish/remove from library toggle with wrapper functions
-  const handlePublishCollection = async (publicAccessType: 'blurred' | 'full_public' = 'blurred') => {
+  const handlePublishCollection = async () => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { session } } = await supabase.auth.getSession();
@@ -425,7 +425,7 @@ const { handleGenerateImage } = useImageManager({
         
         // If removing from library and it's featured, also remove from featured
         const updateData = newLibraryState
-          ? { include_in_library: true, public_access_type: publicAccessType }
+          ? { include_in_library: true, public_access_type: 'blurred' }
           : { include_in_library: false, featured: false };
 
         const { error: updateErr } = await supabase
@@ -435,12 +435,12 @@ const { handleGenerateImage } = useImageManager({
 
         if (updateErr) throw updateErr;
 
-        // If adding to library, also update the collection content with the access type
+        // If adding to library, also update the collection content (always blurred)
         if (newLibraryState) {
           const { error: contentUpdateErr } = await supabase.rpc('update_shared_collection_1_1', {
             p_collection_id: existing.id,
             p_theme_id: themeId,
-            p_public_access_type: publicAccessType,
+            p_public_access_type: 'blurred',
           });
           
           if (contentUpdateErr) {
@@ -454,9 +454,8 @@ const { handleGenerateImage } = useImageManager({
           setIsFeatured(false); // Can't be featured if not in library
         }
         
-        const accessTypeText = publicAccessType === 'full_public' ? ' (Full Public)' : ' (Blurred)';
         const message = newLibraryState 
-          ? `Added to Library${accessTypeText}` 
+          ? 'Added to Library' 
           : existing.featured 
             ? 'Removed from Library & Featured' 
             : 'Removed from Library';
@@ -500,7 +499,7 @@ const { handleGenerateImage } = useImageManager({
         p_theme_id: themeId,
         p_title: titleArg,
         p_description: descriptionArg,
-        p_public_access_type: publicAccessType,
+        p_public_access_type: 'blurred',
       });
       
       if (error) {

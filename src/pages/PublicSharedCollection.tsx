@@ -259,7 +259,7 @@ export default function PublicSharedCollection() {
             </span>
           </h1>
           <div className="flex items-center gap-2 w-full md:w-auto">
-            {(collection?.public_access_type === 'full_public' || user) && theme?.id && (
+            {user && theme?.id && (
               <Button 
                 variant="default" 
                 onClick={handleSaveCollection}
@@ -270,7 +270,7 @@ export default function PublicSharedCollection() {
                 {duplicateCollection.isPending ? 'Saving Images...' : 'Save Images'}
               </Button>
             )}
-            {(collection?.public_access_type === 'full_public' || user) && items.length > 0 && (
+            {user && items.length > 0 && (
               <Button 
                 variant="outline" 
                 onClick={handleDownloadAllPDF}
