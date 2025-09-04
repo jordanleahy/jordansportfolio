@@ -337,18 +337,30 @@ graph TD
 ```typescript
 // Theme-specific prompts
 const { data } = await supabase
-  .from('system_prompts')
+  .from('theme_system_prompts')
   .select('prompt_text')
   .eq('theme_id', themeId)
   .single();
 
 // Agent-specific prompts  
 const { data } = await supabase
-  .from('system_prompts')
+  .from('theme_system_prompts')
   .select('prompt_text')
   .eq('agent_id', agentId)
   .single();
 ```
+
+**Current Database Schema:**
+The system prompts infrastructure uses these tables:
+- **`theme_system_prompts`** - Main table for AI-generated system prompts (renamed from legacy `system_prompts`)
+- **`system_prompt_versions`** - Versioning and change tracking
+- **`cached_prompts`** - Performance optimization cache
+
+**Table Evolution History:**
+1. `system_prompts` (original) → 
+2. `theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent` (descriptive) →
+3. `theme_system_prompts_to_create_image_prompt_via_visual_prompt_a` (PostgreSQL length limit) →
+4. **`theme_system_prompts`** (current simplified name)
 
 ### Visual Prompt Generator
 
@@ -624,7 +636,7 @@ FOR UPDATE USING (user_id = auth.uid());
 | `success` | BOOLEAN | Operation success | Status |
 | `created_at` | TIMESTAMPTZ | Timestamp | Audit |
 
-#### `system_prompts`
+#### `theme_system_prompts`
 **Agent prompt management**
 
 | Field | Type | Purpose | Security |
