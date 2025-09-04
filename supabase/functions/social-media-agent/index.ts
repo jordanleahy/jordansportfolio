@@ -73,7 +73,7 @@ serve(async (req) => {
 
     // Fetch system prompts for requested platforms
     const { data: systemPrompts, error: promptsError } = await supabase
-      .from('system_prompts')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
       .select('*')
       .eq('agent_id', agent.id)
       .in('category', platforms);

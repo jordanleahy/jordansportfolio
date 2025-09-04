@@ -127,7 +127,7 @@ export class UnifiedRealtimeManager {
       id: connectionKey,
       channel,
       userId: config.userId,
-      tables: ['social_media_posts', 'themes', 'color_themes', 'system_prompts', 'openai_agents', 'vendors'],
+      tables: ['social_media_posts', 'themes', 'color_themes', 'theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent', 'openai_agents', 'vendors'],
       subscriberCount: this.subscribers.get(connectionKey)?.size || 0,
       lastActivity: Date.now(),
       status: 'connecting',
@@ -226,11 +226,11 @@ export class UnifiedRealtimeManager {
       {
         event: '*',
         schema: 'public',
-        table: 'system_prompts',
+        table: 'theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent',
         filter: `user_id=eq.${userId}`
       },
       (payload) => {
-        this.handleDebouncedUpdate('system_prompts', payload);
+        this.handleDebouncedUpdate('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent', payload);
       }
     );
 

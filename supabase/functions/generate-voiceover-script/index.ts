@@ -102,7 +102,7 @@ serve(async (req) => {
     // Get the system prompt for the tone from the system_prompts table
     // First try to get the specific tone, then fall back to any available prompt
     let { data: systemPromptData, error: promptError } = await supabase
-      .from('system_prompts')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
       .select('prompt_text, name')
       .eq('agent_id', agent.id)
       .eq('name', tone)
@@ -117,7 +117,7 @@ serve(async (req) => {
       console.log('Specific tone not found, trying fallback. Requested tone:', tone);
       // Try to get any available prompt as fallback
       const { data: fallbackData } = await supabase
-        .from('system_prompts')
+        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
         .select('prompt_text, name')
         .eq('agent_id', agent.id)
         .eq('is_active', true)

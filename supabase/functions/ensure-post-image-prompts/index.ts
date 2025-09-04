@@ -131,7 +131,7 @@ serve(async (req) => {
     const firstPost = posts[0];
     if (firstPost?.themes?.visual_prompt_system_prompt_id) {
       const { data: systemPromptData, error: promptError } = await supabase
-        .from('system_prompts')
+        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
         .select('id, agent_name, prompt_text')
         .eq('id', firstPost.themes.visual_prompt_system_prompt_id)
         .eq('is_active', true)
@@ -146,7 +146,7 @@ serve(async (req) => {
     // Fallback to user's most recent Visual Prompt Generator if no theme-specific prompt
     if (!cachedSystemPrompt) {
       const { data: systemPromptData, error: promptError } = await supabase
-        .from('system_prompts')
+        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
         .select('id, agent_name, prompt_text')
         .eq('user_id', userId)
         .eq('agent_name', 'Visual Prompt Generator')

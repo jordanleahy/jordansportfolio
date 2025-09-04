@@ -215,7 +215,7 @@ class SimpleCacheManager {
     try {
       const supabaseModule = await import('@/integrations/supabase/client');
       const response = await supabaseModule.supabase
-        .from('system_prompts')
+        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent' as any)
         .select('*')
         .eq('theme_id', themeId)
         .maybeSingle();

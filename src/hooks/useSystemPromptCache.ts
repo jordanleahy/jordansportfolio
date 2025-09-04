@@ -96,9 +96,9 @@ export const useSystemPromptCache = (themeId?: string) => {
         await systemPromptCache.set(themeId!, user.id, optimisticData);
       }
 
-      // Update in system_prompts table using theme_id
+      // Update in theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent table using theme_id
       const { error: updateError } = await supabase
-        .from('system_prompts')
+        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent' as any)
         .update({ 
           prompt_text: newPrompt,
           updated_at: new Date().toISOString(),
@@ -243,13 +243,13 @@ async function fetchFreshPrompt(themeId: string, userId: string): Promise<System
     console.log(`🎯 [fetchFreshPrompt] Using themeId: ${themeId}`);
     
     const { data: promptData, error: promptError } = await supabase
-      .from('system_prompts')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent' as any)
       .select('prompt_text, agent_name, updated_at, version, theme, theme_description, theme_id')
       .eq('theme_id', themeId)
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .maybeSingle() as any;
 
     if (promptError && promptError.code !== 'PGRST116') {
       throw promptError;

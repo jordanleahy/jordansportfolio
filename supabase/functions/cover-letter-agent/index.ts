@@ -137,7 +137,7 @@ serve(async (req) => {
 
     // Get the system prompt for the role type from the system_prompts table
     const { data: systemPromptData, error: promptError } = await supabase
-      .from('system_prompts')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
       .select('prompt_text')
       .eq('agent_id', agent.id)
       .eq('is_active', true)

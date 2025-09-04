@@ -81,7 +81,7 @@ export const useUnifiedRealtime = ({
         case 'color_themes':
           handleColorThemeUpdate(eventType, data);
           break;
-        case 'system_prompts':
+        case 'theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent':
           handleSystemPromptUpdate(eventType, data);
           break;
         case 'openai_agents':

@@ -511,7 +511,7 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
   try {
     console.log('🔍 CHECKING: Existing system prompts for theme_id');
     const { data: existingPrompts, error: checkError } = await supabase
-      .from('system_prompts')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
       .select('id')
       .eq('theme_id', themeId)
       .eq('user_id', userId)
