@@ -82,8 +82,8 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 };
-// Ultra-concise system prompt for optimal performance (targeting 500-1000 total chars)
-const STREET_VISION_SYSTEM_PROMPT = `Transform street-level only. Keep all buildings unchanged. Add bike lanes, wider sidewalks, street trees. Maintain exact perspective and lighting. Photorealistic results.`;
+// Technical constraints to support user vision (kept minimal to prioritize user input)
+const TECHNICAL_CONSTRAINTS = `Technical requirements: Transform street-level only, keep all buildings unchanged, maintain exact perspective and lighting, photorealistic results.`;
 serve(async (req)=>{
   const startTime = Date.now();
   let recordId = null;
@@ -311,26 +311,68 @@ serve(async (req)=>{
     if (originalImageBuffer.byteLength > 1024 * 1024) {
       console.log(`Warning: Image size ${imageSizeMB}MB is above optimal 1MB threshold. This may slow processing.`);
     }
-    // Create ultra-concise editing prompt (targeting 500-1000 characters for optimal performance)
+    // Create user-focused editing prompt that prioritizes their specific transformation vision
     const maxPromptLength = 1000; // Target optimal range
-    const basePrompt = `${STREET_VISION_SYSTEM_PROMPT} Goal: ${userPrompt}`;
-    let editingPrompt = basePrompt;
-    const remainingSpace = maxPromptLength - basePrompt.length;
-    // Add only essential analysis insights if space allows
-    if (remainingSpace > 100 && analysis) {
-      // Extract key infrastructure details only (roads, sidewalks, parking)
+    
+    // Ensure user prompt is never empty or too short
+    if (!userPrompt || userPrompt.trim().length < 10) {
+      throw new Error('User prompt must be at least 10 characters long and describe the desired transformation');
+    }
+    
+    // Start with user's vision as the primary directive (60-70% of prompt priority)
+    let editingPrompt = userPrompt.trim();
+    
+    // Calculate space remaining for technical constraints and analysis
+    const userPromptLength = editingPrompt.length;
+    const technicalConstraintsLength = TECHNICAL_CONSTRAINTS.length;
+    const remainingSpace = maxPromptLength - userPromptLength - technicalConstraintsLength - 20; // 20 chars buffer
+    
+    // Add key insights from vision analysis if space allows (10-15% of prompt)
+    if (remainingSpace > 50 && analysis) {
+      // Extract only the most relevant infrastructure keywords for context
       const analysisWords = analysis.split(' ');
-      const keyTerms = analysisWords.filter((word)=>/lanes?|sidewalks?|parking|trees?|bikes?|pedestrian|traffic|safety|width/i.test(word));
+      const keyTerms = analysisWords.filter(word => 
+        /current|existing|lanes?|sidewalks?|parking|trees?|bikes?|pedestrian|traffic|safety|width|narrow|wide/i.test(word)
+      );
+      
       if (keyTerms.length > 0) {
-        const keyInsights = keyTerms.slice(0, Math.floor(remainingSpace / 10)).join(' ');
-        editingPrompt += ` Current: ${keyInsights}`;
+        // Take only essential keywords that fit in remaining space
+        const maxKeywordsSpace = Math.min(remainingSpace - 10, 80); // Leave buffer, cap at 80 chars
+        const keyInsights = keyTerms.slice(0, Math.floor(maxKeywordsSpace / 8)).join(' ');
+        editingPrompt += `. Current conditions: ${keyInsights}`;
       }
     }
-    // Ensure we stay within optimal range
+    
+    // Append technical constraints as supporting requirements (20-25% of prompt)
+    editingPrompt += `. ${TECHNICAL_CONSTRAINTS}`;
+    
+    // Final length check - prioritize user content if we exceed limit
     if (editingPrompt.length > maxPromptLength) {
-      editingPrompt = editingPrompt.substring(0, maxPromptLength - 3) + '...';
+      // If over limit, preserve user prompt and essential technical constraints
+      const essentialConstraints = "Transform street-level only, keep buildings unchanged, photorealistic.";
+      const availableSpace = maxPromptLength - essentialConstraints.length - 2; // 2 chars for ". "
+      
+      if (userPromptLength <= availableSpace) {
+        // User prompt fits, use shortened constraints
+        editingPrompt = `${userPrompt.trim()}. ${essentialConstraints}`;
+      } else {
+        // Truncate analysis first, preserve user prompt and basic constraints
+        editingPrompt = `${userPrompt.trim()}. ${essentialConstraints}`;
+        if (editingPrompt.length > maxPromptLength) {
+          // Last resort: slightly truncate user prompt but never below 200 chars
+          const minUserPrompt = Math.max(200, maxPromptLength - essentialConstraints.length - 2);
+          const truncatedUserPrompt = userPrompt.substring(0, minUserPrompt - 3) + '...';
+          editingPrompt = `${truncatedUserPrompt}. ${essentialConstraints}`;
+        }
+      }
     }
+    
     // Store the generated prompt and update prompt creation status
+    console.log('=== PROMPT CONSTRUCTION SUMMARY ===');
+    console.log('User prompt (priority #1):', userPrompt.substring(0, 150) + (userPrompt.length > 150 ? '...' : ''));
+    console.log('Technical constraints:', TECHNICAL_CONSTRAINTS.substring(0, 100) + '...');
+    console.log('Final prompt length:', editingPrompt.length, 'characters');
+    console.log('Final prompt preview:', editingPrompt.substring(0, 200) + (editingPrompt.length > 200 ? '...' : ''));
     console.log('Storing image editing prompt. Length:', editingPrompt.length);
     const { data: promptUpdateData, error: promptUpdateError } = await supabase.from('street_vision_generations').update({
       image_generation_prompt: editingPrompt,
