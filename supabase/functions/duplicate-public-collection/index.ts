@@ -208,14 +208,14 @@ serve(async (req) => {
 
     // Duplicate system prompts
     const { data: originalPrompts, error: promptsError } = await supabaseClient
-      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
+      .from('theme_system_prompts')
       .select('*')
       .or(`agent_name.eq.Theme Generation Agent,category.eq.${originalTheme.category}`);
 
     if (!promptsError && originalPrompts) {
       for (const prompt of originalPrompts) {
         await supabaseClient
-      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
+      .from('theme_system_prompts')
           .insert([{
             user_id: user.id,
             category: prompt.category,

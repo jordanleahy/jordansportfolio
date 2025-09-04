@@ -342,7 +342,7 @@ const generateSystemPromptReactive = async (supabase: SupabaseClient, themeData:
   // 1. Fast database check for existing system prompt (<100ms)
   console.log('🔍 Checking for existing system prompt in database');
   const { data: existingPrompt, error: checkError } = await supabase
-    .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
+    .from('theme_system_prompts')
     .select('id, created_at, prompt_text')
     .eq('user_id', userId)
     .eq('theme_id', themeId)
