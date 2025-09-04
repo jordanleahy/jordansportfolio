@@ -199,10 +199,10 @@ serve(async (req) => {
       descriptionPreview: description?.slice(0, 50) || ''
     });
 
-    // System prompt resolution logic
+    // System prompt resolution logic - MANDATORY theme-specific prompts only
     let systemPromptData: any = null;
     let usedIdentifier: string;
-    let usedType: 'systemPromptId' | 'themeId' | 'fallback';
+    let usedType: 'systemPromptId' | 'themeId';
 
     // Highest priority: explicit systemPromptId
     if (!systemPromptData && systemPromptId) {
@@ -254,8 +254,39 @@ serve(async (req) => {
     }
 
 
+    // MANDATORY VALIDATION: Theme-specific system prompts only
     if (!systemPromptData) {
-      const errorMsg = `No Visual Prompt Generator system prompt found for themeId '${themeId}'`;
+      const errorMsg = `CRITICAL: Visual Prompt Generator requires a theme-specific system prompt. No system prompt found for themeId '${themeId}'. Theme-specific system prompts are mandatory.`;
+      logger.error('Missing mandatory theme-specific system prompt', {
+        themeId: themeId.slice(0, 8),
+        themeData: themeData ? { name: themeData.theme_name, category: themeData.category } : null,
+        systemPromptId,
+        errorType: 'missing_theme_prompt'
+      });
+      throw new Error(errorMsg);
+    }
+
+    // VALIDATION: Ensure comprehensive system prompt (minimum 1000 characters)
+    if (systemPromptData.prompt_text.length < 1000) {
+      const errorMsg = `CRITICAL: System prompt too short (${systemPromptData.prompt_text.length} chars). Visual Prompt Generator requires comprehensive theme-specific prompts (minimum 1000 characters).`;
+      logger.error('System prompt too short - not comprehensive', {
+        promptLength: systemPromptData.prompt_text.length,
+        systemPromptId: systemPromptData.id,
+        theme: systemPromptData.theme,
+        errorType: 'insufficient_prompt_length'
+      });
+      throw new Error(errorMsg);
+    }
+
+    // VALIDATION: Ensure system prompt is theme-linked
+    if (!systemPromptData.theme && usedType !== 'systemPromptId') {
+      const errorMsg = `CRITICAL: System prompt must be theme-specific. Found generic prompt without theme context.`;
+      logger.error('Generic system prompt rejected', {
+        systemPromptId: systemPromptData.id,
+        agentName: systemPromptData.agent_name,
+        usedType,
+        errorType: 'generic_prompt_rejected'
+      });
       throw new Error(errorMsg);
     }
 
