@@ -2293,14 +2293,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_system_prompts_theme_id"
+            foreignKeyName: "fk_theme_system_prompts_theme_id"
             columns: ["theme_id"]
             isOneToOne: false
             referencedRelation: "themes"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "system_prompts_agent_id_fkey"
+            foreignKeyName: "theme_system_prompts_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "openai_agents"
