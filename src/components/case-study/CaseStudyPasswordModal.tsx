@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
 interface CaseStudyPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,33 +16,16 @@ export const CaseStudyPasswordModal: React.FC<CaseStudyPasswordModalProps> = ({
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const {
-    toast
-  } = useToast();
-  const handleSubmit = (e: React.FormEvent) => {
+  const { isLoading, requestAccess } = useSecureAuth('case_study');
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simple client-side password check
-    if (password === 'PawPatrolRocks') {
-      // Store authentication in session storage
-      sessionStorage.setItem('caseStudyAuth', 'true');
+    
+    const success = await requestAccess(password);
+    if (success) {
       onAuthenticate();
       onClose();
       setPassword('');
-      toast({
-        title: "Access Granted",
-        description: "Welcome to the case studies portfolio."
-      });
-    } else {
-      toast({
-        title: "Access Denied",
-        description: "Incorrect password. Please try again.",
-        variant: "destructive"
-      });
     }
-    setIsLoading(false);
   };
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

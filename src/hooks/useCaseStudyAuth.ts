@@ -7,7 +7,9 @@ export const useCaseStudyAuth = () => {
   const navigate = useNavigate();
 
   const isAuthenticated = useCallback(() => {
-    return sessionStorage.getItem('caseStudyAuth') === 'true';
+    // Now using server-side authentication through Supabase RLS
+    // This function is deprecated but kept for backward compatibility
+    return true; // Always return true since we handle auth in the route wrapper
   }, []);
 
   const handleCaseStudyNavigation = useCallback((path: string) => {

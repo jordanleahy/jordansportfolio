@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
 
 interface CofactorPasswordModalProps {
   isOpen: boolean;
@@ -18,31 +18,16 @@ export const CofactorPasswordModal: React.FC<CofactorPasswordModalProps> = ({
 }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { isLoading, requestAccess } = useSecureAuth('cofactor');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simple client-side password check
-    if (password === 'chicago') {
-      // Store authentication in session storage
-      sessionStorage.setItem('cofactorAuth', 'true');
-      setPassword('');
-      toast({
-        title: "Access Granted",
-        description: "Welcome to the Query Innovation proposal."
-      });
+    
+    const success = await requestAccess(password);
+    if (success) {
       onAuthenticate();
-    } else {
-      toast({
-        title: "Access Denied",
-        description: "Incorrect password. Please try again.",
-        variant: "destructive"
-      });
+      setPassword('');
     }
-    setIsLoading(false);
   };
 
   const togglePasswordVisibility = () => {

@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import { CaseStudyPasswordModal } from './CaseStudyPasswordModal';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
 
 interface CaseStudyRouteWrapperProps {
   children: React.ReactNode;
 }
 
 export const CaseStudyRouteWrapper: React.FC<CaseStudyRouteWrapperProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const { user, loading } = useAuth();
+  const { hasAccess, checkAccess } = useSecureAuth('case_study');
   const location = useLocation();
 
   useEffect(() => {
-    // Check if user is already authenticated for this session
-    const isAuth = sessionStorage.getItem('caseStudyAuth') === 'true';
-    
-    if (isAuth) {
-      setIsAuthenticated(true);
-    } else {
-      // Show password modal for unauthenticated users
-      setShowPasswordModal(true);
+    if (user) {
+      checkAccess().then(access => {
+        if (!access) {
+          setShowPasswordModal(true);
+        }
+      });
     }
-  }, [location.pathname]);
+  }, [user, checkAccess]);
 
   const handleAuthentication = () => {
-    setIsAuthenticated(true);
     setShowPasswordModal(false);
   };
 
@@ -34,8 +34,17 @@ export const CaseStudyRouteWrapper: React.FC<CaseStudyRouteWrapperProps> = ({ ch
     window.history.back();
   };
 
-  // If authenticated, render the case study content
-  if (isAuthenticated) {
+  // Redirect to auth if not logged in
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // If authenticated and has access, render the case study content
+  if (hasAccess) {
     return <>{children}</>;
   }
 

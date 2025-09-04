@@ -1180,6 +1180,30 @@ export type Database = {
         }
         Relationships: []
       }
+      content_access: {
+        Row: {
+          access_granted_at: string | null
+          content_type: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          access_granted_at?: string | null
+          content_type: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          access_granted_at?: string | null
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_work_summaries: {
         Row: {
           categories_summary: Json
@@ -3010,6 +3034,14 @@ export type Database = {
         Returns: {
           role: Database["public"]["Enums"]["app_role"]
         }[]
+      }
+      grant_content_access: {
+        Args: { content_type_param: string; password_param: string }
+        Returns: boolean
+      }
+      has_content_access: {
+        Args: { content_type_param: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
