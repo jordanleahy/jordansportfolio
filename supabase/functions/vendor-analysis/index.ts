@@ -114,7 +114,7 @@ serve(async (req) => {
       .maybeSingle();
 
     const { data: systemPrompt } = await supabase
-      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
       .select('prompt_text')
       .eq('agent_id', vendorAgent?.id)
       .limit(1)

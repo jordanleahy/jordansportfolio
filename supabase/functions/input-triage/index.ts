@@ -81,7 +81,7 @@ serve(async (req) => {
     }
 
     const { data: systemPrompt, error: promptError } = await supabase
-      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
       .select('prompt_text')
       .eq('agent_id', triageAgent.id)
       .eq('user_id', user.id)

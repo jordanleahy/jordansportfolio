@@ -207,7 +207,7 @@ serve(async (req) => {
     // Highest priority: explicit systemPromptId
     if (!systemPromptData && systemPromptId) {
       const { data: spById, error: spByIdError } = await supabase
-      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
+      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
         .select('prompt_text, theme, id, agent_name, created_at, updated_at')
         .eq('id', systemPromptId)
         .eq('is_active', true)
@@ -229,7 +229,7 @@ serve(async (req) => {
       });
       
       const { data: spFromTheme, error: spFromThemeErr } = await supabase
-        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
+        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
         .select('prompt_text, theme, id, agent_name, created_at, updated_at')
         .eq('id', themeData.visual_prompt_system_prompt_id)
         .eq('is_active', true)

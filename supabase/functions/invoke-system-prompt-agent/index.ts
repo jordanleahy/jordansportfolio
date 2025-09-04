@@ -455,7 +455,7 @@ Generate the complete system prompt with ALL placeholders replaced with specific
         // Check if system prompt already exists for this theme
         console.log('Checking for existing system prompts for theme:', actualTheme);
         const existingPromptsQuery = supabase
-      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
+        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
           .select('id, prompt_text')
           .eq('user_id', user_id);
 
@@ -487,7 +487,7 @@ Generate the complete system prompt with ALL placeholders replaced with specific
         // Save the generated prompt to system_prompts table
         console.log('Creating new system prompt for theme:', actualTheme);
         const { data: insertedPrompt, error: insertError } = await supabase
-          .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent')
+          .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_a')
           .insert({
             user_id,
             agent_id: agent.id,
