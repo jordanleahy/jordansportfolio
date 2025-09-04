@@ -253,23 +253,6 @@ serve(async (req) => {
       throw new Error(errorMsg);
     }
 
-    // Fallback: generic Visual Prompt Generator prompt (only for non-theme requests)
-    if (!systemPromptData) {
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('system_prompts')
-        .select('prompt_text, theme, id, agent_name, created_at, updated_at, theme_id')
-        .eq('agent_name', 'Visual Prompt Generator')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (fallbackData && !fallbackError) {
-        systemPromptData = fallbackData;
-        usedIdentifier = 'fallback';
-        usedType = 'fallback';
-      }
-    }
 
     if (!systemPromptData) {
       const errorMsg = `No Visual Prompt Generator system prompt found for themeId '${themeId}'`;
