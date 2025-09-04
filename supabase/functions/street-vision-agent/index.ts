@@ -208,9 +208,52 @@ serve(async (req)=>{
     // Step 1: Analyze the street photo using GPT-5.1 Vision (optimized for speed)
     const visionStartTime = Date.now();
     console.log('Analyzing street photo with GPT-5.1...');
+    
+    // === ENHANCED LOGGING: PRE-API CALL ===
+    console.log('=== VISION ANALYSIS DEBUG: PRE-API CALL ===');
+    console.log('OpenAI API Key Status:', openAIApiKey ? `Present (length: ${openAIApiKey.length})` : 'MISSING');
+    console.log('Image URL being sent to OpenAI:', originalImageUrlData.publicUrl);
+    console.log('User prompt being analyzed:', userPrompt);
+    console.log('System prompt length:', 'You are a street analyst. Analyze this street photo concisely: current infrastructure, safety issues, and improvement opportunities. Be brief and focused.'.length);
+    
+    const requestPayload = {
+      model: 'gpt-5-2025-08-07',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a street analyst. Analyze this street photo concisely: current infrastructure, safety issues, and improvement opportunities. Be brief and focused.'
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Analyze this street photo and suggest improvements for: "${userPrompt}"`
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: originalImageUrlData.publicUrl
+              }
+            }
+          ]
+        }
+      ],
+      max_completion_tokens: 800
+    };
+    
+    console.log('Request payload summary:', {
+      model: requestPayload.model,
+      max_completion_tokens: requestPayload.max_completion_tokens,
+      system_content_length: requestPayload.messages[0].content.length,
+      user_text_length: requestPayload.messages[1].content[0].text.length,
+      image_url_provided: !!requestPayload.messages[1].content[1].image_url.url
+    });
+    
     // Create AbortController for timeout handling
     const visionController = new AbortController();
     const visionTimeout = setTimeout(()=>visionController.abort(), 30000); // 30 second timeout
+    
     const visionResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -218,31 +261,7 @@ serve(async (req)=>{
         'Content-Type': 'application/json',
         'Connection': 'keep-alive'
       },
-      body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a street analyst. Analyze this street photo concisely: current infrastructure, safety issues, and improvement opportunities. Be brief and focused.'
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `Analyze this street photo and suggest improvements for: "${userPrompt}"`
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: originalImageUrlData.publicUrl
-                }
-              }
-            ]
-          }
-        ],
-        max_completion_tokens: 800
-      }),
+      body: JSON.stringify(requestPayload),
       signal: visionController.signal
     }).finally(()=>{
       clearTimeout(visionTimeout);
@@ -265,24 +284,118 @@ serve(async (req)=>{
     }
     const visionData = await visionResponse.json();
     const visionTime = Date.now() - visionStartTime;
+    
+    // === ENHANCED LOGGING: API RESPONSE ANALYSIS ===
+    console.log('=== VISION ANALYSIS DEBUG: API RESPONSE ===');
+    console.log('Response status:', visionResponse.status);
+    console.log('Response headers:', Object.fromEntries(visionResponse.headers.entries()));
+    console.log('Raw response structure:', {
+      hasChoices: !!visionData.choices,
+      choicesLength: visionData.choices?.length,
+      hasUsage: !!visionData.usage,
+      hasModel: !!visionData.model,
+      hasId: !!visionData.id
+    });
+    
+    if (visionData.choices && visionData.choices.length > 0) {
+      console.log('First choice structure:', {
+        hasMessage: !!visionData.choices[0].message,
+        hasContent: !!visionData.choices[0].message?.content,
+        messageRole: visionData.choices[0].message?.role,
+        finishReason: visionData.choices[0].finish_reason
+      });
+    } else {
+      console.log('WARNING: No choices found in response!');
+    }
+    
     const analysis = visionData.choices?.[0]?.message?.content;
+    
+    // === ENHANCED LOGGING: CONTENT ANALYSIS ===
+    console.log('=== VISION ANALYSIS DEBUG: CONTENT ANALYSIS ===');
+    console.log('Analysis type:', typeof analysis);
+    console.log('Analysis is null:', analysis === null);
+    console.log('Analysis is undefined:', analysis === undefined);
+    console.log('Analysis is empty string:', analysis === '');
+    console.log('Analysis is whitespace only:', analysis && analysis.trim() === '');
+    console.log('Analysis length:', analysis?.length || 0);
+    
+    if (analysis) {
+      console.log('Analysis first 100 chars:', analysis.substring(0, 100));
+      console.log('Analysis last 50 chars:', analysis.substring(Math.max(0, analysis.length - 50)));
+      console.log('Analysis contains non-whitespace:', /\S/.test(analysis));
+    } else {
+      console.log('Analysis content is falsy:', { analysis });
+    }
+    
     console.log(`Street analysis completed in ${visionTime}ms. Analysis length: ${analysis?.length || 0}`);
     // Update database with vision analysis - with comprehensive error handling
-    console.log('Updating database with analysis. Analysis length:', analysis?.length || 0);
-    console.log('Analysis preview:', analysis?.substring(0, 200) + '...');
-    const { data: analysisUpdateData, error: analysisUpdateError } = await supabase.from('street_vision_generations').update({
+    console.log('=== VISION ANALYSIS DEBUG: DATABASE OPERATIONS ===');
+    console.log('About to store analysis in database:');
+    console.log('- Record ID:', recordId);
+    console.log('- Analysis type:', typeof analysis);
+    console.log('- Analysis length:', analysis?.length || 0);
+    console.log('- Analysis is truthy:', !!analysis);
+    console.log('- Analysis value (first 300 chars):', analysis?.substring(0, 300) || 'NULL/UNDEFINED');
+    
+    const updatePayload = {
       vision_analysis: analysis,
       status: 'generating'
-    }).eq('id', recordId).select();
+    };
+    
+    console.log('Database update payload:', {
+      vision_analysis_type: typeof updatePayload.vision_analysis,
+      vision_analysis_length: updatePayload.vision_analysis?.length || 0,
+      status: updatePayload.status
+    });
+    
+    const { data: analysisUpdateData, error: analysisUpdateError } = await supabase.from('street_vision_generations').update(updatePayload).eq('id', recordId).select();
+    
     if (analysisUpdateError) {
+      console.error('=== DATABASE UPDATE ERROR ===');
       console.error('Error updating analysis:', analysisUpdateError);
+      console.error('Error details:', {
+        message: analysisUpdateError.message,
+        details: analysisUpdateError.details,
+        hint: analysisUpdateError.hint,
+        code: analysisUpdateError.code
+      });
       throw new Error(`Failed to store vision analysis: ${analysisUpdateError.message}`);
     }
+    
     if (!analysisUpdateData || analysisUpdateData.length === 0) {
+      console.error('=== DATABASE UPDATE WARNING ===');
       console.error('No rows updated when storing analysis for record:', recordId);
+      console.error('Update response:', analysisUpdateData);
       throw new Error('Failed to update analysis - no rows affected');
     }
+    
+    console.log('=== DATABASE UPDATE SUCCESS ===');
     console.log('Street analysis stored successfully. Updated rows:', analysisUpdateData.length);
+    console.log('Updated record data:', {
+      id: analysisUpdateData[0]?.id,
+      vision_analysis_length: analysisUpdateData[0]?.vision_analysis?.length || 0,
+      status: analysisUpdateData[0]?.status,
+      updated_at: analysisUpdateData[0]?.updated_at
+    });
+    
+    // Verify the data was actually stored correctly
+    const { data: verificationData, error: verificationError } = await supabase
+      .from('street_vision_generations')
+      .select('vision_analysis, status')
+      .eq('id', recordId)
+      .single();
+    
+    if (verificationError) {
+      console.warn('Could not verify database storage:', verificationError);
+    } else {
+      console.log('=== DATABASE VERIFICATION ===');
+      console.log('Verified stored analysis:', {
+        type: typeof verificationData.vision_analysis,
+        length: verificationData.vision_analysis?.length || 0,
+        status: verificationData.status,
+        content_preview: verificationData.vision_analysis?.substring(0, 100) || 'EMPTY/NULL'
+      });
+    }
     // Step 2: Download original image (optimized for 1MB target)
     const downloadStartTime = Date.now();
     console.log('Downloading client-optimized image...');
