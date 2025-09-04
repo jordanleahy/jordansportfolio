@@ -2225,12 +2225,12 @@ export type Database = {
             foreignKeyName: "system_prompt_versions_system_prompt_id_fkey"
             columns: ["system_prompt_id"]
             isOneToOne: false
-            referencedRelation: "system_prompts"
+            referencedRelation: "theme_system_prompts_to_create_image_prompt_via_visual_prompt_a"
             referencedColumns: ["id"]
           },
         ]
       }
-      system_prompts: {
+      theme_system_prompts_to_create_image_prompt_via_visual_prompt_a: {
         Row: {
           agent_id: string
           agent_name: string | null
@@ -2384,7 +2384,7 @@ export type Database = {
             foreignKeyName: "themes_visual_prompt_system_prompt_id_fkey"
             columns: ["visual_prompt_system_prompt_id"]
             isOneToOne: false
-            referencedRelation: "system_prompts"
+            referencedRelation: "theme_system_prompts_to_create_image_prompt_via_visual_prompt_a"
             referencedColumns: ["id"]
           },
         ]
