@@ -32,7 +32,7 @@
  * RESPONSE FORMAT:
  * {
  *   "success": true,
- *   "themeId": "uuid",
+ *   "theme_id": "uuid",
  *   "category": "generated-category",
  *   "postCount": 8,
  *   "message": "Theme created successfully"
@@ -103,17 +103,20 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+import { streamingCorsHeaders, sendStreamEvent } from '../_shared/utils.ts';
+import { OPENAI_CONFIG, PROGRESS_STEPS } from '../_shared/config.ts';
+import { createLogger } from '../_shared/advanced-logger.ts';
 
 // Helper function to handle system prompt generation (DRY principle)
 async function handleSystemPromptGeneration(supabase: any, themeData: any, themeId: string, userId: string) {
   try {
     console.log('🚀 Calling create-theme-system-prompt edge function');
     const { data: systemPromptData, error: systemPromptError } = await supabase.functions.invoke('create-theme-system-prompt', {
-      body: { 
-        theme: themeData.theme, 
-        category: themeData.category, 
+      body: {
+        theme: themeData.theme,
+        category: themeData.category,
         theme_id: themeId,
-        user_id: userId 
+        user_id: userId
       }
     });
 
@@ -128,25 +131,22 @@ async function handleSystemPromptGeneration(supabase: any, themeData: any, theme
     // Don't fail the whole pipeline, just log the error
   }
 }
-import { UserIdeaRequest, ThemeData, ThemePost, SupabaseClient } from '../_shared/types.ts';
-import { streamingCorsHeaders, updateThemeImageStatus, sendStreamEvent } from '../_shared/utils.ts';
-import { OPENAI_CONFIG } from '../_shared/config.ts';
 
 const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 // Generate correlation ID for request tracking
-const generateCorrelationId = (): string => {
+const generateCorrelationId = () => {
   return `pipeline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
 // Structured logger with correlation context
 class RequestLogger {
-  private correlationId: string;
-  private userId: string | null;
-  private startTime: number;
-  private context: Record<string, any>;
+  correlationId: string;
+  userId: string | null;
+  startTime: number;
+  context: any;
 
   constructor(correlationId: string, userId: string | null = null) {
     this.correlationId = correlationId;
@@ -160,7 +160,7 @@ class RequestLogger {
     };
   }
 
-  log(level: 'INFO' | 'ERROR' | 'WARN' | 'DEBUG', message: string, data?: any) {
+  log(level: string, message: string, data?: any) {
     const logEntry = {
       ...this.context,
       level,
@@ -168,7 +168,7 @@ class RequestLogger {
       data,
       elapsedMs: Date.now() - this.startTime
     };
-    
+
     const prefix = level === 'ERROR' ? '❌' : level === 'WARN' ? '⚠️' : level === 'DEBUG' ? '🔍' : '✅';
     console.log(`${prefix} [${this.correlationId}] ${message}`, data ? JSON.stringify(data, null, 2) : '');
   }
@@ -194,7 +194,7 @@ class RequestLogger {
   }
 }
 
-const generateTheme = async (description: string): Promise<ThemeData> => {
+const generateTheme = async (description: string) => {
   console.log('🎯 THEME GENERATION START');
   console.log('📝 Raw description received:', JSON.stringify(description));
   console.log('📏 Description length:', description?.length);
@@ -209,6 +209,7 @@ const generateTheme = async (description: string): Promise<ThemeData> => {
   // Clean and clamp the description
   const cleanDescription = description.trim().replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ');
   const truncatedDescription = cleanDescription.length > 1500 ? cleanDescription.slice(0, 1500) : cleanDescription;
+
   console.log('🧹 Cleaned description:', cleanDescription);
   if (cleanDescription.length !== truncatedDescription.length) {
     console.log(`✂️ Description truncated from ${cleanDescription.length} to ${truncatedDescription.length} chars`);
@@ -264,15 +265,15 @@ POST COUNT RULES:
   ]
 }
 
-### ✅ Example 2: Alzheimer’s Education
+### ✅ Example 2: Alzheimer's Education
 {
   "category": "alzheimers-education",
-  "theme": "Understanding Alzheimer’s Disease",
-  "theme_description": "Supportive education for caregivers and families to recognize signs and support loved ones living with Alzheimer’s.",
+  "theme": "Understanding Alzheimer's Disease",
+  "theme_description": "Supportive education for caregivers and families to recognize signs and support loved ones living with Alzheimer's.",
   "posts": [
-    { "day": 1, "title": "What Is Alzheimer’s?", "description": "Alzheimer’s is a brain condition that slowly affects memory and thinking. Learning about it early helps families prepare." },
+    { "day": 1, "title": "What Is Alzheimer's?", "description": "Alzheimer's is a brain condition that slowly affects memory and thinking. Learning about it early helps families prepare." },
     { "day": 2, "title": "Early Warning Signs", "description": "Common signs include memory loss, confusion, and difficulty with daily tasks. Noticing changes early is important." },
-    { "day": 3, "title": "Supporting Caregivers", "description": "Caring for someone with Alzheimer’s is challenging. Support groups and small breaks can make a big difference." }
+    { "day": 3, "title": "Supporting Caregivers", "description": "Caring for someone with Alzheimer's is challenging. Support groups and small breaks can make a big difference." }
   ]
 }
 
@@ -280,11 +281,11 @@ POST COUNT RULES:
 {
   "category": "book-summary-good-to-great",
   "theme": "Good to Great Book Summary",
-  "theme_description": "Key lessons from Jim Collins’ classic on how companies transition from good to truly great.",
+  "theme_description": "Key lessons from Jim Collins' classic on how companies transition from good to truly great.",
   "posts": [
-    { "day": 1, "title": "Level 5 Leadership", "description": "Great companies are led by humble yet determined leaders. They put the company’s success above personal fame." },
+    { "day": 1, "title": "Level 5 Leadership", "description": "Great companies are led by humble yet determined leaders. They put the company's success above personal fame." },
     { "day": 2, "title": "First Who, Then What", "description": "Success starts by getting the right people on the bus before deciding the direction of travel." },
-    { "day": 3, "title": "Hedgehog Concept", "description": "Great companies focus on what they can be best at, what drives their economics, and what they’re passionate about." }
+    { "day": 3, "title": "Hedgehog Concept", "description": "Great companies focus on what they can be best at, what drives their economics, and what they're passionate about." }
   ]
 }
 
@@ -295,7 +296,7 @@ POST COUNT RULES:
   "theme_description": "Ideas to empower communities, reimagine streets, and put people first in city design.",
   "posts": [
     { "day": 1, "title": "Practical Solutions First", "description": "Start with real issues in communities. Build solutions that range from small policy tweaks to major physical changes." },
-    { "day": 2, "title": "Empower Neighborhoods", "description": "Support communities in creating their own vision. Change works best when it’s shaped by the people living there." },
+    { "day": 2, "title": "Empower Neighborhoods", "description": "Support communities in creating their own vision. Change works best when it's shaped by the people living there." },
     { "day": 3, "title": "Mobility Justice", "description": "Dismantle car-first culture and ensure every resident has safe, abundant options for getting around the city." }
   ]
 }
@@ -314,7 +315,7 @@ POST COUNT RULES:
 
   console.log('🤖 Calling OpenAI API...');
   console.log('🔑 OpenAI API key available:', !!openaiApiKey);
-  
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -325,12 +326,18 @@ POST COUNT RULES:
       body: JSON.stringify({
         model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate a social media theme for: ${truncatedDescription}` }
+          {
+            role: 'system',
+            content: systemPrompt
+          },
+          {
+            role: 'user',
+            content: `Generate a social media theme for: ${truncatedDescription}`
+          }
         ],
         max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
         response_format: { type: 'json_object' }
-      }),
+      })
     });
 
     console.log('🎯 Token Management:', {
@@ -373,17 +380,18 @@ POST COUNT RULES:
     const generatedContent = data.choices[0].message.content.trim();
     console.log('📝 Generated content length:', generatedContent.length);
     console.log('📝 Generated content preview:', generatedContent.substring(0, 200) + '...');
-    
+
     // Robust JSON parsing with fallbacks
     const stripCodeFences = (text: string) => {
-      return text
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/```$/i, '')
-        .trim();
+      return text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
     };
+
     const tryParse = (text: string) => {
-      try { return JSON.parse(text); } catch { return null; }
+      try {
+        return JSON.parse(text);
+      } catch {
+        return null;
+      }
     };
 
     let parsedData = tryParse(generatedContent);
@@ -391,6 +399,7 @@ POST COUNT RULES:
       const unfenced = stripCodeFences(generatedContent);
       parsedData = tryParse(unfenced);
     }
+
     if (!parsedData) {
       const first = generatedContent.indexOf('{');
       const last = generatedContent.lastIndexOf('}');
@@ -414,7 +423,7 @@ POST COUNT RULES:
       category: parsedData.category,
       theme: parsedData.theme
     });
-    
+
     // ============= RESPONSE SANITIZATION =============
     // Sanitize the entire response to remove unexpected fields immediately after parsing
     const sanitizedData = {
@@ -427,7 +436,7 @@ POST COUNT RULES:
         description: post.description
       })) || []
     };
-    
+
     // Log any unexpected top-level fields for debugging
     const unexpectedTopLevelFields = Object.keys(parsedData).filter(key => 
       !['category', 'theme', 'theme_description', 'posts'].includes(key)
@@ -435,7 +444,7 @@ POST COUNT RULES:
     if (unexpectedTopLevelFields.length > 0) {
       console.warn('⚠️ SANITIZED: Unexpected top-level fields from OpenAI:', unexpectedTopLevelFields);
     }
-    
+
     // Log any unexpected post fields for debugging
     parsedData.posts?.forEach((post: any, index: number) => {
       const unexpectedPostFields = Object.keys(post).filter(key => 
@@ -445,7 +454,7 @@ POST COUNT RULES:
         console.warn(`⚠️ SANITIZED: Unexpected post fields in post ${index}:`, unexpectedPostFields);
       }
     });
-    
+
     console.log('🧹 Response sanitized - only expected fields will be processed');
     return sanitizedData;
 
@@ -455,9 +464,15 @@ POST COUNT RULES:
   }
 };
 
-const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeData, userId: string): Promise<{ insertedCount: number; createdThemeId: string }> => {
+const importThemeToDatabase = async (supabase: any, themeData: any, userId: string) => {
   console.log('💾 Importing theme to database:', themeData.category);
-  console.log('📋 Theme data:', { theme: themeData.theme, category: themeData.category, userId, postCount: themeData.posts.length });
+  console.log('📋 Theme data:', {
+    theme: themeData.theme,
+    category: themeData.category,
+    userId,
+    postCount: themeData.posts.length
+  });
+
   console.log('🔍 DETAILED: Database connection info:', {
     supabaseUrl: supabaseUrl?.substring(0, 30) + '...',
     hasServiceKey: !!supabaseServiceKey,
@@ -470,7 +485,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       firstPostStructure: themeData.posts?.[0] ? Object.keys(themeData.posts[0]) : []
     }
   });
-  
+
   try {
     // Always create a new theme with unique UUID
     console.log('🎯 Creating new theme:', {
@@ -478,7 +493,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       category: themeData.category,
       user_id: userId
     });
-    
+
     const { data: newTheme, error: themeInsertError } = await supabase
       .from('themes')
       .insert({
@@ -500,7 +515,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
 
     // Import posts using direct insert instead of RPC to ensure proper authentication context
     // Add defensive programming to ensure only expected fields are included
-    const postsToInsert = themeData.posts.map((post: ThemePost) => {
+    const postsToInsert = themeData.posts.map((post: any) => {
       // Explicitly extract only the expected fields to prevent any extra fields from being inserted
       const cleanPost = {
         day: Number(post.day),
@@ -509,9 +524,9 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
         theme_id: themeId,
         category: themeData.category,
         user_id: userId,
-        status: 'draft' as const
+        status: 'draft'
       };
-      
+
       // Log any unexpected fields for debugging
       const unexpectedFields = Object.keys(post).filter(key => 
         !['day', 'title', 'description'].includes(key)
@@ -519,12 +534,13 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       if (unexpectedFields.length > 0) {
         console.warn('⚠️ Unexpected fields in post data:', unexpectedFields);
       }
-      
+
       return cleanPost;
     });
 
     console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
     console.log('📝 Sample post data:', JSON.stringify(postsToInsert[0], null, 2));
+
     console.log('🔍 BEFORE INSERT: Supabase client info:', {
       hasClient: !!supabase,
       clientType: typeof supabase,
@@ -537,7 +553,7 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
       .from('social_media_posts')
       .insert(postsToInsert)
       .select('id, category, theme_id, title');
-    
+
     console.log('🔍 AFTER INSERT: Insert operation completed', {
       hasData: !!data,
       hasError: !!error,
@@ -561,9 +577,11 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     }
 
     console.log(`✅ Successfully imported ${data.length} posts for theme: ${themeData.theme}`);
-    
-    return { insertedCount: data.length, createdThemeId: themeId };
-    
+    return {
+      insertedCount: data.length,
+      createdThemeId: themeId
+    };
+
   } catch (error) {
     console.error('❌ Import theme error:', error);
     console.error('❌ Full error details:', JSON.stringify(error, null, 2));
@@ -571,29 +589,24 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
   }
 };
 
-
-
 serve(async (req) => {
   // Generate correlation ID for request tracking
   const correlationId = generateCorrelationId();
   const requestStart = Date.now();
-  
+
   // Extract user agent and IP for debugging context
   const userAgent = req.headers.get('User-Agent') || 'unknown';
-  const clientIP = req.headers.get('CF-Connecting-IP') || 
-                   req.headers.get('X-Forwarded-For') || 
-                   req.headers.get('X-Real-IP') || 'unknown';
-  
+  const clientIP = req.headers.get('CF-Connecting-IP') || req.headers.get('X-Forwarded-For') || req.headers.get('X-Real-IP') || 'unknown';
+
   // Initialize logger without userId first
   let logger = new RequestLogger(correlationId);
-  
   logger.log('INFO', 'Request received', {
     method: req.method,
     userAgent,
     clientIP,
     timestamp: new Date().toISOString()
   });
-  
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     logger.log('INFO', 'CORS preflight request handled');
@@ -601,21 +614,26 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
+    const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+
     // Parse request body first for proper validation
-    let requestBody;
+    let requestBody: any;
     try {
       requestBody = await req.json();
     } catch (parseError) {
-      logger.error('JSON parsing failed', parseError, { requestSize: req.headers.get('Content-Length') });
+      logger.error('JSON parsing failed', parseError, {
+        requestSize: req.headers.get('Content-Length')
+      });
       return new Response(JSON.stringify({
         success: false,
         error: 'Invalid JSON in request body',
         correlationId
       }), {
         status: 400,
-        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...streamingCorsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
 
@@ -623,9 +641,9 @@ serve(async (req) => {
 
     // Validate required fields
     if (!description || typeof description !== 'string' || !description.trim()) {
-      logger.error('Validation failed: Invalid description', null, { 
+      logger.error('Validation failed: Invalid description', null, {
         description: description?.substring(0, 100),
-        type: typeof description 
+        type: typeof description
       });
       return new Response(JSON.stringify({
         success: false,
@@ -633,32 +651,42 @@ serve(async (req) => {
         correlationId
       }), {
         status: 400,
-        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...streamingCorsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
 
     // Get authenticated user from the request
     const authHeader = req.headers.get('Authorization');
-    let userId: string | null = null;
-    
+    let userId = null;
+
     if (authHeader) {
       const authStart = Date.now();
-      const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+      const { data: { user }, error: authError } = await supabase.auth.getUser(
+        authHeader.replace('Bearer ', '')
+      );
       logger.performance('Authentication', Date.now() - authStart);
-      
+
       if (authError || !user) {
-        logger.error('Authentication failed', authError, { hasAuthHeader: !!authHeader });
+        logger.error('Authentication failed', authError, {
+          hasAuthHeader: !!authHeader
+        });
         return new Response(JSON.stringify({
           success: false,
           error: 'User not authenticated',
           correlationId
         }), {
           status: 401,
-          headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+          headers: {
+            ...streamingCorsHeaders,
+            'Content-Type': 'application/json'
+          }
         });
       }
+
       userId = user.id;
-      
       // Update logger with user context
       logger = new RequestLogger(correlationId, userId);
       logger.log('INFO', 'User authenticated successfully', { userId });
@@ -670,7 +698,10 @@ serve(async (req) => {
         correlationId
       }), {
         status: 401,
-        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...streamingCorsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
 
@@ -682,7 +713,10 @@ serve(async (req) => {
         correlationId
       }), {
         status: 500,
-        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...streamingCorsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
 
@@ -704,16 +738,16 @@ serve(async (req) => {
             // Step 1: Generate Theme (20% progress)
             sendStreamEvent(controller, {
               type: 'theme_generation_start',
-              progress: 10,
+              progress: PROGRESS_STEPS.THEME_GENERATION_START,
               data: { status: 'Generating theme and posts...' }
             });
 
             const themeData = await generateTheme(description);
-            
+
             sendStreamEvent(controller, {
               type: 'theme_generation_complete',
-              progress: 20,
-              data: { 
+              progress: PROGRESS_STEPS.THEME_GENERATION_COMPLETE,
+              data: {
                 theme: themeData.theme,
                 category: themeData.category,
                 postCount: themeData.posts.length
@@ -723,50 +757,49 @@ serve(async (req) => {
             // Step 2: Import to Database (40% progress)
             sendStreamEvent(controller, {
               type: 'database_import_start',
-              progress: 25,
+              progress: PROGRESS_STEPS.DATABASE_IMPORT_START,
               data: { status: 'Importing posts to database...' }
             });
 
-            const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
+            const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId!);
             themeId = createdThemeId;
-            
+
             sendStreamEvent(controller, {
               type: 'database_import_complete',
-              progress: 40,
+              progress: PROGRESS_STEPS.DATABASE_IMPORT_COMPLETE,
               data: { insertedCount }
             });
 
             // Step 3: Generate System Prompt (60% progress)
             sendStreamEvent(controller, {
               type: 'system_prompt_start',
-              progress: 45,
+              progress: PROGRESS_STEPS.SYSTEM_PROMPT_START,
               data: { status: 'Generating AI system prompts...' }
             });
 
             // Call create-theme-system-prompt edge function
-            await handleSystemPromptGeneration(supabase, themeData, themeId, userId);
-            
+            await handleSystemPromptGeneration(supabase, themeData, themeId, userId!);
+
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
-              progress: 60,
+              progress: PROGRESS_STEPS.SYSTEM_PROMPT_COMPLETE,
               data: { promptGenerated: true }
             });
 
             // Step 4: Set posts to generating status (80% progress)
             sendStreamEvent(controller, {
               type: 'posts_status_update',
-              progress: 70,
+              progress: PROGRESS_STEPS.POSTS_STATUS_UPDATE,
               data: { status: 'Posts created successfully' }
             });
 
-            // Step 5: Trigger background image generation (85% progress)
-
-            // Step 6: Pipeline Complete (100% progress)
+            // Step 5: Pipeline Complete (100% progress)
             sendStreamEvent(controller, {
               type: 'pipeline_complete',
-              progress: 100,
+              progress: PROGRESS_STEPS.PIPELINE_COMPLETE,
               data: {
                 success: true,
+                theme_id: themeId,
                 category: themeData.category,
                 theme: themeData.theme,
                 postCount: insertedCount,
@@ -775,18 +808,19 @@ serve(async (req) => {
             });
 
             controller.close();
-
           } catch (error) {
             logger.error('Pipeline streaming error', error, {
               step: 'streaming_pipeline',
               themeId: themeId || 'unknown'
             });
+
             sendStreamEvent(controller, {
               type: 'pipeline_error',
               progress: 0,
               error: error.message,
               correlationId
             });
+
             controller.close();
           }
         }
@@ -795,12 +829,13 @@ serve(async (req) => {
       return new Response(streamResponse, {
         headers: {
           ...streamingCorsHeaders,
-          'Content-Type': 'text/event-stream',
-        },
+          'Content-Type': 'text/event-stream'
+        }
       });
     } else {
       // Non-streaming response (updated to use background processing)
       const themeData = await generateTheme(description);
+
       // Apply overrideCategory if provided
       if (overrideCategory && typeof overrideCategory === 'string') {
         const slug = overrideCategory.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -808,11 +843,12 @@ serve(async (req) => {
           themeData.category = slug;
         }
       }
-      const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
+
+      const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId!);
       const themeId = createdThemeId;
-      
+
       // Call create-theme-system-prompt edge function  
-      await handleSystemPromptGeneration(supabase, themeData, themeId, userId);
+      await handleSystemPromptGeneration(supabase, themeData, themeId, userId!);
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,
@@ -828,21 +864,24 @@ serve(async (req) => {
         postCount: insertedCount,
         message: 'Theme created successfully!'
       }), {
-        headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+        headers: {
+          ...streamingCorsHeaders,
+          'Content-Type': 'application/json'
+        }
       });
     }
-
   } catch (error: any) {
     logger.error('Pipeline fatal error', error, {
       step: 'main_pipeline',
       requestDuration: Date.now() - requestStart
     });
 
-    const isDuplicate = error?.code === '23505' || error?.type === 'duplicate_theme' || (error?.message || '').includes('duplicate key value');
+    const isDuplicate = error?.code === '23505' || error?.type === 'duplicate_theme' || 
+      (error?.message || '').includes('duplicate key value');
 
-    const responseBody: Record<string, any> = {
+    const responseBody = {
       success: false,
-      error: isDuplicate ? 'A theme with this category already exists.' : (error?.message || 'Unexpected error'),
+      error: isDuplicate ? 'A theme with this category already exists.' : error?.message || 'Unexpected error',
       type: isDuplicate ? 'duplicate_theme' : 'unknown_error',
       category: error?.category,
       theme: error?.theme,
@@ -852,7 +891,10 @@ serve(async (req) => {
 
     return new Response(JSON.stringify(responseBody), {
       status: isDuplicate ? 409 : 500,
-      headers: { ...streamingCorsHeaders, 'Content-Type': 'application/json' },
+      headers: {
+        ...streamingCorsHeaders,
+        'Content-Type': 'application/json'
+      }
     });
   }
 });
