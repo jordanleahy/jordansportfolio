@@ -37,7 +37,6 @@ import { SimplifiedBatchSkeleton } from '@/components/stories/SimplifiedBatchSke
 import { generateSEOMetadata } from '@/utils/seoHelpers';
 import { SHIMMER_CONSTANTS } from '@/constants/shimmerConstants';
 import shipImage from '@/assets/story-ship-bg.png';
-import { QuickAdminAccess } from '@/components/admin/QuickAdminAccess';
 
 // Lazy load components
 const ThemeImportModal = React.lazy(() => import('@/components/stories/ThemeImportModalOptimized'));
@@ -966,7 +965,5 @@ export default function StoriesDashboard() {
 
         {/* Bulk Delete Confirmation Dialog */}
         <BulkDeleteConfirmationDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog} selectedThemes={getSelectedThemes()} onConfirm={handleBulkDelete} isDeleting={isDeletingBulk} progress={deleteProgress} />
-        
-        <QuickAdminAccess />
       </PageLayout>;
 }
