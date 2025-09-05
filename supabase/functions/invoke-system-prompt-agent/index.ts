@@ -133,10 +133,9 @@ Always incorporate these <Category>-specific metaphors:
 <Define metaphor 3>
 
 📋 <Category> Output Instructions
-Create content that will generate:
-<Overview or explainer content>
-<Step-by-step guidance>
-<Template/workflow assistance>
+- Key message (1-2 sentences)
+- Clear call-to-action
+- Engaging visual focus
 
 CRITICAL Requirements:
 Always specify exact requirements when needed
