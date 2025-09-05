@@ -67,7 +67,8 @@ const AICityPlanner: React.FC = () => {
     isProcessing,     // Boolean indicating if AI transformation is active
     startProcessing,  // Function to initiate the AI transformation workflow
     clearProcessing,  // Function to reset processing state and cleanup
-    error            // Error message if processing fails
+    error,           // Error message if processing fails
+    refreshRecord    // Manual refresh function for latest record state
   } = useStreetVisionProcessing();
 
   /**
@@ -139,11 +140,13 @@ const AICityPlanner: React.FC = () => {
 
   /**
    * Retries failed processing with current image and prompt
-   * Clears previous state and re-initiates the workflow
+   * Clears previous state and re-initiates the workflow, plus refreshes record
    */
-  const handleRetry = () => {
+  const handleRetry = async () => {
     if (imagePath && prompt.trim()) {
       clearProcessing(); // Reset processing state and cleanup subscriptions
+      // Also try to refresh any existing record state
+      await refreshRecord().catch(() => {}); // Ignore errors
       handleRun();       // Re-trigger the AI transformation
     }
   };
