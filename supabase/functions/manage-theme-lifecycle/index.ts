@@ -19,8 +19,8 @@
  * 1. CREATE - Complete theme creation pipeline
  *    • Takes a user description (e.g., "Top 5 concepts from Good to Great book")
  *    • Calls structure-theme-input to convert text into structured JSON
- *    • Imports structured data into database via import_theme_with_transaction RPC
- *    • Sets initial lifecycle status and triggers background processing
+ *    • Creates theme & posts directly in database with idempotency protection
+ *    • Sets initial lifecycle status to trigger background processing
  *    • Returns theme_id for client-side tracking
  * 
  * 2. COMPLETE - Mark theme as user-completed
@@ -249,11 +249,19 @@ serve(async (req) => {
         });
         
         if (existingSubmission.status === 'completed') {
-          // Return existing successful submission
+          // Get the actual theme ID for existing submission
+          const { data: existingTheme } = await supabase
+            .from('themes')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('name', themeData.data.theme)
+            .eq('category', themeData.data.category)
+            .single();
+
           const response = {
             success: true,
-            theme_id: existingSubmission.id,
-            lifecycle_status: 'generating',
+            theme_id: existingTheme?.id || existingSubmission.id,
+            lifecycle_status: 'pending',
             message: 'Theme already exists (idempotent)',
             correlationId
           };
@@ -405,7 +413,7 @@ serve(async (req) => {
 
       const actualThemeId = theme.id;
 
-      // Initial status update - triggers will handle the rest automatically
+      // Set initial lifecycle status to enable downstream processing
       const { error: updateError } = await supabase
         .from('themes')
         .update({
@@ -422,23 +430,23 @@ serve(async (req) => {
         });
       }
 
-      // Start background processing (simplified - no polling needed)
-      console.log(`🔵 [BACKGROUND] Starting background processing`, {
-        userId: user.id,
+      console.log(`✅ [COMPLETE] Theme creation pipeline completed`, {
         themeId: actualThemeId,
+        insertedCount,
         correlationId
       });
 
       const response = {
         success: true,
         theme_id: actualThemeId,
-        lifecycle_status: 'generating',
-        message: 'Theme created and background processing started',
+        lifecycle_status: 'pending',
+        message: 'Theme created successfully',
         correlationId
       };
 
       console.log(`✅ [COMPLETE] CREATE action completed`, {
         ...response,
+        insertedCount,
         duration: `${Date.now() - startTime}ms`
       });
 
