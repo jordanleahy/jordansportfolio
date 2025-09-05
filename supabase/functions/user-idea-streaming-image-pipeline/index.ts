@@ -1,3 +1,105 @@
+/**
+ * ========================================
+ * USER IDEA STREAMING IMAGE PIPELINE
+ * ========================================
+ * 
+ * FUNCTION PURPOSE:
+ * This Supabase Edge Function is responsible for:
+ * 1. Processing user theme ideas and generating structured content using OpenAI
+ * 2. Populating the 'themes' and 'social_media_posts' database tables
+ * 3. Triggering background system prompt generation (handled by separate processes)
+ * 4. Providing real-time streaming responses to the client
+ * 
+ * IMPORTANT: This function does NOT directly create system prompts. It only:
+ * - Populates theme and post data in the database
+ * - Triggers asynchronous system prompt generation via generateSystemPromptReactive()
+ * - System prompts are stored separately in 'theme_system_prompts' table
+ * 
+ * DATA FLOW:
+ * 1. User submits theme description → OpenAI generates structured content
+ * 2. Theme record created in 'themes' table
+ * 3. Posts created in 'social_media_posts' table with theme_id reference
+ * 4. Background: System prompt generation triggered (separate process)
+ * 5. Background: Image generation pipeline triggered (separate process)
+ * 
+ * REQUEST FORMAT:
+ * POST /functions/v1/user-idea-streaming-image-pipeline
+ * {
+ *   "description": "User's theme idea description",
+ *   "stream": false (optional - enables streaming response)
+ * }
+ * 
+ * RESPONSE FORMAT:
+ * {
+ *   "success": true,
+ *   "themeId": "uuid",
+ *   "category": "generated-category",
+ *   "postCount": 8,
+ *   "message": "Theme created successfully"
+ * }
+ * 
+ * DATABASE OPERATIONS:
+ * - Creates 1 record in 'themes' table
+ * - Creates 8 records in 'social_media_posts' table
+ * - All operations use authenticated user context (auth.uid())
+ * - Uses service role for database operations but maintains user association
+ * 
+ * AUTHENTICATION:
+ * - Requires valid JWT token in Authorization header
+ * - User ID extracted from auth.uid() and used for all database records
+ * - Service role used for database operations to ensure proper permissions
+ * 
+ * ERROR HANDLING:
+ * Common issues and solutions:
+ * 
+ * 1. "system_prompts" column error (PostgreSQL 42703):
+ *    - Cause: OpenAI sometimes includes unexpected 'system_prompts' field in response
+ *    - Solution: Defensive programming filters out non-expected fields before DB insert
+ *    - This field is NOT supposed to be in OpenAI's response per system prompt
+ * 
+ * 2. Authentication errors:
+ *    - Ensure valid JWT token in Authorization header
+ *    - Check user exists and is properly authenticated
+ * 
+ * 3. OpenAI API errors:
+ *    - Rate limiting, quota exceeded, or API downtime
+ *    - Function includes retry logic and detailed error logging
+ * 
+ * 4. Database constraint violations:
+ *    - Duplicate themes, invalid references, or data type mismatches
+ *    - All database operations are wrapped in try-catch with detailed logging
+ * 
+ * BACKGROUND PROCESSING:
+ * This function triggers but does not wait for:
+ * - System prompt generation (handled by generateSystemPromptReactive)
+ * - Image generation pipeline (separate edge function)
+ * - Theme lifecycle management (separate edge function)
+ * 
+ * DEBUGGING:
+ * Key logging points include:
+ * - Request initialization with correlation ID
+ * - User authentication status
+ * - OpenAI API request/response details
+ * - Database operation results
+ * - Background task initiation
+ * - Error conditions with full context
+ * 
+ * Use correlation ID to trace requests across logs:
+ * Format: "pipeline-{timestamp}-{random}"
+ * 
+ * PERFORMANCE:
+ * - Typical execution time: 15-25 seconds (includes OpenAI API call)
+ * - Streams response for better UX when stream=true
+ * - Uses background tasks for non-blocking operations
+ * - Database operations are optimized with bulk inserts
+ * 
+ * RELATED FUNCTIONS:
+ * - manage-theme-lifecycle: Handles theme status updates and system prompts
+ * - create-theme-system-prompt: Generates system prompts for themes
+ * - streaming-image-pipeline: Handles image generation for posts
+ * ========================================
+ */
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
