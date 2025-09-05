@@ -883,7 +883,6 @@ export type Database = {
         Row: {
           company_name: string
           company_slug: string
-          cover_letter: string | null
           created_at: string
           custom_cover_image_url: string | null
           custom_image_url: string | null
@@ -904,7 +903,6 @@ export type Database = {
         Insert: {
           company_name: string
           company_slug: string
-          cover_letter?: string | null
           created_at?: string
           custom_cover_image_url?: string | null
           custom_image_url?: string | null
@@ -925,7 +923,6 @@ export type Database = {
         Update: {
           company_name?: string
           company_slug?: string
-          cover_letter?: string | null
           created_at?: string
           custom_cover_image_url?: string | null
           custom_image_url?: string | null
@@ -1522,7 +1519,6 @@ export type Database = {
           attachment_type: string | null
           attachment_url: string | null
           company_name: string
-          cover_letter_link: string | null
           created_at: string
           id: string
           job_description: string
@@ -1538,7 +1534,6 @@ export type Database = {
           attachment_type?: string | null
           attachment_url?: string | null
           company_name: string
-          cover_letter_link?: string | null
           created_at?: string
           id?: string
           job_description: string
@@ -1554,7 +1549,6 @@ export type Database = {
           attachment_type?: string | null
           attachment_url?: string | null
           company_name?: string
-          cover_letter_link?: string | null
           created_at?: string
           id?: string
           job_description?: string
@@ -3098,10 +3092,6 @@ export type Database = {
       insert_contracts_content: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      insert_cover_letter_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
       }
       insert_engineering_work_report_agent: {
         Args: Record<PropertyKey, never>
