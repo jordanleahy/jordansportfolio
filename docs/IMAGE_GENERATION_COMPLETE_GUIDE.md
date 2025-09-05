@@ -47,7 +47,7 @@ graph TB
     
     subgraph "Edge Functions Layer"
         EF1[generate-image-gpt] --> EF2[generate-all-images-optimized]
-        EF3[visual-prompt-generator] --> EF4[create-theme-system-prompt]
+        EF3[create-single-image-prompt] --> EF4[create-theme-system-prompt]
         EF5[generate-image-with-concurrency-control] --> EF6[user-idea-streaming-image-pipeline]
         EF7[check-usage-limits] --> EF8[send-usage-alert]
     end
@@ -230,7 +230,7 @@ sequenceDiagram
             UI->>DB: get cached prompt
             DB-->>UI: hit/miss
             alt Miss
-                UI->>SB: invoke('visual-prompt-generator')
+                UI->>SB: invoke('create-single-image-prompt')
                 SB-->>UI: {generatedPrompt}
                 UI->>DB: upsert cached_prompts
             end
@@ -397,7 +397,7 @@ The system prompts infrastructure uses these tables:
 
 | Function | Purpose | Input | Output | Security Level |
 |----------|---------|--------|--------|----------------|
-| `visual-prompt-generator` | Image prompt creation | Content, theme, config | Optimized prompt | JWT Required |
+| `create-single-image-prompt` | Image prompt creation | Content, theme, config | Optimized prompt | JWT Required |
 | `create-theme-system-prompt` | System prompt routing | Category, context | System prompt | JWT Required |
 
 ### Utility Functions
@@ -1558,7 +1558,7 @@ export const useImageGenerationComplete = () => {
       
       // Step 2: Generate prompt
       setProgress(30);
-      const promptResult = await supabase.functions.invoke('visual-prompt-generator', {
+      const promptResult = await supabase.functions.invoke('create-single-image-prompt', {
         body: {
           title: post.title,
           description: post.description,
@@ -1682,7 +1682,7 @@ file_size_limit = "50MiB"
 - `src/hooks/useCreditCheck.ts`
 
 **Edge Functions:**
-- `supabase/functions/visual-prompt-generator/`
+- `supabase/functions/create-single-image-prompt/`
 - `supabase/functions/generate-image-gpt/`
 - `supabase/functions/generate-image-with-concurrency-control/`
 - `supabase/functions/generate-all-images-optimized/`

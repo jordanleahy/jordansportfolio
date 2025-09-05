@@ -1,4 +1,4 @@
-# Visual Prompt Generator Agent
+# Single Image Prompt Generator Agent
 
 **Created:** 2024-11-01  
 **Last Updated:** 2024-12-31
@@ -161,7 +161,7 @@ INSERT INTO agent_performance_logs (
 ## Edge Function Integration
 
 ### Endpoint
-`supabase/functions/visual-prompt-generator/index.ts`
+`supabase/functions/create-single-image-prompt/index.ts`
 
 ### Processing Pipeline
 ```typescript

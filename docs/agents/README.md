@@ -46,7 +46,7 @@ graph TB
 
 ### Functional Agents
 - **[System Prompt Agent](./system-prompt-agent.md)** - Central orchestrator and prompt router
-- **[Visual Prompt Generator](./visual-prompt-generator.md)** - Specialized image generation prompts
+- **[Single Image Prompt Generator](./create-single-image-prompt.md)** - Specialized image generation prompts
 - **[Blog Content Generator](./blog-content-generator.md)** - Long-form content creation
 - **[Cover Letter Generator](./cover-letter-generator.md)** - Professional document generation
 - **[Social Media Agent](./social-media-agent.md)** - Multi-platform social content

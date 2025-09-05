@@ -244,7 +244,7 @@ async function retryWithBackoff(fn: Function, maxRetries = 3) {
 ---
 
 **Related Documentation:**
-- [Visual Prompt Generator](./visual-prompt-generator.md)
+- [Single Image Prompt Generator](./create-single-image-prompt.md)
 - [Blog Content Generator](./blog-content-generator.md) 
 - [Agent Relationships](./agent-relationships.md)
 - [Performance Monitoring](./performance-monitoring.md)

@@ -8,10 +8,10 @@ const QA_RESULTS = {
   cleanup_completed: {
     status: 'SUCCESS',
     changes: [
-      'Removed redundant safe space code from visual-prompt-generator',
+      'Removed redundant safe space code from create-single-image-prompt',
       'Deleted legacy generate-image-prompt-dynamic function',
       'Updated config.ts to remove legacy function reference',
-      'Updated ensure-post-image-prompts to use visual-prompt-generator',
+      'Updated ensure-post-image-prompts to use create-single-image-prompt',
       'safeSpace.ts is now the single source of truth for composition rules'
     ],
     remaining_embedded_content: 'Migration files contain legacy safe space rules but are read-only (correct)',
