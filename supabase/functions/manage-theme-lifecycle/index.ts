@@ -67,10 +67,9 @@
  * ------------------------
  * 1. User Authentication - Validates JWT token
  * 2. Structure Input - Calls structure-theme-input to parse description
- * 3. Data Import - Uses import_theme_with_transaction RPC to create theme & posts
- * 4. Theme ID Resolution - Queries database for the actual theme UUID
- * 5. Status Initialization - Sets lifecycle_status to 'pending'
- * 6. Response - Returns theme_id for client tracking
+ * 3. Direct Data Import - Creates theme & posts directly in database with idempotency
+ * 4. Status Initialization - Sets lifecycle_status to 'pending' 
+ * 5. Response - Returns theme_id for client tracking
  * 
  * LIFECYCLE STATES:
  * -----------------
@@ -81,8 +80,8 @@
  * DEPENDENCIES:
  * -------------
  * • structure-theme-input - Edge function for parsing user text into structured JSON
- * • import_theme_with_transaction - Database RPC function for atomic data import
  * • Database triggers - Auto-update lifecycle status based on prompt completion
+ * • theme_submissions table - Idempotency and transaction tracking
  * 
  * ERROR HANDLING:
  * ---------------
@@ -224,54 +223,187 @@ serve(async (req) => {
         correlationId
       });
 
-      // Import the structured theme data into the database using RPC
-      const { data: importResult, error: importError } = await supabase
-        .rpc('import_theme_with_transaction', {
-          p_user_id: user.id,
-          p_idempotency_key: `lifecycle-${correlationId}`,
-          p_category: themeData.data.category,
-          p_theme: themeData.data.theme,
-          p_theme_description: themeData.data.theme_description,
-          p_posts_data: themeData.data.posts
-        });
+      // Import the structured theme data directly into the database
+      console.log(`🔵 [IMPORT] Starting direct theme import`, {
+        correlationId,
+        category: themeData.data.category,
+        theme: themeData.data.theme,
+        postsCount: themeData.data.posts?.length || 0
+      });
 
-      if (importError || !importResult?.[0]?.success) {
-        console.error(`❌ [CREATE] Theme import failed`, {
-          importError,
-          importResult,
+      const idempotencyKey = `lifecycle-${correlationId}`;
+      
+      // Check for existing submission with same idempotency key
+      const { data: existingSubmission } = await supabase
+        .from('theme_submissions')
+        .select('id, status, inserted_count, error_message')
+        .eq('user_id', user.id)
+        .eq('idempotency_key', idempotencyKey)
+        .single();
+
+      if (existingSubmission) {
+        console.log(`🔄 [IMPORT] Found existing submission`, {
+          submissionId: existingSubmission.id,
+          status: existingSubmission.status,
           correlationId
         });
-        throw new Error(importResult?.[0]?.error_message || 'Failed to import theme');
+        
+        if (existingSubmission.status === 'completed') {
+          // Return existing successful submission
+          const response = {
+            success: true,
+            theme_id: existingSubmission.id,
+            lifecycle_status: 'generating',
+            message: 'Theme already exists (idempotent)',
+            correlationId
+          };
+          return new Response(JSON.stringify(response), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          });
+        }
       }
 
-      console.log(`✅ [CREATE] Theme imported successfully`, {
-        themeId: importResult[0].submission_id,
-        insertedCount: importResult[0].inserted_count,
+      // Create new submission record
+      const { data: submission, error: submissionError } = await supabase
+        .from('theme_submissions')
+        .insert({
+          user_id: user.id,
+          idempotency_key: idempotencyKey,
+          category: themeData.data.category,
+          theme: themeData.data.theme,
+          theme_description: themeData.data.theme_description,
+          submission_data: themeData.data.posts,
+          status: 'processing'
+        })
+        .select('id')
+        .single();
+
+      if (submissionError) {
+        console.error(`❌ [IMPORT] Failed to create submission`, {
+          submissionError,
+          correlationId
+        });
+        throw new Error('Failed to create submission record');
+      }
+
+      console.log(`✅ [IMPORT] Submission created`, {
+        submissionId: submission.id,
         correlationId
       });
 
-      const themeId = importResult[0].submission_id;
-
-      // Get the actual theme ID from the submission
-      const { data: themeRecord, error: themeRetrievalError } = await supabase
+      // Check for duplicate theme
+      const { data: existingTheme } = await supabase
         .from('themes')
         .select('id')
         .eq('user_id', user.id)
         .eq('name', themeData.data.theme)
         .eq('category', themeData.data.category)
-        .order('created_at', { ascending: false })
-        .limit(1)
         .single();
 
-      if (themeRetrievalError) {
-        console.error(`❌ [THEME] Failed to retrieve theme ID`, {
-          themeRetrievalError,
-          correlationId
-        });
-        throw new Error('Failed to retrieve created theme');
+      if (existingTheme) {
+        // Mark submission as failed due to duplicate
+        await supabase
+          .from('theme_submissions')
+          .update({
+            status: 'failed',
+            error_message: 'Duplicate theme detected. A theme with this category and name already exists.'
+          })
+          .eq('id', submission.id);
+
+        throw new Error('Duplicate theme detected. A theme with this category and name already exists.');
       }
 
-      const actualThemeId = themeRecord.id;
+      // Create the theme
+      const { data: theme, error: themeCreationError } = await supabase
+        .from('themes')
+        .insert({
+          user_id: user.id,
+          name: themeData.data.theme,
+          description: themeData.data.theme_description,
+          category: themeData.data.category
+        })
+        .select('id')
+        .single();
+
+      if (themeCreationError) {
+        console.error(`❌ [IMPORT] Failed to create theme`, {
+          themeCreationError,
+          correlationId
+        });
+        
+        // Mark submission as failed
+        await supabase
+          .from('theme_submissions')
+          .update({
+            status: 'failed',
+            error_message: 'Failed to create theme in database'
+          })
+          .eq('id', submission.id);
+
+        throw new Error('Failed to create theme in database');
+      }
+
+      console.log(`✅ [IMPORT] Theme created`, {
+        themeId: theme.id,
+        correlationId
+      });
+
+      // Insert posts
+      const postsToInsert = themeData.data.posts.map((post: any) => ({
+        user_id: user.id,
+        theme_id: theme.id,
+        day: post.day || null,
+        title: post.title,
+        description: post.story_description,
+        theme: themeData.data.theme,
+        category: themeData.data.category,
+        status: post.status || 'draft'
+      }));
+
+      const { data: insertedPosts, error: postsError } = await supabase
+        .from('social_media_posts')
+        .insert(postsToInsert)
+        .select('id');
+
+      if (postsError) {
+        console.error(`❌ [IMPORT] Failed to insert posts`, {
+          postsError,
+          correlationId
+        });
+        
+        // Mark submission as failed
+        await supabase
+          .from('theme_submissions')
+          .update({
+            status: 'failed',
+            error_message: 'Failed to insert posts'
+          })
+          .eq('id', submission.id);
+
+        throw new Error('Failed to insert posts');
+      }
+
+      const insertedCount = insertedPosts?.length || 0;
+
+      // Mark submission as completed
+      await supabase
+        .from('theme_submissions')
+        .update({
+          status: 'completed',
+          inserted_count: insertedCount,
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', submission.id);
+
+      console.log(`✅ [IMPORT] Theme import completed successfully`, {
+        themeId: theme.id,
+        submissionId: submission.id,
+        insertedCount,
+        correlationId
+      });
+
+      const actualThemeId = theme.id;
 
       // Initial status update - triggers will handle the rest automatically
       const { error: updateError } = await supabase
