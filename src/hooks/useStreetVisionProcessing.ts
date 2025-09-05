@@ -91,8 +91,11 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
    * @param recordId - Database record ID to monitor
    */
   const setupRealtimeSubscription = useCallback((recordId: string) => {
+    console.log('🔍 PROCESSING DEBUG: Setting up subscription for record ID:', recordId);
+    
     // Clean up any existing subscription first
     if (subscriptionRef.current) {
+      console.log('🔍 PROCESSING DEBUG: Cleaning up existing subscription');
       supabase.removeChannel(subscriptionRef.current);
     }
 
@@ -108,12 +111,14 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
           filter: `id=eq.${recordId}`                   // Only this specific record
         },
         (payload) => {
-          console.log('Street vision update received:', payload);
-          console.log('Payload new data:', payload.new);
+          console.log('🔍 PROCESSING DEBUG: Real-time update received for record:', recordId);
+          console.log('🔍 PROCESSING DEBUG: Payload:', payload);
+          console.log('🔍 PROCESSING DEBUG: New data:', payload.new);
           
           const updatedRecord = payload.new as StreetVisionRecord;
-          console.log('Updated record status:', updatedRecord.status);
-          console.log('Updated record transformed_image_url:', updatedRecord.transformed_image_url);
+          console.log('🔍 PROCESSING DEBUG: Updated record status:', updatedRecord.status);
+          console.log('🔍 PROCESSING DEBUG: Updated record transformed_image_url:', updatedRecord.transformed_image_url);
+          console.log('🔍 PROCESSING DEBUG: Updated record ID:', updatedRecord.id);
           
           setCurrentRecord(updatedRecord);              // Update local state
 
@@ -222,6 +227,8 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
       } as StreetVisionRecord;
 
       // Only set current record after successful edge function call
+      console.log('🔍 PROCESSING DEBUG: Setting initial record with ID:', result.recordId);
+      console.log('🔍 PROCESSING DEBUG: Initial record data:', initialRecord);
       setCurrentRecord(initialRecord);           // Update local state
       setupRealtimeSubscription(result.recordId); // Start monitoring updates
 

@@ -39,6 +39,7 @@ export const useStreetVisionRecord = (recordId: string | null): UseStreetVisionR
   const fetchRecord = useCallback(async () => {
     if (!recordId) return;
     
+    console.log('🔍 RECORD DEBUG: Fetching record with ID:', recordId);
     setLoading(true);
     setError(null);
     
@@ -53,6 +54,9 @@ export const useStreetVisionRecord = (recordId: string | null): UseStreetVisionR
         throw fetchError;
       }
       
+      console.log('🔍 RECORD DEBUG: Fetched record data:', data);
+      console.log('🔍 RECORD DEBUG: Record status:', data?.status);
+      console.log('🔍 RECORD DEBUG: Record transformed_image_url:', data?.transformed_image_url);
       setRecord(data);
     } catch (err) {
       console.error('Error fetching street vision record:', err);
@@ -71,6 +75,8 @@ export const useStreetVisionRecord = (recordId: string | null): UseStreetVisionR
   useEffect(() => {
     if (!recordId) return;
 
+    console.log('🔍 RECORD DEBUG: Setting up subscription for record ID:', recordId);
+
     const channel = supabase
       .channel(`street-vision-record-${recordId}`)
       .on(
@@ -82,11 +88,14 @@ export const useStreetVisionRecord = (recordId: string | null): UseStreetVisionR
           filter: `id=eq.${recordId}`
         },
         (payload) => {
-          console.log('Real-time record update:', payload);
+          console.log('🔍 RECORD DEBUG: Real-time update received for record:', recordId);
+          console.log('🔍 RECORD DEBUG: Payload:', payload);
           
           if (payload.eventType === 'UPDATE') {
+            console.log('🔍 RECORD DEBUG: Updating record with new data:', payload.new);
             setRecord(payload.new as StreetVisionRecord);
           } else if (payload.eventType === 'DELETE') {
+            console.log('🔍 RECORD DEBUG: Record deleted');
             setRecord(null);
           }
         }
