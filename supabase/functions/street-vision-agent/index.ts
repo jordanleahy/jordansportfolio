@@ -665,7 +665,6 @@ serve(async (req)=>{
     
     // Find the image part in the response - try multiple possible paths
     let imagePart;
-    let transformedImageBase64;
     
     // Try different possible property paths for Gemini response
     for (const part of parts) {
@@ -716,10 +715,10 @@ serve(async (req)=>{
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
     
     // Safe conversion for large base64 images
-    const binaryString = atob(transformedImageBase64);
-    const transformedImageBuffer = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      transformedImageBuffer[i] = binaryString.charCodeAt(i);
+    const decodedBinaryString = atob(transformedImageBase64);
+    const transformedImageBuffer = new Uint8Array(decodedBinaryString.length);
+    for (let i = 0; i < decodedBinaryString.length; i++) {
+      transformedImageBuffer[i] = decodedBinaryString.charCodeAt(i);
     }
     const { error: uploadError } = await supabase.storage.from('street-vision').upload(transformedFilename, transformedImageBuffer, {
       contentType: 'image/png',
