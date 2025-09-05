@@ -142,14 +142,7 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-muted-foreground">Transformed Vision</h3>
               {(() => {
-                console.log('StreetVisionResults render - transformed image decision:');
-                console.log('- record?.transformed_image_url:', record?.transformed_image_url);
-                console.log('- isProcessing:', isProcessing);
-                console.log('- record?.status:', record?.status);
-                console.log('- condition for shimmer:', isProcessing || (record && record.status !== 'failed'));
-                
                 if (record?.transformed_image_url) {
-                  console.log('Showing actual transformed image');
                   return (
                     <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video group">
                       <img 
@@ -174,7 +167,6 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
                     </div>
                   );
                 } else if (isProcessing || (record && ['pending', 'analyzing', 'generating'].includes(record.status))) {
-                  console.log('Showing shimmer (loading state)');
                   return (
                     <SimpleShimmer 
                       aspectRatio="16/9" 
@@ -182,7 +174,6 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
                     />
                   );
                 } else {
-                  console.log('Showing error/retry state');
                   return (
                     <div className="aspect-video rounded-lg border border-border bg-muted/30 flex items-center justify-center">
                       <div className="text-center space-y-2">
