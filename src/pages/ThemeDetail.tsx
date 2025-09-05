@@ -52,7 +52,7 @@ export default function ThemeDetail() {
     
     const markThemeCompleted = async () => {
       try {
-        const { data } = await supabase.functions.invoke('manage-theme-lifecycle', {
+        const { data } = await supabase.functions.invoke('create-theme', {
           body: {
             action: 'complete',
             themeId: themeId

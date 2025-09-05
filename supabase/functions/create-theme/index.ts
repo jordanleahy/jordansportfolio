@@ -1,17 +1,16 @@
 /**
  * ==============================================================================
- * MANAGE THEME LIFECYCLE - Supabase Edge Function
+ * CREATE THEME - Supabase Edge Function
  * ==============================================================================
  * 
- * This Edge Function orchestrates the complete lifecycle management of content themes.
- * It handles theme creation from user descriptions, lifecycle status updates, and 
- * status monitoring throughout the theme generation pipeline.
+ * This Edge Function handles complete theme creation from user descriptions.
+ * It orchestrates the transformation of text descriptions into structured themes
+ * with associated social media posts, and manages the theme lifecycle.
  * 
  * OVERVIEW:
  * ---------
- * This function serves as the main orchestrator for theme management, coordinating
- * between multiple services to transform user descriptions into structured themes
- * with associated social media posts.
+ * This function serves as the main entry point for theme creation, coordinating
+ * between text parsing and database operations to create complete themes.
  * 
  * SUPPORTED ACTIONS:
  * ------------------
@@ -35,7 +34,7 @@
  * 
  * REQUEST FORMAT:
  * ---------------
- * POST /functions/v1/manage-theme-lifecycle
+ * POST /functions/v1/create-theme
  * Content-Type: application/json
  * Authorization: Bearer <jwt_token>
  * 
