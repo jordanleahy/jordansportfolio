@@ -517,6 +517,12 @@ Generate the complete system prompt with ALL placeholders replaced with specific
         // Link system prompt to theme if theme_id is provided
         if (theme_id && insertedPrompt?.id) {
           console.log('Linking system prompt to theme:', { theme_id, prompt_id: insertedPrompt.id });
+          console.log('🔍 DEBUG: About to update theme with values:', {
+            theme_id: theme_id,
+            user_id: user_id,
+            prompt_id: insertedPrompt.id,
+            contextCategory: contextCategory
+          });
           
           const { error: themeUpdateError } = await supabase
             .from('themes')
@@ -527,12 +533,18 @@ Generate the complete system prompt with ALL placeholders replaced with specific
             .eq('id', theme_id)
             .eq('user_id', user_id);
 
+          console.log('🔍 DEBUG: Theme update result:', { 
+            themeUpdateError: themeUpdateError,
+            willTriggerEnsure: !themeUpdateError 
+          });
+
           if (themeUpdateError) {
             console.error('Theme update error:', themeUpdateError);
           } else {
             console.log('Successfully linked system prompt to theme');
             
             // ✅ HYBRID SOLUTION: Call ensure-post-image-prompts to generate individual post prompts
+            console.log('🔄 ABOUT TO TRIGGER ensure-post-image-prompts for theme:', theme_id);
             try {
               console.log('🔄 Triggering ensure-post-image-prompts for theme:', theme_id);
               const { data: ensurePromptsData, error: ensurePromptsError } = await supabase.functions.invoke('ensure-post-image-prompts', {
@@ -554,6 +566,13 @@ Generate the complete system prompt with ALL placeholders replaced with specific
               // Don't fail the main system prompt generation
             }
           }
+        } else {
+          console.log('🔍 DEBUG: Skipping theme linking because:', {
+            theme_id: theme_id,
+            insertedPrompt_id: insertedPrompt?.id,
+            hasThemeId: !!theme_id,
+            hasInsertedPrompt: !!insertedPrompt?.id
+          });
         }
 
         // Return success response
