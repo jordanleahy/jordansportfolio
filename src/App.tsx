@@ -349,6 +349,18 @@ function App() {
                 <Route path="/companies/:vendorSlug" element={<PublicVendorView />} />
                 <Route path="/investors" element={<ProtectedRoute><Investors /></ProtectedRoute>} />
                 <Route 
+                  path="/admin/prompts" 
+                  element={
+                    <AdminRoute>
+                      <AdminLayout>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <AdminPrompts />
+                        </Suspense>
+                      </AdminLayout>
+                    </AdminRoute>
+                  } 
+                />
+                <Route 
                   path="/admin/subscription-analytics" 
                   element={
                     <AdminRoute>
