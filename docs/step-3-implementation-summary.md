@@ -34,7 +34,7 @@ Successfully implemented enhanced user attribution and OpenAI correlation tracki
   - Updated model to `gpt-4.1-2025-04-14`
   - Comprehensive error tracking with correlation
 
-#### `invoke-system-prompt-agent/index.ts` (Partial)
+#### `create-theme-system-prompt/index.ts` (Partial)
 - **Enhancement**: Started correlation tracking integration
 - **Features**:
   - Correlation ID generation

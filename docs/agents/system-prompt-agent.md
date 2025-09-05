@@ -103,7 +103,7 @@ WHERE name = $3;
 ## Edge Function Implementation
 
 ### Endpoint
-`supabase/functions/invoke-system-prompt-agent/index.ts`
+`supabase/functions/create-theme-system-prompt/index.ts`
 
 ### Key Functions
 ```typescript
