@@ -505,7 +505,7 @@ serve(async (req)=>{
     const imageGenStartTime = Date.now();
     console.log('Starting image generation...');
     const formData = new FormData();
-    formData.append('model', 'gpt-image-1');
+    formData.append('model', 'gemini-2.5-flash-image-preview');
     formData.append('image', new File([
       originalImageBuffer
     ], "input.png", {
@@ -514,7 +514,7 @@ serve(async (req)=>{
     formData.append('prompt', editingPrompt);
     formData.append('size', '1024x1024');
     console.log('Image generation parameters:', {
-      model: 'gpt-image-1',
+      model: 'gemini-2.5-flash-image-preview',
       imageSize: `${Math.round(originalImageBuffer.byteLength / 1024)}KB`,
       promptLength: editingPrompt.length,
       size: '1024x1024'
