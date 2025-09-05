@@ -176,33 +176,35 @@ const AICityPlanner: React.FC = () => {
         <div className="container mx-auto px-6 py-8">
           <div className="max-w-4xl mx-auto space-y-8">
             
-            {/* Input Section */}
-            <Card className="bg-card border-border">
-              <CardContent className="p-6 space-y-6">
-                
-                {/* Image Upload */}
-                <div>
-                  <h2 className="text-lg font-medium mb-4 text-foreground">Street Photo</h2>
-        <ImageUploadArea
-          onImageUpload={handleImageUpload}
-          uploadedImageUrl={imageUrl}
-          onRemoveImage={handleRemoveImage}
-          isUploading={isUploading}
-        />
-                </div>
+            {/* Input Section - Hide when processing starts */}
+            {!currentRecord && (
+              <Card className="bg-card border-border">
+                <CardContent className="p-6 space-y-6">
+                  
+                  {/* Image Upload */}
+                  <div>
+                    <h2 className="text-lg font-medium mb-4 text-foreground">Street Photo</h2>
+          <ImageUploadArea
+            onImageUpload={handleImageUpload}
+            uploadedImageUrl={imageUrl}
+            onRemoveImage={handleRemoveImage}
+            isUploading={isUploading}
+          />
+                  </div>
 
-                {/* Prompt Input */}
-                <div>
-                  <PromptInput
-                    value={prompt}
-                    onChange={setPrompt}
-                    onEnterPress={canRun ? handleRun : undefined}
-                    disabled={isProcessing}
-                  />
-                </div>
+                  {/* Prompt Input */}
+                  <div>
+                    <PromptInput
+                      value={prompt}
+                      onChange={setPrompt}
+                      onEnterPress={canRun ? handleRun : undefined}
+                      disabled={isProcessing}
+                    />
+                  </div>
 
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Results Section */}
             <StreetVisionResults
