@@ -625,7 +625,13 @@ serve(async (req)=>{
     transformedImageBase64 = imagePart.inline_data.data;
     // Upload transformed image to storage
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
-    const transformedImageBuffer = Uint8Array.from(atob(transformedImageBase64), (c)=>c.charCodeAt(0));
+    
+    // Safe conversion for large base64 images
+    const binaryString = atob(transformedImageBase64);
+    const transformedImageBuffer = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      transformedImageBuffer[i] = binaryString.charCodeAt(i);
+    }
     const { error: uploadError } = await supabase.storage.from('street-vision').upload(transformedFilename, transformedImageBuffer, {
       contentType: 'image/png',
       cacheControl: '3600',
