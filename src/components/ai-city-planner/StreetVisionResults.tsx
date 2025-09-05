@@ -33,13 +33,14 @@
  * - Triggers retry functionality through parent component callbacks
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { UnifiedLoadingIndicator } from '@/components/ui/unified-loading-indicator';
 import { Button } from '@/components/ui/button';
-import { Download, RefreshCw } from 'lucide-react';
+import { Download, RefreshCw, Expand } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
+import { ImageLightbox } from './ImageLightbox';
 
 /**
  * Database record structure for street vision transformations
@@ -56,6 +57,7 @@ interface StreetVisionResultsProps {
   error: string | null;                 // Error message for display
   originalImageUrl?: string;            // Fallback original image URL for immediate display
   onRetry?: () => void;                 // Callback function to retry failed processing
+  onConfirmCoding?: () => void;         // Callback function when user confirms coding intent
 }
 
 /**
@@ -93,8 +95,12 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
   isProcessing,    // Processing status for loading states
   error,           // Error message for user display
   originalImageUrl, // Fallback original image URL
-  onRetry          // Retry callback function
+  onRetry,         // Retry callback function
+  onConfirmCoding  // Coding confirmation callback function
 }) => {
+  // State for lightbox control
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
   // Don't render anything if no processing has started
   if (!record && !isProcessing) return null;
 
@@ -123,12 +129,18 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-muted-foreground">Original Street</h3>
               {originalImageUrl || record?.original_image_url ? (
-                <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video">
+                <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video group cursor-pointer hover:shadow-lg transition-shadow"
+                     onClick={() => setIsLightboxOpen(true)}>
                   <img 
                     src={originalImageUrl || record?.original_image_url}
                     alt="Original street"
                     className="w-full h-full object-cover"
                   />
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
+                      <Expand className="h-4 w-4 text-foreground" />
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <SimpleShimmer 
@@ -144,22 +156,28 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
               {(() => {
                 if (record?.transformed_image_url) {
                   return (
-                    <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video group">
+                    <div className="relative rounded-lg overflow-hidden border border-border bg-card aspect-video group cursor-pointer hover:shadow-lg transition-shadow"
+                         onClick={() => setIsLightboxOpen(true)}>
                       <img 
                         src={record.transformed_image_url}
                         alt="Transformed street"
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <div className="bg-background/80 backdrop-blur-sm rounded-full p-2">
+                          <Expand className="h-4 w-4 text-foreground" />
+                        </div>
                         <Button 
                           variant="secondary" 
                           size="sm"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             const link = document.createElement('a');
                             link.href = record.transformed_image_url!;
                             link.download = 'street-transformation.png';
                             link.click();
                           }}
+                          className="h-8 w-8 p-0"
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -239,6 +257,17 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
           )}
 
         </div>
+
+        {/* Image Lightbox */}
+        <ImageLightbox
+          isOpen={isLightboxOpen}
+          onClose={() => setIsLightboxOpen(false)}
+          originalImageUrl={originalImageUrl || record?.original_image_url}
+          transformedImageUrl={record?.transformed_image_url}
+          userPrompt={record?.user_prompt}
+          onConfirmCoding={onConfirmCoding}
+        />
+
       </CardContent>
     </Card>
   );

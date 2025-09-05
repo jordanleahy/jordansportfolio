@@ -216,6 +216,14 @@ const AICityPlanner: React.FC = () => {
               error={error}
               originalImageUrl={imageUrl}
               onRetry={handleRetry}
+              onConfirmCoding={() => {
+                toast({
+                  title: "Starting Code Generation",
+                  description: "Your street transformation will be converted into implementation code.",
+                });
+                // TODO: Implement actual code generation functionality
+                console.log("User confirmed coding intent for record:", currentRecord?.id);
+              }}
             />
 
           </div>
