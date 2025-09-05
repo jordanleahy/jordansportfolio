@@ -643,15 +643,39 @@ serve(async (req)=>{
       throw new Error('Image generation failed - no content parts returned');
     }
     
-    // Find the image part in the response
-    const imagePart = parts.find(part => part.inline_data?.data);
-    if (!imagePart) {
+    // Find the image part in the response - try multiple possible paths
+    let imagePart;
+    let transformedImageBase64;
+    
+    // Try different possible property paths for Gemini response
+    for (const part of parts) {
+      // Try camelCase format (standard Gemini API)
+      if (part.inlineData?.data) {
+        imagePart = part;
+        transformedImageBase64 = part.inlineData.data;
+        console.log('Found image data in part.inlineData.data (camelCase)');
+        break;
+      }
+      // Try snake_case format (fallback)
+      if (part.inline_data?.data) {
+        imagePart = part;
+        transformedImageBase64 = part.inline_data.data;
+        console.log('Found image data in part.inline_data.data (snake_case)');
+        break;
+      }
+      // Try direct data property
+      if (part.data) {
+        imagePart = part;
+        transformedImageBase64 = part.data;
+        console.log('Found image data in part.data');
+        break;
+      }
+    }
+    
+    if (!imagePart || !transformedImageBase64) {
       console.error('No image data found in Gemini response parts:', parts);
       throw new Error('Image generation failed - no image data in response');
     }
-    
-    console.log('Using base64 response from Gemini');
-    transformedImageBase64 = imagePart.inline_data.data;
     // Upload transformed image to storage
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
     
