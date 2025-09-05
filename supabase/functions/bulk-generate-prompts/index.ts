@@ -48,7 +48,7 @@ serve(async (req) => {
     // Get theme details for context
     const { data: theme } = await supabaseClient
       .from('themes')
-      .select('name, description, category')
+      .select('theme_name, description, category')
       .eq('id', themeId)
       .single();
 
@@ -105,7 +105,7 @@ serve(async (req) => {
                   content: `You are an expert visual content creator for ${theme.category} industry. 
                   Create detailed, professional image generation prompts that will produce high-quality visuals.
                   
-                  Theme Context: ${theme.name} - ${theme.description}
+                  Theme Context: ${theme.theme_name} - ${theme.description}
                   Aspect Ratio: ${request.aspectRatio}
                   
                   Guidelines:
@@ -177,7 +177,7 @@ serve(async (req) => {
       JSON.stringify({
         results,
         metadata: {
-          theme: theme.name,
+          theme: theme.theme_name,
           category: theme.category,
           totalRequests: requests.length,
           successCount,
