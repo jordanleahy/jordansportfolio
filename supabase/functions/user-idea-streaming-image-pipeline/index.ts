@@ -12,7 +12,7 @@
  * 
  * IMPORTANT: This function does NOT directly create system prompts. It only:
  * - Populates theme and post data in the database
- * - Triggers asynchronous system prompt generation via generateSystemPromptReactive()
+ * - Triggers asynchronous system prompt generation via external utilities
  * - System prompts are stored separately in 'theme_system_prompts' table
  * 
  * DATA FLOW:
@@ -71,7 +71,7 @@
  * 
  * BACKGROUND PROCESSING:
  * This function triggers but does not wait for:
- * - System prompt generation (handled by generateSystemPromptReactive)
+ * - System prompt generation (handled by external utilities)
  * - Image generation pipeline (separate edge function)
  * - Theme lifecycle management (separate edge function)
  * 
@@ -514,74 +514,6 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
   }
 };
 
-const generateSystemPromptReactive = async (supabase: SupabaseClient, themeData: ThemeData, userId: string, themeId: string): Promise<void> => {
-  console.log('🤖 Reactive system prompt generation for theme:', themeData.theme);
-  
-  // 1. Fast database check for existing system prompt (<100ms)
-  console.log('🔍 Checking for existing system prompt in database');
-  const { data: existingPrompt, error: checkError } = await supabase
-    .from('theme_system_prompts')
-    .select('id, created_at, prompt_text')
-    .eq('user_id', userId)
-    .eq('theme_id', themeId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (checkError) {
-    console.warn('⚠️ Error checking existing system prompt:', checkError);
-  }
-
-  if (existingPrompt?.id) {
-    console.log('✅ System prompt already exists:', existingPrompt.id);
-    // Continue with image generation since system prompt exists
-    triggerBackgroundImageGeneration(supabase, themeData, userId);
-    return;
-  }
-
-  console.log('📝 No existing system prompt found, triggering generation');
-  
-  // 2. Fire-and-forget call to system prompt generation (no timeout, no retries)
-  console.log('🚀 Triggering fire-and-forget system prompt generation');
-  EdgeRuntime.waitUntil((async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('create-theme-system-prompt', {
-        body: {
-          theme: themeData.theme,
-          category: themeData.category,
-          description: themeData.theme_description,
-          sample_posts: themeData.posts.slice(0, 3),
-          user_id: userId,
-          theme_id: themeId,
-          skip_ensure: true,
-        },
-      });
-      
-      if (error) {
-        console.warn('⚠️ System prompt generation background error:', error);
-      } else {
-        console.log('✅ System prompt generation initiated successfully');
-      }
-      
-      // The real-time system will handle updates when the prompt is ready
-    } catch (error) {
-      console.error('❌ Fire-and-forget system prompt generation failed:', error);
-      // Continue gracefully - image generation doesn't depend on system prompts
-    }
-  })());
-
-  // 3. Continue immediately with image generation pipeline
-  console.log('⚡ Continuing with image generation pipeline immediately');
-  triggerBackgroundImageGeneration(supabase, themeData, userId);
-};
-
-const triggerBackgroundImageGeneration = (supabase: SupabaseClient, themeData: ThemeData, userId: string): void => {
-  console.log('🎨 Image generation will be triggered when system prompt is ready');
-  
-  // NOTE: No longer calling ensure-post-image-prompts here
-  // The single trigger in useUnifiedRealtime will handle this
-  // when visual_prompt_system_prompt_id is populated in themes table
-};
 
 
 serve(async (req) => {
@@ -754,8 +686,7 @@ serve(async (req) => {
               data: { status: 'Generating AI system prompts...' }
             });
 
-    // Use EdgeRuntime.waitUntil to run system prompt generation in background
-    EdgeRuntime.waitUntil(generateSystemPromptReactive(supabase, themeData, userId, createdThemeId));
+    // System prompt generation is handled by external utilities
             
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
@@ -821,9 +752,7 @@ serve(async (req) => {
       }
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
       const themeId = createdThemeId;
-    // 🤖 Step 3: Reactive system prompt generation (fire-and-forget, event-driven)
-    console.log('🤖 Starting reactive system prompt generation for theme:', themeData.theme);
-    await generateSystemPromptReactive(supabase, themeData, userId, createdThemeId);
+    // System prompt generation is handled by external utilities
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,
