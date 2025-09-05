@@ -390,7 +390,39 @@ POST COUNT RULES:
       theme: parsedData.theme
     });
     
-    return parsedData;
+    // ============= RESPONSE SANITIZATION =============
+    // Sanitize the entire response to remove unexpected fields immediately after parsing
+    const sanitizedData = {
+      category: parsedData.category,
+      theme: parsedData.theme,
+      theme_description: parsedData.theme_description,
+      posts: parsedData.posts?.map((post: any) => ({
+        day: post.day,
+        title: post.title,
+        description: post.description
+      })) || []
+    };
+    
+    // Log any unexpected top-level fields for debugging
+    const unexpectedTopLevelFields = Object.keys(parsedData).filter(key => 
+      !['category', 'theme', 'theme_description', 'posts'].includes(key)
+    );
+    if (unexpectedTopLevelFields.length > 0) {
+      console.warn('⚠️ SANITIZED: Unexpected top-level fields from OpenAI:', unexpectedTopLevelFields);
+    }
+    
+    // Log any unexpected post fields for debugging
+    parsedData.posts?.forEach((post: any, index: number) => {
+      const unexpectedPostFields = Object.keys(post).filter(key => 
+        !['day', 'title', 'description'].includes(key)
+      );
+      if (unexpectedPostFields.length > 0) {
+        console.warn(`⚠️ SANITIZED: Unexpected post fields in post ${index}:`, unexpectedPostFields);
+      }
+    });
+    
+    console.log('🧹 Response sanitized - only expected fields will be processed');
+    return sanitizedData;
 
   } catch (fetchError) {
     console.error('❌ OpenAI API fetch error:', fetchError);
