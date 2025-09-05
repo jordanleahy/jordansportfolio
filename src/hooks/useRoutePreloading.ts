@@ -87,6 +87,24 @@ export const useRoutePreloading = () => {
         console.log('[Prefetch] Stories prefetch completed');
         break;
 
+      case '/cases/case1':
+        // Preload hero image for Case 1
+        const case1Img = new Image();
+        case1Img.src = '/lovable-uploads/f8bdf34c-98f3-483b-9033-2c28bda929cd.png';
+        break;
+
+      case '/cases/case3':
+        // Preload hero image for Case 3
+        const case3Img = new Image();
+        case3Img.src = '/lovable-uploads/4be80a48-e90b-4b76-af9c-259fe703976d.png';
+        break;
+
+      case '/cases/case4':
+        // Preload hero image for Case 4
+        const case4Img = new Image();
+        case4Img.src = '/lovable-uploads/3e1c498e-aaa3-49a7-a2ee-5c4b772223fb.png';
+        break;
+
       case '/vendors':
         console.log('[Prefetch] Starting vendors data prefetch');
         const { useVendors } = await import('@/hooks/useVendors');
