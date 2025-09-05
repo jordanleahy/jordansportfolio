@@ -587,13 +587,42 @@ serve(async (req)=>{
     const imageGenTime = Date.now() - imageGenStartTime;
     console.log(`Image generation completed in ${imageGenTime}ms`);
     
-    // Log the actual response structure for debugging
-    console.log('Gemini response structure:', {
+    // Detailed logging of the complete Gemini response structure
+    console.log('=== COMPLETE GEMINI RESPONSE STRUCTURE ===');
+    console.log('Full response keys:', Object.keys(imageData_result));
+    console.log('Response structure:', {
       hasCandidates: !!imageData_result.candidates,
       candidatesLength: imageData_result.candidates?.length,
       hasContent: !!imageData_result.candidates?.[0]?.content,
-      partsLength: imageData_result.candidates?.[0]?.content?.parts?.length
+      partsLength: imageData_result.candidates?.[0]?.content?.parts?.length,
+      responseSize: JSON.stringify(imageData_result).length
     });
+    
+    // Log each candidate structure
+    if (imageData_result.candidates) {
+      imageData_result.candidates.forEach((candidate, index) => {
+        console.log(`Candidate ${index} structure:`, {
+          hasContent: !!candidate.content,
+          contentKeys: candidate.content ? Object.keys(candidate.content) : null,
+          partsCount: candidate.content?.parts?.length || 0
+        });
+        
+        // Log each part structure
+        if (candidate.content?.parts) {
+          candidate.content.parts.forEach((part, partIndex) => {
+            console.log(`Part ${partIndex} structure:`, {
+              partKeys: Object.keys(part),
+              hasInlineData: !!part.inline_data,
+              inlineDataKeys: part.inline_data ? Object.keys(part.inline_data) : null,
+              hasData: !!part.inline_data?.data,
+              dataLength: part.inline_data?.data?.length || 0,
+              mimeType: part.inline_data?.mimeType || 'unknown'
+            });
+          });
+        }
+      });
+    }
+    console.log('=== END GEMINI RESPONSE STRUCTURE ===');
     
     // Step 4: Process and upload transformed image
     const uploadStartTime = Date.now();
