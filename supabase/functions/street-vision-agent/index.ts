@@ -74,6 +74,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 // Environment variables and client setup
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const googleApiKey = Deno.env.get('GOOGLE_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 // Initialize Supabase client with service role for database operations
@@ -109,7 +110,19 @@ serve(async (req)=>{
   if (!openAIApiKey) {
     console.error('OPENAI_API_KEY not found');
     return new Response(JSON.stringify({
-      error: 'OpenAI API key not configured'
+      error: 'OpenAI API key not configured (needed for vision analysis)'
+    }), {
+      status: 500,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
+  }
+  if (!googleApiKey) {
+    console.error('GOOGLE_API_KEY not found');
+    return new Response(JSON.stringify({
+      error: 'Google API key not configured (needed for image generation)'
     }), {
       status: 500,
       headers: {
@@ -501,34 +514,51 @@ serve(async (req)=>{
       throw new Error('Failed to update prompt - no rows affected');
     }
     console.log('Image editing prompt stored successfully. Updated rows:', promptUpdateData.length);
-    // Step 3: Generate transformed image with timeout handling
+    // Step 3: Generate transformed image with Gemini
     const imageGenStartTime = Date.now();
-    console.log('Starting image generation...');
-    const formData = new FormData();
-    formData.append('model', 'gemini-2.5-flash-image-preview');
-    formData.append('image', new File([
-      originalImageBuffer
-    ], "input.png", {
-      type: 'image/png'
-    }));
-    formData.append('prompt', editingPrompt);
-    formData.append('size', '1024x1024');
+    console.log('Starting image generation with Gemini...');
+    
+    // Convert image buffer to base64 for Gemini
+    const imageBase64 = btoa(String.fromCharCode(...new Uint8Array(originalImageBuffer)));
+    
+    const geminiRequestPayload = {
+      model: 'gemini-2.5-flash-image-preview',
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              text: `Using the provided street image, create a transformed version based on this prompt: ${editingPrompt}`
+            },
+            {
+              inline_data: {
+                mime_type: 'image/png',
+                data: imageBase64
+              }
+            }
+          ]
+        }
+      ]
+    };
+    
     console.log('Image generation parameters:', {
       model: 'gemini-2.5-flash-image-preview',
       imageSize: `${Math.round(originalImageBuffer.byteLength / 1024)}KB`,
       promptLength: editingPrompt.length,
-      size: '1024x1024'
+      imageBase64Length: imageBase64.length
     });
+    
     // Log detailed image generation start timing
     console.log('Image generation started at:', new Date().toISOString());
-    console.log('Expected processing time: 60-120 seconds for complex urban transformations');
-    const imageResponse = await fetch('https://api.openai.com/v1/images/edits', {
+    console.log('Expected processing time: 30-60 seconds for complex urban transformations');
+    
+    const imageResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${googleApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
         'Connection': 'keep-alive'
       },
-      body: formData
+      body: JSON.stringify(geminiRequestPayload)
     });
     if (!imageResponse.ok) {
       const errorText = await imageResponse.text();
@@ -553,10 +583,11 @@ serve(async (req)=>{
     console.log(`Image generation completed in ${imageGenTime}ms`);
     
     // Log the actual response structure for debugging
-    console.log('Image generation response structure:', {
-      hasData: !!imageData_result.data,
-      dataLength: imageData_result.data?.length,
-      firstItemKeys: imageData_result.data?.[0] ? Object.keys(imageData_result.data[0]) : 'no data'
+    console.log('Gemini response structure:', {
+      hasCandidates: !!imageData_result.candidates,
+      candidatesLength: imageData_result.candidates?.length,
+      hasContent: !!imageData_result.candidates?.[0]?.content,
+      partsLength: imageData_result.candidates?.[0]?.content?.parts?.length
     });
     
     // Step 4: Process and upload transformed image
@@ -565,25 +596,28 @@ serve(async (req)=>{
     
     let transformedImageBase64;
     
-    // Handle both gpt-image-1 (base64) and legacy (URL) response formats
-    if (imageData_result.data?.[0]?.b64_json) {
-      // gpt-image-1 returns base64 data directly - use it without additional fetch
-      console.log('Using base64 response from gpt-image-1');
-      transformedImageBase64 = imageData_result.data[0].b64_json;
-    } else if (imageData_result.data?.[0]?.url) {
-      // Legacy format returns URL - fetch and convert to base64
-      console.log('Fetching image from URL response');
-      const transformedImageUrl = imageData_result.data[0].url;
-      const transformedResponse = await fetch(transformedImageUrl);
-      if (!transformedResponse.ok) {
-        throw new Error(`Failed to fetch transformed image: ${transformedResponse.status}`);
-      }
-      const transformedArrayBuffer = await transformedResponse.arrayBuffer();
-      transformedImageBase64 = btoa(String.fromCharCode(...new Uint8Array(transformedArrayBuffer)));
-    } else {
-      console.error('Unexpected image response format:', imageData_result);
-      throw new Error('Image generation response missing expected data format (no b64_json or url found)');
+    // Handle Gemini's response format (inline_data.data)
+    const candidates = imageData_result.candidates;
+    if (!candidates || candidates.length === 0) {
+      console.error('No candidates in Gemini response:', imageData_result);
+      throw new Error('Image generation failed - no candidates returned');
     }
+    
+    const parts = candidates[0]?.content?.parts;
+    if (!parts || parts.length === 0) {
+      console.error('No parts in Gemini response:', candidates[0]);
+      throw new Error('Image generation failed - no content parts returned');
+    }
+    
+    // Find the image part in the response
+    const imagePart = parts.find(part => part.inline_data?.data);
+    if (!imagePart) {
+      console.error('No image data found in Gemini response parts:', parts);
+      throw new Error('Image generation failed - no image data in response');
+    }
+    
+    console.log('Using base64 response from Gemini');
+    transformedImageBase64 = imagePart.inline_data.data;
     // Upload transformed image to storage
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
     const transformedImageBuffer = Uint8Array.from(atob(transformedImageBase64), (c)=>c.charCodeAt(0));
