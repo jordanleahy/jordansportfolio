@@ -85,14 +85,12 @@ serve(async (req) => {
         correlationId
       });
       
-      // Use manage-theme-lifecycle function for theme creation
+      // Use structure-theme-input function for theme creation
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        'manage-theme-lifecycle',
+        'structure-theme-input',
         {
           body: {
-            action: 'create',
-            description: body.description,
-            userId: user?.id
+            text: body.description
           },
           headers: {
             Authorization: authHeader,
@@ -109,17 +107,51 @@ serve(async (req) => {
       });
 
       if (themeError || !themeData?.success) {
-        console.error(`❌ [CREATE] Theme generation failed`, {
+        console.error(`❌ [CREATE] Theme structuring failed`, {
           themeError,
           themeData,
           correlationId
         });
-        throw new Error(themeData?.error || 'Failed to generate theme');
+        throw new Error(themeData?.errors?.[0] || 'Failed to structure theme');
       }
 
-      console.log(`✅ [CREATE] Theme generated successfully`, {
+      console.log(`✅ [STRUCTURE] Theme structured successfully`, {
         correlationId
       });
+
+      // Import the structured theme data into the database
+      const { data: importResult, error: importError } = await supabase.functions.invoke(
+        'import-theme-with-transaction',
+        {
+          body: {
+            user_id: user.id,
+            idempotency_key: `lifecycle-${correlationId}`,
+            category: themeData.data.category,
+            theme: themeData.data.theme,
+            theme_description: themeData.data.theme_description,
+            posts_data: themeData.data.posts
+          },
+          headers: {
+            Authorization: authHeader,
+          }
+        }
+      );
+
+      if (importError || !importResult?.success) {
+        console.error(`❌ [CREATE] Theme import failed`, {
+          importError,
+          importResult,
+          correlationId
+        });
+        throw new Error(importResult?.error_message || 'Failed to import theme');
+      }
+
+      console.log(`✅ [CREATE] Theme imported successfully`, {
+        themeId: importResult.submission_id,
+        correlationId
+      });
+
+      const themeId = importResult.submission_id;
 
       // Initial status update - triggers will handle the rest automatically
       const { error: updateError } = await supabase
@@ -129,7 +161,7 @@ serve(async (req) => {
           user_interaction_required: true,
           background_processing_complete: false
         })
-        .eq('id', themeData.theme_id);
+        .eq('id', themeId);
 
       if (updateError) {
         console.error(`❌ [UPDATE] Failed to update theme lifecycle`, {
@@ -146,7 +178,7 @@ serve(async (req) => {
 
       const response = {
         success: true,
-        theme_id: themeData.theme_id,
+        theme_id: themeId,
         lifecycle_status: 'generating',
         message: 'Theme created and background processing started',
         correlationId
