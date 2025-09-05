@@ -69,7 +69,9 @@
  * - OpenAI API failures (vision analysis, image generation)
  * - Input validation errors
  * - Processing timeouts and resource limits
- */ import "https://deno.land/x/xhr@0.1.0/mod.ts";
+ */
+
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 // Environment variables and client setup
@@ -630,17 +632,35 @@ serve(async (req)=>{
     
     let transformedImageBase64;
     
-    // Handle Gemini's response format (inline_data.data)
+    // Handle Gemini's response format with detailed error reporting
     const candidates = imageData_result.candidates;
     if (!candidates || candidates.length === 0) {
-      console.error('No candidates in Gemini response:', imageData_result);
-      throw new Error('Image generation failed - no candidates returned');
+      const errorDetails = {
+        responseKeys: Object.keys(imageData_result),
+        responseStructure: imageData_result,
+        candidatesValue: candidates,
+        candidatesType: typeof candidates
+      };
+      console.error('=== DETAILED ERROR: No candidates in Gemini response ===');
+      console.error('Error details:', errorDetails);
+      console.error('Full response:', JSON.stringify(imageData_result, null, 2));
+      throw new Error(`Image generation failed - no candidates returned. Response structure: ${JSON.stringify(errorDetails, null, 2)}`);
     }
     
     const parts = candidates[0]?.content?.parts;
     if (!parts || parts.length === 0) {
-      console.error('No parts in Gemini response:', candidates[0]);
-      throw new Error('Image generation failed - no content parts returned');
+      const errorDetails = {
+        candidateStructure: candidates[0],
+        candidateKeys: candidates[0] ? Object.keys(candidates[0]) : null,
+        contentValue: candidates[0]?.content,
+        contentType: typeof candidates[0]?.content,
+        partsValue: parts,
+        partsType: typeof parts
+      };
+      console.error('=== DETAILED ERROR: No parts in Gemini response ===');
+      console.error('Error details:', errorDetails);
+      console.error('Candidate[0]:', JSON.stringify(candidates[0], null, 2));
+      throw new Error(`Image generation failed - no content parts returned. Candidate structure: ${JSON.stringify(errorDetails, null, 2)}`);
     }
     
     // Find the image part in the response - try multiple possible paths
@@ -673,8 +693,24 @@ serve(async (req)=>{
     }
     
     if (!imagePart || !transformedImageBase64) {
-      console.error('No image data found in Gemini response parts:', parts);
-      throw new Error('Image generation failed - no image data in response');
+      const errorDetails = {
+        partsCount: parts.length,
+        partsStructure: parts.map((part, index) => ({
+          partIndex: index,
+          partKeys: Object.keys(part),
+          hasInlineData: !!part.inlineData,
+          hasInline_data: !!part.inline_data,
+          hasData: !!part.data,
+          inlineDataKeys: part.inlineData ? Object.keys(part.inlineData) : null,
+          inline_dataKeys: part.inline_data ? Object.keys(part.inline_data) : null,
+          dataLength: part.inlineData?.data?.length || part.inline_data?.data?.length || part.data?.length || 0,
+          mimeType: part.inlineData?.mimeType || part.inline_data?.mimeType || 'unknown'
+        }))
+      };
+      console.error('=== DETAILED ERROR: No image data found in any part ===');
+      console.error('Parts analysis:', errorDetails);
+      console.error('All parts:', JSON.stringify(parts, null, 2));
+      throw new Error(`Image generation failed - no image data in response. Parts analysis: ${JSON.stringify(errorDetails, null, 2)}`);
     }
     // Upload transformed image to storage
     const transformedFilename = `${userId}/transformed/${recordId}_transformed.png`;
