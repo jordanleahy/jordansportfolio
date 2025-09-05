@@ -148,7 +148,7 @@ serve(async (req) => {
       const themeId = importResult[0].submission_id;
 
       // Get the actual theme ID from the submission
-      const { data: themeRecord, error: themeError } = await supabase
+      const { data: themeRecord, error: themeRetrievalError } = await supabase
         .from('themes')
         .select('id')
         .eq('user_id', user.id)
@@ -158,9 +158,9 @@ serve(async (req) => {
         .limit(1)
         .single();
 
-      if (themeError) {
+      if (themeRetrievalError) {
         console.error(`❌ [THEME] Failed to retrieve theme ID`, {
-          themeError,
+          themeRetrievalError,
           correlationId
         });
         throw new Error('Failed to retrieve created theme');
