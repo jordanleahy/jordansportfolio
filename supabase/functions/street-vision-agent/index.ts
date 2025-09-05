@@ -518,8 +518,13 @@ serve(async (req)=>{
     const imageGenStartTime = Date.now();
     console.log('Starting image generation with Gemini...');
     
-    // Convert image buffer to base64 for Gemini
-    const imageBase64 = btoa(String.fromCharCode(...new Uint8Array(originalImageBuffer)));
+    // Convert image buffer to base64 for Gemini (safe for large images)
+    const uint8Array = new Uint8Array(originalImageBuffer);
+    let binaryString = '';
+    for (let i = 0; i < uint8Array.length; i++) {
+      binaryString += String.fromCharCode(uint8Array[i]);
+    }
+    const imageBase64 = btoa(binaryString);
     
     const geminiRequestPayload = {
       model: 'gemini-2.5-flash-image-preview',
