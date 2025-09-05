@@ -12,7 +12,7 @@ verify_jwt = false
 [functions.generate-image-with-concurrency-control]
 verify_jwt = true
 
-[functions.create-theme]
+[functions.manage-theme-lifecycle]
 verify_jwt = true
 
 [functions.input-triage]
@@ -27,16 +27,44 @@ verify_jwt = true
 [functions.generate-all-images-optimized]
 verify_jwt = true
 
+[functions.user-idea-streaming-image-pipeline]
+verify_jwt = true
+
+[functions.streaming-image-pipeline]
+verify_jwt = true
+
 [functions.generate-blog-content]
 verify_jwt = true
 
+[functions.generate-content]
+verify_jwt = true
+
+[functions.generate-comparison-pages]
+verify_jwt = true
+
+
+[functions.generate-hero-job-visual]
+verify_jwt = true
+
 [functions.generate-voiceover-script]
+verify_jwt = true
+
+[functions.process-and-import-theme]
 verify_jwt = true
 
 [functions.process-funding-json]
 verify_jwt = true
 
 [functions.process-investor-json]
+verify_jwt = true
+
+[functions.process-theme-json]
+verify_jwt = true
+
+[functions.process-uploaded-images]
+verify_jwt = true
+
+[functions.cover-letter-agent]
 verify_jwt = true
 
 [functions.create-theme-system-prompt]

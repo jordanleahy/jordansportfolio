@@ -22,6 +22,7 @@ import BlogEditor from "./pages/BlogEditor";
 // Lazy load admin components for better performance
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 import CompanyPortfolio from "./pages/CompanyPortfolio";
+import AscertainToTheMoon from "./pages/AscertainToTheMoon";
 import Vendors from "./pages/Vendors";
 import VendorsIndex from "./pages/VendorsIndex";
 import VendorDetail from "./pages/VendorDetail";
@@ -206,6 +207,7 @@ function App() {
                   } 
                 />
                 <Route path="/portfolio/:company" element={<CompanyPortfolio />} />
+                <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
                 <Route path="/pixar" element={<PixarConverter />} />
                 {/* Vendor routes - redirect to admin namespace */}
                 <Route path="/vendors" element={<Navigate to="/admin/vendors" replace />} />

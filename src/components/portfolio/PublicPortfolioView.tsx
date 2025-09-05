@@ -11,6 +11,7 @@ interface PublicPortfolioViewProps {
       job_description: string;
       job_description_link?: string;
       resume_link?: string;
+      cover_letter_link?: string;
       created_at: string;
     };
   };
@@ -118,6 +119,14 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
                         <a href={jobApplication.resume_link} target="_blank" rel="noopener noreferrer">
                           <FileText className="w-4 h-4 mr-2" />
                           Resume
+                        </a>
+                      </Button>
+                    )}
+                    {jobApplication.cover_letter_link && (
+                      <Button asChild variant="outline">
+                        <a href={jobApplication.cover_letter_link} target="_blank" rel="noopener noreferrer">
+                          <Mail className="w-4 h-4 mr-2" />
+                          Cover Letter
                         </a>
                       </Button>
                     )}

@@ -160,8 +160,8 @@ export const useAdvancedImageGeneration = () => {
       updateStep('Image Generation', 'active', 'Creating image with AI...');
       const imageStart = Date.now();
       
-      // Use the main image generation function
-      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image-gpt', {
+      // Use the advanced logging function for better insights
+      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image-gpt-advanced-logging', {
         body: {
           prompt: prompt,
           aspectRatio: '1:1',

@@ -1,13 +1,22 @@
 // Edge Function Names
 export const EDGE_FUNCTION_NAMES = {
   CREATE_THEME_SYSTEM_PROMPT: 'create-theme-system-prompt',
+  GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
+  GENERATE_CONTENT: 'generate-content',
   CREATE_SINGLE_IMAGE_PROMPT: 'create-single-image-prompt',
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
   
+  GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',
   GENERATE_IMAGE_GPT: 'generate-image-gpt',
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
+  PROCESS_AND_IMPORT_THEME: 'process-and-import-theme',
   PROCESS_FUNDING_JSON: 'process-funding-json',
   PROCESS_INVESTOR_JSON: 'process-investor-json',
+  PROCESS_THEME_JSON: 'process-theme-json',
+  PROCESS_UPLOADED_IMAGES: 'process-uploaded-images',
+  COVER_LETTER_AGENT: 'cover-letter-agent',
+  STREAMING_IMAGE_PIPELINE: 'streaming-image-pipeline',
+  USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
   STREET_VISION_AGENT: 'street-vision-agent',
   
 } as const;

@@ -50,11 +50,11 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
         }
       }
 
-      // Upload resume if selected
-      if (selectedResume) {
-        const resumeUrl = await uploadFile(selectedResume);
-        if (resumeUrl) {
-          updateData.resume_link = resumeUrl;
+      // Upload cover letter if selected
+      if (selectedCoverLetter) {
+        const coverLetterUrl = await uploadFile(selectedCoverLetter);
+        if (coverLetterUrl) {
+          updateData.cover_letter_link = coverLetterUrl;
         }
       }
 

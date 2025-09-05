@@ -326,8 +326,20 @@ serve(async (req) => {
         // API usage tracking failed
       }
 
-      // Background processing removed - function deleted
-      console.log('✅ [BULK_GEN] Images generated successfully:', successfulResults.length);
+      // Trigger background processing
+      if (successfulResults.length > 0) {
+        try {
+          await supabase.functions.invoke('process-uploaded-images', {
+            body: { 
+              postId,
+              imageUrls: successfulResults.map(r => r.url!),
+              aspectRatios: successfulResults.map(r => r.aspectRatio)
+            }
+          });
+        } catch (error) {
+          // Background processing failed
+        }
+      }
     };
 
     // Use waitUntil if available (Edge Runtime), otherwise run in background

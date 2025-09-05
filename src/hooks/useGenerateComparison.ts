@@ -59,8 +59,38 @@ export const useGenerateComparison = () => {
       await ensureComparisonAgentExists();
       console.log('✅ [Frontend] Agent check complete');
 
-      // Function deleted - return error for now
-      throw new Error('Comparison generation feature is temporarily disabled');
+      console.log('📤 [Frontend] Calling edge function...');
+      const { data, error } = await supabase.functions.invoke('generate-comparison-pages', {
+        body: {
+          vendor1,
+          vendor2
+        }
+      });
+
+      if (error) {
+        console.error('❌ [Frontend] Edge function error:', error);
+        throw new Error(error.message || 'Failed to generate comparison');
+      }
+
+      console.log('📥 [Frontend] Edge function response:', data);
+      
+      // Parse the generated text to check company names
+      try {
+        const parsedResponse = JSON.parse(data.generatedText);
+        console.log('🔍 [Frontend] Parsed response structure:', {
+          hasComparison: !!parsedResponse.comparison,
+          hasCompanies: !!parsedResponse.companies,
+          companiesCount: parsedResponse.companies?.length,
+          company1Name: parsedResponse.companies?.[0]?.name,
+          company2Name: parsedResponse.companies?.[1]?.name,
+          comparisonTitle: parsedResponse.comparison?.title
+        });
+      } catch (parseError) {
+        console.error('❌ [Frontend] Failed to parse response:', parseError);
+        console.log('🔍 [Frontend] Raw response:', data.generatedText);
+      }
+      
+      return data;
     },
   });
 };

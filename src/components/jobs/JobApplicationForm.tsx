@@ -22,6 +22,7 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
     job_description: initialData?.job_description || "",
     job_description_link: initialData?.job_description_link || "",
     resume_link: initialData?.resume_link || "",
+    cover_letter_link: initialData?.cover_letter_link || "",
     attachment_url: initialData?.attachment_url || "",
     attachment_filename: initialData?.attachment_filename || "",
     attachment_type: initialData?.attachment_type || "",
@@ -29,6 +30,7 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedResume, setSelectedResume] = useState<File | null>(null);
+  const [selectedCoverLetter, setSelectedCoverLetter] = useState<File | null>(null);
   const { uploadFile, uploading } = useFileUpload({ 
     bucket: 'job-applications', 
     folder: 'job-applications' 
@@ -45,6 +47,14 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
         const resumeUrl = await uploadFile(selectedResume);
         if (resumeUrl) {
           finalFormData.resume_link = resumeUrl;
+        }
+      }
+
+      // Upload cover letter PDF if selected
+      if (selectedCoverLetter) {
+        const coverLetterUrl = await uploadFile(selectedCoverLetter);
+        if (coverLetterUrl) {
+          finalFormData.cover_letter_link = coverLetterUrl;
         }
       }
 
@@ -134,6 +144,26 @@ export function JobApplicationForm({ onSubmit, initialData, isLoading, onCancel 
             maxSize={10}
             label="Upload Resume PDF"
             description="Upload your resume as a PDF file"
+            preview={false}
+          />
+
+          <div className="space-y-2">
+            <Label htmlFor="cover_letter_link">Cover Letter Link</Label>
+            <Input
+              id="cover_letter_link"
+              type="url"
+              value={formData.cover_letter_link}
+              onChange={(e) => handleChange("cover_letter_link", e.target.value)}
+              placeholder="https://example.com/your-cover-letter.pdf"
+            />
+          </div>
+
+          <FileUpload
+            onFileSelect={setSelectedCoverLetter}
+            accept="application/pdf"
+            maxSize={10}
+            label="Upload Cover Letter PDF"
+            description="Upload your cover letter as a PDF file"
             preview={false}
           />
 

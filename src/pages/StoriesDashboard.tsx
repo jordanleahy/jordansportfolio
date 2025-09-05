@@ -505,7 +505,7 @@ export default function StoriesDashboard() {
       const {
         data,
         error
-      } = await supabase.functions.invoke('create-theme', {
+      } = await supabase.functions.invoke('manage-theme-lifecycle', {
         body: {
           action: 'create',
           description: themeDescription

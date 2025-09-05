@@ -142,8 +142,8 @@ export const useOptimizedImageGeneration = () => {
       
       const imageStart = Date.now();
       
-      // Use the main image generation function
-      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image-gpt', {
+      // Generate image with optimized function
+      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image-gpt-optimized', {
         body: {
           prompt: prompt,
           aspectRatio: '1:1',

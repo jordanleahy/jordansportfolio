@@ -5,6 +5,7 @@ export interface JobApplication {
   job_description: string;
   job_description_link?: string;
   resume_link?: string;
+  cover_letter_link?: string;
   resume_text?: string;
   attachment_url?: string;
   attachment_filename?: string;
@@ -19,6 +20,7 @@ export interface JobApplicationInput {
   job_description: string;
   job_description_link?: string;
   resume_link?: string;
+  cover_letter_link?: string;
   resume_text?: string;
   attachment_url?: string;
   attachment_filename?: string;

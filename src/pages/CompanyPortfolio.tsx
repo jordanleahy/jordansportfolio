@@ -4,7 +4,7 @@ import { useCompanyPortfolio } from "@/hooks/useCompanyPortfolios";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import PublicPortfolioView from "@/components/portfolio/PublicPortfolioView";
-
+import CoverLetterPortfolioView from "@/components/portfolio/CoverLetterPortfolioView";
 import { PageLayout } from "@/components/layout/PageLayout";
 
 const CompanyPortfolio = () => {
@@ -81,7 +81,7 @@ const CompanyPortfolio = () => {
 
   return (
     <PageLayout>
-      <PublicPortfolioView portfolio={portfolio} />
+      <CoverLetterPortfolioView portfolio={portfolio} />
     </PageLayout>
   );
 };
