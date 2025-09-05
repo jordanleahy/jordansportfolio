@@ -180,7 +180,7 @@ const AICityPlanner: React.FC = () => {
           <div className="max-w-4xl mx-auto space-y-8">
             
             {/* Input Section - Hide when processing starts */}
-            {!currentRecord && (
+            {!currentRecord && !isProcessing && (
               <Card className="bg-card border-border">
                 <CardContent className="p-6 space-y-6">
                   
