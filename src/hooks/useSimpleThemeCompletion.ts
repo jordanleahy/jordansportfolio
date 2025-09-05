@@ -35,8 +35,14 @@ export const useSimpleThemeCompletion = (
           .eq('id', themeId)
           .maybeSingle();
 
-        if (error || !data) {
-          console.error('Error checking theme completion:', error);
+        if (error) {
+          console.error('Error checking theme completion:', error?.message || 'Unknown error');
+          // Don't throw - just return gracefully to prevent cascade failures
+          return;
+        }
+
+        if (!data) {
+          console.warn('No theme data found for ID:', themeId);
           return;
         }
 
