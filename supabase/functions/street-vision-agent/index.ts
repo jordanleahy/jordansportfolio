@@ -185,7 +185,7 @@ serve(async (req)=>{
       original_filename: originalFilename,
       status: 'pending',
       prompt_model: 'gpt-5-2025-08-07',
-      image_model: 'gpt-image-1'
+      image_model: 'gemini-2.5-flash-image-preview'
     }).select().single();
     if (insertError || !record) {
       console.error('Database insert error:', insertError);
