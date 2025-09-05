@@ -20,7 +20,11 @@ export const useSystemPromptCache = (themeId?: string) => {
   const query = useQuery({
     queryKey: ['system-prompt-cached', themeId],
     queryFn: async (): Promise<SystemPromptData | null> => {
-      if (!themeId) return null;
+      console.log('🔍 [useSystemPromptCache] Query function called with themeId:', themeId);
+      if (!themeId) {
+        console.log('❌ [useSystemPromptCache] No themeId provided, returning null');
+        return null;
+      }
 
       try {
         const { data: { user } } = await supabase.auth.getUser();

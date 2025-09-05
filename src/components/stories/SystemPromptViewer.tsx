@@ -30,6 +30,7 @@ export const SystemPromptViewer = ({
   themes = [],
   onThemeChange
 }: SystemPromptViewerProps) => {
+  console.log('🎯 [SystemPromptViewer] Rendered with themeId:', themeId, 'isVisible:', isVisible);
   const isMobile = useIsMobile();
   const { user } = useAuth();
   const [showDiff, setShowDiff] = useState(false);
@@ -51,6 +52,14 @@ export const SystemPromptViewer = ({
     isRegenerating,
     invalidateCache
   } = useSystemPromptCache(themeId);
+  
+  console.log('📊 [SystemPromptViewer] Hook data:', {
+    themeId,
+    hasData: !!promptData,
+    isLoading,
+    isRegenerating,
+    isVisible
+  });
 
   // Use realtime system prompts
   const { isConnected } = useUnifiedRealtime({
