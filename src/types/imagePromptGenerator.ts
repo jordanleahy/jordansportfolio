@@ -8,7 +8,7 @@ export interface AspectRatioOption {
 export interface ImagePromptConfig {
   title: string;
   systemPrompt: string;
-  edgeFunction: 'generate-content' | 'create-single-image-prompt' | 'generate-hero-job-visual' | 'generate-job-context-visual';
+  edgeFunction: 'create-single-image-prompt' | 'generate-job-context-visual';
   theme?: string;
   themeId?: string;
   category?: string;
