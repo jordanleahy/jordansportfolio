@@ -47,6 +47,7 @@ export default function StoriesDashboard() {
     user,
     loading,
     isAdmin,
+    role,
     roleLoading
   } = useAuth();
   
@@ -674,30 +675,44 @@ export default function StoriesDashboard() {
             </div>
             
             <div className="w-full max-w-7xl mx-auto">
-              <TypewriterInput 
-                typewriterTexts={[
-                  "patient education for diabetes",
-                  "patient education for sepsis", 
-                  "patient education for UTI",
-                  "patient education for resp failure",
-                  "patient education for heart attack"
-                ]}
-                fallbackPlaceholder="Describe your theme..." 
-                className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
-                value={customThemeDescription} 
-                onChange={e => setCustomThemeDescription(e.target.value)} 
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && customThemeDescription.trim()) {
-                    try {
-                      localStorage.setItem('stories_hero_seen', '1');
-                    } catch {}
-                    setShowHero(false);
-                  }
-                }} 
-                typingSpeed={60}
-                deletingSpeed={30}
-                pauseDuration={1500}
-              />
+              {role === 'user' ? (
+                <div className="space-y-3">
+                  <div className="w-full h-16 px-8 py-6 text-lg bg-muted/50 backdrop-blur-sm border-2 border-border/30 rounded-3xl flex items-center text-muted-foreground/60 cursor-not-allowed">
+                    Describe your theme...
+                  </div>
+                  <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    </div>
+                    Down for maintenance
+                  </div>
+                </div>
+              ) : (
+                <TypewriterInput 
+                  typewriterTexts={[
+                    "patient education for diabetes",
+                    "patient education for sepsis", 
+                    "patient education for UTI",
+                    "patient education for resp failure",
+                    "patient education for heart attack"
+                  ]}
+                  fallbackPlaceholder="Describe your theme..." 
+                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
+                  value={customThemeDescription} 
+                  onChange={e => setCustomThemeDescription(e.target.value)} 
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && customThemeDescription.trim()) {
+                      try {
+                        localStorage.setItem('stories_hero_seen', '1');
+                      } catch {}
+                      setShowHero(false);
+                    }
+                  }} 
+                  typingSpeed={60}
+                  deletingSpeed={30}
+                  pauseDuration={1500}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -731,31 +746,48 @@ export default function StoriesDashboard() {
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">Instant Infographics</h1>
               <p className="text-base md:text-xl text-foreground font-semibold">Prompt Your Visualization</p>
               <div className="w-full text-center">
-                <TypewriterInput 
-                  aria-label="Describe your theme" 
-                  typewriterTexts={[
-                    "patient education for diabetes",
-                    "patient education for sepsis", 
-                    "patient education for UTI",
-                    "patient education for resp failure",
-                    "patient education for heart attack"
-                  ]}
-                  fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
-                  value={customThemeDescription} 
-                  onChange={e => setCustomThemeDescription(e.target.value)} 
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
-                      console.log('⌨️ Enter key pressed - triggering theme generation');
-                      e.preventDefault();
-                      handleGenerateCustomTheme();
-                    }
-                  }}
-                  disabled={isGeneratingTheme} 
-                  typingSpeed={80}
-                  deletingSpeed={40}
-                  pauseDuration={2000}
-                />
+                {role === 'user' ? (
+                  <div className="space-y-3">
+                    <div 
+                      aria-label="Theme input disabled for maintenance"
+                      className="w-full h-16 px-8 py-6 text-lg bg-muted/50 backdrop-blur-sm border-2 border-border/30 rounded-3xl flex items-center text-muted-foreground/60 cursor-not-allowed"
+                    >
+                      Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')
+                    </div>
+                    <div className="text-center text-sm text-muted-foreground flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 rounded-full bg-amber-500/20 flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      </div>
+                      Down for maintenance
+                    </div>
+                  </div>
+                ) : (
+                  <TypewriterInput 
+                    aria-label="Describe your theme" 
+                    typewriterTexts={[
+                      "patient education for diabetes",
+                      "patient education for sepsis", 
+                      "patient education for UTI",
+                      "patient education for resp failure",
+                      "patient education for heart attack"
+                    ]}
+                    fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
+                    className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
+                    value={customThemeDescription} 
+                    onChange={e => setCustomThemeDescription(e.target.value)} 
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
+                        console.log('⌨️ Enter key pressed - triggering theme generation');
+                        e.preventDefault();
+                        handleGenerateCustomTheme();
+                      }
+                    }}
+                    disabled={isGeneratingTheme} 
+                    typingSpeed={80}
+                    deletingSpeed={40}
+                    pauseDuration={2000}
+                  />
+                )}
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>
