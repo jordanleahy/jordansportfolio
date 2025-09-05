@@ -100,7 +100,6 @@ export const EDGE_FUNCTIONS = {
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
   PROCESS_FUNDING_JSON: 'process-funding-json',
   PROCESS_INVESTOR_JSON: 'process-investor-json',
-  COVER_LETTER_AGENT: 'cover-letter-agent',
 } as const;
 
 // Content Configuration

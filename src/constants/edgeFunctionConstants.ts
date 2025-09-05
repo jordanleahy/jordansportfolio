@@ -8,7 +8,6 @@ export const EDGE_FUNCTION_NAMES = {
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
   PROCESS_FUNDING_JSON: 'process-funding-json',
   PROCESS_INVESTOR_JSON: 'process-investor-json',
-  COVER_LETTER_AGENT: 'cover-letter-agent',
   STREET_VISION_AGENT: 'street-vision-agent',
   
 } as const;

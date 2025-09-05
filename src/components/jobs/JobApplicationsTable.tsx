@@ -191,23 +191,10 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                     </a>
                   </Button>
                 ) : null}
-                {application.cover_letter_link ? (
-                  <Button variant="outline" size="sm" asChild>
-                    <a 
-                      href={application.cover_letter_link} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      Cover Letter
-                    </a>
-                  </Button>
-                ) : null}
                 {application.attachment_url ? (
                   <Button variant="outline" size="sm" asChild>
                     <a 
-                      href={application.attachment_url} 
+                      href={application.attachment_url}
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center gap-1"
@@ -336,7 +323,6 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
               <TableHead>Job Description</TableHead>
               <TableHead>Job Link</TableHead>
               <TableHead>Resume</TableHead>
-              <TableHead>Cover Letter</TableHead>
               <TableHead>Attachment</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Submitted</TableHead>
@@ -399,28 +385,6 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                   )}
                 </TableCell>
                 <TableCell>
-                  {application.cover_letter_link ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      asChild
-                      className="p-1 h-auto"
-                    >
-                      <a 
-                        href={application.cover_letter_link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        <span className="sr-only">View Cover Letter</span>
-                      </a>
-                    </Button>
-                  ) : (
-                    <Badge variant="secondary">No link</Badge>
-                  )}
-                </TableCell>
-                <TableCell>
                   {application.attachment_url ? (
                     <Button
                       variant="ghost"
@@ -429,7 +393,7 @@ export function JobApplicationsTable({ applications, onEdit, onDelete, isDeletin
                       className="p-1 h-auto"
                     >
                       <a 
-                        href={application.attachment_url} 
+                        href={application.attachment_url}
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="flex items-center gap-1"

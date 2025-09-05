@@ -56,9 +56,8 @@ export const useCompanyPortfolio = (companySlug: string) => {
           job_description: string; 
           job_description_link?: string; 
           resume_link?: string; 
-          cover_letter_link?: string; 
           created_at: string; 
-        }; 
+        };
       };
     },
     enabled: !!companySlug,

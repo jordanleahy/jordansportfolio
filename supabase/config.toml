@@ -39,9 +39,6 @@ verify_jwt = true
 [functions.process-investor-json]
 verify_jwt = true
 
-[functions.cover-letter-agent]
-verify_jwt = true
-
 [functions.create-theme-system-prompt]
 verify_jwt = true
 
