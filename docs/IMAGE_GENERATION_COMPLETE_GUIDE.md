@@ -47,7 +47,7 @@ graph TB
     
     subgraph "Edge Functions Layer"
         EF1[generate-image-gpt] --> EF2[generate-all-images-optimized]
-        EF3[visual-prompt-generator] --> EF4[invoke-system-prompt-agent]
+        EF3[visual-prompt-generator] --> EF4[create-theme-system-prompt]
         EF5[generate-image-with-concurrency-control] --> EF6[user-idea-streaming-image-pipeline]
         EF7[check-usage-limits] --> EF8[send-usage-alert]
     end
@@ -398,7 +398,7 @@ The system prompts infrastructure uses these tables:
 | Function | Purpose | Input | Output | Security Level |
 |----------|---------|--------|--------|----------------|
 | `visual-prompt-generator` | Image prompt creation | Content, theme, config | Optimized prompt | JWT Required |
-| `invoke-system-prompt-agent` | System prompt routing | Category, context | System prompt | JWT Required |
+| `create-theme-system-prompt` | System prompt routing | Category, context | System prompt | JWT Required |
 
 ### Utility Functions
 
@@ -1687,7 +1687,7 @@ file_size_limit = "50MiB"
 - `supabase/functions/generate-image-with-concurrency-control/`
 - `supabase/functions/generate-all-images-optimized/`
 - `supabase/functions/user-idea-streaming-image-pipeline/`
-- `supabase/functions/invoke-system-prompt-agent/`
+- `supabase/functions/create-theme-system-prompt/`
 - `supabase/functions/check-usage-limits/`
 - `supabase/functions/get-usage-summary/`
 - `supabase/functions/send-usage-alert/`
