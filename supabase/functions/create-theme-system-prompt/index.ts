@@ -531,6 +531,28 @@ Generate the complete system prompt with ALL placeholders replaced with specific
             console.error('Theme update error:', themeUpdateError);
           } else {
             console.log('Successfully linked system prompt to theme');
+            
+            // ✅ HYBRID SOLUTION: Call ensure-post-image-prompts to generate individual post prompts
+            try {
+              console.log('🔄 Triggering ensure-post-image-prompts for theme:', theme_id);
+              const { data: ensurePromptsData, error: ensurePromptsError } = await supabase.functions.invoke('ensure-post-image-prompts', {
+                body: { 
+                  category: contextCategory,
+                  userId: user_id,
+                  themeId: theme_id
+                }
+              });
+
+              if (ensurePromptsError) {
+                console.error('❌ ensure-post-image-prompts failed:', ensurePromptsError);
+                // Don't fail the main system prompt generation
+              } else {
+                console.log('✅ ensure-post-image-prompts completed successfully:', ensurePromptsData);
+              }
+            } catch (ensureError) {
+              console.error('❌ ensure-post-image-prompts error:', ensureError);
+              // Don't fail the main system prompt generation
+            }
           }
         }
 

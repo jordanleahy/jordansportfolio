@@ -105,18 +105,20 @@ serve(async (req) => {
     }
 
     if (!posts || posts.length === 0) {
-      console.log('✅ NO POSTS NEED PROMPTS: All posts already have image prompts');
+      console.log('✅ NO POSTS NEED PROMPTS: All posts already have image prompts (HYBRID SOLUTION: Duplicate protection active)');
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'No posts need image prompts',
-          processed: 0 
+          message: 'No posts need image prompts - duplicate protection active',
+          processed: 0,
+          duplicateProtection: true
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`📊 FOUND ${posts.length} POSTS: Need image prompt generation`);
+    console.log(`📊 FOUND ${posts.length} POSTS: Need image prompt generation (HYBRID SOLUTION: Processing remaining posts)`);
+    
     
     // Log details about posts found
     posts.forEach((post, index) => {
