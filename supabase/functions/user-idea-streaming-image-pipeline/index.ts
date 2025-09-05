@@ -718,7 +718,28 @@ serve(async (req) => {
               data: { status: 'Generating AI system prompts...' }
             });
 
-    // System prompt generation is handled by external utilities
+            // Call create-theme-system-prompt edge function
+            try {
+              console.log('🚀 Calling create-theme-system-prompt edge function');
+              const { data: systemPromptData, error: systemPromptError } = await supabase.functions.invoke('create-theme-system-prompt', {
+                body: { 
+                  theme: themeData.theme, 
+                  category: themeData.category, 
+                  theme_id: themeId,
+                  user_id: userId 
+                }
+              });
+
+              if (systemPromptError) {
+                console.error('❌ System prompt generation failed:', systemPromptError);
+                // Don't fail the whole pipeline, just log the error
+              } else {
+                console.log('✅ System prompt generation completed successfully');
+              }
+            } catch (systemPromptErr) {
+              console.error('❌ System prompt generation error:', systemPromptErr);
+              // Don't fail the whole pipeline, just log the error
+            }
             
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
@@ -784,7 +805,27 @@ serve(async (req) => {
       }
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
       const themeId = createdThemeId;
-    // System prompt generation is handled by external utilities
+      
+      // Call create-theme-system-prompt edge function for non-streaming mode
+      try {
+        console.log('🚀 Calling create-theme-system-prompt edge function (non-streaming)');
+        const { data: systemPromptData, error: systemPromptError } = await supabase.functions.invoke('create-theme-system-prompt', {
+          body: { 
+            theme: themeData.theme, 
+            category: themeData.category, 
+            theme_id: themeId,
+            user_id: userId 
+          }
+        });
+
+        if (systemPromptError) {
+          console.error('❌ System prompt generation failed:', systemPromptError);
+        } else {
+          console.log('✅ System prompt generation completed successfully');
+        }
+      } catch (systemPromptErr) {
+        console.error('❌ System prompt generation error:', systemPromptErr);
+      }
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,
