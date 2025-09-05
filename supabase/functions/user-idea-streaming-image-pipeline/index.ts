@@ -103,6 +103,31 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
+
+// Helper function to handle system prompt generation (DRY principle)
+async function handleSystemPromptGeneration(supabase: any, themeData: any, themeId: string, userId: string) {
+  try {
+    console.log('🚀 Calling create-theme-system-prompt edge function');
+    const { data: systemPromptData, error: systemPromptError } = await supabase.functions.invoke('create-theme-system-prompt', {
+      body: { 
+        theme: themeData.theme, 
+        category: themeData.category, 
+        theme_id: themeId,
+        user_id: userId 
+      }
+    });
+
+    if (systemPromptError) {
+      console.error('❌ System prompt generation failed:', systemPromptError);
+      // Don't fail the whole pipeline, just log the error
+    } else {
+      console.log('✅ System prompt generation completed successfully');
+    }
+  } catch (systemPromptErr) {
+    console.error('❌ System prompt generation error:', systemPromptErr);
+    // Don't fail the whole pipeline, just log the error
+  }
+}
 import { UserIdeaRequest, ThemeData, ThemePost, SupabaseClient } from '../_shared/types.ts';
 import { streamingCorsHeaders, updateThemeImageStatus, sendStreamEvent } from '../_shared/utils.ts';
 import { OPENAI_CONFIG } from '../_shared/config.ts';
@@ -719,27 +744,7 @@ serve(async (req) => {
             });
 
             // Call create-theme-system-prompt edge function
-            try {
-              console.log('🚀 Calling create-theme-system-prompt edge function');
-              const { data: systemPromptData, error: systemPromptError } = await supabase.functions.invoke('create-theme-system-prompt', {
-                body: { 
-                  theme: themeData.theme, 
-                  category: themeData.category, 
-                  theme_id: themeId,
-                  user_id: userId 
-                }
-              });
-
-              if (systemPromptError) {
-                console.error('❌ System prompt generation failed:', systemPromptError);
-                // Don't fail the whole pipeline, just log the error
-              } else {
-                console.log('✅ System prompt generation completed successfully');
-              }
-            } catch (systemPromptErr) {
-              console.error('❌ System prompt generation error:', systemPromptErr);
-              // Don't fail the whole pipeline, just log the error
-            }
+            await handleSystemPromptGeneration(supabase, themeData, themeId, userId);
             
             sendStreamEvent(controller, {
               type: 'system_prompt_complete',
@@ -806,26 +811,8 @@ serve(async (req) => {
       const { insertedCount, createdThemeId } = await importThemeToDatabase(supabase, themeData, userId);
       const themeId = createdThemeId;
       
-      // Call create-theme-system-prompt edge function for non-streaming mode
-      try {
-        console.log('🚀 Calling create-theme-system-prompt edge function (non-streaming)');
-        const { data: systemPromptData, error: systemPromptError } = await supabase.functions.invoke('create-theme-system-prompt', {
-          body: { 
-            theme: themeData.theme, 
-            category: themeData.category, 
-            theme_id: themeId,
-            user_id: userId 
-          }
-        });
-
-        if (systemPromptError) {
-          console.error('❌ System prompt generation failed:', systemPromptError);
-        } else {
-          console.log('✅ System prompt generation completed successfully');
-        }
-      } catch (systemPromptErr) {
-        console.error('❌ System prompt generation error:', systemPromptErr);
-      }
+      // Call create-theme-system-prompt edge function  
+      await handleSystemPromptGeneration(supabase, themeData, themeId, userId);
 
       logger.performance('Total request', Date.now() - requestStart, {
         theme: themeData.theme,
