@@ -119,39 +119,54 @@ serve(async (req) => {
         correlationId
       });
 
-      // Import the structured theme data into the database
-      const { data: importResult, error: importError } = await supabase.functions.invoke(
-        'import-theme-with-transaction',
-        {
-          body: {
-            user_id: user.id,
-            idempotency_key: `lifecycle-${correlationId}`,
-            category: themeData.data.category,
-            theme: themeData.data.theme,
-            theme_description: themeData.data.theme_description,
-            posts_data: themeData.data.posts
-          },
-          headers: {
-            Authorization: authHeader,
-          }
-        }
-      );
+      // Import the structured theme data into the database using RPC
+      const { data: importResult, error: importError } = await supabase
+        .rpc('import_theme_with_transaction', {
+          p_user_id: user.id,
+          p_idempotency_key: `lifecycle-${correlationId}`,
+          p_category: themeData.data.category,
+          p_theme: themeData.data.theme,
+          p_theme_description: themeData.data.theme_description,
+          p_posts_data: themeData.data.posts
+        });
 
-      if (importError || !importResult?.success) {
+      if (importError || !importResult?.[0]?.success) {
         console.error(`❌ [CREATE] Theme import failed`, {
           importError,
           importResult,
           correlationId
         });
-        throw new Error(importResult?.error_message || 'Failed to import theme');
+        throw new Error(importResult?.[0]?.error_message || 'Failed to import theme');
       }
 
       console.log(`✅ [CREATE] Theme imported successfully`, {
-        themeId: importResult.submission_id,
+        themeId: importResult[0].submission_id,
+        insertedCount: importResult[0].inserted_count,
         correlationId
       });
 
-      const themeId = importResult.submission_id;
+      const themeId = importResult[0].submission_id;
+
+      // Get the actual theme ID from the submission
+      const { data: themeRecord, error: themeError } = await supabase
+        .from('themes')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', themeData.data.theme)
+        .eq('category', themeData.data.category)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (themeError) {
+        console.error(`❌ [THEME] Failed to retrieve theme ID`, {
+          themeError,
+          correlationId
+        });
+        throw new Error('Failed to retrieve created theme');
+      }
+
+      const actualThemeId = themeRecord.id;
 
       // Initial status update - triggers will handle the rest automatically
       const { error: updateError } = await supabase
@@ -161,7 +176,7 @@ serve(async (req) => {
           user_interaction_required: true,
           background_processing_complete: false
         })
-        .eq('id', themeId);
+        .eq('id', actualThemeId);
 
       if (updateError) {
         console.error(`❌ [UPDATE] Failed to update theme lifecycle`, {
@@ -173,12 +188,13 @@ serve(async (req) => {
       // Start background processing (simplified - no polling needed)
       console.log(`🔵 [BACKGROUND] Starting background processing`, {
         userId: user.id,
+        themeId: actualThemeId,
         correlationId
       });
 
       const response = {
         success: true,
-        theme_id: themeId,
+        theme_id: actualThemeId,
         lifecycle_status: 'generating',
         message: 'Theme created and background processing started',
         correlationId
