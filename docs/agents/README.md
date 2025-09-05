@@ -17,7 +17,7 @@ graph TB
     end
     
     subgraph "Core Agents"
-        SPA[System Prompt Agent] --> VPG[Visual Prompt Generator]
+        SPA[System Prompt Agent] --> SIPG[Single Image Prompt Generator]
         SPA --> BCG[Blog Content Generator] 
         SPA --> CLG[Cover Letter Generator]
         SPA --> CTP[Calendar Theme Processor]
