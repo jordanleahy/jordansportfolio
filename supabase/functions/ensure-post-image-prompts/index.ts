@@ -176,7 +176,7 @@ serve(async (req) => {
       let errorCount = 0;
       const results = [];
       const BATCH_SIZE = 3; // Reduced from 7 to 3 posts per batch for better reliability
-      const BATCH_DELAY_MS = 2000; // Increased to 2000ms for more breathing room
+      const BATCH_DELAY_MS = 0; // No delay between batches for faster processing
 
       console.log(`🔄 BACKGROUND: Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);
 
@@ -298,8 +298,8 @@ serve(async (req) => {
           const successfulInBatch = batchResults.filter(r => r.status === 'fulfilled' && r.value?.success).length;
           console.log(`✅ BACKGROUND BATCH ${batchNum}/${totalBatches} completed: ${successfulInBatch}/${batch.length} successful`);
 
-          // Add longer delay between batches for better system stability
-          if (i + BATCH_SIZE < posts.length) {
+          // Process next batch immediately for faster completion
+          if (i + BATCH_SIZE < posts.length && BATCH_DELAY_MS > 0) {
             console.log(`⏱️ BACKGROUND: Waiting ${BATCH_DELAY_MS}ms before next batch...`);
             await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
           }
@@ -341,7 +341,7 @@ serve(async (req) => {
         status: 'processing',
         optimizations: {
           batchSize: 3,
-          batchDelay: '2000ms',
+          batchDelay: '0ms',
           backgroundProcessing: true,
           earlyResponse: true
         }
