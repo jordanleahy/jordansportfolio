@@ -1,3 +1,108 @@
+/**
+ * ==============================================================================
+ * MANAGE THEME LIFECYCLE - Supabase Edge Function
+ * ==============================================================================
+ * 
+ * This Edge Function orchestrates the complete lifecycle management of content themes.
+ * It handles theme creation from user descriptions, lifecycle status updates, and 
+ * status monitoring throughout the theme generation pipeline.
+ * 
+ * OVERVIEW:
+ * ---------
+ * This function serves as the main orchestrator for theme management, coordinating
+ * between multiple services to transform user descriptions into structured themes
+ * with associated social media posts.
+ * 
+ * SUPPORTED ACTIONS:
+ * ------------------
+ * 
+ * 1. CREATE - Complete theme creation pipeline
+ *    • Takes a user description (e.g., "Top 5 concepts from Good to Great book")
+ *    • Calls structure-theme-input to convert text into structured JSON
+ *    • Imports structured data into database via import_theme_with_transaction RPC
+ *    • Sets initial lifecycle status and triggers background processing
+ *    • Returns theme_id for client-side tracking
+ * 
+ * 2. COMPLETE - Mark theme as user-completed
+ *    • Updates theme lifecycle_status to 'completed'
+ *    • Sets background_processing_complete to true
+ *    • Removes user_interaction_required flag
+ * 
+ * 3. STATUS - Query current theme status
+ *    • Returns current lifecycle_status, prompt_generation_status
+ *    • Shows user_interaction_required and background_processing_complete flags
+ *    • Used for real-time UI updates and progress tracking
+ * 
+ * REQUEST FORMAT:
+ * ---------------
+ * POST /functions/v1/manage-theme-lifecycle
+ * Content-Type: application/json
+ * Authorization: Bearer <jwt_token>
+ * 
+ * {
+ *   "action": "create" | "complete" | "status",
+ *   "description": "string (required for 'create')",
+ *   "themeId": "uuid (required for 'complete', 'status')"
+ * }
+ * 
+ * RESPONSE FORMAT:
+ * ----------------
+ * Success (200):
+ * {
+ *   "success": true,
+ *   "theme_id": "uuid",
+ *   "lifecycle_status": "pending" | "generating" | "completed",
+ *   "message": "string",
+ *   "correlationId": "string"
+ * }
+ * 
+ * Error (400):
+ * {
+ *   "success": false,
+ *   "error": "string",
+ *   "correlationId": "string"
+ * }
+ * 
+ * THEME CREATION WORKFLOW:
+ * ------------------------
+ * 1. User Authentication - Validates JWT token
+ * 2. Structure Input - Calls structure-theme-input to parse description
+ * 3. Data Import - Uses import_theme_with_transaction RPC to create theme & posts
+ * 4. Theme ID Resolution - Queries database for the actual theme UUID
+ * 5. Status Initialization - Sets lifecycle_status to 'pending'
+ * 6. Response - Returns theme_id for client tracking
+ * 
+ * LIFECYCLE STATES:
+ * -----------------
+ * • pending - Theme created, awaiting background processing
+ * • generating - Background processes (prompts, images) in progress
+ * • completed - All processing finished, theme ready for use
+ * 
+ * DEPENDENCIES:
+ * -------------
+ * • structure-theme-input - Edge function for parsing user text into structured JSON
+ * • import_theme_with_transaction - Database RPC function for atomic data import
+ * • Database triggers - Auto-update lifecycle status based on prompt completion
+ * 
+ * ERROR HANDLING:
+ * ---------------
+ * • Comprehensive logging with correlation IDs for tracing
+ * • Graceful error responses with meaningful messages
+ * • Atomic operations to prevent partial state corruption
+ * • Proper cleanup of failed operations
+ * 
+ * SECURITY:
+ * ---------
+ * • JWT authentication required for all operations
+ * • User can only access their own themes (enforced by user_id checks)
+ * • Service role key used for elevated database operations
+ * • CORS headers configured for browser compatibility
+ * 
+ * @author AI Content System
+ * @version 2.0
+ * @since 2025-09-05
+ */
+
 import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
