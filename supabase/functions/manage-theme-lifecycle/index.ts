@@ -85,13 +85,14 @@ serve(async (req) => {
         correlationId
       });
       
-      // Call the existing theme generation function
+      // Use manage-theme-lifecycle function for theme creation
       const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        'user-idea-streaming-image-pipeline',
+        'manage-theme-lifecycle',
         {
           body: {
+            action: 'create',
             description: body.description,
-            stream: false
+            userId: user?.id
           },
           headers: {
             Authorization: authHeader,

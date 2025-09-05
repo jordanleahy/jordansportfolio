@@ -31,37 +31,8 @@ export const useStreamlinedThemeImport = (options: UseStreamlinedThemeImportOpti
         timestamp: new Date().toISOString()
       });
       
-      // Call the combined edge function
-      console.log('📡 CALLING: process-and-import-theme edge function');
-      const response = await supabase.functions.invoke('process-and-import-theme', {
-        body: { 
-          rawJson: JSON.parse(rawJson),
-          idempotencyKey
-        }
-      });
-
-      console.log('📡 EDGE FUNCTION RESPONSE:', {
-        hasError: !!response.error,
-        hasData: !!response.data,
-        errorMessage: response.error?.message,
-        idempotencyKey: response.data?.idempotencyKey,
-        themeId: response.data?.themeId
-      });
-
-      if (response.error) {
-        console.error('❌ EDGE FUNCTION ERROR:', response.error);
-        throw new Error(response.error.message);
-      }
-
-      console.log('✅ EDGE FUNCTION SUCCESS:', {
-        success: response.data?.success,
-        insertedCount: response.data?.insertedCount,
-        category: response.data?.data?.category,
-        idempotencyKey: response.data?.idempotencyKey,
-        themeId: response.data?.themeId
-      });
-
-      return { ...response.data, categoryName };
+      // Function deleted - return error for now  
+      throw new Error('Streamlined theme import feature is temporarily disabled');
     },
     onSuccess: (result) => {
       console.log('✅ MUTATION SUCCESS:', {

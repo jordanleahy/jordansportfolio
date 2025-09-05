@@ -174,14 +174,8 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
           .eq('id', postId);
       }
 
-      // Trigger background processing (kept for parity with backend workflows)
-      await supabase.functions.invoke('process-uploaded-images', {
-        body: {
-          imageUrl: urlData.publicUrl,
-          postId,
-          aspectRatio
-        }
-      });
+      // Background processing removed - function deleted
+      console.log('📁 Image uploaded successfully to:', urlData.publicUrl);
 
       toast.success('Image generated successfully!');
       debouncedOnPostsChange();

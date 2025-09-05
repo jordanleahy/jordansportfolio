@@ -90,27 +90,17 @@ export const API_ENDPOINTS = {
   },
 } as const;
 
-// Edge Function Names
+// Edge Function Names - Core Functions Only
 export const EDGE_FUNCTIONS = {
   CREATE_THEME_SYSTEM_PROMPT: 'create-theme-system-prompt',
   CREATE_SINGLE_IMAGE_PROMPT: 'create-single-image-prompt',
   
-  USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
-  GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
-  GENERATE_CONTENT: 'generate-content',
-  
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
-  GENERATE_CUSTOM_THEME: 'generate-custom-theme',
-  GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',
   GENERATE_IMAGE_GPT: 'generate-image-gpt',
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
-  PROCESS_AND_IMPORT_THEME: 'process-and-import-theme',
   PROCESS_FUNDING_JSON: 'process-funding-json',
   PROCESS_INVESTOR_JSON: 'process-investor-json',
-  PROCESS_THEME_JSON: 'process-theme-json',
-  PROCESS_UPLOADED_IMAGES: 'process-uploaded-images',
   COVER_LETTER_AGENT: 'cover-letter-agent',
-  STREAMING_IMAGE_PIPELINE: 'streaming-image-pipeline',
 } as const;
 
 // Content Configuration
