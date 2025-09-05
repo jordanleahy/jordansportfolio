@@ -71,6 +71,7 @@ import CofactorProposal from "./pages/CofactorProposal";
 import { PixarConverter } from "./components/PixarConverter";
 
 const SeedAnalytics = lazy(() => import("./pages/admin/SeedAnalytics"));
+const AdminPrompts = lazy(() => import("./pages/admin/AdminPrompts"));
 import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/performance/SkeletonLoader";
 
 // Lazy load optimized components
