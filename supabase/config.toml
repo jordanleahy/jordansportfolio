@@ -64,7 +64,7 @@ verify_jwt = true
 [functions.cover-letter-agent]
 verify_jwt = true
 
-[functions.invoke-system-prompt-agent]
+[functions.create-theme-system-prompt]
 verify_jwt = true
 
 [functions.manage-subscription]

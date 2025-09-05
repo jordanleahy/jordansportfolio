@@ -185,7 +185,7 @@ async function getDefaultColorTheme(supabase: any): Promise<any> {
 
 
 serve(async (req) => {
-  console.log('invoke-system-prompt-agent function called');
+  console.log('create-theme-system-prompt function called');
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -572,7 +572,7 @@ Generate the complete system prompt with ALL placeholders replaced with specific
       });
     }
   } catch (error) {
-    console.error('Error in invoke-system-prompt-agent function:', error);
+    console.error('Error in create-theme-system-prompt function:', error);
     
     // Check if this is a timeout error and provide user-friendly message
     const isTimeoutError = error?.timeout || error?.userFriendlyMessage || error?.error?.message?.includes('timeout');

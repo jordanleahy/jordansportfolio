@@ -533,8 +533,8 @@ async function generateSystemPromptBackground(supabase: any, category: string, u
       return { success: true };
     }
 
-    console.log('🚀 INVOKING: invoke-system-prompt-agent edge function');
-    const invokeResult = await supabase.functions.invoke('invoke-system-prompt-agent', {
+    console.log('🚀 INVOKING: create-theme-system-prompt edge function');
+    const invokeResult = await supabase.functions.invoke('create-theme-system-prompt', {
       body: { 
         category: 'system_prompt_generation',
         theme: category,

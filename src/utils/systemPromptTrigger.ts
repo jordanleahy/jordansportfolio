@@ -86,7 +86,7 @@ export const triggerSystemPromptGeneration = async (category: string) => {
       return { success: false, error: 'User not authenticated' };
     }
     
-    console.log('🚀 STEP 4: Calling invoke-system-prompt-agent edge function');
+    console.log('🚀 STEP 4: Calling create-theme-system-prompt edge function');
     console.log('📋 EDGE FUNCTION PAYLOAD:', {
       category: 'system_prompt_generation',
       theme: category,
@@ -95,7 +95,7 @@ export const triggerSystemPromptGeneration = async (category: string) => {
       user_id: user.id
     });
     
-    const { data: invokeData, error: invokeError } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+    const { data: invokeData, error: invokeError } = await supabase.functions.invoke('create-theme-system-prompt', {
       body: {
         category: 'system_prompt_generation',
         theme: category,
@@ -166,7 +166,7 @@ export const triggerSystemPromptForNewTheme = async (themeId: string, themeName:
     console.log(`📝 Found ${posts.length} posts for category ${category}, generating system prompt...`);
 
     // Call the system prompt agent
-    const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+    const { data, error } = await supabase.functions.invoke('create-theme-system-prompt', {
       body: {
         category: 'system_prompt_generation',
         theme: themeName,

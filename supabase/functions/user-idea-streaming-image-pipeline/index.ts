@@ -367,7 +367,7 @@ const generateSystemPromptReactive = async (supabase: SupabaseClient, themeData:
   console.log('🚀 Triggering fire-and-forget system prompt generation');
   EdgeRuntime.waitUntil((async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+      const { data, error } = await supabase.functions.invoke('create-theme-system-prompt', {
         body: {
           theme: themeData.theme,
           category: themeData.category,

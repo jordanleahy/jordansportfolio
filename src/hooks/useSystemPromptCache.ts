@@ -169,7 +169,7 @@ export const useSystemPromptCache = (themeId?: string) => {
         throw new Error('Theme not found');
       }
 
-      const { data, error } = await supabase.functions.invoke('invoke-system-prompt-agent', {
+      const { data, error } = await supabase.functions.invoke('create-theme-system-prompt', {
         body: { 
           theme: themeData.theme_name, 
           category: themeData.category, 

@@ -1,6 +1,6 @@
 // Edge Function Names
 export const EDGE_FUNCTION_NAMES = {
-  INVOKE_SYSTEM_PROMPT_AGENT: 'invoke-system-prompt-agent',
+  CREATE_THEME_SYSTEM_PROMPT: 'create-theme-system-prompt',
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
   GENERATE_CONTENT: 'generate-content',
   VISUAL_PROMPT_GENERATOR: 'visual-prompt-generator',
