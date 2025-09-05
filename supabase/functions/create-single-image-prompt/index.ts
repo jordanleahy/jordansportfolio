@@ -357,12 +357,12 @@ Incorporate these characteristics naturally into the generated prompt while main
       hasReferenceAnalysis: !!referenceAnalysis,
       aspectRatio: requestedAspectRatio,
       tokenEstimate: Math.ceil((categoryPrompt.prompt.length + userMessage.length) / 4),
-      maxTokensAllowed: 8000
+      maxTokensAllowed: 4000
     });
 
     // Hardcoded single model configuration for testing
-    const model = 'gpt-5-2025-08-07';
-    const maxTokens = 8000;
+    const model = 'gpt-5-mini-2025-08-07';
+    const maxTokens = 4000;
     let generatedText: string | null = null;
     const usedModel = model;
 

@@ -175,7 +175,7 @@ serve(async (req) => {
       let successCount = 0;
       let errorCount = 0;
       const results = [];
-      const BATCH_SIZE = 3; // Reduced from 7 to 3 posts per batch for better reliability
+      const BATCH_SIZE = posts.length; // Process all posts in single batch for maximum speed
       const BATCH_DELAY_MS = 0; // No delay between batches for faster processing
 
       console.log(`🔄 BACKGROUND: Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);
@@ -340,7 +340,7 @@ serve(async (req) => {
         totalPosts: posts.length,
         status: 'processing',
         optimizations: {
-          batchSize: 3,
+          batchSize: posts.length,
           batchDelay: '0ms',
           backgroundProcessing: true,
           earlyResponse: true
