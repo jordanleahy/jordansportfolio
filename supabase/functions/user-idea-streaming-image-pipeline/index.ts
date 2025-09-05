@@ -278,15 +278,29 @@ const importThemeToDatabase = async (supabase: SupabaseClient, themeData: ThemeD
     console.log('✅ Created new theme:', themeId);
 
     // Import posts using direct insert instead of RPC to ensure proper authentication context
-    const postsToInsert = themeData.posts.map((post: ThemePost) => ({
-      day: post.day,
-      title: post.title,
-      description: post.description,
-      theme_id: themeId,
-      category: themeData.category,
-      user_id: userId,
-      status: 'draft' as const
-    }));
+    // Add defensive programming to ensure only expected fields are included
+    const postsToInsert = themeData.posts.map((post: ThemePost) => {
+      // Explicitly extract only the expected fields to prevent any extra fields from being inserted
+      const cleanPost = {
+        day: Number(post.day),
+        title: String(post.title || '').trim(),
+        description: String(post.description || '').trim(),
+        theme_id: themeId,
+        category: themeData.category,
+        user_id: userId,
+        status: 'draft' as const
+      };
+      
+      // Log any unexpected fields for debugging
+      const unexpectedFields = Object.keys(post).filter(key => 
+        !['day', 'title', 'description'].includes(key)
+      );
+      if (unexpectedFields.length > 0) {
+        console.warn('⚠️ Unexpected fields in post data:', unexpectedFields);
+      }
+      
+      return cleanPost;
+    });
 
     console.log(`📊 Inserting ${postsToInsert.length} posts for user ${userId}`);
     console.log('📝 Sample post data:', JSON.stringify(postsToInsert[0], null, 2));
