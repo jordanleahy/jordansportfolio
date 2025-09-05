@@ -173,7 +173,7 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
                       </div>
                     </div>
                   );
-                } else if (isProcessing || (record && record.status !== 'failed')) {
+                } else if (isProcessing || (record && ['pending', 'analyzing', 'generating'].includes(record.status))) {
                   console.log('Showing shimmer (loading state)');
                   return (
                     <SimpleShimmer 
