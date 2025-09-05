@@ -45,7 +45,7 @@ serve(async (req) => {
   const startTime = Date.now();
   let userId: string | null = null;
   const correlationId = generateCorrelationId();
-  const logger = createLogger({ functionName: 'visual-prompt-generator', correlationId });
+  const logger = createLogger({ functionName: 'create-single-image-prompt', correlationId });
   let success = false;
   let estimatedCost = 0;
   let tokensUsed = 0;
@@ -547,7 +547,7 @@ Incorporate these characteristics naturally into the generated prompt while main
     if (userId) {
       await trackOpenAIUsage({
         userId,
-        functionName: 'visual-prompt-generator',
+        functionName: 'create-single-image-prompt',
         model: usedModel || 'unknown',
         requestType: 'text_generation',
         success,
@@ -569,14 +569,14 @@ Incorporate these characteristics naturally into the generated prompt while main
   } catch (error) {
     success = false;
     errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    logger.error('Error in visual-prompt-generator function', error);
-    console.error('❌ Error in visual-prompt-generator function:', error);
+    logger.error('Error in create-single-image-prompt function', error);
+    console.error('❌ Error in create-single-image-prompt function:', error);
 
     // Track failed usage
     if (userId) {
       await trackOpenAIUsage({
         userId,
-        functionName: 'visual-prompt-generator',
+        functionName: 'create-single-image-prompt',
         model: usedModel || 'unknown',
         requestType: 'text_generation',
         success: false,

@@ -3,7 +3,7 @@ export const EDGE_FUNCTION_NAMES = {
   CREATE_THEME_SYSTEM_PROMPT: 'create-theme-system-prompt',
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
   GENERATE_CONTENT: 'generate-content',
-  VISUAL_PROMPT_GENERATOR: 'visual-prompt-generator',
+  CREATE_SINGLE_IMAGE_PROMPT: 'create-single-image-prompt',
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
   
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',

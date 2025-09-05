@@ -37,7 +37,7 @@ export const useCachedPromptGeneration = () => {
       }
 
 
-      const response = await supabase.functions.invoke('visual-prompt-generator', {
+      const response = await supabase.functions.invoke('create-single-image-prompt', {
         body: {
           postId: config.postId,
           themeId: config.themeId,

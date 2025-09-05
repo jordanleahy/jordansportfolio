@@ -134,7 +134,7 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('visual-prompt-generator', {
+      const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
         body: {
           postId: post.id,
           title: post.title,

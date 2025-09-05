@@ -141,7 +141,7 @@ export const GenerateImage = ({
       console.log('🎨 IMAGE_GEN: Step 1 - Generating prompt...');
       toast.info('Generating image prompt...');
       
-      const promptResponse = await supabase.functions.invoke('visual-prompt-generator', {
+      const promptResponse = await supabase.functions.invoke('create-single-image-prompt', {
         body: {
           postId: post.id,
           themeId: (post as any).theme_id || undefined,

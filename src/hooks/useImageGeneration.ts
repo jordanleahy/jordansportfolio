@@ -58,7 +58,7 @@ export const useImageGeneration = () => {
         colorTheme: colorTheme?.name
       });
       
-      const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
+      const { data: promptData, error: promptError } = await supabase.functions.invoke('create-single-image-prompt', {
         body: {
           postId: post.id,
           themeId,

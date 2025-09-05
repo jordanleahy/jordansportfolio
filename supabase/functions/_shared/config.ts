@@ -93,6 +93,7 @@ export const API_ENDPOINTS = {
 // Edge Function Names
 export const EDGE_FUNCTIONS = {
   CREATE_THEME_SYSTEM_PROMPT: 'create-theme-system-prompt',
+  CREATE_SINGLE_IMAGE_PROMPT: 'create-single-image-prompt',
   
   USER_IDEA_STREAMING_IMAGE_PIPELINE: 'user-idea-streaming-image-pipeline',
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',

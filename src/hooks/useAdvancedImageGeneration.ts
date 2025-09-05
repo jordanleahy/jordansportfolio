@@ -122,7 +122,7 @@ export const useAdvancedImageGeneration = () => {
          // urlTheme: theme  // REMOVED - use themeId instead
       });
 
-      const { data: promptData, error: promptError } = await supabase.functions.invoke('visual-prompt-generator', {
+      const { data: promptData, error: promptError } = await supabase.functions.invoke('create-single-image-prompt', {
         body: {
           postId: post.id,
           themeId,

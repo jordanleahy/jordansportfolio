@@ -204,7 +204,7 @@ serve(async (req) => {
               const maxRetries = 2; // Reduced retries to prevent excessive delays
               
               for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                const result = await supabase.functions.invoke('visual-prompt-generator', {
+                const result = await supabase.functions.invoke('create-single-image-prompt', {
                   body: invokePayload
                 });
                 

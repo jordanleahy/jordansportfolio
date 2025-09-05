@@ -20,7 +20,7 @@
  * 4. Generated images respect safe boundaries without manual specification
  * 
  * INTEGRATION POINTS:
- * - visual-prompt-generator: Applied to generated prompts before return
+ * - create-single-image-prompt: Applied to generated prompts before return
  * - bulk-image-generation: Applied during batch processing
  * - All image generation workflows: Ensures consistent safe space enforcement
  */
