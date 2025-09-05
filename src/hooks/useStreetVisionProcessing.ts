@@ -221,6 +221,7 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
         original_filename: originalFilename
       } as StreetVisionRecord;
 
+      // Only set current record after successful edge function call
       setCurrentRecord(initialRecord);           // Update local state
       setupRealtimeSubscription(result.recordId); // Start monitoring updates
 
@@ -234,6 +235,7 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
       console.error('Error starting street vision processing:', err);
       setError(err instanceof Error ? err.message : 'Unknown error occurred');
       setIsProcessing(false);
+      setCurrentRecord(null); // Reset current record on error so input container stays visible
       
       toast({
         title: "Error starting processing",
