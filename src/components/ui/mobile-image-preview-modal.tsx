@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { useImageVersions } from "@/hooks/useImageVersions";
 import { useWatermarkStatus } from "@/hooks/useWatermarkStatus";
-import { useReferenceImage } from "@/hooks/useReferenceImage";
+
 import { useImageEdit } from "@/hooks/useImageEdit";
 import { useImageGenerationTimerContext } from "@/contexts/ImageGenerationTimerContext";
 
@@ -47,17 +47,6 @@ export const MobileImagePreviewModal = ({
     fetchVersionsFromDatabase 
   } = useImageVersions(imageUrl, aspectRatio);
   
-  const {
-    referenceImage,
-    referenceImageAnalysis,
-    fileInputRef,
-    handleImagePaste,
-    handleDragOver,
-    handleDrop,
-    handleImageUpload,
-    clearReferenceImage
-  } = useReferenceImage();
-
   const { isProcessing, handleEditSubmit } = useImageEdit(
     imageUrl, 
     aspectRatio, 
@@ -112,9 +101,8 @@ export const MobileImagePreviewModal = ({
   };
 
   const onSubmitEdit = async () => {
-    await handleEditSubmit(prompt, referenceImageAnalysis, () => {
+    await handleEditSubmit(prompt, null, () => {
       setPrompt("");
-      clearReferenceImage();
       setSheetOpen(false);
     });
   };
@@ -240,62 +228,12 @@ export const MobileImagePreviewModal = ({
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    onPaste={handleImagePaste}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
                     placeholder="Describe how you want to edit this image..."
                     className="min-h-[80px] resize-none"
                     disabled={isProcessing}
                   />
                 </div>
 
-                {/* Reference image display */}
-                {referenceImage && (
-                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                    <img
-                      src={referenceImage}
-                      alt="Reference"
-                      className="w-10 h-10 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Reference image</p>
-                      <p className="text-xs text-muted-foreground">
-                        Style will be applied
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearReferenceImage}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-
-                {/* Upload area */}
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-3">
-                  <div className="text-center">
-                    <Upload className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Drop image or paste from clipboard
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      Choose File
-                    </Button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/png,image/jpeg"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </div>
-                </div>
 
                 {/* Action buttons */}
                 <div className="flex gap-2">

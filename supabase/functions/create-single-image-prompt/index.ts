@@ -11,8 +11,9 @@
  * - systemPromptId: string (optional) - Explicit system prompt override
  * - colorTheme: object (optional) - Brand color theme configuration with colors and styling
  * - aspectRatio: string (optional) - Desired aspect ratio (e.g., "16:9", "9:16", "1:1") - defaults to "1:1"
- * - aspect_ratio: string (optional) - Alternative naming for aspectRatio parameter
- * - referenceAnalysis: object (optional) - Reference image analysis data for visual characteristics matching
+  * @param postId - The ID of the post to generate a prompt for
+  * @param themeId - The ID of the theme to use for prompt generation
+  * @param colorThemeId - Optional ID of the color theme to apply
  * 
  * NOTE: Aspect ratio and safe space composition rules are automatically applied via appendSafeSpaceRules().
  * System prompts should focus on content and style only, not aspect ratio specifications.
@@ -91,7 +92,7 @@ serve(async (req) => {
     }
 
     const requestBody = await req.json();
-    let { postId, themeId, aspectRatio, aspect_ratio, systemPromptId, colorTheme, referenceAnalysis } = requestBody;
+    let { postId, themeId, aspectRatio, aspect_ratio, systemPromptId, colorTheme } = requestBody;
 
     logger.info('Request validation', {
       receivedFields: Object.keys(requestBody),
@@ -119,7 +120,7 @@ serve(async (req) => {
     let category: string | null = null;
     const requestedAspectRatio = aspectRatio || aspect_ratio || '1:1';
 
-    requestMetadata = { themeId, systemPromptId, postId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId, hasReferenceAnalysis: !!referenceAnalysis };
+    requestMetadata = { themeId, systemPromptId, postId, title, description, colorTheme, aspectRatio: requestedAspectRatio, correlationId };
 
     logger.info('Request payload received', {
       themeId,
@@ -333,28 +334,12 @@ Color Theme Instructions:
 - Color Instructions: ${colorTheme.color_instructions}`;
     }
 
-    // Add reference image analysis if provided
-    if (referenceAnalysis) {
-      userMessage += `
-
-Reference Image Analysis:
-Apply these visual characteristics from the reference image:
-- Color Palette: ${referenceAnalysis.colors?.palette?.join(', ') || 'N/A'}
-- Dominant Colors: ${referenceAnalysis.colors?.dominant?.join(', ') || 'N/A'}
-- Mood: ${referenceAnalysis.mood?.overall || 'N/A'}
-- Composition Style: ${referenceAnalysis.composition?.layout || 'N/A'}
-- Artistic Style: ${referenceAnalysis.style?.artistic || 'N/A'}
-- Lighting: ${referenceAnalysis.lighting?.quality || 'N/A'}
-
-Incorporate these characteristics naturally into the generated prompt while maintaining the theme requirements.`;
-    }
 
     // Pre-request validation and logging
     logger.info('Pre-request validation', {
       systemPromptLength: categoryPrompt.prompt.length,
       userMessageLength: userMessage.length,
       hasColorTheme: !!colorTheme,
-      hasReferenceAnalysis: !!referenceAnalysis,
       aspectRatio: requestedAspectRatio,
       tokenEstimate: Math.ceil((categoryPrompt.prompt.length + userMessage.length) / 4),
       maxTokensAllowed: 4000

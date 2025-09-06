@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { X, Download, Loader2, Edit } from "lucide-react";
 import { useImageVersions } from "@/hooks/useImageVersions";
 import { useWatermarkStatus } from "@/hooks/useWatermarkStatus";
-import { useReferenceImage } from "@/hooks/useReferenceImage";
+
 import { useImageEdit } from "@/hooks/useImageEdit";
 import { useImageGenerationTimerContext } from "@/contexts/ImageGenerationTimerContext";
 
@@ -48,13 +48,6 @@ export const DesktopImagePreviewModal = ({
     fetchVersionsFromDatabase 
   } = useImageVersions(imageUrl, aspectRatio);
   
-  const {
-    referenceImage,
-    referenceImageAnalysis,
-    handleImagePaste,
-    clearReferenceImage
-  } = useReferenceImage();
-
   const { isProcessing, handleEditSubmit } = useImageEdit(
     imageUrl, 
     aspectRatio, 
@@ -76,9 +69,8 @@ export const DesktopImagePreviewModal = ({
   useEffect(() => {
     if (!isOpen) {
       setEditState({ isSheetOpen: false, prompt: '', isProcessing: false });
-      clearReferenceImage();
     }
-  }, [isOpen, clearReferenceImage]);
+  }, [isOpen]);
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -124,10 +116,9 @@ export const DesktopImagePreviewModal = ({
 
     handleEditSubmit(
       editState.prompt,
-      referenceImageAnalysis,
+      null,
       () => {
         setEditState({ isSheetOpen: false, prompt: '', isProcessing: false });
-        clearReferenceImage();
       }
     );
   };
@@ -239,49 +230,12 @@ export const DesktopImagePreviewModal = ({
               </div>
 
               <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-4">
-
-              {/* Reference image display */}
-              {referenceImage && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white text-sm">Reference Image:</span>
-                    <Button
-                      onClick={clearReferenceImage}
-                      variant="ghost"
-                      size="sm"
-                      className="text-white hover:bg-white/10 h-6 px-2"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                  
-                  <div className="flex gap-3">
-                    <div className="w-20 h-20 rounded-lg overflow-hidden border border-white/20">
-                      <img
-                        src={referenceImage}
-                        alt="Reference"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    {referenceImageAnalysis?.extractedCharacteristics && (
-                      <div className="text-white text-xs space-y-1 flex-1">
-                        <div>Style: {referenceImageAnalysis.extractedCharacteristics.artisticStyle}</div>
-                        <div>Mood: {referenceImageAnalysis.extractedCharacteristics.overallMood}</div>
-                        <div>Colors: {referenceImageAnalysis.extractedCharacteristics.colorPalette?.slice(0, 3).join(', ')}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* Edit prompt area */}
               <Textarea
                 ref={textareaRef}
                 placeholder="Describe how you want to edit the image..."
                 value={editState.prompt}
                 onChange={(e) => setEditState(prev => ({ ...prev, prompt: e.target.value }))}
-                onPaste={handleImagePaste}
                 className="min-h-20 bg-white/10 border-white/20 text-white placeholder:text-white/60 resize-none focus:border-white/40"
                 disabled={editState.isProcessing}
               />

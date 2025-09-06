@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useReferenceImage } from '@/hooks/useReferenceImage';
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Upload, Wand2, Download, Loader2 } from 'lucide-react';
@@ -14,20 +14,45 @@ export const PixarConverter: React.FC = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [characterAnalysis, setCharacterAnalysis] = useState<string>('');
 
-  const {
-    referenceImage,
-    fileInputRef,
-    handleImagePaste,
-    handleDragOver,
-    handleDrop,
-    handleImageUpload,
-    clearReferenceImage
-  } = useReferenceImage();
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleInputPaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
-    // Convert HTMLInputElement event to HTMLTextAreaElement event type for compatibility
-    const textAreaEvent = e as unknown as React.ClipboardEvent<HTMLTextAreaElement>;
-    await handleImagePaste(textAreaEvent);
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const files = e.dataTransfer?.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (file && file.type.startsWith('image/')) {
+      processImage(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      processImage(file);
+    }
+  };
+
+  const processImage = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target?.result as string;
+      setReferenceImage(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearReferenceImage = () => {
+    setReferenceImage(null);
   };
 
   const enhancePrompt = (userPrompt: string): string => {
@@ -203,10 +228,9 @@ export const PixarConverter: React.FC = () => {
                 <Label htmlFor="prompt">Your Pixar Vision</Label>
                 <Input
                   id="prompt"
-                  placeholder="Type 'pixar' or describe your vision (you can also paste an image here)"
+                  placeholder="Type 'pixar' or describe your vision"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  onPaste={handleInputPaste}
                 />
               </div>
 

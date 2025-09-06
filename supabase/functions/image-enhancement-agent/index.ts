@@ -11,19 +11,7 @@ const corsHeaders = {
 
 interface ImageEnhancementRequest {
   userInput: string;
-  sourceContext?: {
-    originalPrompt?: string;
-    title?: string;
-    description?: string;
-    aspectRatio?: string;
-  };
-  referenceImageAnalysis?: {
-    artisticStyle?: string;
-    overallMood?: string;
-    colorPalette?: string[];
-    lightingMood?: string;
-    complexity?: string;
-  };
+  sourceContext?: string;
 }
 
 interface EnhancementResponse {
@@ -59,7 +47,7 @@ serve(async (req) => {
       );
     }
 
-    const { userInput, sourceContext, referenceImageAnalysis }: ImageEnhancementRequest = await req.json();
+    const { userInput, sourceContext }: ImageEnhancementRequest = await req.json();
 
     if (!userInput?.trim()) {
       logger.warn('Empty user input received');
@@ -74,8 +62,7 @@ serve(async (req) => {
 
     logger.info('Processing enhancement request', { 
       inputLength: userInput.length,
-      hasSourceContext: !!sourceContext,
-      hasReferenceAnalysis: !!referenceImageAnalysis
+      hasSourceContext: !!sourceContext
     });
 
     // Build context for the AI
@@ -101,21 +88,7 @@ GUIDELINES:
 
     // Add source context if available
     if (sourceContext) {
-      contextPrompt += `\nSOURCE CONTEXT:`;
-      if (sourceContext.title) contextPrompt += `\n- Title: ${sourceContext.title}`;
-      if (sourceContext.description) contextPrompt += `\n- Description: ${sourceContext.description}`;
-      if (sourceContext.originalPrompt) contextPrompt += `\n- Original Prompt: ${sourceContext.originalPrompt}`;
-      if (sourceContext.aspectRatio) contextPrompt += `\n- Aspect Ratio: ${sourceContext.aspectRatio}`;
-    }
-
-    // Add reference image analysis if available
-    if (referenceImageAnalysis) {
-      contextPrompt += `\nREFERENCE IMAGE STYLE:`;
-      if (referenceImageAnalysis.artisticStyle) contextPrompt += `\n- Style: ${referenceImageAnalysis.artisticStyle}`;
-      if (referenceImageAnalysis.overallMood) contextPrompt += `\n- Mood: ${referenceImageAnalysis.overallMood}`;
-      if (referenceImageAnalysis.colorPalette) contextPrompt += `\n- Colors: ${referenceImageAnalysis.colorPalette.join(', ')}`;
-      if (referenceImageAnalysis.lightingMood) contextPrompt += `\n- Lighting: ${referenceImageAnalysis.lightingMood}`;
-      if (referenceImageAnalysis.complexity) contextPrompt += `\n- Complexity: ${referenceImageAnalysis.complexity}`;
+      contextPrompt += `\nSOURCE CONTEXT: ${sourceContext}`;
     }
 
     contextPrompt += `\n

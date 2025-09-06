@@ -13,61 +13,10 @@ export const useImageEdit = (
 ) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const enhancePromptWithReference = (basePrompt: string, referenceImageAnalysis: any) => {
-    if (!referenceImageAnalysis?.extractedCharacteristics) return basePrompt;
-    
-    const characteristics = referenceImageAnalysis.extractedCharacteristics;
-    return `${basePrompt}\n\nReference image characteristics:
-- Color palette: ${characteristics.colorPalette?.join(', ')}
-- Artistic style: ${characteristics.artisticStyle}
-- Lighting mood: ${characteristics.lightingMood}
-- Overall mood: ${characteristics.overallMood}
-- Complexity: ${characteristics.complexity}`;
-  };
-
-  const enhancePromptWithAgent = async (userInput: string, referenceImageAnalysis: any) => {
-    console.log('🤖 Calling Image Enhancement Agent with input:', userInput);
-    
-    try {
-      const sourceContext = {
-        title: title,
-        aspectRatio: aspectRatio || '1:1'
-      };
-
-      const requestBody = {
-        userInput,
-        sourceContext,
-        ...(referenceImageAnalysis && { referenceImageAnalysis: referenceImageAnalysis.extractedCharacteristics })
-      };
-
-      const { data, error } = await supabase.functions.invoke('image-enhancement-agent', {
-        body: requestBody
-      });
-
-      if (error) {
-        console.error('❌ Enhancement agent error:', error);
-        toast.error('Failed to enhance prompt, using original input');
-        return userInput;
-      }
-
-      if (data.confidence === 'low' && data.clarificationNeeded) {
-        toast.warning(`Clarification needed: ${data.clarificationNeeded}`);
-      } else if (data.confidence === 'high') {
-        toast.success('Prompt enhanced successfully');
-      }
-
-      return data.enhancedPrompt || userInput;
-
-    } catch (error) {
-      console.error('❌ Enhancement agent failed:', error);
-      toast.error('Failed to enhance prompt, using original input');
-      return userInput;
-    }
-  };
 
   const handleEditSubmit = async (
-    prompt: string, 
-    referenceImageAnalysis: any,
+    prompt: string,
+    _referenceImageAnalysis: any,
     onSuccess?: () => void
   ) => {
     if (!prompt?.trim() || isProcessing) return;
@@ -81,12 +30,12 @@ export const useImageEdit = (
       
       const { data: { user } } = await supabase.auth.getUser();
       
-      const enhancedPrompt = await enhancePromptWithAgent(prompt, referenceImageAnalysis);
-      const finalPrompt = enhancePromptWithReference(enhancedPrompt, referenceImageAnalysis);
+      // Use the prompt as-is without enhancement
+      const enhancedPrompt = prompt;
 
       const { data, error } = await supabase.functions.invoke('edit-image', {
         body: { 
-          prompt: finalPrompt, 
+          prompt: enhancedPrompt, 
           imageUrl, 
           aspectRatio,
           postId,
@@ -133,8 +82,6 @@ export const useImageEdit = (
 
   return {
     isProcessing,
-    handleEditSubmit,
-    enhancePromptWithReference,
-    enhancePromptWithAgent
+    handleEditSubmit
   };
 };

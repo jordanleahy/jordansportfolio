@@ -3,13 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Copy, Check, RefreshCw, Settings, ChevronDown, ChevronUp, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Copy, Check, RefreshCw, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { EnhancedCacheManagement } from '@/components/blog/EnhancedCacheManagement';
-import { ReferenceImageAnalyzer } from '@/components/ui/reference-image-analyzer';
-import { ImagePromptGeneratorModalProps, ReferenceImageAnalysis, ExtractedCharacteristics } from '@/types/imagePromptGenerator';
+import { ImagePromptGeneratorModalProps } from '@/types/imagePromptGenerator';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 
 export const ImagePromptGeneratorModal = ({
@@ -18,9 +17,7 @@ export const ImagePromptGeneratorModal = ({
   config,
   content,
   cachedPrompt,
-  onPromptGenerated,
-  referenceAnalysis,
-  extractedCharacteristics
+  onPromptGenerated
 }: ImagePromptGeneratorModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -35,8 +32,6 @@ export const ImagePromptGeneratorModal = ({
   const [basePrompt, setBasePrompt] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
-  const [currentReferenceAnalysis, setCurrentReferenceAnalysis] = useState<ReferenceImageAnalysis | undefined>(referenceAnalysis);
-  const [currentExtractedCharacteristics, setCurrentExtractedCharacteristics] = useState<ExtractedCharacteristics | undefined>(extractedCharacteristics);
 
   const generateImagePrompt = async () => {
     if (!content.primary.trim() || !content.secondary.trim()) {
@@ -61,9 +56,7 @@ export const ImagePromptGeneratorModal = ({
           postId: content.postId,
           themeId: config.themeId,
           aspectRatio: selectedAspectRatio,
-          colorTheme: null, // TODO: Add color theme support
-          referenceAnalysis: currentReferenceAnalysis,
-          extractedCharacteristics: currentExtractedCharacteristics
+          colorTheme: null
         }
       });
 
@@ -135,18 +128,6 @@ export const ImagePromptGeneratorModal = ({
     }
   };
 
-  const handleReferenceAnalysisComplete = (analysis: ReferenceImageAnalysis, characteristics: ExtractedCharacteristics) => {
-    setCurrentReferenceAnalysis(analysis);
-    setCurrentExtractedCharacteristics(characteristics);
-    
-    // Optionally regenerate prompt with new reference data
-    if (generatedPrompt) {
-      toast({
-        title: "Reference Analysis Complete",
-        description: "Click 'Regenerate' to apply the reference image analysis to your prompt.",
-      });
-    }
-  };
 
   useEffect(() => {
     if (isOpen && content.primary && content.secondary) {
@@ -194,13 +175,8 @@ export const ImagePromptGeneratorModal = ({
           </DialogHeader>
 
           <Tabs defaultValue="prompt" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-auto">
-              <TabsTrigger value="prompt" className="text-sm px-2 py-2">Image Prompt</TabsTrigger>
-              <TabsTrigger value="reference" className="flex items-center gap-1 text-sm px-2 py-2">
-                <ImageIcon className="h-3 w-3" />
-                <span className="hidden sm:inline">Reference Image</span>
-                <span className="sm:hidden">Reference</span>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-1">
+              <TabsTrigger value="prompt">Image Prompt</TabsTrigger>
             </TabsList>
             
             <TabsContent value="prompt" className="space-y-6">
@@ -346,51 +322,6 @@ export const ImagePromptGeneratorModal = ({
               )}
             </TabsContent>
             
-            <TabsContent value="reference" className="space-y-6">
-              <ReferenceImageAnalyzer 
-                onAnalysisComplete={handleReferenceAnalysisComplete}
-              />
-              
-              {currentExtractedCharacteristics && (
-                <div className="rounded-lg bg-muted/50 p-4">
-                  <h4 className="font-medium mb-2">Applied Reference Characteristics:</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    {currentExtractedCharacteristics.dominantColors.length > 0 && (
-                      <div>
-                        <span className="font-medium">Colors:</span>
-                        <div className="flex gap-1 mt-1">
-                          {currentExtractedCharacteristics.dominantColors.slice(0, 3).map((color, i) => (
-                            <div 
-                              key={i} 
-                              className="w-4 h-4 rounded border"
-                              style={{ backgroundColor: color }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {currentExtractedCharacteristics.compositionStyle && (
-                      <div>
-                        <span className="font-medium">Composition:</span>
-                        <p className="text-muted-foreground">{currentExtractedCharacteristics.compositionStyle}</p>
-                      </div>
-                    )}
-                    {currentExtractedCharacteristics.artisticStyle && (
-                      <div>
-                        <span className="font-medium">Style:</span>
-                        <p className="text-muted-foreground">{currentExtractedCharacteristics.artisticStyle}</p>
-                      </div>
-                    )}
-                    {currentExtractedCharacteristics.overallMood && (
-                      <div>
-                        <span className="font-medium">Mood:</span>
-                        <p className="text-muted-foreground">{currentExtractedCharacteristics.overallMood}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </TabsContent>
           </Tabs>
         </DialogContent>
       </Dialog>
