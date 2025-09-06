@@ -496,6 +496,30 @@ Incorporate these characteristics naturally into the generated prompt while main
       throw new Error('Failed to generate content from OpenAI');
     }
 
+    // ATOMICALLY UPDATE DATABASE: Store prompt and status together
+    const { error: updateError } = await supabase.rpc(
+      'update_post_prompt_and_status', 
+      { 
+        p_post_id: postId, 
+        p_generated_prompt: generatedText.trim() 
+      }
+    );
+
+    if (updateError) {
+      logger.error('Failed to update post with prompt', {
+        postId: postId.slice(0, 8),
+        error: updateError.message,
+        correlationId
+      });
+      throw new Error(`Failed to update post: ${updateError.message}`);
+    }
+
+    logger.info('Post updated with prompt and status', {
+      postId: postId.slice(0, 8),
+      promptLength: generatedText.length,
+      correlationId
+    });
+
     success = true;
 
     // Cache the generated prompt if user is authenticated
