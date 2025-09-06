@@ -17,19 +17,18 @@
  * 
  * DEPENDENCIES:
  * - OpenAI API (GPT-4.1-2025-04-14 for sophisticated prompt generation)
- * - Supabase Database (cached_prompts table for storage)
+ * - Supabase Database
  * 
  * USAGE:
  * Called from: Job posting creation workflows, HR content generation, social media job campaigns
- * Authentication: Optional - caching only available for authenticated users
+ * Authentication: Optional
  * 
  * FLOW:
  * 1. Validate required job title and company name inputs
  * 2. Apply specialized hero-style visual prompt system with cinematic guidelines
  * 3. Generate dramatic 9:16 vertical image prompt using OpenAI
- * 4. Store generated prompt in cache for reuse (if user authenticated)
- * 5. Return complete prompt optimized for AI image generation
- * 6. Emphasize bold typography, dramatic lighting, and premium aesthetic
+ * 4. Return complete prompt optimized for AI image generation
+ * 5. Emphasize bold typography, dramatic lighting, and premium aesthetic
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
@@ -132,7 +131,7 @@ serve(async (req) => {
       throw new Error('Job title and company name are required');
     }
 
-    // Initialize Supabase client for prompt storage
+    // Initialize Supabase client for user authentication
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -197,45 +196,17 @@ Focus on making this feel like THE career opportunity of a lifetime, with the co
 
     const generatedPrompt = data.choices[0].message.content;
 
-    // Store the generated prompt in cached_prompts table
-    if (userId) {
-      try {
-        const cacheKey = `hero_job_prompt_${companyName}_${jobTitle}`.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
-        
-        await supabase.from('cached_prompts').insert({
-          user_id: userId,
-          cache_key: cacheKey,
-          category: 'hero_job_visual',
-          prompt_text: generatedPrompt,
-          metadata: {
-            companyName,
-            jobTitle,
-            jobDescription: jobDescription || 'Not provided',
-            agent: 'Hero Job Visual Generator',
-            model: 'gpt-5-mini',
-            generated_at: new Date().toISOString(),
-            style: 'hero',
-            aspectRatio: '9:16'
-          },
-          hit_count: 1,
-          version: 1,
-          expires_at: null
-        });
-        console.log('✅ Hero job prompt stored in cache successfully');
-      } catch (cacheError) {
-        console.error('❌ Failed to store hero job prompt in cache:', cacheError);
-        // Don't fail the request if caching fails
-      }
-    }
-
-    return new Response(JSON.stringify({ 
-      generatedPrompt,
-      companyName,
-      jobTitle,
-      style: 'hero'
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({
+        generatedPrompt,
+        companyName,
+        jobTitle,
+        style: 'hero',
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
   } catch (error) {
     console.error('Error in generate-hero-job-visual function:', error);
     return new Response(JSON.stringify({ 

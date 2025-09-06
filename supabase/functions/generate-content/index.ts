@@ -3,8 +3,7 @@
  * 
  * PURPOSE:
  * General-purpose content generation using OpenAI's GPT models with type-specific system prompts.
- * Supports various content types including image prompts and important content with caching
- * capabilities for authenticated users. Serves as a flexible content creation endpoint.
+ * Supports various content types including image prompts and important content.
  * 
  * INPUTS:
  * - prompt: string - Content generation request or prompt text
@@ -16,18 +15,17 @@
  * 
  * DEPENDENCIES:
  * - OpenAI API (GPT-4o-mini for content generation)
- * - Supabase Database (cached_prompts table for storage)
+ * - Supabase Database
  * 
  * USAGE:
  * Called from: Legacy content workflows, general-purpose content tools, multi-type generation
- * Authentication: Optional - caching and enhanced features available for authenticated users
+ * Authentication: Optional
  * 
  * FLOW:
  * 1. Parse prompt and optional content type from request
  * 2. Select appropriate system prompt based on type (image_prompt gets specialized prompt)
  * 3. Generate content using OpenAI with type-specific context
- * 4. Cache generated content for important types (if user authenticated)
- * 5. Return generated text ready for immediate use or further processing
+ * 4. Return generated text ready for immediate use or further processing
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
@@ -57,7 +55,7 @@ serve(async (req) => {
       throw new Error('Prompt is required');
     }
 
-    // Initialize Supabase client for prompt storage
+    // Initialize Supabase client for user authentication
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.38.4');
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -112,35 +110,6 @@ serve(async (req) => {
     }
 
     const generatedText = data.choices[0].message.content;
-
-    // Store the generated content in cached_prompts table (for image prompts and important content)
-    if (userId && (type === 'image_prompt' || type === 'important')) {
-      try {
-        const promptHash = Buffer.from(prompt).toString('base64').slice(0, 20);
-        const cacheKey = `content_${type}_${promptHash}`;
-        
-        await supabase.from('cached_prompts').insert({
-          user_id: userId,
-          cache_key: cacheKey,
-          category: type,
-          prompt_text: generatedText,
-          metadata: {
-            original_prompt: prompt,
-            content_type: type,
-            agent: 'General Content Generator',
-            model: 'gpt-5-mini',
-            generated_at: new Date().toISOString()
-          },
-          hit_count: 1,
-          version: 1,
-          expires_at: null
-        });
-        console.log('✅ Generated content stored in cache successfully');
-      } catch (cacheError) {
-        console.error('❌ Failed to store generated content in cache:', cacheError);
-        // Don't fail the request if caching fails
-      }
-    }
 
     return new Response(JSON.stringify({ generatedText }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

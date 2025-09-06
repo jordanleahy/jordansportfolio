@@ -507,32 +507,6 @@ Color Theme Instructions:
 
     success = true;
 
-    // Cache the generated prompt if user is authenticated
-    if (userId && generatedText) {
-      try {
-        const cacheKey = `visual_prompt_${postId}_${requestedAspectRatio}`;
-        await supabase
-          .from('cached_prompts')
-          .upsert({
-            cache_key: cacheKey,
-            prompt_text: generatedText,
-            category: category || 'visual_prompt',
-            user_id: userId,
-            expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-            metadata: {
-              postId,
-              themeId,
-              aspectRatio: requestedAspectRatio,
-              usedType,
-              usedIdentifier,
-              systemPromptId: systemPromptData.id
-            }
-          });
-      } catch (cacheError) {
-        logger.warn('Failed to cache prompt', { error: cacheError });
-      }
-    }
-
     const responseData = {
       generatedPrompt: generatedText,
       theme: systemPromptData.theme || usedIdentifier,

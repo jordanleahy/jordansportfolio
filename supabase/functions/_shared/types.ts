@@ -40,7 +40,6 @@ export interface DatabaseConfig {
   readonly TABLES: {
     readonly SOCIAL_MEDIA_POSTS: string;
     readonly OPENAI_AGENTS: string;
-    readonly CACHED_PROMPTS: string;
   };
   readonly STORAGE: {
     readonly BUCKETS: {

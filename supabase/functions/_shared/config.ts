@@ -50,7 +50,6 @@ export const DATABASE_CONFIG = {
   TABLES: {
     SOCIAL_MEDIA_POSTS: 'social_media_posts',
     OPENAI_AGENTS: 'openai_agents',
-    CACHED_PROMPTS: 'cached_prompts',
   },
   STORAGE: {
     BUCKETS: {

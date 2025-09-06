@@ -118,17 +118,6 @@ Deno.serve(async (req) => {
           throw new Error(`Failed to delete posts: ${postsError.message}`);
         }
 
-        // Delete cached prompts (best effort - don't fail if this errors)
-        const { error: cacheError } = await supabaseClient
-          .from('cached_prompts')
-          .delete()
-          .eq('user_id', user.id)
-          .like('cache_key', `%${themeId}%`);
-
-        if (cacheError) {
-          console.warn(`Warning: Failed to delete cached prompts for ${category}:`, cacheError.message);
-        }
-
         // Delete the theme itself
         const { error: themeError } = await supabaseClient
           .from('themes')
