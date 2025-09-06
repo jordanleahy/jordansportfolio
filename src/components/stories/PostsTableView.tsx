@@ -17,7 +17,6 @@ import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicat
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
-import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
 
@@ -120,7 +119,7 @@ export const PostsTableView = memo(({
         try {
           setProcessing(post.id, 'generate', true);
           
-          // Use cached generation with enhanced theme data
+          // Generate prompt with enhanced theme data
           console.log('🎯 [POST_TABLE] Generating prompt for post:', {
             postId: post.id,
             title: post.title,
@@ -129,7 +128,7 @@ export const PostsTableView = memo(({
             timestamp: new Date().toISOString()
           });
 
-          // Direct API call to generate prompt instead of using cache
+          // Direct API call to generate prompt
           const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
             body: {
               postId: post.id,

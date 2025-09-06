@@ -7,7 +7,7 @@ import { OptimizedMonacoEditor } from '@/components/ui/optimized-monaco-editor';
 import { Save, X, Edit, GitCompare, RotateCcw, Lightbulb } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
+import { useIndividualPrompt } from '@/hooks/useIndividualPrompt';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { diffLines } from 'diff';
 import type { SocialMediaPost } from '@/types/socialMedia';
@@ -44,7 +44,7 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
     regeneratePrompt,
     isRegenerating,
     refetch
-  } = useIndividualPromptCache(post?.id || '', themeId);
+  } = useIndividualPrompt(post?.id || '', themeId);
 
   // Allow prompt generation if theme is completed or in progress
   // Only block if theme hasn't started yet

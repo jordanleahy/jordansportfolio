@@ -14,7 +14,7 @@ import { ASPECT_RATIO_CONFIGS } from '@/types/bulkImageGeneration';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 import type { SingleAspectRatioSelectorProps } from '@/types/stories/ui';
 import { useToast } from '@/hooks/use-toast';
-import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
+import { useIndividualPrompt } from '@/hooks/useIndividualPrompt';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 
 export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps> = ({
@@ -23,7 +23,7 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
   onPostsChange,
 }) => {
   const { toast } = useToast();
-  const { updatePrompt, isUpdating, refetch } = useIndividualPromptCache(post.id);
+  const { updatePrompt, isUpdating, refetch } = useIndividualPrompt(post.id);
   const { isProcessing } = useProcessingStatesContext();
   const timer = useImageGenerationTimerContext();
 
@@ -51,10 +51,10 @@ export const SingleAspectRatioSelector: React.FC<SingleAspectRatioSelectorProps>
     const updatedPrompt = cleanedPrompt ? `${cleanedPrompt}. ${aspectRatioText}` : aspectRatioText;
     
     try {
-      // Wait for prompt update to complete and cache to refresh
+      // Wait for prompt update to complete and refresh data
       await updatePrompt({ newPrompt: updatedPrompt });
       
-      // Verify the prompt was updated in cache before proceeding
+      // Verify the prompt was updated before proceeding
       const updatedData = await refetch();
       if (!updatedData.data?.prompt) {
         throw new Error('Failed to verify prompt update. Please try again.');

@@ -9,7 +9,7 @@ import { GenerateImage } from './GenerateImage';
 import VideoUploadCard from './VideoUploadCard';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
+import { useIndividualPrompt } from '@/hooks/useIndividualPrompt';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { PostCardProps } from '@/types/stories/ui';
 
@@ -40,7 +40,7 @@ export const PostCardAdminSection: React.FC<PostCardAdminSectionProps> = ({
 }) => {
   const { getCreditStatus, getBlockingMessage } = useCreditCheck();
   const creditStatus = getCreditStatus();
-  const { hasPrompt } = useIndividualPromptCache(post.id, themeId);
+  const { hasPrompt } = useIndividualPrompt(post.id, themeId);
   const { isAdmin } = useUserRole();
   
   const [showPhotos, setShowPhotos] = useState(false);
