@@ -2,35 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ColorTheme, CreateColorTheme, UpdateColorTheme } from "@/types/colorTheme";
 
 export class ColorThemeService {
-  private cache = new Map<string, { data: ColorTheme[], timestamp: number }>();
-  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
-  private getCacheKey(prefix = 'themes') {
-    return `${prefix}_all`;
-  }
-
-  private isValidCache(cacheKey: string): boolean {
-    const cached = this.cache.get(cacheKey);
-    if (!cached) return false;
-    return Date.now() - cached.timestamp < this.CACHE_TTL;
-  }
-
-  private setCache(key: string, data: ColorTheme[]) {
-    this.cache.set(key, { data, timestamp: Date.now() });
-  }
-
-  private getFromCache(key: string): ColorTheme[] | null {
-    const cached = this.cache.get(key);
-    return cached ? cached.data : null;
-  }
-
   async getAllColorThemes(): Promise<ColorTheme[]> {
-    const cacheKey = this.getCacheKey();
-    
-    if (this.isValidCache(cacheKey)) {
-      return this.getFromCache(cacheKey)!;
-    }
-
     const { data, error } = await supabase
       .from('color_themes')
       .select('*')
@@ -43,7 +15,6 @@ export class ColorThemeService {
       throw error;
     }
 
-    this.setCache(cacheKey, data || []);
     return data || [];
   }
 
@@ -101,7 +72,6 @@ export class ColorThemeService {
       throw error;
     }
 
-    this.invalidateCache();
     return data;
   }
 
@@ -120,7 +90,6 @@ export class ColorThemeService {
       throw error;
     }
 
-    this.invalidateCache();
     return data;
   }
 
@@ -134,8 +103,6 @@ export class ColorThemeService {
       console.error('Error deleting color theme:', error);
       throw error;
     }
-
-    this.invalidateCache();
   }
 
   async duplicateColorTheme(id: string, newName: string): Promise<ColorTheme> {
@@ -161,10 +128,6 @@ export class ColorThemeService {
     };
 
     return this.createColorTheme(newTheme);
-  }
-
-  public invalidateCache() {
-    this.cache.clear();
   }
 }
 
