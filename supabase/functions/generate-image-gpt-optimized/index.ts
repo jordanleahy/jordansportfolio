@@ -8,8 +8,6 @@ interface ImageGenerationRequest {
   aspectRatio?: string;
   seed?: number | null;
   useDeterministicSeed?: boolean;
-  useManagedSeed?: boolean;
-  managedSeedCategory?: string | null;
   seedContext?: string | null;
   category?: string | null;
   backgroundProcessing?: boolean;
@@ -50,8 +48,6 @@ serve(async (req) => {
       aspectRatio = "4:3", 
       seed = null, 
       useDeterministicSeed = false,
-      useManagedSeed = false, 
-      managedSeedCategory = null, 
       seedContext = null, 
       category = null,
       backgroundProcessing = false
@@ -102,24 +98,6 @@ serve(async (req) => {
     const isCDICategory = category === 'cdi';
     let finalSeed = isCDICategory ? null : seed;
     
-    // Get managed seed if requested
-    if (useManagedSeed && managedSeedCategory && userId && !isCDICategory) {
-      try {
-        const { data: managedSeeds } = await supabase
-          .from('image_seeds')
-          .select('seed_value')
-          .eq('user_id', userId)
-          .eq('category', managedSeedCategory)
-          .eq('is_default', true)
-          .limit(1);
-        
-        if (managedSeeds && managedSeeds.length > 0) {
-          finalSeed = managedSeeds[0].seed_value;
-        }
-      } catch (error) {
-        console.warn('Failed to fetch managed seed:', error);
-      }
-    }
     
     // Generate deterministic seed if needed
     if (useDeterministicSeed && !finalSeed && !isCDICategory) {

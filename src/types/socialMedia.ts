@@ -36,8 +36,6 @@ export interface SocialMediaPost {
   image_4_3_watermark_status?: 'none' | 'processing' | 'complete' | 'failed';
   image_1_1_watermark_status?: 'none' | 'processing' | 'complete' | 'failed';
   
-  // Seed management
-  seed_value?: number | null;
   
   // Color theme
   color_theme_id?: string | null;

@@ -9,8 +9,6 @@ interface ImageGenerationRequest {
   aspectRatio?: string;
   seed?: number | null;
   useDeterministicSeed?: boolean;
-  useManagedSeed?: boolean;
-  managedSeedCategory?: string | null;
   seedContext?: string | null;
   category?: string | null;
 }
@@ -87,7 +85,7 @@ serve(async (req) => {
       );
     }
     
-    const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, useManagedSeed = false, managedSeedCategory = null, seedContext = null, category = null } = incomingRequestBody;
+    const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, seedContext = null, category = null } = incomingRequestBody;
 
     // Normalize aspect ratio formats like "1_1" to "1:1"
     const normalizedAspectRatio: string = String(aspectRatio).replace(/_/g, ':');
@@ -143,25 +141,6 @@ serve(async (req) => {
     // Generate deterministic seed if requested, or use provided seed, or use managed seed
     let finalSeed = isCDICategory ? null : seed;
     
-    // Check for managed seed first (skip for CDI)
-    if (useManagedSeed && managedSeedCategory && userId && !isCDICategory) {
-      try {
-        const { data: managedSeeds } = await supabase
-          .from('image_seeds')
-          .select('seed_value')
-          .eq('user_id', userId)
-          .eq('category', managedSeedCategory)
-          .eq('is_default', true)
-          .limit(1);
-        
-        if (managedSeeds && managedSeeds.length > 0) {
-          finalSeed = managedSeeds[0].seed_value;
-          console.log('🌱 Using managed seed:', finalSeed, 'for category:', managedSeedCategory);
-        }
-      } catch (error) {
-        console.warn('Failed to fetch managed seed:', error);
-      }
-    }
     
     // Fall back to deterministic seed if no seed is set yet (skip for CDI)
     if (useDeterministicSeed && !finalSeed && !isCDICategory) {

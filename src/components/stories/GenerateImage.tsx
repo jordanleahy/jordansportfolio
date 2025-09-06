@@ -169,9 +169,7 @@ export const GenerateImage = ({
       const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
         body: {
           prompt: generatedPrompt,
-          aspectRatio: aspectRatio,
-          useManagedSeed: true,
-          managedSeedCategory: post.category || 'cdi'
+          aspectRatio: aspectRatio
         }
       });
 
