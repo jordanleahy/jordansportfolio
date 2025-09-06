@@ -8,6 +8,7 @@ export const EDGE_FUNCTION_NAMES = {
   
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',
   GENERATE_IMAGE: 'generate-image',
+  PREVENTS_DUPLICATE_IMAGE_GENERATIONS: 'prevents-duplicate-image-generations',
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
   PROCESS_AND_IMPORT_THEME: 'process-and-import-theme',
   PROCESS_FUNDING_JSON: 'process-funding-json',

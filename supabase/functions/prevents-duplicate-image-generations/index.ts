@@ -98,7 +98,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('🔒 CONCURRENCY_CONTROL: Attempting to start generation', {
+    console.log('🔒 DUPLICATE_PREVENTION: Attempting to start generation', {
       postId,
       aspectRatio: normalizedAspectRatio,
       userId: userId.slice(0, 8)
@@ -115,7 +115,7 @@ serve(async (req) => {
     );
 
     if (lockError) {
-      console.error('🔒 CONCURRENCY_CONTROL: Lock error:', lockError);
+      console.error('🔒 DUPLICATE_PREVENTION: Lock error:', lockError);
       return new Response(
         JSON.stringify({ success: false, error: 'Database error', details: lockError.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
@@ -123,7 +123,7 @@ serve(async (req) => {
     }
 
     if (!lockResult?.success) {
-      console.log('🔒 CONCURRENCY_CONTROL: Generation already in progress', {
+      console.log('🔒 DUPLICATE_PREVENTION: Generation already in progress', {
         postId,
         currentStatus: lockResult?.current_status,
         message: lockResult?.message
@@ -140,7 +140,7 @@ serve(async (req) => {
       );
     }
 
-    console.log('🔒 CONCURRENCY_CONTROL: Lock acquired, checking usage limits');
+    console.log('🔒 DUPLICATE_PREVENTION: Lock acquired, checking usage limits');
 
     // Check usage limits before proceeding with generation
     try {
@@ -149,7 +149,7 @@ serve(async (req) => {
       });
 
       if (usageError) {
-        console.error('🔒 CONCURRENCY_CONTROL: Usage check error:', usageError);
+        console.error('🔒 DUPLICATE_PREVENTION: Usage check error:', usageError);
         // Mark as failed and release lock
         await supabase.rpc('complete_image_generation', {
           p_post_id: postId,
@@ -165,7 +165,7 @@ serve(async (req) => {
       }
 
       if (!usageCheck?.allowed) {
-        console.log('🔒 CONCURRENCY_CONTROL: Usage limit exceeded', {
+        console.log('🔒 DUPLICATE_PREVENTION: Usage limit exceeded', {
           remaining: usageCheck?.remaining,
           limit: usageCheck?.limit,
           message: usageCheck?.message
@@ -191,9 +191,9 @@ serve(async (req) => {
         );
       }
 
-      console.log('🔒 CONCURRENCY_CONTROL: Usage limits passed, starting generation');
+      console.log('🔒 DUPLICATE_PREVENTION: Usage limits passed, starting generation');
     } catch (limitError) {
-      console.error('🔒 CONCURRENCY_CONTROL: Limit check failed:', limitError);
+      console.error('🔒 DUPLICATE_PREVENTION: Limit check failed:', limitError);
       // Mark as failed and release lock
       await supabase.rpc('complete_image_generation', {
         p_post_id: postId,
@@ -235,7 +235,7 @@ serve(async (req) => {
         finalSeed = rawSeed % 4294967295;
       }
 
-      console.log('🔒 CONCURRENCY_CONTROL: Starting OpenAI generation', {
+      console.log('🔒 DUPLICATE_PREVENTION: Starting OpenAI generation', {
         postId,
         aspectRatio: normalizedAspectRatio,
         size,
@@ -267,7 +267,7 @@ serve(async (req) => {
       });
 
       if (!response.ok) {
-        console.error('🔒 CONCURRENCY_CONTROL: OpenAI API error', response.status);
+        console.error('🔒 DUPLICATE_PREVENTION: OpenAI API error', response.status);
         
         // Track failed usage
         try {
@@ -275,7 +275,7 @@ serve(async (req) => {
             .from('api_usage_tracking')
             .insert({
               user_id: userId,
-              function_name: 'generate-image-with-concurrency-control',
+              function_name: 'prevents-duplicate-image-generations',
               request_type: 'image_generation',
               model_used: 'gpt-image-1',
               success: false,
@@ -291,7 +291,7 @@ serve(async (req) => {
               }
             });
         } catch (trackingError) {
-          console.error('🔒 CONCURRENCY_CONTROL: Failed to track failed usage:', trackingError);
+          console.error('🔒 DUPLICATE_PREVENTION: Failed to track failed usage:', trackingError);
         }
         
         // Mark as failed in database
@@ -312,7 +312,7 @@ serve(async (req) => {
       const data = await response.json();
       
       if (!data.data || !data.data[0] || !data.data[0].b64_json) {
-        console.error('🔒 CONCURRENCY_CONTROL: Invalid response format');
+        console.error('🔒 DUPLICATE_PREVENTION: Invalid response format');
         
         // Mark as failed in database
         await supabase.rpc('complete_image_generation', {
@@ -342,7 +342,7 @@ serve(async (req) => {
         });
 
       if (uploadError) {
-        console.error('🔒 CONCURRENCY_CONTROL: Upload error:', uploadError);
+        console.error('🔒 DUPLICATE_PREVENTION: Upload error:', uploadError);
         
         // Mark as failed in database
         await supabase.rpc('complete_image_generation', {
@@ -376,7 +376,7 @@ serve(async (req) => {
       });
 
       if (!updateResult) {
-        console.warn('🔒 CONCURRENCY_CONTROL: Failed to update database with completion status');
+        console.warn('🔒 DUPLICATE_PREVENTION: Failed to update database with completion status');
       }
 
       // Track successful usage
@@ -385,7 +385,7 @@ serve(async (req) => {
           .from('api_usage_tracking')
           .insert({
             user_id: userId,
-            function_name: 'generate-image-with-concurrency-control',
+            function_name: 'prevents-duplicate-image-generations',
             request_type: 'image_generation',
             model_used: 'gpt-image-1',
             success: true,
@@ -400,13 +400,13 @@ serve(async (req) => {
               prompt_length: prompt.length
             }
           });
-        console.log('🔒 CONCURRENCY_CONTROL: Usage tracked successfully');
+        console.log('🔒 DUPLICATE_PREVENTION: Usage tracked successfully');
       } catch (trackingError) {
-        console.error('🔒 CONCURRENCY_CONTROL: Failed to track usage:', trackingError);
+        console.error('🔒 DUPLICATE_PREVENTION: Failed to track usage:', trackingError);
         // Don't fail the whole request for tracking errors, just log them
       }
 
-      console.log('🔒 CONCURRENCY_CONTROL: Generation complete', {
+      console.log('🔒 DUPLICATE_PREVENTION: Generation complete', {
         postId,
         processingTimeMs,
         imageUrl: imageUrl.slice(-50)
@@ -426,7 +426,7 @@ serve(async (req) => {
       );
 
     } catch (generationError) {
-      console.error('🔒 CONCURRENCY_CONTROL: Generation error:', generationError);
+      console.error('🔒 DUPLICATE_PREVENTION: Generation error:', generationError);
       
       // Mark as failed in database
       await supabase.rpc('complete_image_generation', {
@@ -441,7 +441,7 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('🔒 CONCURRENCY_CONTROL: Error:', error);
+    console.error('🔒 DUPLICATE_PREVENTION: Error:', error);
     
     return new Response(
       JSON.stringify({ success: false, error: 'An unexpected error occurred', details: errorMessage }),

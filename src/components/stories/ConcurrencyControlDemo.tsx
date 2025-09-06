@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ConcurrencyControlledImageButton } from './ConcurrencyControlledImageButton';
+import { PreventsDuplicateImageButton } from './PreventsDuplicateImageButton';
 import { RealtimeImageStatusMonitor } from './RealtimeImageStatusMonitor';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -100,7 +100,7 @@ export const ConcurrencyControlDemo: React.FC<ConcurrencyControlDemoProps> = ({ 
                     className="justify-center"
                   />
                   
-                  <ConcurrencyControlledImageButton
+                  <PreventsDuplicateImageButton
                     post={post}
                     aspectRatio={aspectRatio}
                     size="sm"

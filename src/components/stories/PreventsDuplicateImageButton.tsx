@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Image, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { useConcurrencyControlledImageGeneration } from '@/hooks/useConcurrencyControlledImageGeneration';
+import { usePreventsDuplicateImageGeneration } from '@/hooks/usePreventsDuplicateImageGeneration';
 import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 import { useToast } from '@/hooks/use-toast';
 
-interface ConcurrencyControlledImageButtonProps {
+interface PreventsDuplicateImageButtonProps {
   post: SocialMediaPost;
   aspectRatio: string;
   onImageGenerated?: () => void;
@@ -17,7 +17,7 @@ interface ConcurrencyControlledImageButtonProps {
   variant?: 'default' | 'outline' | 'secondary' | 'ghost';
 }
 
-export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledImageButtonProps> = ({
+export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButtonProps> = ({
   post,
   aspectRatio,
   onImageGenerated,
@@ -25,7 +25,7 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
   size = 'default',
   variant = 'default'
 }) => {
-  const { generateImage, checkImageStatus, canGenerateImage, isGenerating } = useConcurrencyControlledImageGeneration();
+  const { generateImage, checkImageStatus, canGenerateImage, isGenerating } = usePreventsDuplicateImageGeneration();
   const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage, cooldown } = useUnifiedRegenerateStates();
   const { getCreditStatus } = useCreditCheck();
   const [currentStatus, setCurrentStatus] = useState<string>('none');
@@ -36,7 +36,7 @@ export const ConcurrencyControlledImageButton: React.FC<ConcurrencyControlledIma
 
   // Debug logging for QA
   useEffect(() => {
-    console.log('[ConcurrencyControlledImageButton] Credit status update', {
+    console.log('[PreventsDuplicateImageButton] Credit status update', {
       postId: post.id,
       aspectRatio,
       creditStatus: {

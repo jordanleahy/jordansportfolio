@@ -19,7 +19,7 @@ interface GenerationResult {
   currentStatus?: string;
 }
 
-export const useConcurrencyControlledImageGeneration = () => {
+export const usePreventsDuplicateImageGeneration = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
@@ -46,13 +46,13 @@ export const useConcurrencyControlledImageGeneration = () => {
     setIsGenerating(true);
 
     try {
-      console.log('🎨 Starting concurrency-controlled image generation', {
+      console.log('🎨 Starting duplicate-prevention image generation', {
         postId: post.id,
         aspectRatio,
         prompt: post.generated_image_prompt.substring(0, 100)
       });
 
-      const { data, error } = await supabase.functions.invoke('generate-image-with-concurrency-control', {
+      const { data, error } = await supabase.functions.invoke('prevents-duplicate-image-generations', {
         body: {
           postId: post.id,
           prompt: post.generated_image_prompt,

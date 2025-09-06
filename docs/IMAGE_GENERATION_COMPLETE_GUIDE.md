@@ -48,7 +48,7 @@ graph TB
     subgraph "Edge Functions Layer"
         EF1[generate-image-gpt] --> EF2[generate-all-images-optimized]
         EF3[create-single-image-prompt] --> EF4[create-theme-system-prompt]
-        EF5[generate-image-with-concurrency-control] --> EF6[user-idea-streaming-image-pipeline]
+        EF5[prevents-duplicate-image-generations] --> EF6[user-idea-streaming-image-pipeline]
         EF7[check-usage-limits] --> EF8[send-usage-alert]
     end
     
@@ -388,7 +388,7 @@ The system prompts infrastructure uses these tables:
 |----------|---------|--------|--------|----------------|
 | `generate-image-gpt` | Single image generation | Prompt, aspect ratio, config | Base64 image data | JWT Required |
 | `generate-all-images-optimized` | Bulk multi-aspect generation | Post IDs, config | Batch results | JWT Required |
-| `generate-image-with-concurrency-control` | Controlled single generation | Post data, options | Generation result | JWT Required |
+| `prevents-duplicate-image-generations` | Controlled single generation | Post data, options | Generation result | JWT Required |
 | `user-idea-streaming-image-pipeline` | Real-time streaming generation | Stream config | SSE stream | JWT Required |
 
 ### Content Processing Functions
@@ -1674,7 +1674,7 @@ file_size_limit = "50MiB"
 - `src/hooks/useImageManager.ts`
 - `src/hooks/useBulkImageGeneration.ts`
 - `src/hooks/useBulkSingleAspectGeneration.ts`
-- `src/hooks/useConcurrencyControlledImageGeneration.ts`
+- `src/hooks/usePreventsDuplicateImageGeneration.ts`
 - `src/hooks/useOptimizedImageGeneration.ts`
 - `src/hooks/useUsageEnforcement.ts`
 - `src/hooks/useCreditCheck.ts`
@@ -1682,7 +1682,7 @@ file_size_limit = "50MiB"
 **Edge Functions:**
 - `supabase/functions/create-single-image-prompt/`
 - `supabase/functions/generate-image-gpt/`
-- `supabase/functions/generate-image-with-concurrency-control/`
+- `supabase/functions/prevents-duplicate-image-generations/`
 - `supabase/functions/generate-all-images-optimized/`
 - `supabase/functions/user-idea-streaming-image-pipeline/`
 - `supabase/functions/create-theme-system-prompt/`
