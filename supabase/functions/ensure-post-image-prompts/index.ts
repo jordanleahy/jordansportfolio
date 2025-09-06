@@ -242,22 +242,9 @@ serve(async (req) => {
                 return { postId: post.id, success: false, error: 'No prompt generated' };
               }
 
-              // Update the post with the generated prompt and mark as completed
-              const { error: updateError } = await supabase
-                .from('social_media_posts')
-                .update({ 
-                  generated_image_prompt: generatedPrompt.trim(),
-                  individual_prompt_status: 'completed',
-                  updated_at: new Date().toISOString()
-                })
-                .eq('id', post.id);
-
-              if (updateError) {
-                console.error(`❌ BACKGROUND: Update error for post ${post.id}:`, updateError);
-                return { postId: post.id, success: false, error: updateError.message };
-              } else {
-                console.log(`✅ BACKGROUND: Prompt generated and saved for post ${post.id}`);
-                return { 
+              // ✅ Database is already updated atomically by create-single-image-prompt
+              console.log(`✅ BACKGROUND: Prompt generated and saved for post ${post.id}`);
+              return {
                   postId: post.id, 
                   success: true, 
                   promptLength: generatedPrompt.length 
