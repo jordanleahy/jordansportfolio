@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-type TableName = 'api_usage_tracking' | 'cached_prompts' | 'social_media_posts';
+type TableName = 'api_usage_tracking' | 'social_media_posts';
 
 interface BatchOperation {
   table: TableName;
@@ -131,39 +131,5 @@ export const batchApiUsageTracking = async (
   } catch (error) {
     console.error('Batch API usage tracking failed:', error);
     // Don't throw - tracking failures shouldn't break the main flow
-  }
-};
-
-// Utility for caching multiple items
-export const batchCacheOperations = async (
-  cacheOperations: Array<{
-    cacheKey: string;
-    promptText: string;
-    category: string;
-    userId: string;
-    metadata?: Record<string, any>;
-  }>
-): Promise<void> => {
-  if (cacheOperations.length === 0) return;
-
-  const operations: BatchOperation[] = cacheOperations.map(cache => ({
-    table: 'cached_prompts' as TableName,
-    operation: 'upsert' as const,
-    data: {
-      cache_key: cache.cacheKey,
-      prompt_text: cache.promptText,
-      category: cache.category,
-      user_id: cache.userId,
-      metadata: cache.metadata || {},
-      updated_at: new Date().toISOString(),
-      version: 1,
-      hit_count: 0
-    }
-  }));
-
-  try {
-    await executeBatchOperations(operations, 25);
-  } catch (error) {
-    console.error('Batch cache operations failed:', error);
   }
 };

@@ -19,7 +19,6 @@ export const uploadFileToStorage = async (
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(filePath, file, {
-        cacheControl: '3600',
         upsert: false
       });
 
