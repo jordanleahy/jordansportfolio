@@ -1,15 +1,6 @@
 import type { Vendor, VendorCategory } from '@/types/vendor';
 
-// Memoized category calculation to avoid recalculating for each vendor
-const categoryCache = new Map<string, VendorCategory>();
-
 export const getVendorCategory = (vendor: Vendor): VendorCategory => {
-  const cacheKey = `${vendor.id}-${vendor.company_name}`;
-  
-  if (categoryCache.has(cacheKey)) {
-    return categoryCache.get(cacheKey)!;
-  }
-
   const services = vendor.core_services?.join(' ').toLowerCase() || '';
   const specialties = vendor.specialties?.join(' ').toLowerCase() || '';
   const description = vendor.description?.toLowerCase() || '';
@@ -38,8 +29,6 @@ export const getVendorCategory = (vendor: Vendor): VendorCategory => {
     category = 'healthcare';
   }
 
-  // Cache the result
-  categoryCache.set(cacheKey, category);
   return category;
 };
 
@@ -93,9 +82,4 @@ export const extractFilterOptions = (vendors: Vendor[]) => {
     allCustomers,
     allSpecialties
   };
-};
-
-// Clear category cache (useful if vendor data changes significantly)
-export const clearCategoryCache = (): void => {
-  categoryCache.clear();
 };

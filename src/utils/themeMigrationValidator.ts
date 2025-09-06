@@ -97,7 +97,7 @@ export class ThemeMigrationValidator {
   }
 
   /**
-   * Clear warnings cache (useful for testing)
+   * Clear recorded warnings (useful for testing)
    */
   static clearWarnings(): void {
     this.warnings.clear();
