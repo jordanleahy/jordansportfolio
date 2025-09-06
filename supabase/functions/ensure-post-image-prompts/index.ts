@@ -249,7 +249,6 @@ serve(async (req) => {
                   success: true, 
                   promptLength: generatedPrompt.length 
                 };
-              }
 
             } catch (error) {
               console.error(`❌ BACKGROUND: Unexpected error for post ${post.id}:`, error);
