@@ -393,11 +393,6 @@ export const useUnifiedRealtime = ({
     queryClient.invalidateQueries({ queryKey: ['color-themes'] });
     queryClient.invalidateQueries({ queryKey: ['color-theme'] });
     queryClient.invalidateQueries({ queryKey: ['color-theme', 'default'] });
-    
-    // Clear service cache
-    import('@/services/colorThemeService').then(({ colorThemeService }) => {
-      colorThemeService.invalidateCache();
-    });
   };
 
   const handleSystemPromptUpdate = (eventType: string, data: any) => {

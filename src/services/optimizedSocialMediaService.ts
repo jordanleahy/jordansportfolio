@@ -2,37 +2,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { SocialMediaPost, CreateSocialMediaPost } from "@/types/socialMedia";
 
-// Enhanced service with caching and optimization
+// Service that queries Supabase directly for each request
 export class OptimizedSocialMediaService {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
-
-  private getCacheKey(category?: string, prefix = 'posts') {
-    return `${prefix}:${category || 'all'}`;
-  }
-
-  private isValidCache(cacheKey: string): boolean {
-    const cached = this.cache.get(cacheKey);
-    if (!cached) return false;
-    return Date.now() - cached.timestamp < cached.ttl;
-  }
-
-  private setCache(key: string, data: any, ttl = 5 * 60 * 1000) {
-    this.cache.set(key, { data, timestamp: Date.now(), ttl });
-  }
-
-  private getFromCache(key: string) {
-    const cached = this.cache.get(key);
-    return cached?.data;
-  }
 
   async getAllPosts(category?: string): Promise<SocialMediaPost[]> {
-    const cacheKey = this.getCacheKey(category);
-    
-    // Return cached data if valid
-    if (this.isValidCache(cacheKey)) {
-      return this.getFromCache(cacheKey);
-    }
-
     let query = supabase
       .from('social_media_posts')
       .select('*')
@@ -49,10 +22,8 @@ export class OptimizedSocialMediaService {
     const { data, error } = await query;
 
     if (error) throw error;
-    
-    const posts = (data || []) as SocialMediaPost[];
-    this.setCache(cacheKey, posts);
-    return posts;
+
+    return (data || []) as SocialMediaPost[];
   }
 
   // DEPRECATED: Use getPostsByThemeId instead for theme-based queries
@@ -63,13 +34,6 @@ export class OptimizedSocialMediaService {
 
   // Add method for getting posts by theme ID
   async getPostsByThemeId(themeId: string): Promise<SocialMediaPost[]> {
-    const cacheKey = `theme-posts:${themeId}`;
-    
-    // Return cached data if valid
-    if (this.isValidCache(cacheKey)) {
-      return this.getFromCache(cacheKey);
-    }
-
     const { data, error } = await supabase
       .from('social_media_posts')
       .select(`
@@ -82,21 +46,12 @@ export class OptimizedSocialMediaService {
       .order('id', { ascending: true });
 
     if (error) throw error;
-    
-    const posts = (data || []) as SocialMediaPost[];
-    this.setCache(cacheKey, posts);
-    return posts;
+
+    return (data || []) as SocialMediaPost[];
   }
 
   // Add method for getting a single post by ID
   async getPostById(id: string): Promise<SocialMediaPost | null> {
-    const cacheKey = `post:${id}`;
-    
-    // Return cached data if valid
-    if (this.isValidCache(cacheKey)) {
-      return this.getFromCache(cacheKey);
-    }
-
     const { data, error } = await supabase
       .from('social_media_posts')
       .select('*')
@@ -104,12 +59,8 @@ export class OptimizedSocialMediaService {
       .maybeSingle();
 
     if (error) throw error;
-    
-    const post = data as SocialMediaPost | null;
-    if (post) {
-      this.setCache(cacheKey, post);
-    }
-    return post;
+
+    return data as SocialMediaPost | null;
   }
 
   async createPost(post: CreateSocialMediaPost): Promise<SocialMediaPost> {
@@ -175,13 +126,7 @@ export class OptimizedSocialMediaService {
       .single();
 
     if (error) throw error;
-    
-    // Invalidate relevant caches
-    this.invalidateCache(finalCategory);
-    if (post.theme_id) {
-      this.cache.delete(`theme-posts:${post.theme_id}`);
-    }
-    
+
     return data as SocialMediaPost;
   }
 
@@ -205,10 +150,7 @@ export class OptimizedSocialMediaService {
     }
     
     console.log('🖼️ IMAGE_UPLOAD: Database update successful', { postId: id, updatedPost: data });
-    
-    // Invalidate relevant caches
-    this.invalidateCache(updates.category);
-    
+
     return data as SocialMediaPost;
   }
 
@@ -219,9 +161,6 @@ export class OptimizedSocialMediaService {
       .eq('id', id);
 
     if (error) throw error;
-    
-    // Invalidate all caches since we don't know the category
-    this.invalidateAllCaches();
   }
 
   async bulkImportPosts(category: string, posts: Array<{
@@ -239,10 +178,7 @@ export class OptimizedSocialMediaService {
       });
 
     if (error) throw error;
-    
-    // Invalidate relevant caches
-    this.invalidateCache(category);
-    
+
     // Handle the new JSON response format
     const result = data as { inserted_count: number } | null;
     return result?.inserted_count || 0;
@@ -276,12 +212,6 @@ export class OptimizedSocialMediaService {
       image_1_1_status?: string;
     } | null;
   }>> {
-    const cacheKey = this.getCacheKey(undefined, 'themes');
-    
-    if (this.isValidCache(cacheKey)) {
-      return this.getFromCache(cacheKey);
-    }
-
     // Check authentication first with timeout
     const { data: { user } } = await supabase.auth.getUser();
     console.log('🔐 SERVICE: getAvailableThemes - User authentication:', { 
@@ -306,7 +236,6 @@ export class OptimizedSocialMediaService {
     if (themesError) throw themesError;
 
     if (!themes || themes.length === 0) {
-      this.setCache(cacheKey, [], 1 * 60 * 1000); // 1 minute cache for empty results
       return [];
     }
 
@@ -401,7 +330,6 @@ export class OptimizedSocialMediaService {
       };
     });
     
-    this.setCache(cacheKey, processedThemes, 1 * 60 * 1000); // 1 minute cache for faster updates during theme creation
     return processedThemes;
   }
 
@@ -427,33 +355,11 @@ export class OptimizedSocialMediaService {
       .eq('id', themeId);
 
     if (themeError) throw themeError;
-
-    // Clear relevant caches
-    this.cache.delete(`theme-posts:${themeId}`);
-    this.cache.delete(this.getCacheKey(undefined, 'themes'));
-    this.invalidateAllCaches();
-  }
-
-  private invalidateCache(category?: string) {
-    if (category) {
-      this.cache.delete(this.getCacheKey(category));
-    }
-    this.cache.delete(this.getCacheKey()); // all posts cache
-    this.cache.delete(this.getCacheKey(undefined, 'themes')); // themes cache
-  }
-
-  // Public helpers to handle stale or ghost UI entries
-  public clearThemesCache() {
-    this.cache.delete(this.getCacheKey(undefined, 'themes'));
   }
 
   public async refreshAvailableThemes() {
-    this.clearThemesCache();
     return this.getAvailableThemes();
-  }
-
-  private invalidateAllCaches() {
-    this.cache.clear();
   }
 }
 export const optimizedSocialMediaService = new OptimizedSocialMediaService();
+
