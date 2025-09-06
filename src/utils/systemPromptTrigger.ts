@@ -39,7 +39,7 @@ export const triggerSystemPromptGeneration = async (category: string) => {
     console.log('🔍 STEP 2: Checking existing system prompts for category');
     // ❌ BAD: Legacy theme field check (Phase 2 migration needed)
     const promptsQuery = supabase
-      .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent' as any)
+      .from('theme_system_prompts' as any)
       .select('id')
       .eq('theme', category)
       .limit(1);
