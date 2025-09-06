@@ -85,7 +85,7 @@ export const useImageGeneration = () => {
       setGenerationStep('Generating image...');
       
       // Generate image using the prompt
-      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image-gpt', {
+      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image', {
         body: {
           prompt: prompt,
           aspectRatio: '1:1'

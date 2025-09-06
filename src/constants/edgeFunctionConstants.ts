@@ -7,7 +7,7 @@ export const EDGE_FUNCTION_NAMES = {
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
   
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',
-  GENERATE_IMAGE_GPT: 'generate-image-gpt',
+  GENERATE_IMAGE: 'generate-image',
   GENERATE_VOICEOVER_SCRIPT: 'generate-voiceover-script',
   PROCESS_AND_IMPORT_THEME: 'process-and-import-theme',
   PROCESS_FUNDING_JSON: 'process-funding-json',

@@ -94,7 +94,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
       // Generate image directly with existing prompt
       toast.info('Generating image with AI...');
 
-      const imageResponse = await supabase.functions.invoke('generate-image-gpt', {
+      const imageResponse = await supabase.functions.invoke('generate-image', {
         body: {
           prompt: generatedPrompt,
           aspectRatio: aspectRatio.replace('_', ':')
