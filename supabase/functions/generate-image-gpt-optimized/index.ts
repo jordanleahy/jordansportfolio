@@ -8,7 +8,6 @@ interface ImageGenerationRequest {
   aspectRatio?: string;
   seed?: number | null;
   useDeterministicSeed?: boolean;
-  seedContext?: string | null;
   category?: string | null;
   backgroundProcessing?: boolean;
 }
@@ -48,7 +47,6 @@ serve(async (req) => {
       aspectRatio = "4:3", 
       seed = null, 
       useDeterministicSeed = false,
-      seedContext = null, 
       category = null,
       backgroundProcessing = false
     } = requestBody;
@@ -102,7 +100,7 @@ serve(async (req) => {
     // Generate deterministic seed if needed
     if (useDeterministicSeed && !finalSeed && !isCDICategory) {
       const encoder = new TextEncoder();
-      const seedInput = seedContext ? `${seedContext}_${prompt}_${normalizedAspectRatio}` : `${prompt}_${normalizedAspectRatio}`;
+      const seedInput = `${prompt}_${normalizedAspectRatio}`;
       const data = encoder.encode(seedInput);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = new Uint8Array(hashBuffer);

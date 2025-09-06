@@ -7,7 +7,6 @@ interface GenerationOptions {
   aspectRatio?: string;
   seed?: number | null;
   useDeterministicSeed?: boolean;
-  seedContext?: string | null;
   category?: string | null;
 }
 
@@ -32,7 +31,6 @@ export const useConcurrencyControlledImageGeneration = () => {
       aspectRatio = '1:1',
       seed = null,
       useDeterministicSeed = false,
-      seedContext = null,
       category = null
     } = options;
 
@@ -61,7 +59,6 @@ export const useConcurrencyControlledImageGeneration = () => {
           aspectRatio,
           seed,
           useDeterministicSeed,
-          seedContext,
           category
         }
       });

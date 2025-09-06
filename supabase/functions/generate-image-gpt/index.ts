@@ -9,7 +9,6 @@ interface ImageGenerationRequest {
   aspectRatio?: string;
   seed?: number | null;
   useDeterministicSeed?: boolean;
-  seedContext?: string | null;
   category?: string | null;
 }
 
@@ -85,12 +84,12 @@ serve(async (req) => {
       );
     }
     
-    const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, seedContext = null, category = null } = incomingRequestBody;
+    const { prompt, aspectRatio = "4:3", seed = null, useDeterministicSeed = false, category = null } = incomingRequestBody;
 
     // Normalize aspect ratio formats like "1_1" to "1:1"
     const normalizedAspectRatio: string = String(aspectRatio).replace(/_/g, ':');
 
-    console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'normalized:', normalizedAspectRatio, 'seedContext exists:', !!seedContext);
+    console.log('🔍 DEBUG: Parsed parameters - prompt exists:', !!prompt, 'aspectRatio:', aspectRatio, 'normalized:', normalizedAspectRatio);
     console.log('📐 ASPECT_RATIO: Received aspect ratio:', normalizedAspectRatio);
 
     if (!prompt) {
@@ -144,9 +143,9 @@ serve(async (req) => {
     
     // Fall back to deterministic seed if no seed is set yet (skip for CDI)
     if (useDeterministicSeed && !finalSeed && !isCDICategory) {
-      // Create deterministic seed based on seedContext + prompt + aspect ratio for uniqueness
+      // Create deterministic seed based on prompt + aspect ratio for uniqueness
       const encoder = new TextEncoder();
-      const seedInput = seedContext ? `${seedContext}_${prompt}_${normalizedAspectRatio}` : `${prompt}_${normalizedAspectRatio}`;
+      const seedInput = `${prompt}_${normalizedAspectRatio}`;
       const data = encoder.encode(seedInput);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = new Uint8Array(hashBuffer);
