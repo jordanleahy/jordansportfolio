@@ -16,7 +16,6 @@ export const ImagePromptGeneratorModal = ({
   onClose,
   config,
   content,
-  cachedPrompt,
   onPromptGenerated
 }: ImagePromptGeneratorModalProps) => {
   const { user } = useAuth();
@@ -131,27 +130,14 @@ export const ImagePromptGeneratorModal = ({
 
   useEffect(() => {
     if (isOpen && content.primary && content.secondary) {
-      if (cachedPrompt) {
-        // Instant loading of cached prompt - no delay needed as aspect ratios no longer cached
-        setBasePrompt(cachedPrompt);
-        
-        // Apply current aspect ratio dynamically
-        const finalPrompt = config.aspectRatioOptions && selectedAspectRatio 
-          ? `${cachedPrompt}. Composed in ${selectedAspectRatio} aspect ratio format with appropriate layout for this orientation.`
-          : cachedPrompt;
-          
-        setGeneratedPrompt(finalPrompt);
-        setIsFromCache(true);
-      } else {
-        // Show immediate loading state
-        setIsGenerating(true);
-        // Use setTimeout to ensure UI updates before heavy operation
-        setTimeout(() => {
-          generateImagePrompt();
-        }, 10);
-      }
+      // Show immediate loading state
+      setIsGenerating(true);
+      // Use setTimeout to ensure UI updates before heavy operation
+      setTimeout(() => {
+        generateImagePrompt();
+      }, 10);
     }
-  }, [isOpen, content.primary, content.secondary, cachedPrompt]);
+  }, [isOpen, content.primary, content.secondary]);
 
   useEffect(() => {
     if (!isOpen) {

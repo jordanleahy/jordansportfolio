@@ -169,9 +169,6 @@ export interface ImagePromptModalProps {
   title: string;
   description: string;
   postId: string;
-  cachedPrompt?: string | null;
-  // ❌ BAD: Using theme name - should use themeId exclusively  
-  // theme?: string;  // REMOVED - use themeId instead
   themeId?: string;
   category?: string;
 }

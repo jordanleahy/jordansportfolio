@@ -12,7 +12,7 @@ const aspectRatioOptions: AspectRatioOption[] = [
   { label: "Standard (4:3)", value: "4:3" }
 ];
 
-export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, cachedPrompt, category = 'cdi', themeId }: ImagePromptModalProps) => {
+export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, category = 'cdi', themeId }: ImagePromptModalProps) => {
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete  
   // const params = useParams();
   // const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
@@ -25,12 +25,8 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'create-single-image-prompt',
     category: category,
-    // ❌ BAD: Using theme name - removed in Phase 1 migration
-    // theme: theme,  // REMOVED - use themeId instead
     themeId: themeId,
-    enableCaching: true,
-    aspectRatioOptions,
-    cacheKeyPrefix: themeId ? `theme_${themeId}_image` : 'calendar_image'
+    aspectRatioOptions
   };
 
   const content: ImagePromptContent = {
@@ -57,7 +53,6 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
       onClose={onClose}
       config={config}
       content={content}
-      cachedPrompt={cachedPrompt || undefined}
       onPromptGenerated={handlePromptGenerated}
     />
   );

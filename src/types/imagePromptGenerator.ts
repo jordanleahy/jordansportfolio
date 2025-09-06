@@ -12,9 +12,7 @@ export interface ImagePromptConfig {
   theme?: string;
   themeId?: string;
   category?: string;
-  enableCaching?: boolean;
   aspectRatioOptions?: AspectRatioOption[];
-  cacheKeyPrefix?: string;
   fixedAspectRatio?: AspectRatio;
 }
 
@@ -31,6 +29,5 @@ export interface ImagePromptGeneratorModalProps {
   onClose: () => void;
   config: ImagePromptConfig;
   content: ImagePromptContent;
-  cachedPrompt?: string;
   onPromptGenerated?: (prompt: string) => void;
 }

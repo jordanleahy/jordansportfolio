@@ -27,9 +27,7 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
     edgeFunction: 'create-single-image-prompt',
     category: category,
     themeId,
-    enableCaching: true,
-    aspectRatioOptions,
-    cacheKeyPrefix: 'blog_visual'
+    aspectRatioOptions
   };
 
   const contentData: ImagePromptContent = {

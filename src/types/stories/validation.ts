@@ -18,14 +18,7 @@ export function assertThemeId(value: string): ThemeId {
   return value as ThemeId;
 }
 
-// Cache key validation types
-export interface ValidatedCacheConfig {
-  themeId: ThemeId;
-  category: string;
-  postId?: string;
-  title?: string;
-  description?: string;
-}
+// Removed cache validation types - no longer needed
 
 // Strict theme-related interfaces
 export interface StrictTheme {
@@ -69,24 +62,13 @@ export interface StrictThemeWithPosts {
   } | null;
 }
 
-// Migration validation types
-export interface LegacyCacheEntry {
-  key: string;
-  isLegacy: boolean;
-  shouldMigrate: boolean;
-}
-
-export interface CacheMigrationResult {
-  migratedCount: number;
-  cleanedCount: number;
-  errors: string[];
-}
+// Removed migration validation types - no longer needed
 
 // Validation error types
 export class ThemeValidationError extends Error {
   constructor(
     message: string,
-    public readonly code: 'INVALID_THEME_ID' | 'LEGACY_THEME_NAME_USAGE' | 'CACHE_KEY_MISMATCH',
+    public readonly code: 'INVALID_THEME_ID' | 'LEGACY_THEME_NAME_USAGE',
     public readonly details?: any
   ) {
     super(message);

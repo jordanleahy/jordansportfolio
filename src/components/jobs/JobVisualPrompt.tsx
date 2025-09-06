@@ -18,8 +18,6 @@ export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, com
     systemPrompt: '', // Will be handled by the edge function
     edgeFunction: 'create-single-image-prompt',
     category: 'healthcare',
-    enableCaching: true,
-    cacheKeyPrefix: `job_visual_${companyName.toLowerCase().replace(/\s+/g, '_')}`,
     fixedAspectRatio: "9:16"
   };
 
