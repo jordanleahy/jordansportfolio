@@ -286,14 +286,7 @@ export default function StoriesDashboard() {
       
       if (themeDeleteError) throw themeDeleteError;
       
-      // Delete cached prompts related to this theme
-      const { error: cacheError } = await supabase
-        .from('cached_prompts')
-        .delete()
-        .eq('user_id', user?.id)
-        .like('cache_key', `%${theme.id}%`);
-      
-      if (cacheError) console.warn('Failed to delete cached prompts:', cacheError);
+      // Removed cache deletion - cache system no longer exists
       
       toast({
         title: "Theme Deleted",

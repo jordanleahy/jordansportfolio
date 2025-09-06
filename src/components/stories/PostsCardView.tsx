@@ -10,15 +10,16 @@ import { Copy, Trash2, Lightbulb, Mic, Sparkles, Edit2, RefreshCw, ChevronDown, 
 import { Button } from '@/components/ui/button';
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 
-import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
+
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
-import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
+
 import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -64,12 +65,12 @@ export const PostsCardView = memo(({
   blogStatuses = {},
   onEditPost
 }: PostsTableViewProps) => {
-  const { generateAllImages, isGenerating } = useBulkImageGeneration();
+  // const { generateAllImages, isGenerating } = useBulkImageGeneration(); // Removed - hook deleted
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { setProcessing } = useProcessingStatesContext();
   const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage } = useUnifiedRegenerateStates();
   const { themeData } = useEnhancedThemeDataPrefetch();
-  const { generateWithCache } = useCachedPromptGeneration();
+  
   const { user } = useAuth();
   const { toast } = useToast();
   const { getCreditStatus, enforceUsage, getBlockingMessage } = useCreditCheck();
@@ -168,17 +169,9 @@ export const PostsCardView = memo(({
   };
 
   const handleGenerateAllImages = async (post: SocialMediaPost) => {
-    try {
-      await generateAllImages({
-        postId: post.id,
-        title: post.title,
-        description: post.description,
-        category: post.category
-      });
-      onPostsChange();
-    } catch (error) {
-      console.error('Batch generation failed:', error);
-    }
+    // Bulk generation functionality removed - use individual image generation instead
+    console.log('Bulk generation removed - use individual image generation');
+    return;
   };
 
   const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
@@ -206,14 +199,17 @@ export const PostsCardView = memo(({
         try {
           setProcessing(post.id, 'generate', true);
           
-          const generatedPrompt = await generateWithCache({
-            postId: post.id,
-            title: post.title,
-            description: post.description,
-            theme: themeData?.theme,
-            themeId: themeData?.themeId,
-            category: themeData?.category || post.category
+          // Direct API call to generate prompt instead of using cache
+          const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
+            body: {
+              postId: post.id,
+              themeId: themeData?.themeId,
+              aspectRatio: '1:1'
+            }
           });
+
+          if (error) throw new Error(error.message || 'Failed to generate prompt');
+          const generatedPrompt = data?.generatedPrompt;
 
           if (generatedPrompt) {
             const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');
@@ -230,7 +226,7 @@ export const PostsCardView = memo(({
       },
       100
     );
-  }, [generateWithCache, themeData, setInstantLoading, setProcessing, debouncedAction]);
+  }, [themeData, setInstantLoading, setProcessing, debouncedAction]);
 
   const handleDownloadPDF = useCallback(async (post: SocialMediaPost) => {
     if (!user) {
@@ -435,13 +431,14 @@ export const PostsCardView = memo(({
                        
                        {isAdmin && (
                          <>
-                           <ActionButton
-                             icon={<Sparkles className="h-4 w-4" />}
-                             onClick={() => handleGenerateAllImages(post)}
-                             loading={isGenerating(post.id)}
-                             title="Bulk Generate"
-                             size="sm"
-                           />
+                            <ActionButton
+                              icon={<Sparkles className="h-4 w-4" />}
+                              onClick={() => handleGenerateAllImages(post)}
+                              loading={false}
+                              disabled={true}
+                              title="Bulk Generate (Disabled)"
+                              size="sm"
+                            />
                            
                             <ActionButton
                               icon={<Lightbulb className="h-4 w-4" />}

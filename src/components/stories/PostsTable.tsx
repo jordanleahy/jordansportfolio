@@ -24,7 +24,7 @@ import { PostEditModal } from "./PostEditModal";
 import { ImagePreviewModal } from "@/components/ui/responsive-image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { useRowAnimations } from "@/hooks/useRowAnimations";
-import { SystemPromptViewer } from "./SystemPromptViewer";
+
 import { IndividualPromptViewer } from "./IndividualPromptViewer";
 import { useUserRole } from "@/hooks/useUserRole";
 import { toast } from "sonner";
@@ -1232,14 +1232,7 @@ const { handleGenerateImage } = useImageManager({
         width: '4px',
         marginLeft: '-2px'
       }} />
-          <SystemPromptViewer 
-            themeId={themeId}
-            isVisible={showSystemPrompt} 
-            onClose={() => setShowSystemPrompt(false)} 
-            selectedThemeId={selectedThemeId}
-            themes={colorThemes}
-            onThemeChange={onThemeChange}
-          />
+          {/* System prompt viewer removed - component deleted */}
         </div>}
 
       {/* Individual Prompt Panel */}

@@ -572,51 +572,6 @@ export type Database = {
         }
         Relationships: []
       }
-      cached_prompts: {
-        Row: {
-          cache_key: string
-          category: string
-          created_at: string
-          expires_at: string | null
-          hit_count: number | null
-          id: string
-          last_accessed_at: string | null
-          metadata: Json | null
-          prompt_text: string
-          updated_at: string
-          user_id: string | null
-          version: number | null
-        }
-        Insert: {
-          cache_key: string
-          category: string
-          created_at?: string
-          expires_at?: string | null
-          hit_count?: number | null
-          id?: string
-          last_accessed_at?: string | null
-          metadata?: Json | null
-          prompt_text: string
-          updated_at?: string
-          user_id?: string | null
-          version?: number | null
-        }
-        Update: {
-          cache_key?: string
-          category?: string
-          created_at?: string
-          expires_at?: string | null
-          hit_count?: number | null
-          id?: string
-          last_accessed_at?: string | null
-          metadata?: Json | null
-          prompt_text?: string
-          updated_at?: string
-          user_id?: string | null
-          version?: number | null
-        }
-        Relationships: []
-      }
       case_studies: {
         Row: {
           created_at: string

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { cacheManager } from '@/lib/cacheManager';
+
 import { supabase } from '@/integrations/supabase/client';
 
 interface EnhancedThemeData {
@@ -40,18 +40,14 @@ export const useEnhancedThemeDataPrefetch = () => {
         
       if (error) throw error;
       
-      let systemPrompt = null;
-      if (themeId) {
-        // Prefetch system prompt for the theme
-        systemPrompt = await cacheManager.getSystemPrompt(themeId);
-      }
+      // No system prompt caching needed - removed cache dependency
 
       const result: EnhancedThemeData = {
         themeId,
         theme: data?.theme_name || '',
         category,
         systemPromptId: data?.visual_prompt_system_prompt_id,
-        systemPrompt
+        systemPrompt: null
       };
 
       setThemeData(result);

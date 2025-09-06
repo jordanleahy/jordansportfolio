@@ -7,7 +7,7 @@ import { Loader2, Copy, Check, RefreshCw, Settings, ChevronDown, ChevronUp } fro
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { EnhancedCacheManagement } from '@/components/blog/EnhancedCacheManagement';
+
 import { ImagePromptGeneratorModalProps } from '@/types/imagePromptGenerator';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 
@@ -25,7 +25,7 @@ export const ImagePromptGeneratorModal = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isFromCache, setIsFromCache] = useState(false);
-  const [cacheManagementOpen, setCacheManagementOpen] = useState(false);
+  
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(
     config.fixedAspectRatio || config.aspectRatioOptions?.[0]?.value || "1:1"
   );
@@ -162,7 +162,6 @@ export const ImagePromptGeneratorModal = ({
       setIsGenerating(false);
       setCopied(false);
       setIsFromCache(false);
-      setCacheManagementOpen(false);
     }
   }, [isOpen]);
 
@@ -195,15 +194,6 @@ export const ImagePromptGeneratorModal = ({
                           <span className="text-xs text-muted-foreground bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
                             From Cache
                           </span>
-                        )}
-                        {config.enableCaching && (
-                          <Button
-                            onClick={() => setCacheManagementOpen(true)}
-                            variant="ghost"
-                            size="sm"
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
                         )}
                         <Button
                           onClick={generateImagePrompt}
@@ -326,12 +316,6 @@ export const ImagePromptGeneratorModal = ({
         </DialogContent>
       </Dialog>
 
-      {config.enableCaching && config.cacheKeyPrefix && (
-        <EnhancedCacheManagement
-          isOpen={cacheManagementOpen}
-          onClose={() => setCacheManagementOpen(false)}
-        />
-      )}
     </>
   );
 };

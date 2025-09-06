@@ -12,14 +12,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Copy, Trash2, Lightbulb, Mic, ChevronUp, ChevronDown, Sparkles, Edit2, RefreshCw } from 'lucide-react';
 
 import { SimpleShimmer } from '@/components/ui/simple-shimmer';
+import { supabase } from '@/integrations/supabase/client';
 import { InstantLoadingIndicator } from '@/components/ui/instant-loading-indicator';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useBulkImageGeneration } from '@/hooks/useImageBatchGeneration';
+
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useIndividualPromptCache } from '@/hooks/useIndividualPromptCache';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
-import { useCachedPromptGeneration } from '@/hooks/useCachedPromptGeneration';
+
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
 
@@ -66,11 +67,11 @@ export const PostsTableView = memo(({
   const [editingCell, setEditingCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
   const [editValues, setEditValues] = useState<{[key: string]: string}>({});
   const [hoveredCell, setHoveredCell] = useState<{postId: string, field: 'title' | 'description'} | null>(null);
-  const { generateAllImages, isGenerating } = useBulkImageGeneration();
+  // const { generateAllImages, isGenerating } = useBulkImageGeneration(); // Removed - hook deleted
   const { isProcessing: isProcessingCtx, setProcessing } = useProcessingStatesContext();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { themeData } = useEnhancedThemeDataPrefetch();
-  const { generateWithCache, fromCache } = useCachedPromptGeneration();
+  
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
 
   const getNextStatus = (currentStatus: string): 'draft' | 'scheduled' | 'published' => {
@@ -87,18 +88,9 @@ export const PostsTableView = memo(({
   };
 
   const handleGenerateAllImages = async (post: SocialMediaPost) => {
-    try {
-      await generateAllImages({
-        postId: post.id,
-        title: post.title,
-        description: post.description,
-        category: post.category
-      });
-      // Refresh the posts to show newly generated images
-      onPostsChange();
-    } catch (error) {
-      console.error('Batch generation failed:', error);
-    }
+    // Bulk generation functionality removed - use individual image generation instead
+    console.log('Bulk generation removed - use individual image generation');
+    return;
   };
 
   const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
@@ -137,14 +129,17 @@ export const PostsTableView = memo(({
             timestamp: new Date().toISOString()
           });
 
-          const generatedPrompt = await generateWithCache({
-            postId: post.id,
-            title: post.title,
-            description: post.description,
-            theme: themeData?.theme,
-            themeId: themeData?.themeId,
-            category: themeData?.category || post.category
+          // Direct API call to generate prompt instead of using cache
+          const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
+            body: {
+              postId: post.id,
+              themeId: themeData?.themeId,
+              aspectRatio: '1:1'
+            }
           });
+
+          if (error) throw new Error(error.message || 'Failed to generate prompt');
+          const generatedPrompt = data?.generatedPrompt;
 
           if (generatedPrompt) {
             // Update the post with the generated prompt
@@ -162,7 +157,7 @@ export const PostsTableView = memo(({
       },
       100 // Very short debounce to prevent double-clicks but keep responsiveness
     );
-  }, [generateWithCache, themeData, setInstantLoading, setProcessing, debouncedAction]);
+  }, [themeData, setInstantLoading, setProcessing, debouncedAction]);
 
   const handleCellEdit = (postId: string, field: 'title' | 'description', currentValue: string) => {
     setEditingCell({ postId, field });
@@ -315,8 +310,9 @@ export const PostsTableView = memo(({
                   {
                     icon: <Sparkles className="h-4 w-4" />,
                     onClick: () => handleGenerateAllImages(post),
-                    loading: isGenerating(post.id),
-                    title: "Bulk Generate"
+                    loading: false,
+                    disabled: true,
+                    title: "Bulk Generate (Disabled)"
                   },
                   {
                     icon: <Lightbulb className="h-4 w-4" />,
