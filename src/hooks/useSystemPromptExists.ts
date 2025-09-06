@@ -12,7 +12,7 @@ export const useSystemPromptExists = (themeId: string | null, theme?: string | n
       // ✅ GOOD: Primary themeId-based check (Phase 2 migration)
       if (themeId) {
         const { data: themeIdData, error: themeIdError } = await supabase
-          .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent' as any)
+          .from('theme_system_prompts' as any)
           .select('id')
           .eq('theme_id', themeId)
           .limit(1);
@@ -45,7 +45,7 @@ export const useSystemPromptExists = (themeId: string | null, theme?: string | n
       // Check for system prompts using theme_id if theme record exists
       if (themeRecord?.id) {
         const { data: themeIdData, error: themeIdError } = await supabase
-          .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent' as any)
+          .from('theme_system_prompts' as any)
           .select('id')
           .eq('theme_id', themeRecord.id)
           .limit(1);
@@ -60,7 +60,7 @@ export const useSystemPromptExists = (themeId: string | null, theme?: string | n
       
       // ❌ BAD: Final fallback to text-based theme check (legacy)
       const { data: themeData, error: themeTextError } = await supabase
-        .from('theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent' as any)
+        .from('theme_system_prompts' as any)
         .select('id')
         .eq('theme', theme)
         .limit(1);

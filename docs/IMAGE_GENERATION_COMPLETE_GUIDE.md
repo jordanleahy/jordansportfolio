@@ -357,10 +357,8 @@ The system prompts infrastructure uses these tables:
 - **`cached_prompts`** - Performance optimization cache
 
 **Table Evolution History:**
-1. `system_prompts` (original) → 
-2. `theme_system_prompts_to_create_image_prompt_via_visual_prompt_agent` (descriptive) →
-3. `theme_system_prompts_to_create_image_prompt_via_visual_prompt_a` (PostgreSQL length limit) →
-4. **`theme_system_prompts`** (current simplified name)
+1. `system_prompts` (original) →
+2. **`theme_system_prompts`** (current simplified name)
 
 ### Visual Prompt Generator
 
