@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
 import { QUERY_KEYS, QUERY_CONFIG, getAllPostQueryKeys } from '@/constants/queryKeys';
-import { useParams } from 'react-router-dom';
 import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
 
 interface IndividualPromptData {
@@ -12,14 +11,11 @@ interface IndividualPromptData {
   version: number;
 }
 
-export const useIndividualPromptCache = (postId: string, themeId?: string) => {
+export const useIndividualPrompt = (postId: string, themeId?: string) => {
   
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
-  // const params = useParams();
-  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
   
   // Check theme completion status - allow generation for in_progress themes
   const { isCompleted, isProcessing } = useSimpleThemeCompletion(themeId);
@@ -52,7 +48,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
           .single();
 
         if (postError) {
-          console.error('🔍 [useIndividualPromptCache] Database error:', postError);
+          console.error('🔍 [useIndividualPrompt] Database error:', postError);
           if (postError.code === 'PGRST116') {
             
             return null; // Post not found
@@ -75,7 +71,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
 
         return result;
       } catch (error) {
-        console.error('Error in useIndividualPromptCache:', error);
+        console.error('Error in useIndividualPrompt:', error);
         throw error;
       }
     },
@@ -147,8 +143,6 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
       console.log('🔄 Regeneration mutation called with:', {
         postId,
         themeId,
-         // ❌ BAD: Using theme name - removed in Phase 1 migration
-         // theme,  // REMOVED - use themeId instead
         aspectRatio,
         isCompleted,
         isProcessing
@@ -156,7 +150,6 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
 
       if (!postId || !themeId) {
          const errorMsg = `Missing required data: postId=${postId}, themeId=${themeId}`;
-         // ❌ BAD: Using theme name - removed in Phase 1 migration: , theme=${theme}
         console.error('❌ Regeneration failed:', errorMsg);
         throw new Error(errorMsg);
       }
@@ -222,7 +215,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
     },
   });
 
-  const invalidateCache = useCallback(async () => {
+  const refresh = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.individualPrompt(postId) });
     getAllPostQueryKeys().forEach(key => {
       queryClient.invalidateQueries({ queryKey: key });
@@ -244,7 +237,7 @@ export const useIndividualPromptCache = (postId: string, themeId?: string) => {
     isUpdating: updateMutation.isPending,
     regeneratePrompt: regenerateMutation.mutate,
     isRegenerating: regenerateMutation.isPending,
-    invalidateCache,
+    refresh,
     refetch: query.refetch
   };
 };
