@@ -32,6 +32,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PostsTableProps } from '@/types/stories';
 import { useParams } from 'react-router-dom';
 import { ManualPostForm } from './ManualPostForm';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 
 export default function PostsTable({
@@ -62,6 +63,7 @@ export default function PostsTable({
   const [hasImageActivity, setHasImageActivity] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   // Check user role for admin features
   const { isAdmin: userIsAdmin } = useUserRole();
@@ -134,17 +136,10 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
-        body: {
-          postId: post.id,
-          title: post.title,
-          description: post.description,
-          category: post.category,
-          themeId: post.theme_id
-        }
-      });
+      // Use optimized prompt generation instead of direct edge function call
+      const generatedPrompt = await generatePrompt(post.id, post.theme_id);
 
-      if (error) throw error;
+      if (!generatedPrompt) throw new Error('No prompt generated');
 
       toast.success("Prompt regenerated successfully");
       onPostsChange(); // Refresh the posts to show updated prompt

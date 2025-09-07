@@ -46,8 +46,8 @@ export const ImagePromptGeneratorModal = ({
     setIsFromCache(false);
 
     try {
-      // Use the specified edge function or default to create-single-image-prompt
-      const edgeFunction = config.edgeFunction || 'create-single-image-prompt';
+      // Use the specified edge function or default to bulk-generate-prompts
+      const edgeFunction = config.edgeFunction || 'bulk-generate-prompts';
 
       // Call the appropriate edge function directly
       const { data, error } = await supabase.functions.invoke(edgeFunction, {

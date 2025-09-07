@@ -4,6 +4,7 @@ export const EDGE_FUNCTION_NAMES = {
   GENERATE_COMPARISON_PAGES: 'generate-comparison-pages',
   GENERATE_CONTENT: 'generate-content',
   CREATE_SINGLE_IMAGE_PROMPT: 'create-single-image-prompt',
+  BULK_GENERATE_PROMPTS: 'bulk-generate-prompts',
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
   
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',

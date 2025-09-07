@@ -15,6 +15,7 @@ import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 import { generatePostPDF, generateMultiplePostsPDF } from '@/utils/pdfGenerator';
 import { useAuth } from '@/contexts/AuthContext';
@@ -70,6 +71,7 @@ export const PostsCardView = memo(({
   const { setProcessing } = useProcessingStatesContext();
   const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage } = useUnifiedRegenerateStates();
   const { themeData } = useEnhancedThemeDataPrefetch();
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   const { user } = useAuth();
   const { toast } = useToast();
@@ -199,17 +201,8 @@ export const PostsCardView = memo(({
         try {
           setProcessing(post.id, 'generate', true);
           
-          // Direct API call to generate prompt instead of using cache
-          const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
-            body: {
-              postId: post.id,
-              themeId: themeData?.themeId,
-              aspectRatio: '1:1'
-            }
-          });
-
-          if (error) throw new Error(error.message || 'Failed to generate prompt');
-          const generatedPrompt = data?.generatedPrompt;
+          // Use optimized prompt generation instead of direct edge function call
+          const generatedPrompt = await generatePrompt(post.id, themeData?.themeId, '1:1');
 
           if (generatedPrompt) {
             const { optimizedSocialMediaService } = await import('@/services/optimizedSocialMediaService');

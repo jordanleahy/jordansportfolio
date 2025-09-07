@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { optimizedSocialMediaService } from '@/services/optimizedSocialMediaService';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 interface EditPostData {
   title: string;
@@ -20,6 +21,7 @@ export const usePostEditor = (): UsePostEditorReturn => {
   const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const { generatePrompt } = useOptimizedPromptGeneration();
 
   const editMutation = useMutation({
     mutationFn: async ({ postId, data }: { postId: string; data: EditPostData }) => {
@@ -52,21 +54,16 @@ export const usePostEditor = (): UsePostEditorReturn => {
 
           if (error) throw error;
 
-          const { data: promptData, error: promptError } = await supabase.functions.invoke('create-single-image-prompt', {
-            body: { 
-              postId: postId,
-              themeId: postData.theme_id,
-              aspectRatio: '1:1'
-            }
-          });
+          // Use optimized prompt generation instead of direct edge function call
+          const generatedPrompt = await generatePrompt(postId, postData.theme_id, '1:1');
 
-          if (promptError) throw promptError;
+          if (!generatedPrompt) throw new Error('No prompt generated');
           
           // Update the post with the new prompt
           await supabase
             .from('social_media_posts')
             .update({ 
-              generated_image_prompt: promptData.generatedPrompt,
+              generated_image_prompt: generatedPrompt,
               updated_at: new Date().toISOString()
             })
             .eq('id', postId)

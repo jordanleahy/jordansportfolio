@@ -24,7 +24,7 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
   const config: ImagePromptConfig = {
     title: themeId ? `Theme ${themeId} Visual Prompt Generator` : `${getCategoryLabel(category)} Visual Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
-    edgeFunction: 'create-single-image-prompt',
+    edgeFunction: 'bulk-generate-prompts',
     category: category,
     themeId,
     aspectRatioOptions

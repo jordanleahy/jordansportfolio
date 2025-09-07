@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCallback } from 'react';
 import { QUERY_KEYS, QUERY_CONFIG, getAllPostQueryKeys } from '@/constants/queryKeys';
 import { useSimpleThemeCompletion } from '@/hooks/useSimpleThemeCompletion';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 interface IndividualPromptData {
   prompt: string;
@@ -12,10 +13,9 @@ interface IndividualPromptData {
 }
 
 export const useIndividualPrompt = (postId: string, themeId?: string) => {
-  
-  
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   // Check theme completion status - allow generation for in_progress themes
   const { isCompleted, isProcessing } = useSimpleThemeCompletion(themeId);
@@ -162,22 +162,16 @@ export const useIndividualPrompt = (postId: string, themeId?: string) => {
         throw new Error(errorMsg);
       }
 
-      // Call the create-single-image-prompt function with the new payload format
-      const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
-        body: { 
-          postId,
-          themeId,
-          aspectRatio
-        }
-      });
+      // Use optimized prompt generation instead of direct edge function call
+      const generatedPrompt = await generatePrompt(postId, themeId, aspectRatio);
 
-      if (error) throw error;
+      if (!generatedPrompt) throw new Error('No prompt generated');
       
       // Update the post with the new prompt and mark as completed
       const { error: updateError } = await supabase
         .from('social_media_posts')
         .update({ 
-          generated_image_prompt: data.generatedPrompt,
+          generated_image_prompt: generatedPrompt,
           individual_prompt_status: 'completed',
           updated_at: new Date().toISOString()
         })
@@ -186,7 +180,7 @@ export const useIndividualPrompt = (postId: string, themeId?: string) => {
 
       if (updateError) throw updateError;
 
-      return data;
+      return { generatedPrompt };
     },
     onSuccess: async () => {
       // Invalidate and refetch the individual prompt query

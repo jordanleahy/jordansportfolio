@@ -7,6 +7,7 @@ import { SimpleShimmer } from '@/components/ui/simple-shimmer';
 import { useImageGenerationTimerContext } from '@/contexts/ImageGenerationTimerContext';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useUnifiedRegenerateStates } from '@/hooks/useUnifiedRegenerateStates';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,7 @@ export const GenerateImage = ({
   const timer = useImageGenerationTimerContext();
   const { setProcessing } = useProcessingStatesContext();
   const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage } = useUnifiedRegenerateStates();
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
   // const params = useParams();
@@ -141,23 +143,12 @@ export const GenerateImage = ({
       console.log('🎨 IMAGE_GEN: Step 1 - Generating prompt...');
       toast.info('Generating image prompt...');
       
-      const promptResponse = await supabase.functions.invoke('create-single-image-prompt', {
-        body: {
-          postId: post.id,
-          themeId: (post as any).theme_id || undefined,
-          aspectRatio: aspectRatio
-        }
-      });
+      // Use optimized prompt generation instead of direct edge function call
+      const generatedPrompt = await generatePrompt(post.id, (post as any).theme_id, aspectRatio);
 
-      if (promptResponse.error) {
-        console.error('🚫 IMAGE_GEN: Prompt generation failed:', promptResponse.error);
-        throw new Error(`Failed to generate prompt: ${promptResponse.error.message}`);
-      }
-
-      const generatedPrompt = promptResponse.data?.generatedPrompt;
       console.log('✅ IMAGE_GEN: Prompt generated successfully:', generatedPrompt?.substring(0, 100) + '...');
       if (!generatedPrompt) {
-        console.error('🚫 IMAGE_GEN: No prompt in response:', promptResponse.data);
+        console.error('🚫 IMAGE_GEN: No prompt generated');
         throw new Error('No prompt generated');
       }
 

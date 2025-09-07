@@ -19,6 +19,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { useInstantFeedback } from '@/hooks/useInstantFeedback';
 import { useEnhancedThemeDataPrefetch } from '@/hooks/useEnhancedThemeDataPrefetch';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatioKey } from '@/types/bulkImageGeneration';
@@ -70,6 +71,7 @@ export const PostsTableView = memo(({
   const { isProcessing: isProcessingCtx, setProcessing } = useProcessingStatesContext();
   const { setInstantLoading, debouncedAction, isGenerating: isInstantGenerating, getElapsedTime } = useInstantFeedback();
   const { themeData } = useEnhancedThemeDataPrefetch();
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   const toAspect = (k: AspectRatioKey) => k.replace('_', ':') as any;
 
@@ -128,17 +130,8 @@ export const PostsTableView = memo(({
             timestamp: new Date().toISOString()
           });
 
-          // Direct API call to generate prompt
-          const { data, error } = await supabase.functions.invoke('create-single-image-prompt', {
-            body: {
-              postId: post.id,
-              themeId: themeData?.themeId,
-              aspectRatio: '1:1'
-            }
-          });
-
-          if (error) throw new Error(error.message || 'Failed to generate prompt');
-          const generatedPrompt = data?.generatedPrompt;
+          // Use optimized prompt generation instead of direct edge function call
+          const generatedPrompt = await generatePrompt(post.id, themeData?.themeId, '1:1');
 
           if (generatedPrompt) {
             // Update the post with the generated prompt

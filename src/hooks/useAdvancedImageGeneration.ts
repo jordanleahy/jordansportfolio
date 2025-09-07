@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
-import { useParams } from 'react-router-dom';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 import { ColorTheme } from '@/types/colorTheme';
 
 interface GenerationMetrics {
@@ -29,10 +29,7 @@ export const useAdvancedImageGeneration = () => {
   const { toast } = useToast();
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
-  
-  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
-  // const params = useParams();
-  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationSteps, setGenerationSteps] = useState<GenerationStep[]>([]);
@@ -117,41 +114,22 @@ export const useAdvancedImageGeneration = () => {
           visual_style: colorTheme.visual_style,
           hasAllColors: !!(colorTheme.primary_color && colorTheme.secondary_color)
         } : null,
-        themeId,
-         // ❌ BAD: Using theme name - removed in Phase 1 migration
-         // urlTheme: theme  // REMOVED - use themeId instead
+        themeId
       });
 
-      const { data: promptData, error: promptError } = await supabase.functions.invoke('create-single-image-prompt', {
-        body: {
-          postId: post.id,
-          themeId,
-          aspectRatio: '1:1'
-        }
-      });
+      // Use optimized prompt generation instead of direct edge function call
+      const prompt = await generatePrompt(post.id, themeId, '1:1');
 
       promptTime = Date.now() - promptStart;
       
-      if (promptError) {
-        updateStep('Prompt Generation', 'error', `Failed: ${promptError.message}`);
-        throw new Error(`Failed to generate prompt: ${promptError.message}`);
+      if (!prompt) {
+        updateStep('Prompt Generation', 'error', 'No prompt generated');
+        throw new Error('No prompt generated');
       }
 
       // Check for slow prompt generation
       if (promptTime > 10000) {
         bottlenecks.push(`Slow prompt generation: ${promptTime}ms`);
-      }
-
-      const prompt = promptData?.generatedPrompt || 
-                    promptData?.generatedText || 
-                    promptData?.prompt || 
-                    promptData?.generated_prompt || 
-                    promptData?.result ||
-                    (typeof promptData === 'string' ? promptData : null);
-      
-      if (!prompt) {
-        updateStep('Prompt Generation', 'error', 'No prompt generated');
-        throw new Error(`No prompt generated. Response: ${JSON.stringify(promptData)}`);
       }
 
       updateStep('Prompt Generation', 'complete', `Generated in ${promptTime}ms`, promptTime);

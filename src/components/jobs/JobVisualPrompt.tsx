@@ -16,7 +16,7 @@ export const JobVisualPrompt = ({ isOpen, onClose, jobTitle, jobDescription, com
   const config: ImagePromptConfig = {
     title: `Generate ${companyName} Job Visual Prompt (9:16)`,
     systemPrompt: '', // Will be handled by the edge function
-    edgeFunction: 'create-single-image-prompt',
+    edgeFunction: 'bulk-generate-prompts',
     category: 'healthcare',
     fixedAspectRatio: "9:16"
   };

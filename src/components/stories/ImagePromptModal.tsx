@@ -23,7 +23,7 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
       ? `Theme ${themeId} Image Prompt Generator`
       : `${getCategoryLabel(category)} Image Prompt Generator`,
     systemPrompt: '', // Will be handled by the edge function
-    edgeFunction: 'create-single-image-prompt',
+    edgeFunction: 'bulk-generate-prompts',
     category: category,
     themeId: themeId,
     aspectRatioOptions

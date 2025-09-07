@@ -4,16 +4,13 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
-import { useParams } from 'react-router-dom';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 export const useImageGeneration = () => {
   const { toast } = useToast();
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
-  
-  // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
-  // const params = useParams();
-  // const theme = params.theme ? decodeURIComponent(params.theme) : undefined;
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState('');
@@ -51,35 +48,16 @@ export const useImageGeneration = () => {
 
       const themeId = postData?.theme_id;
       console.log('Theme resolution debug:', {
-         // ❌ BAD: Using theme name - removed in Phase 1 migration
-         // urlTheme: theme,  // REMOVED - use themeId instead
         fetchedThemeId: themeId,
         postCategory: post.category,
         colorTheme: colorTheme?.name
       });
       
-      const { data: promptData, error: promptError } = await supabase.functions.invoke('create-single-image-prompt', {
-        body: {
-          postId: post.id,
-          themeId,
-          aspectRatio: '1:1'
-        }
-      });
-
-      if (promptError) {
-        throw new Error(`Failed to generate prompt: ${promptError.message}`);
-      }
-      
-      // Try different possible response structures
-      const prompt = promptData?.generatedPrompt || 
-                    promptData?.generatedText || 
-                    promptData?.prompt || 
-                    promptData?.generated_prompt || 
-                    promptData?.result ||
-                    (typeof promptData === 'string' ? promptData : null);
+      // Use optimized prompt generation instead of direct edge function call
+      const prompt = await generatePrompt(post.id, themeId, '1:1');
       
       if (!prompt) {
-        throw new Error(`No prompt generated. Response: ${JSON.stringify(promptData)}`);
+        throw new Error('No prompt generated');
       }
 
       setGenerationStep('Generating image...');
