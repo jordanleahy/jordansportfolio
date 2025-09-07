@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useParams } from 'react-router-dom';
-import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 interface QueuedRequest {
   id: string;
@@ -27,7 +26,6 @@ export const useOptimizedImageGeneration = () => {
   const { toast } = useToast();
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
-  const { generatePrompt } = useOptimizedPromptGeneration();
   
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
   // const params = useParams();
@@ -105,25 +103,17 @@ export const useOptimizedImageGeneration = () => {
         console.warn('Could not fetch theme_id for post:', fetchError.message);
       }
 
-      const themeId = postData?.theme_id;
+      // Use existing prompt from bulk generation - no individual prompt generation needed  
+      const prompt = (post as any).generated_image_prompt;
       
-      // Generate prompt using optimized hook
-      console.log('🎯 [PROMPT_GEN] Starting prompt generation', { 
+      console.log('🎯 [IMAGE_GEN] Using existing prompt from bulk generation', { 
         postId: post.id, 
-        themeId, 
-        postTitle: post.title,
-        postDescription: post.description?.substring(0, 50) + '...'
-      });
-      
-      const prompt = await generatePrompt(post.id, themeId, '1:1');
-
-      console.log('🎯 [PROMPT_GEN] Prompt generation response', { 
-        success: !!prompt,
+        hasPrompt: !!prompt,
         promptLength: prompt?.length || 0
       });
       
       if (!prompt) {
-        throw new Error('No prompt generated from optimized hook');
+        throw new Error('Post does not have a generated prompt. Ensure bulk prompt generation completed first.');
       }
 
       promptTime = Date.now() - promptStart;
