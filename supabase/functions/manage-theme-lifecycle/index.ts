@@ -201,6 +201,7 @@ serve(async (req) => {
               .eq('id', tempThemeId);
           }
         })();
+      });
 
       const response = {
         success: true,
