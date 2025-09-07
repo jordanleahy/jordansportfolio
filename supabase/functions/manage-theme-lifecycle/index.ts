@@ -99,7 +99,7 @@ serve(async (req) => {
           lifecycle_status: 'generating',
           user_interaction_required: false,
           background_processing_complete: false,
-          prompt_generation_status: 'pending'
+          prompt_generation_status: 'not_started'
         })
         .select()
         .single();
