@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { useParams } from 'react-router-dom';
+import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 
 interface QueuedRequest {
   id: string;
@@ -26,6 +27,7 @@ export const useOptimizedImageGeneration = () => {
   const { toast } = useToast();
   const { enforceUsage, getBlockingMessage, getCreditStatus } = useCreditCheck();
   const creditStatus = getCreditStatus();
+  const { generatePrompt } = useOptimizedPromptGeneration();
   
   // ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
   // const params = useParams();
@@ -82,6 +84,11 @@ export const useOptimizedImageGeneration = () => {
     let promptTime = 0, imageTime = 0, uploadTime = 0, watermarkTime = 0;
     
     try {
+      // Validate post has content before processing
+      if (!post.title?.trim() || !post.description?.trim()) {
+        throw new Error('Cannot generate image for post without title or description');
+      }
+
       setIsGenerating(true);
       setGenerationStep('Generating prompt...');
       
@@ -100,41 +107,23 @@ export const useOptimizedImageGeneration = () => {
 
       const themeId = postData?.theme_id;
       
-      // Generate prompt using optimized function with new payload format
+      // Generate prompt using optimized hook
       console.log('🎯 [PROMPT_GEN] Starting prompt generation', { 
         postId: post.id, 
         themeId, 
-        postTitle: post.title 
+        postTitle: post.title,
+        postDescription: post.description?.substring(0, 50) + '...'
       });
       
-      const { data: promptData, error: promptError } = await supabase.functions.invoke('create-single-image-prompt', {
-        body: {
-          postId: post.id,
-          themeId,
-          aspectRatio: '1:1'
-        }
-      });
+      const prompt = await generatePrompt(post.id, themeId, '1:1');
 
       console.log('🎯 [PROMPT_GEN] Prompt generation response', { 
-        success: !promptError,
-        error: promptError?.message,
-        dataKeys: promptData ? Object.keys(promptData) : null,
-        promptLength: promptData?.generatedPrompt?.length || 0
+        success: !!prompt,
+        promptLength: prompt?.length || 0
       });
-
-      if (promptError) {
-        throw new Error(`Failed to generate prompt: ${promptError.message}`);
-      }
-      
-      const prompt = promptData?.generatedPrompt || 
-                    promptData?.generatedText || 
-                    promptData?.prompt || 
-                    promptData?.generated_prompt || 
-                    promptData?.result ||
-                    (typeof promptData === 'string' ? promptData : null);
       
       if (!prompt) {
-        throw new Error(`No prompt generated. Response: ${JSON.stringify(promptData)}`);
+        throw new Error('No prompt generated from optimized hook');
       }
 
       promptTime = Date.now() - promptStart;
@@ -268,6 +257,16 @@ export const useOptimizedImageGeneration = () => {
     onPostsChange?: () => void,
     priority: number = 1
   ) => {
+    // Validate post content before enforcing usage
+    if (!post.title?.trim() || !post.description?.trim()) {
+      toast({
+        title: 'Invalid post content',
+        description: 'Cannot generate image for post without title or description.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     // Enforce usage before queueing
     const enforcement = await enforceUsage('image_generation', 1);
     if (!enforcement.allowed) {
