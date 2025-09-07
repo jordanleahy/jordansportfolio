@@ -395,7 +395,7 @@ The system prompts infrastructure uses these tables:
 
 | Function | Purpose | Input | Output | Security Level |
 |----------|---------|--------|--------|----------------|
-| `create-single-image-prompt` | Image prompt creation | Content, theme, config | Optimized prompt | JWT Required |
+| `bulk-generate-prompts` | Bulk image prompt creation | Post batch, theme, config | Optimized prompts | JWT Required |
 | `create-theme-system-prompt` | System prompt routing | Category, context | System prompt | JWT Required |
 
 ### Utility Functions
