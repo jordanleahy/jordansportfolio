@@ -170,124 +170,67 @@ serve(async (req) => {
     console.log('🚀 STEP 3: Starting background image prompt generation');
     console.log(`📊 Processing ${posts.length} posts with optimized batch processing`);
 
-    // Background processing function with improved error handling
+    // Background processing function using bulk prompt generation
     const processImagePromptsInBackground = async () => {
-      let successCount = 0;
-      let errorCount = 0;
-      const results = [];
-      const BATCH_SIZE = posts.length; // Process all posts in single batch for maximum speed
-      const BATCH_DELAY_MS = 0; // No delay between batches for faster processing
-
-      console.log(`🔄 BACKGROUND: Processing ${posts.length} posts in batches of ${BATCH_SIZE}`);
+      console.log(`🔄 BACKGROUND: Processing ${posts.length} posts using bulk generation`);
 
       try {
-        // Process posts in smaller batches to prevent timeout
-        for (let i = 0; i < posts.length; i += BATCH_SIZE) {
-          const batch = posts.slice(i, i + BATCH_SIZE);
-          const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-          const totalBatches = Math.ceil(posts.length / BATCH_SIZE);
-          
-          console.log(`🔄 BACKGROUND BATCH ${batchNum}/${totalBatches}: Processing ${batch.length} posts`);
+        // Prepare bulk request data
+        const bulkRequests = posts.map(post => ({
+          postId: post.id,
+          aspectRatio: '1:1'
+        }));
 
-          // Process batch with parallel processing and improved error handling
-          const batchPromises = batch.map(async (post, index) => {
+        console.log(`🚀 BACKGROUND: Calling bulk-generate-prompts for ${bulkRequests.length} posts`);
+
+        // Make single bulk call instead of individual calls
+        const bulkResult = await supabase.functions.invoke('bulk-generate-prompts', {
+          body: {
+            requests: bulkRequests,
+            themeId: firstPost.theme_id,
+            batchSize: bulkRequests.length
+          }
+        });
+
+        if (bulkResult.error) {
+          console.error(`❌ BACKGROUND: Bulk generation failed:`, bulkResult.error);
+          throw new Error(`Bulk generation failed: ${bulkResult.error.message}`);
+        }
+
+        const bulkResponse = bulkResult.data;
+        const results = bulkResponse?.results || [];
+        const successCount = results.filter(r => r.success).length;
+        const errorCount = results.length - successCount;
+
+        console.log(`📈 BACKGROUND PROCESSING COMPLETE: {
+      category: "${category}",
+      totalPosts: ${posts.length},
+      successCount: ${successCount},
+      errorCount: ${errorCount},
+      successRate: ${((successCount / posts.length) * 100).toFixed(1)}%
+    }`);
+
+        // Update database with successful results
+        for (const result of results) {
+          if (result.success && result.prompt) {
             try {
-              console.log(`🎯 BACKGROUND: Generating prompt for "${post.title}" (${post.id})`);
+              const { error: updateError } = await supabase
+                .from('social_media_posts')
+                .update({ 
+                  generated_image_prompt: result.prompt,
+                  individual_prompt_status: 'completed',
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', result.postId);
 
-              // Use internal edge function to generate prompts consistently with retry logic
-              const invokePayload = {
-                postId: post.id,
-                themeId: post.theme_id,
-                aspectRatio: '1:1'
-              };
-              
-              let promptResp = null;
-              let promptFnError = null;
-              const maxRetries = 2; // Reduced retries to prevent excessive delays
-              
-              for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                const result = await supabase.functions.invoke('create-single-image-prompt', {
-                  body: invokePayload
-                });
-                
-                promptResp = result.data;
-                promptFnError = result.error;
-                
-                if (!promptFnError) {
-                  break; // Success, exit retry loop
-                }
-                
-                // Check if it's a retryable error (503, timeout, etc.)
-                const isRetryable = promptFnError.message?.includes('Service Unavailable') || 
-                                   promptFnError.message?.includes('503') ||
-                                   promptFnError.message?.includes('timeout');
-                
-                if (!isRetryable || attempt === maxRetries) {
-                  console.error(`❌ BACKGROUND: Prompt function error for post ${post.id} (attempt ${attempt}/${maxRetries}):`, promptFnError);
-                  break;
-                }
-                
-                console.log(`⏳ BACKGROUND: Retrying post ${post.id} (attempt ${attempt + 1}/${maxRetries}) in 1s...`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-              }
-
-              if (promptFnError) {
-                return { postId: post.id, success: false, error: promptFnError.message };
-              }
-
-              const generatedPrompt = promptResp?.generatedPrompt;
-
-              if (!generatedPrompt) {
-                console.error(`❌ BACKGROUND: No prompt generated for post ${post.id}`);
-                return { postId: post.id, success: false, error: 'No prompt generated' };
-              }
-
-              // ✅ Database is already updated atomically by create-single-image-prompt
-              console.log(`✅ BACKGROUND: Prompt generated and saved for post ${post.id}`);
-              return {
-                  postId: post.id, 
-                  success: true, 
-                  promptLength: generatedPrompt.length 
-                };
-
-            } catch (error) {
-              console.error(`❌ BACKGROUND: Unexpected error for post ${post.id}:`, error);
-              return { postId: post.id, success: false, error: error.message };
-            }
-          });
-
-          // Wait for all posts in the batch to complete
-          const batchResults = await Promise.allSettled(batchPromises);
-          
-          // Process batch results
-          batchResults.forEach((result, index) => {
-            if (result.status === 'fulfilled' && result.value) {
-              results.push(result.value);
-              if (result.value.success) {
-                successCount++;
+              if (updateError) {
+                console.error(`❌ BACKGROUND: Failed to update post ${result.postId}:`, updateError);
               } else {
-                errorCount++;
+                console.log(`✅ BACKGROUND: Updated post ${result.postId} with generated prompt`);
               }
-            } else {
-              const post = batch[index];
-              console.error(`❌ BACKGROUND: Batch promise failed for post ${post.id}:`, result.reason);
-              errorCount++;
-              results.push({ 
-                postId: post.id, 
-                success: false, 
-                error: result.reason?.message || 'Promise rejected' 
-              });
+            } catch (updateError) {
+              console.error(`❌ BACKGROUND: Exception updating post ${result.postId}:`, updateError);
             }
-          });
-
-          // Log batch completion with more details
-          const successfulInBatch = batchResults.filter(r => r.status === 'fulfilled' && r.value?.success).length;
-          console.log(`✅ BACKGROUND BATCH ${batchNum}/${totalBatches} completed: ${successfulInBatch}/${batch.length} successful`);
-
-          // Process next batch immediately for faster completion
-          if (i + BATCH_SIZE < posts.length && BATCH_DELAY_MS > 0) {
-            console.log(`⏱️ BACKGROUND: Waiting ${BATCH_DELAY_MS}ms before next batch...`);
-            await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
           }
         }
 
