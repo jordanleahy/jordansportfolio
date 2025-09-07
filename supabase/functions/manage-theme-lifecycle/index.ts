@@ -84,70 +84,130 @@ serve(async (req) => {
         userId: user.id,
         correlationId
       });
+
+      // Generate a temporary theme ID for immediate response
+      const tempThemeId = crypto.randomUUID();
       
-      // Call the existing theme generation function
-      const { data: themeData, error: themeError } = await supabase.functions.invoke(
-        'user-idea-streaming-image-pipeline',
-        {
-          body: {
-            description: body.description,
-            stream: false
-          },
-          headers: {
-            Authorization: authHeader,
-          }
-        }
-      );
-
-      console.log(`🔵 [INVOKE] Theme generation function completed`, {
-        duration: `${Date.now() - startTime}ms`,
-        hasError: !!themeError,
-        hasData: !!themeData,
-        success: themeData?.success,
-        correlationId
-      });
-
-      if (themeError || !themeData?.success) {
-        console.error(`❌ [CREATE] Theme generation failed`, {
-          themeError,
-          themeData,
-          correlationId
-        });
-        throw new Error(themeData?.error || 'Failed to generate theme');
-      }
-
-      console.log(`✅ [CREATE] Theme generated successfully`, {
-        correlationId
-      });
-
-      // Initial status update - triggers will handle the rest automatically
-      const { error: updateError } = await supabase
+      // Create initial theme record with generating status
+      const { data: themeRecord, error: createError } = await supabase
         .from('themes')
-        .update({
-          lifecycle_status: 'pending',
-          user_interaction_required: true,
-          background_processing_complete: false
+        .insert({
+          id: tempThemeId,
+          user_id: user.id,
+          theme_name: 'Generating...',
+          category: 'generating',
+          lifecycle_status: 'generating',
+          user_interaction_required: false,
+          background_processing_complete: false,
+          prompt_generation_status: 'pending'
         })
-        .eq('id', themeData.theme_id);
+        .select()
+        .single();
 
-      if (updateError) {
-        console.error(`❌ [UPDATE] Failed to update theme lifecycle`, {
-          updateError,
+      if (createError) {
+        console.error(`❌ [CREATE] Failed to create initial theme record`, {
+          createError,
           correlationId
         });
+        throw new Error('Failed to create theme record');
       }
 
-      // Start background processing (simplified - no polling needed)
+      console.log(`✅ [CREATE] Initial theme record created`, {
+        themeId: tempThemeId,
+        correlationId
+      });
+
+      // Start background processing WITHOUT waiting for completion
       console.log(`🔵 [BACKGROUND] Starting background processing`, {
         userId: user.id,
+        themeId: tempThemeId,
         correlationId
       });
+
+      // Use EdgeRuntime.waitUntil for true background processing
+      EdgeRuntime.waitUntil(
+        (async () => {
+          try {
+            console.log(`🔄 [BACKGROUND] Invoking theme generation pipeline`, {
+              themeId: tempThemeId,
+              correlationId
+            });
+
+            const { data: themeData, error: themeError } = await supabase.functions.invoke(
+              'user-idea-streaming-image-pipeline',
+              {
+                body: {
+                  description: body.description,
+                  stream: false,
+                  themeId: tempThemeId // Pass the theme ID for updates
+                },
+                headers: {
+                  Authorization: authHeader,
+                }
+              }
+            );
+
+            console.log(`🔵 [BACKGROUND] Theme generation completed`, {
+              duration: `${Date.now() - startTime}ms`,
+              hasError: !!themeError,
+              hasData: !!themeData,
+              success: themeData?.success,
+              correlationId
+            });
+
+            if (themeError || !themeData?.success) {
+              console.error(`❌ [BACKGROUND] Theme generation failed`, {
+                themeError,
+                themeData,
+                correlationId
+              });
+              
+              // Update theme status to failed
+              await supabase
+                .from('themes')
+                .update({
+                  lifecycle_status: 'failed',
+                  background_processing_complete: true
+                })
+                .eq('id', tempThemeId);
+            } else {
+              console.log(`✅ [BACKGROUND] Theme generation successful`, {
+                correlationId
+              });
+              
+              // Update theme status to completed
+              await supabase
+                .from('themes')
+                .update({
+                  lifecycle_status: 'completed',
+                  background_processing_complete: true,
+                  prompt_generation_status: 'completed'
+                })
+                .eq('id', tempThemeId);
+            }
+          } catch (bgError) {
+            console.error(`❌ [BACKGROUND] Background processing failed`, {
+              bgError: bgError.message,
+              correlationId
+            });
+            
+            // Update theme status to failed
+            await supabase
+              .from('themes')
+              .update({
+                lifecycle_status: 'failed',
+                background_processing_complete: true
+              })
+              .eq('id', tempThemeId);
+          }
+        })()
+      );
 
       const response = {
         success: true,
-        theme_id: themeData.theme_id,
+        theme_id: tempThemeId,
         lifecycle_status: 'generating',
-        message: 'Theme created and background processing started',
+        message: 'Theme creation started in background',
         correlationId
       };
 
