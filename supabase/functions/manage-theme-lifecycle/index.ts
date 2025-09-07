@@ -124,8 +124,8 @@ serve(async (req) => {
         correlationId
       });
 
-      // Use EdgeRuntime.waitUntil for true background processing
-      EdgeRuntime.waitUntil(
+      // Use proper Deno background processing instead of EdgeRuntime.waitUntil
+      Promise.resolve().then(async () => {
         (async () => {
           try {
             console.log(`🔄 [BACKGROUND] Invoking theme generation pipeline`, {
@@ -200,8 +200,7 @@ serve(async (req) => {
               })
               .eq('id', tempThemeId);
           }
-        })()
-      );
+        })();
 
       const response = {
         success: true,
