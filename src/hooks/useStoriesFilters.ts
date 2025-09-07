@@ -44,6 +44,19 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
   const filteredThemes = useMemo(() => {
     let filtered = themes;
 
+    // First filter out incomplete/generating themes
+    filtered = filtered.filter(theme => {
+      // Only show completed themes with posts
+      if (theme.lifecycle_status === 'generating' || 
+          theme.lifecycle_status === 'pending' ||
+          theme.background_processing_complete === false ||
+          theme.prompt_generation_status !== 'completed' ||
+          theme.post_count === 0) {
+        return false;
+      }
+      return true;
+    });
+
     // Filter by selected categories
     if (selectedCategories.size > 0) {
       filtered = filtered.filter(theme => selectedCategories.has(theme.category));
