@@ -44,9 +44,9 @@ graph TB
 
 ## Agent Categories
 
-### Functional Agents
+### Core Processing Agents
 - **[System Prompt Agent](./system-prompt-agent.md)** - Central orchestrator and prompt router
-- **[Single Image Prompt Generator](./create-single-image-prompt.md)** - Specialized image generation prompts
+- **[Bulk Prompt Generator](./bulk-generate-prompts.md)** - Batch image prompt generation
 - **[Blog Content Generator](./blog-content-generator.md)** - Long-form content creation
 - **[Cover Letter Generator](./cover-letter-generator.md)** - Professional document generation
 - **[Social Media Agent](./social-media-agent.md)** - Multi-platform social content

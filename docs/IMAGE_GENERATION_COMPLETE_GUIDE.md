@@ -46,10 +46,10 @@ graph TB
     end
     
     subgraph "Edge Functions Layer"
-        EF1[generate-image-gpt] --> EF2[generate-all-images-optimized]
-        EF3[create-single-image-prompt] --> EF4[create-theme-system-prompt]
-        EF5[prevents-duplicate-image-generations] --> EF6[user-idea-streaming-image-pipeline]
-        EF7[check-usage-limits] --> EF8[send-usage-alert]
+        EF1[generate-image] --> EF2[bulk-generate-single-aspect]
+        EF3[bulk-generate-prompts] --> EF4[create-theme-system-prompt]
+        EF5[prevents-duplicate-image-generations] --> EF6[streaming-image-pipeline]
+        EF7[ensure-post-image-prompts] --> EF8[bulk-generate-prompts]
     end
     
     subgraph "Storage & Database"
@@ -230,11 +230,11 @@ sequenceDiagram
             UI->>DB: get cached prompt
             DB-->>UI: hit/miss
             alt Miss
-                UI->>SB: invoke('create-single-image-prompt')
-                SB-->>UI: {generatedPrompt}
-                UI->>DB: upsert cached_prompts
+                UI->>SB: invoke('bulk-generate-prompts')
+                SB-->>UI: {batchResults}
+                UI->>DB: upsert bulk prompts
             end
-            UI->>SB: invoke('generate-all-images-optimized')
+            UI->>SB: invoke('bulk-generate-single-aspect')
             SB-->>UI: stream/progress/results
             loop For each aspect
                 UI->>ST: Upload image
@@ -258,7 +258,7 @@ sequenceDiagram
    - Multiple aspect ratios simultaneously
    - Intelligent retry logic
 
-3. **Streaming Pipeline** (`user-idea-streaming-image-pipeline`)
+3. **Streaming Pipeline** (`streaming-image-pipeline`)
    - Real-time generation updates via SSE
    - Progress streaming for long-running jobs
    - Error recovery and continuation
@@ -386,10 +386,10 @@ The system prompts infrastructure uses these tables:
 
 | Function | Purpose | Input | Output | Security Level |
 |----------|---------|--------|--------|----------------|
-| `generate-image-gpt` | Single image generation | Prompt, aspect ratio, config | Base64 image data | JWT Required |
-| `generate-all-images-optimized` | Bulk multi-aspect generation | Post IDs, config | Batch results | JWT Required |
+| `generate-image` | Single image generation | Prompt, aspect ratio, config | Base64 image data | JWT Required |
+| `bulk-generate-single-aspect` | Bulk single aspect generation | Post IDs, aspect ratio, config | Batch results | JWT Required |
 | `prevents-duplicate-image-generations` | Controlled single generation | Post data, options | Generation result | JWT Required |
-| `user-idea-streaming-image-pipeline` | Real-time streaming generation | Stream config | SSE stream | JWT Required |
+| `streaming-image-pipeline` | Real-time streaming generation | Stream config | SSE stream | JWT Required |
 
 ### Content Processing Functions
 
@@ -424,7 +424,7 @@ const corsHeaders = {
 const credits = await useCreditCheck.getCreditStatus();
 
 // 2. Generate image
-const result = await supabase.functions.invoke('generate-image-gpt', {
+const result = await supabase.functions.invoke('generate-image', {
   body: {
     prompt: visualPrompt,
     aspectRatio: '16:9',
@@ -444,10 +444,10 @@ if (result.data?.success) {
 const posts = await getBulkPosts();
 
 // 2. Process batch
-const results = await supabase.functions.invoke('generate-all-images-optimized', {
+const results = await supabase.functions.invoke('bulk-generate-single-aspect', {
   body: {
     posts: posts.map(p => ({ id: p.id, prompt: p.generated_image_prompt })),
-    aspectRatios: ['1:1', '16:9', '9:16'],
+    aspectRatio: '1:1', // Process one aspect at a time
     mode: 'missing_only'
   }
 });
@@ -1293,9 +1293,9 @@ describe('useCreditCheck', () => {
 
 **Edge Function Testing:**
 ```typescript
-describe('generate-image-gpt', () => {
+describe('generate-image', () => {
   it('should generate image successfully', async () => {
-    const response = await testFunction('generate-image-gpt', {
+    const response = await testFunction('generate-image', {
       prompt: 'A beautiful sunset',
       aspectRatio: '16:9'
     });
@@ -1307,7 +1307,7 @@ describe('generate-image-gpt', () => {
   it('should handle rate limiting', async () => {
     mockOpenAIResponse(429, 'Rate limited');
     
-    const response = await testFunction('generate-image-gpt', {
+    const response = await testFunction('generate-image', {
       prompt: 'Test prompt'
     });
     
@@ -1554,14 +1554,18 @@ export const useImageGenerationComplete = () => {
         throw new Error('Insufficient credits');
       }
       
-      // Step 2: Generate prompt
+      // Step 2: Generate prompts (bulk processing)
       setProgress(30);
-      const promptResult = await supabase.functions.invoke('create-single-image-prompt', {
+      const promptResult = await supabase.functions.invoke('bulk-generate-prompts', {
         body: {
-          title: post.title,
-          description: post.description,
-          aspectRatio: options.aspectRatio,
-          category: options.category
+          posts: [{ 
+            id: post.id, 
+            title: post.title, 
+            description: post.description 
+          }],
+          theme_id: post.theme_id,
+          category: options.category,
+          mode: 'missing_only'
         }
       });
       
@@ -1571,9 +1575,9 @@ export const useImageGenerationComplete = () => {
       
       // Step 3: Generate image
       setProgress(60);
-      const imageResult = await supabase.functions.invoke('generate-image-gpt', {
+      const imageResult = await supabase.functions.invoke('generate-image', {
         body: {
-          prompt: promptResult.data.generatedPrompt,
+          prompt: promptResult.data.results[0].prompt,
           aspectRatio: options.aspectRatio,
           quality: 'high'
         }
@@ -1680,15 +1684,13 @@ file_size_limit = "50MiB"
 - `src/hooks/useCreditCheck.ts`
 
 **Edge Functions:**
-- `supabase/functions/create-single-image-prompt/`
-- `supabase/functions/generate-image-gpt/`
-- `supabase/functions/prevents-duplicate-image-generations/`
-- `supabase/functions/generate-all-images-optimized/`
-- `supabase/functions/user-idea-streaming-image-pipeline/`
-- `supabase/functions/create-theme-system-prompt/`
-- `supabase/functions/check-usage-limits/`
-- `supabase/functions/get-usage-summary/`
-- `supabase/functions/send-usage-alert/`
+- `supabase/functions/bulk-generate-prompts/` - Batch prompt generation
+- `supabase/functions/ensure-post-image-prompts/` - Background processing orchestration
+- `supabase/functions/generate-image/` - Single image generation
+- `supabase/functions/bulk-generate-single-aspect/` - Bulk single aspect generation
+- `supabase/functions/prevents-duplicate-image-generations/` - Duplicate prevention
+- `supabase/functions/streaming-image-pipeline/` - Real-time image generation
+- `supabase/functions/create-theme-system-prompt/` - System prompt routing
 
 **Utilities:**
 - `src/utils/imageUpload.ts`

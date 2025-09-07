@@ -16,7 +16,7 @@ Successfully implemented enhanced user attribution and OpenAI correlation tracki
 
 ### 2. Enhanced Edge Functions
 
-#### `generate-image-gpt/index.ts`
+#### `generate-image/index.ts`
 - **Enhancement**: Added correlation tracking for image generation
 - **Features**:
   - Unique correlation IDs for each request
