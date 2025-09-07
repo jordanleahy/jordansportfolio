@@ -342,12 +342,12 @@ Color Theme Instructions:
       hasColorTheme: !!colorTheme,
       aspectRatio: requestedAspectRatio,
       tokenEstimate: Math.ceil((categoryPrompt.prompt.length + userMessage.length) / 4),
-      maxTokensAllowed: 4000
+      maxTokensAllowed: 2500
     });
 
     // Hardcoded single model configuration for testing
     const model = 'gpt-5-nano-2025-08-07';
-    const maxTokens = 4000;
+    const maxTokens = 2500;
     let generatedText: string | null = null;
     const usedModel = model;
 
