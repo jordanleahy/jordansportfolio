@@ -553,7 +553,21 @@ Color Theme Instructions:
     success = false;
     errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error('Error in create-single-image-prompt function', error);
-    console.error('❌ Error in create-single-image-prompt function:', error);
+    console.error('❌ Error in create-single-image-prompt function:', {
+      error: error.message || error,
+      correlationId,
+      userId: userId?.slice(0, 8),
+      success,
+      estimatedCost,
+      tokensUsed,
+      promptTokens,
+      completionTokens,
+      errorMessage,
+      requestMetadata,
+      openAIRequestId,
+      executionTimeMs: Date.now() - startTime,
+      timestamp: new Date().toISOString()
+    });
 
     // Track failed usage
     if (userId) {
