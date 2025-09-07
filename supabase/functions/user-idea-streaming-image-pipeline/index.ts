@@ -104,7 +104,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.4';
 import { streamingCorsHeaders, sendStreamEvent } from '../_shared/utils.ts';
-import { OPENAI_CONFIG, PROGRESS_STEPS } from '../_shared/config.ts';
+import { PROGRESS_STEPS } from '../_shared/config.ts';
 import { createLogger } from '../_shared/advanced-logger.ts';
 
 // Helper function to handle system prompt generation (DRY principle)
@@ -324,7 +324,7 @@ POST COUNT RULES:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
+        model: 'gpt-5-mini',
         messages: [
           {
             role: 'system',
@@ -335,15 +335,15 @@ POST COUNT RULES:
             content: `Generate a social media theme for: ${truncatedDescription}`
           }
         ],
-        max_completion_tokens: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
+        max_completion_tokens: 6000,
         response_format: { type: 'json_object' }
       })
     });
 
     console.log('🎯 Token Management:', {
       estimatedPromptTokens: Math.ceil((systemPrompt.length + `Generate a social media theme for: ${truncatedDescription}`.length) / 4),
-      maxAllowed: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
-      model: OPENAI_CONFIG.DEFAULT_THEME_MODEL
+      maxAllowed: 6000,
+      model: 'gpt-5-mini'
     });
 
     console.log('📡 OpenAI Response status:', response.status);
@@ -370,9 +370,9 @@ POST COUNT RULES:
         promptTokens: data.usage?.prompt_tokens || 0,
         completionTokens: data.usage?.completion_tokens || 0,
         totalTokens: data.usage?.total_tokens || 0,
-        maxAllowed: OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
-        hitLimit: (data.usage?.completion_tokens || 0) >= OPENAI_CONFIG.DEFAULT_THEME_MAX_COMPLETION_TOKENS,
-        model: OPENAI_CONFIG.DEFAULT_THEME_MODEL,
+        maxAllowed: 6000,
+        hitLimit: (data.usage?.completion_tokens || 0) >= 6000,
+        model: 'gpt-5-mini',
         estimatedCost: (((data.usage?.prompt_tokens || 0) * 0.00015 + (data.usage?.completion_tokens || 0) * 0.0006) / 1000).toFixed(6)
       });
     }
