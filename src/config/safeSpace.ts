@@ -20,8 +20,7 @@
  * 4. Generated images respect safe boundaries without manual specification
  * 
  * INTEGRATION POINTS:
- * - bulk-generate-prompts: Applied to generated prompts before return (preferred)
- * - create-single-image-prompt: Legacy individual prompt generation (deprecated)
+ * - bulk-generate-prompts: Applied to generated prompts before return
  * - bulk-image-generation: Applied during batch processing
  * - All image generation workflows: Ensures consistent safe space enforcement
  */

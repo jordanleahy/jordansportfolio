@@ -3,32 +3,30 @@
  * 
  * PURPOSE:
  * Automatically generates image prompts for social media posts that are missing them.
- * Batch processes posts by category using the Visual Prompt Generator agent and category-specific
- * system prompts to create professional, consistent image generation prompts.
+ * Uses bulk prompt generation for efficient processing of multiple posts.
  * 
  * INPUTS:
  * - category: string - Category of posts to process (e.g., 'coding ai', 'healthcare', 'contracts')
- * - userId: string - User ID to filter posts and find appropriate agent
+ * - userId: string - User ID to filter posts
+ * - themeId: string (optional) - Theme ID to filter posts by specific theme
  * 
  * OUTPUTS:
  * - Success: { success: true, category: string, totalPosts: number, status: 'processing' }
  * - Error: { error: string }
  * 
  * DEPENDENCIES:
- * - OpenAI API (GPT-4o-mini for prompt generation)
- * - Supabase Database (social_media_posts, openai_agents, system_prompts tables)
+ * - bulk-generate-prompts edge function
+ * - Supabase Database (social_media_posts, themes tables)
  * 
  * USAGE:
- * Called from: Content management workflows, bulk processing operations
+ * Called from: Theme lifecycle management, content management workflows
  * Authentication: Service role access for batch operations
  * 
  * FLOW:
  * 1. Fetch all posts in specified category that lack image prompts
- * 2. Find user's Visual Prompt Generator agent
- * 3. Retrieve category-specific system prompt from system_prompts table
- * 4. Return immediate response and process in background using EdgeRuntime.waitUntil()
- * 5. For each post, generate detailed image prompt using OpenAI
- * 6. Update posts with generated prompts and timestamp
+ * 2. Return immediate response and process in background using EdgeRuntime.waitUntil()
+ * 3. Call bulk-generate-prompts function for efficient processing
+ * 4. Update posts with generated prompts and timestamps
  */
 
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
@@ -40,7 +38,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -125,49 +122,8 @@ serve(async (req) => {
       console.log(`📝 [Post ${index + 1}] ID: ${post.id}, Title: "${post.title}", Theme ID: ${post.theme_id}`);
     });
 
-    // Step 2: Cache system prompt for efficiency (avoid repeated queries)
-    console.log('🔍 STEP 2: Caching system prompt for batch processing');
-    let cachedSystemPrompt = null;
-    
-    // Try to get system prompt from theme data first (if available)
-    const firstPost = posts[0];
-    if (firstPost?.themes?.visual_prompt_system_prompt_id) {
-      const { data: systemPromptData, error: promptError } = await supabase
-        .from('theme_system_prompts')
-        .select('id, agent_name, prompt_text')
-        .eq('id', firstPost.themes.visual_prompt_system_prompt_id)
-        .eq('is_active', true)
-        .single();
-      
-      if (systemPromptData && !promptError) {
-        cachedSystemPrompt = systemPromptData;
-        console.log(`✅ CACHED SYSTEM PROMPT: ${systemPromptData.agent_name}, length: ${systemPromptData.prompt_text.length}`);
-      }
-    }
-    
-    // Fallback to user's most recent Visual Prompt Generator if no theme-specific prompt
-    if (!cachedSystemPrompt) {
-      const { data: systemPromptData, error: promptError } = await supabase
-        .from('theme_system_prompts')
-        .select('id, agent_name, prompt_text')
-        .eq('user_id', userId)
-        .eq('agent_name', 'Visual Prompt Generator')
-        .eq('is_active', true)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (promptError || !systemPromptData) {
-        console.error(`❌ ERROR: No system prompt found for user`);
-        throw new Error(`No system prompt found for user`);
-      }
-      
-      cachedSystemPrompt = systemPromptData;
-      console.log(`✅ FALLBACK SYSTEM PROMPT: ${systemPromptData.agent_name}, length: ${systemPromptData.prompt_text.length}`);
-    }
-
-    // Step 3: Return early response and process in background
-    console.log('🚀 STEP 3: Starting background image prompt generation');
+    // Step 2: Return early response and process in background
+    console.log('🚀 STEP 2: Starting background image prompt generation');
     console.log(`📊 Processing ${posts.length} posts with optimized batch processing`);
 
     // Background processing function using bulk prompt generation
@@ -184,6 +140,7 @@ serve(async (req) => {
         console.log(`🚀 BACKGROUND: Calling bulk-generate-prompts for ${bulkRequests.length} posts`);
 
         // Make single bulk call instead of individual calls
+        const firstPost = posts[0];
         const bulkResult = await supabase.functions.invoke('bulk-generate-prompts', {
           body: {
             requests: bulkRequests,
