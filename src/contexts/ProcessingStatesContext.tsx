@@ -1,11 +1,12 @@
 import React, { createContext, useContext } from 'react';
-import { useProcessingStates } from '@/hooks/useProcessingStates';
+import { useProcessingStates, type ProcessingOperation } from '@/hooks/useProcessingStates';
+import type { AspectRatio } from '@/types/bulkImageGeneration';
 
 // Define the context type based on the hook's return
 interface ProcessingStatesContextValue {
-  setProcessing: (postId: string, operation: 'generate' | 'bulk_generate' | 'regenerate_prompt', isActive: boolean, aspectRatio?: import('@/types/bulkImageGeneration').AspectRatio) => void;
+  setProcessing: (postId: string, operation: ProcessingOperation, isActive: boolean, aspectRatio?: AspectRatio) => void;
   setBulkProcessing: (postId: string, isActive: boolean) => void;
-  isProcessing: (postId: string, operation?: 'generate' | 'bulk_generate' | 'regenerate_prompt', aspectRatio?: import('@/types/bulkImageGeneration').AspectRatio) => boolean;
+  isProcessing: (postId: string, operation?: ProcessingOperation, aspectRatio?: AspectRatio) => boolean;
   isGenerating: (postId: string) => boolean;
   isAnyImageGenerating: () => boolean;
   clearProcessing: (postId: string) => void;

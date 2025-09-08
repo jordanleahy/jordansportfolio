@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 
+// Keep original string literal type for backward compatibility
 export type ProcessingOperation = 'generate' | 'bulk_generate' | 'regenerate_prompt';
 
 interface ProcessingState {

@@ -10,6 +10,16 @@ export const AGENT_NAMES = {
   STREET_VISION_AGENT: 'Street Vision Agent',
 } as const;
 
+// Import unified status enums
+import { 
+  BaseProcessingStatus, 
+  ImageGenerationStatus, 
+  ContentStatus,
+  ThemeLifecycleStatus,
+  ProcessingOperation,
+  AgentStatus 
+} from '@/types/enums/status';
+
 // System Prompt Categories
 export const SYSTEM_PROMPT_CATEGORIES = {
   SYSTEM_PROMPT_GENERATION: 'system_prompt_generation',
@@ -94,31 +104,16 @@ export const MODEL_OPTIONS = [
   }
 ] as const;
 
-// Agent Status Values
-export const AGENT_STATUS = {
-  ACTIVE: 'active',
-  PAUSED: 'paused',
-  DEPRECATED: 'deprecated',
-} as const;
 
 // Post/Content Status Values (matching database values)
 export const CONTENT_STATUS = {
-  DRAFT: 'draft',
-  SCHEDULED: 'scheduled', 
-  PUBLISHED: 'published',
+  DRAFT: ContentStatus.DRAFT,
+  SCHEDULED: ContentStatus.SCHEDULED, 
+  PUBLISHED: ContentStatus.PUBLISHED,
+  DELETED: ContentStatus.DELETED,
 } as const;
 
-// Import unified status enums
-import { 
-  BaseProcessingStatus, 
-  ImageGenerationStatus, 
-  ContentStatus,
-  ThemeLifecycleStatus,
-  ProcessingOperation,
-  AgentStatus 
-} from '@/types/enums/status';
-
-// Export unified status constants for backward compatibility
+// Image Generation Status Values - unified system
 export const IMAGE_STATUS = {
   NONE: ImageGenerationStatus.NONE,
   PENDING: ImageGenerationStatus.PENDING,
@@ -127,6 +122,7 @@ export const IMAGE_STATUS = {
   FAILED: ImageGenerationStatus.FAILED,
 } as const;
 
+// Base Processing Status Values - for prompt generation, etc.
 export const PROCESSING_STATUS = {
   NOT_STARTED: BaseProcessingStatus.NOT_STARTED,
   IN_PROGRESS: BaseProcessingStatus.IN_PROGRESS,
@@ -134,6 +130,7 @@ export const PROCESSING_STATUS = {
   FAILED: BaseProcessingStatus.FAILED,
 } as const;
 
+// Theme Lifecycle Status Values - for overall theme state
 export const THEME_LIFECYCLE_STATUS = {
   PENDING: ThemeLifecycleStatus.PENDING,
   GENERATING: ThemeLifecycleStatus.GENERATING,
@@ -142,10 +139,39 @@ export const THEME_LIFECYCLE_STATUS = {
   FAILED: ThemeLifecycleStatus.FAILED,
 } as const;
 
+// Processing Operation Types - export individual values for easy usage
 export const PROCESSING_OPERATIONS = {
   GENERATE: ProcessingOperation.GENERATE,
   BULK_GENERATE: ProcessingOperation.BULK_GENERATE,
   REGENERATE_PROMPT: ProcessingOperation.REGENERATE_PROMPT,
+} as const;
+
+// Export individual operation values as strings for backward compatibility
+export const GENERATE_OPERATION = 'generate' as const;
+export const BULK_GENERATE_OPERATION = 'bulk_generate' as const;  
+export const REGENERATE_PROMPT_OPERATION = 'regenerate_prompt' as const;
+
+// Status value constants for easy import
+export const IMAGE_STATUS_VALUES = {
+  NONE: 'none',
+  PENDING: 'pending', 
+  GENERATING: 'generating',
+  COMPLETED: 'completed',
+  FAILED: 'failed'
+} as const;
+
+export const PROCESSING_STATUS_VALUES = {
+  NOT_STARTED: 'not_started',
+  IN_PROGRESS: 'in_progress',
+  COMPLETED: 'completed', 
+  FAILED: 'failed'
+} as const;
+
+// Agent Status Values
+export const AGENT_STATUS = {
+  ACTIVE: AgentStatus.ACTIVE,
+  PAUSED: AgentStatus.PAUSED,
+  DEPRECATED: AgentStatus.DEPRECATED,
 } as const;
 
 // Temperature Settings for Different Use Cases
