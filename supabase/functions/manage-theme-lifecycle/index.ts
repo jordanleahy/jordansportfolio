@@ -7,9 +7,10 @@ const corsHeaders = {
 };
 
 interface ThemeLifecycleRequest {
-  action: 'create' | 'complete' | 'status';
+  action: 'create' | 'complete' | 'status' | 'start_processing' | 'restart_processing';
   description?: string;
   themeId?: string;
+  userId?: string;
 }
 
 serve(async (req) => {
@@ -322,8 +323,154 @@ serve(async (req) => {
         }
       );
 
+    } else if (body.action === 'start_processing' || body.action === 'restart_processing') {
+      // Handle trigger-based processing start/restart
+      if (!body.themeId || !body.userId) {
+        throw new Error('Theme ID and user ID are required for processing actions');
+      }
+
+      console.log(`🔵 [PROCESSING] ${body.action} for theme`, {
+        themeId: body.themeId,
+        userId: body.userId,
+        correlationId
+      });
+
+      // Check if posts exist for this theme
+      const { data: posts, error: postsError } = await supabase
+        .from('social_media_posts')
+        .select('id, individual_prompt_status')
+        .eq('theme_id', body.themeId)
+        .eq('user_id', body.userId);
+
+      if (postsError) {
+        console.error('Error fetching posts:', postsError);
+        throw postsError;
+      }
+
+      if (!posts || posts.length === 0) {
+        console.log('No posts found for theme:', body.themeId);
+        return new Response(
+          JSON.stringify({ success: false, message: 'No posts found for theme' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log(`Found ${posts.length} posts for theme ${body.themeId}`);
+
+      // Create system prompt first if it doesn't exist
+      const { data: existingSystemPrompt } = await supabase
+        .from('theme_system_prompts')
+        .select('id')
+        .eq('theme_id', body.themeId)
+        .single();
+
+      if (!existingSystemPrompt) {
+        console.log('Creating system prompt for theme:', body.themeId);
+        
+        // Get theme details
+        const { data: theme } = await supabase
+          .from('themes')
+          .select('category, theme_name, description')
+          .eq('id', body.themeId)
+          .single();
+
+        if (theme) {
+          const systemPromptText = `You are generating social media content for the theme "${theme.theme_name}" in the ${theme.category} category. ${theme.description || ''}`;
+          
+          await supabase
+            .from('theme_system_prompts')
+            .insert({
+              theme_id: body.themeId,
+              user_id: body.userId,
+              system_prompt: systemPromptText,
+              category: theme.category
+            });
+        }
+      }
+
+      // Start processing by updating post statuses to trigger existing pipelines
+      console.log('Starting post processing by updating statuses...');
+      
+      try {
+        // Reset all posts to in_progress to trigger existing processing
+        const { error: updateError } = await supabase
+          .from('social_media_posts')
+          .update({ 
+            individual_prompt_status: 'in_progress',
+            updated_at: new Date().toISOString()
+          })
+          .eq('theme_id', body.themeId)
+          .eq('user_id', body.userId)
+          .eq('individual_prompt_status', 'not_started');
+
+        if (updateError) {
+          console.error('Error updating post statuses:', updateError);
+          throw updateError;
+        }
+
+        console.log('Successfully updated post statuses to in_progress');
+
+        // Also try to call the bulk function if it works
+        const requests = posts.map(post => ({
+          postId: post.id,
+          aspectRatio: '1:1' // Default aspect ratio
+        }));
+
+        if (requests.length > 0) {
+          const { data: bulkResult, error: bulkError } = await supabase.functions.invoke(
+            'bulk-generate-prompts',
+            {
+              body: {
+                requests: requests,
+                themeId: body.themeId,
+                batchSize: 5
+              }
+            }
+          );
+
+          if (bulkError) {
+            console.log('Bulk function call failed, but post statuses updated:', bulkError);
+          } else {
+            console.log('Bulk generation also successful:', bulkResult);
+          }
+        }
+
+      } catch (error) {
+        console.error('Failed to start processing:', error);
+        throw error;
+      }
+
+      // Update theme status
+      await supabase
+        .from('themes')
+        .update({
+          prompt_generation_status: 'in_progress',
+          lifecycle_status: 'generating',
+          user_interaction_required: true,
+          background_processing_complete: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', body.themeId);
+
+      const response = {
+        success: true, 
+        message: `Theme processing ${body.action === 'restart_processing' ? 'restarted' : 'started'}`,
+        postsCount: posts.length,
+        correlationId
+      };
+
+      console.log(`✅ [PROCESSING] ${body.action} completed`, {
+        ...response,
+        duration: `${Date.now() - startTime}ms`
+      });
+
+      return new Response(
+        JSON.stringify(response),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+
     } else {
-      throw new Error('Invalid action. Must be create, complete, or status');
+      throw new Error('Invalid action. Must be create, complete, status, start_processing, or restart_processing');
     }
 
   } catch (error) {

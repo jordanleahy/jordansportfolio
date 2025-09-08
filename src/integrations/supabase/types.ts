@@ -2857,6 +2857,15 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      check_processing_health: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          check_name: string
+          count: number
+          details: string
+          status: string
+        }[]
+      }
       check_theme_submission_rate_limit: {
         Args: {
           p_max_submissions?: number
@@ -2878,6 +2887,14 @@ export type Database = {
           post_count: number
           removed_posts: number
         }[]
+      }
+      cleanup_expired_cache: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      cleanup_old_cached_prompts: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       cleanup_old_submissions: {
         Args: Record<PropertyKey, never>
@@ -2944,6 +2961,16 @@ export type Database = {
       get_agent_name: {
         Args: { constant_name: string }
         Returns: string
+      }
+      get_cache_stats: {
+        Args: { user_id_param?: string }
+        Returns: {
+          avg_hit_count: number
+          categories_count: number
+          expired_prompts: number
+          total_hits: number
+          total_prompts: number
+        }[]
       }
       get_or_create_monthly_aggregate: {
         Args: { target_month: string; target_user_id: string }
@@ -3135,9 +3162,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      restart_stuck_themes: {
+        Args: { p_user_id?: string }
+        Returns: {
+          message: string
+          status: string
+          theme_id: string
+          theme_name: string
+        }[]
+      }
       try_start_image_generation: {
         Args: { p_aspect_ratio: string; p_post_id: string; p_user_id: string }
         Returns: Json
+      }
+      update_cache_hit: {
+        Args: { cache_key_param: string }
+        Returns: undefined
       }
       update_post_prompt_and_status: {
         Args: { p_generated_prompt: string; p_post_id: string }
