@@ -7,6 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TypewriterInput } from '@/components/ui/typewriter-input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2, Sparkles, Users, MessageSquareText, Send } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { Section } from '@/components/layout/Section';
@@ -65,6 +66,7 @@ export default function StoriesDashboard() {
   const [isGeneratingTheme, setIsGeneratingTheme] = useState(false);
   const [pendingTheme, setPendingTheme] = useState<PendingTheme | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isAbcMode, setIsAbcMode] = useState(false);
 
   // Centralized function to clear pending theme state
   const clearPendingThemeState = () => {
@@ -444,9 +446,9 @@ export default function StoriesDashboard() {
     }
   };
   const handleGenerateCustomTheme = async () => {
-    console.log('🎯 handleGenerateCustomTheme called');
+    console.log('🎯 handleGenerateCustomTheme called', { isAbcMode });
     
-    if (!customThemeDescription.trim()) {
+    if (!customThemeDescription.trim() && !isAbcMode) {
       console.log('❌ No theme description provided');
       toast({
         title: "Description Required",
@@ -495,29 +497,58 @@ export default function StoriesDashboard() {
     });
     
     try {
-      console.log('📡 Calling theme lifecycle orchestrator...');
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('manage-theme-lifecycle', {
-        body: {
-          action: 'create',
-          description: themeDescription
+      let data: any;
+      let error: any;
+      
+      if (isAbcMode) {
+        console.log('📚 Calling ABC illustrations generator...');
+        const response = await supabase.functions.invoke('generate-abc-illustrations', {
+          body: {
+            description: themeDescription,
+            user_id: user.id
+          }
+        });
+        
+        data = response.data;
+        error = response.error;
+        
+        console.log('📡 ABC Edge function response:', { data, error });
+        
+        if (error) {
+          console.log('❌ ABC Edge function error:', error);
+          throw new Error(`ABC generation error: ${error.message}`);
         }
-      });
-      
-      console.log('📡 Edge function response:', { data, error });
-      // Remove duplicate handling - always proceed with generation
-      if (error) {
-        console.log('❌ Edge function error:', error);
-        throw new Error(`Edge function error: ${error.message}`);
+        if (!data?.success) {
+          console.log('❌ ABC Edge function returned failure:', data);
+          throw new Error(data?.error || 'Failed to generate ABC illustrations');
+        }
+        
+        console.log('✅ ABC Theme saved to database:', data);
+      } else {
+        console.log('📡 Calling theme lifecycle orchestrator...');
+        const response = await supabase.functions.invoke('manage-theme-lifecycle', {
+          body: {
+            action: 'create',
+            description: themeDescription
+          }
+        });
+        
+        data = response.data;
+        error = response.error;
+        
+        console.log('📡 Edge function response:', { data, error });
+        // Remove duplicate handling - always proceed with generation
+        if (error) {
+          console.log('❌ Edge function error:', error);
+          throw new Error(`Edge function error: ${error.message}`);
+        }
+        if (!data?.success) {
+          console.log('❌ Edge function returned failure:', data);
+          throw new Error(data?.error || 'Failed to generate theme');
+        }
+        
+        console.log('✅ Theme saved to database:', data);
       }
-      if (!data?.success) {
-        console.log('❌ Edge function returned failure:', data);
-        throw new Error(data?.error || 'Failed to generate theme');
-      }
-      
-      console.log('✅ Theme saved to database:', data);
       
       // Update pending theme with the actual theme_id from the response
       if (data?.theme_id) {
@@ -680,32 +711,45 @@ export default function StoriesDashboard() {
                     Down for maintenance
                   </div>
                 </div>
-              ) : (
-                <TypewriterInput 
-                  typewriterTexts={[
-                    "patient education for diabetes",
-                    "patient education for sepsis", 
-                    "patient education for UTI",
-                    "patient education for resp failure",
-                    "patient education for heart attack"
-                  ]}
-                  fallbackPlaceholder="Describe your theme..." 
-                  className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
-                  value={customThemeDescription} 
-                  onChange={e => setCustomThemeDescription(e.target.value)} 
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && customThemeDescription.trim()) {
-                      try {
-                        localStorage.setItem('stories_hero_seen', '1');
-                      } catch {}
-                      setShowHero(false);
-                    }
-                  }} 
-                  typingSpeed={60}
-                  deletingSpeed={30}
-                  pauseDuration={1500}
-                />
-              )}
+                 ) : (
+                  <div className="space-y-3">
+                    <TypewriterInput 
+                      typewriterTexts={[
+                        "patient education for diabetes",
+                        "patient education for sepsis", 
+                        "patient education for UTI",
+                        "patient education for resp failure",
+                        "patient education for heart attack"
+                      ]}
+                      fallbackPlaceholder={isAbcMode ? "Theme for ABC series (optional)..." : "Describe your theme..."} 
+                      className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
+                      value={customThemeDescription} 
+                      onChange={e => setCustomThemeDescription(e.target.value)} 
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && (customThemeDescription.trim() || isAbcMode)) {
+                          try {
+                            localStorage.setItem('stories_hero_seen', '1');
+                          } catch {}
+                          setShowHero(false);
+                        }
+                      }} 
+                      typingSpeed={60}
+                      deletingSpeed={30}
+                      pauseDuration={1500}
+                    />
+                     <div className="flex items-center justify-center gap-2">
+                       <Checkbox 
+                         id="abc-mode" 
+                         checked={isAbcMode}
+                         onCheckedChange={(checked) => setIsAbcMode(checked === true)}
+                         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                       />
+                       <label htmlFor="abc-mode" className="text-sm text-muted-foreground cursor-pointer">
+                         Create ABC Illustrations (A-Z series with letters in images)
+                       </label>
+                     </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>
@@ -754,40 +798,53 @@ export default function StoriesDashboard() {
                       Down for maintenance
                     </div>
                   </div>
-                ) : (
-                  <TypewriterInput 
-                    aria-label="Describe your theme" 
-                    typewriterTexts={[
-                      "patient education for diabetes",
-                      "patient education for sepsis", 
-                      "patient education for UTI",
-                      "patient education for resp failure",
-                      "patient education for heart attack"
-                    ]}
-                    fallbackPlaceholder="Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"
-                    className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
-                    value={customThemeDescription} 
-                    onChange={e => setCustomThemeDescription(e.target.value)} 
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && customThemeDescription.trim() && !isGeneratingTheme) {
-                        console.log('⌨️ Enter key pressed - triggering theme generation');
-                        e.preventDefault();
-                        handleGenerateCustomTheme();
-                      }
-                    }}
-                    disabled={isGeneratingTheme} 
-                    typingSpeed={80}
-                    deletingSpeed={40}
-                    pauseDuration={2000}
-                  />
-                )}
+                 ) : (
+                   <div className="space-y-3">
+                     <TypewriterInput 
+                       aria-label="Describe your theme" 
+                       typewriterTexts={[
+                         "patient education for diabetes",
+                         "patient education for sepsis", 
+                         "patient education for UTI",
+                         "patient education for resp failure",
+                         "patient education for heart attack"
+                       ]}
+                       fallbackPlaceholder={isAbcMode ? "Theme for ABC series (optional)... (e.g., 'Space Adventure', 'Peppa Pig')" : "Describe your theme... (e.g., 'AI applications in healthcare for medical professionals')"}
+                       className="w-full h-16 px-8 py-6 text-lg bg-background/80 backdrop-blur-sm border-2 border-border/50 rounded-3xl placeholder:text-muted-foreground/60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 transition-all duration-300 hover:border-border" 
+                       value={customThemeDescription} 
+                       onChange={e => setCustomThemeDescription(e.target.value)} 
+                       onKeyDown={e => {
+                         if (e.key === 'Enter' && (customThemeDescription.trim() || isAbcMode) && !isGeneratingTheme) {
+                           console.log('⌨️ Enter key pressed - triggering theme generation');
+                           e.preventDefault();
+                           handleGenerateCustomTheme();
+                         }
+                       }}
+                       disabled={isGeneratingTheme} 
+                       typingSpeed={80}
+                       deletingSpeed={40}
+                       pauseDuration={2000}
+                     />
+                     <div className="flex items-center justify-center gap-2">
+                       <Checkbox 
+                         id="abc-mode-main" 
+                         checked={isAbcMode}
+                         onCheckedChange={(checked) => setIsAbcMode(checked === true)}
+                         className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                       />
+                       <label htmlFor="abc-mode-main" className="text-sm text-muted-foreground cursor-pointer">
+                         Create ABC Illustrations (A-Z series with letters in images)
+                       </label>
+                     </div>
+                   </div>
+                 )}
                 <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground px-8">
                   <span className="w-full">Agentic Experience Created by Jordan Leahy</span>
                 </div>
               </div>
               {isAdmin && <div className="mt-2 space-y-2">
-                  {/* Submit button - only show when text is entered */}
-                  {customThemeDescription.trim() && (
+                  {/* Submit button - show when text is entered OR ABC mode is enabled */}
+                  {(customThemeDescription.trim() || isAbcMode) && (
                     <Button 
                       onClick={handleGenerateCustomTheme}
                       disabled={isGeneratingTheme}
