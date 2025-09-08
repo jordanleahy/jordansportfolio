@@ -108,13 +108,44 @@ export const CONTENT_STATUS = {
   PUBLISHED: 'published',
 } as const;
 
-// Image Generation Status Values
+// Import unified status enums
+import { 
+  BaseProcessingStatus, 
+  ImageGenerationStatus, 
+  ContentStatus,
+  ThemeLifecycleStatus,
+  ProcessingOperation,
+  AgentStatus 
+} from '@/types/enums/status';
+
+// Export unified status constants for backward compatibility
 export const IMAGE_STATUS = {
-  NONE: 'none',
-  PENDING: 'pending',
-  GENERATING: 'generating',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
+  NONE: ImageGenerationStatus.NONE,
+  PENDING: ImageGenerationStatus.PENDING,
+  GENERATING: ImageGenerationStatus.GENERATING,
+  COMPLETED: ImageGenerationStatus.COMPLETED,
+  FAILED: ImageGenerationStatus.FAILED,
+} as const;
+
+export const PROCESSING_STATUS = {
+  NOT_STARTED: BaseProcessingStatus.NOT_STARTED,
+  IN_PROGRESS: BaseProcessingStatus.IN_PROGRESS,
+  COMPLETED: BaseProcessingStatus.COMPLETED,
+  FAILED: BaseProcessingStatus.FAILED,
+} as const;
+
+export const THEME_LIFECYCLE_STATUS = {
+  PENDING: ThemeLifecycleStatus.PENDING,
+  GENERATING: ThemeLifecycleStatus.GENERATING,
+  READY: ThemeLifecycleStatus.READY,
+  COMPLETED: ThemeLifecycleStatus.COMPLETED,
+  FAILED: ThemeLifecycleStatus.FAILED,
+} as const;
+
+export const PROCESSING_OPERATIONS = {
+  GENERATE: ProcessingOperation.GENERATE,
+  BULK_GENERATE: ProcessingOperation.BULK_GENERATE,
+  REGENERATE_PROMPT: ProcessingOperation.REGENERATE_PROMPT,
 } as const;
 
 // Temperature Settings for Different Use Cases
