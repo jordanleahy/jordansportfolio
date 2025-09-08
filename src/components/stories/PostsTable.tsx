@@ -760,7 +760,7 @@ const { handleGenerateImage } = useImageManager({
       )}
 
       {/* Modals */}
-      {previewImage.url && (
+      {previewImage.url && previewImage.url.trim() && (
         <ImagePreviewModal
           imageUrl={previewImage.url}
           alt={previewImage.alt || "Post image"}
