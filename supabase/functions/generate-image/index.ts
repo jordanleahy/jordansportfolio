@@ -196,13 +196,24 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       
+      // Enhanced error logging for console visibility
+      console.error('OpenAI API Error Details:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+        correlationId,
+        timestamp: new Date().toISOString()
+      });
+      
       logger.logOpenAIResponse('gpt-image-1', undefined, undefined, {
         status: response.status,
+        statusText: response.statusText,
         error: errorData
       });
       
       logger.logImageGeneration(enhancedPrompt, 'failed', {
         status: response.status,
+        statusText: response.statusText,
         error: errorData
       });
 
