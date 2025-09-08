@@ -1,3 +1,5 @@
+import { BaseProcessingStatus, ThemeLifecycleStatus } from '@/types/enums/status';
+
 export const SHIMMER_CONSTANTS = {
   PREFIXES: {
     PENDING_THEME: 'pending-',
@@ -24,15 +26,15 @@ export const SHIMMER_CONSTANTS = {
     SHIMMER_DURATION: '2s',
   },
   STATUS: {
-    COMPLETED: 'completed',
-    IN_PROGRESS: 'in_progress',
-    FAILED: 'failed',
+    COMPLETED: BaseProcessingStatus.COMPLETED,
+    IN_PROGRESS: BaseProcessingStatus.IN_PROGRESS,
+    FAILED: BaseProcessingStatus.FAILED,
   },
   LIFECYCLE_STATUS: {
-    PENDING: 'pending',
-    GENERATING: 'generating',
-    READY: 'ready',
-    COMPLETED: 'completed',
+    PENDING: ThemeLifecycleStatus.PENDING,
+    GENERATING: ThemeLifecycleStatus.GENERATING,
+    READY: ThemeLifecycleStatus.READY,
+    COMPLETED: ThemeLifecycleStatus.COMPLETED,
   }
 } as const;
 

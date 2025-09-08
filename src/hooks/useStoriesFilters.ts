@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ThemeWithPosts } from '@/types/stories';
 import { getCategoryIndustry, groupCategoriesByIndustry } from '@/constants/categoryConstants';
+import { ThemeLifecycleStatus, BaseProcessingStatus } from '@/types/enums/status';
 
 interface UseStoriesFiltersProps {
   themes: ThemeWithPosts[];
@@ -47,10 +48,10 @@ export function useStoriesFilters({ themes }: UseStoriesFiltersProps): UseStorie
     // First filter out incomplete/generating themes
     filtered = filtered.filter(theme => {
       // Only show completed themes with posts
-      if (theme.lifecycle_status === 'generating' || 
-          theme.lifecycle_status === 'pending' ||
+      if (theme.lifecycle_status === ThemeLifecycleStatus.GENERATING || 
+          theme.lifecycle_status === ThemeLifecycleStatus.PENDING ||
           theme.background_processing_complete === false ||
-          theme.prompt_generation_status !== 'completed' ||
+          theme.prompt_generation_status !== BaseProcessingStatus.COMPLETED ||
           theme.post_count === 0) {
         return false;
       }

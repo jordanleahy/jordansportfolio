@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useUnifiedRealtime } from '@/hooks/useUnifiedRealtime';
 import { supabase } from '@/integrations/supabase/client';
+import { BaseProcessingStatus } from '@/types/enums/status';
 
 export const RealtimeThemeTest: React.FC = () => {
   const [testResults, setTestResults] = useState<string[]>([]);
@@ -53,7 +54,7 @@ export const RealtimeThemeTest: React.FC = () => {
 
       // Test update - change status temporarily
       const currentStatus = testTheme.prompt_generation_status;
-      const testStatus = currentStatus === 'completed' ? 'in_progress' : 'completed';
+      const testStatus = currentStatus === BaseProcessingStatus.COMPLETED ? BaseProcessingStatus.IN_PROGRESS : BaseProcessingStatus.COMPLETED;
       
       addLog(`🔄 Updating theme status from '${currentStatus}' to '${testStatus}'`);
       

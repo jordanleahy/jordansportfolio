@@ -151,21 +151,7 @@ export const GENERATE_OPERATION = 'generate' as const;
 export const BULK_GENERATE_OPERATION = 'bulk_generate' as const;  
 export const REGENERATE_PROMPT_OPERATION = 'regenerate_prompt' as const;
 
-// Status value constants for easy import
-export const IMAGE_STATUS_VALUES = {
-  NONE: 'none',
-  PENDING: 'pending', 
-  GENERATING: 'generating',
-  COMPLETED: 'completed',
-  FAILED: 'failed'
-} as const;
-
-export const PROCESSING_STATUS_VALUES = {
-  NOT_STARTED: 'not_started',
-  IN_PROGRESS: 'in_progress',
-  COMPLETED: 'completed', 
-  FAILED: 'failed'
-} as const;
+// These constants are now deprecated - use enum values directly from the status module
 
 // Agent Status Values
 export const AGENT_STATUS = {

@@ -67,17 +67,19 @@ interface StreetVisionResultsProps {
  * @param status - Current processing status from database record
  * @returns User-friendly status message
  */
+import { BaseProcessingStatus } from '@/types/enums/status';
+
 const getStatusMessage = (status: string): string => {
   switch (status) {
-    case 'pending':
+    case BaseProcessingStatus.NOT_STARTED:
       return 'Initializing processing...';      // Initial state after edge function call
     case 'analyzing':
       return 'Analyzing street conditions...';   // GPT-5 vision analysis phase
-    case 'generating':
+    case BaseProcessingStatus.IN_PROGRESS:
       return 'Generating transformation...';     // Image generation phase
-    case 'completed':
+    case BaseProcessingStatus.COMPLETED:
       return 'Processing complete!';            // Successfully finished
-    case 'failed':
+    case BaseProcessingStatus.FAILED:
       return 'Processing failed';               // Error occurred
     default:
       return 'Processing...';                   // Fallback for unknown states
@@ -184,7 +186,7 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
                       </div>
                     </div>
                   );
-                } else if (isProcessing || (record && ['pending', 'analyzing', 'generating'].includes(record.status))) {
+                } else if (isProcessing || (record && [BaseProcessingStatus.NOT_STARTED, 'analyzing', BaseProcessingStatus.IN_PROGRESS].includes(record.status))) {
                   return (
                     <SimpleShimmer 
                       aspectRatio="16/9" 
@@ -250,7 +252,7 @@ export const StreetVisionResults: React.FC<StreetVisionResultsProps> = ({
           )}
 
           {/* Processing Stats */}
-          {record?.processing_time_ms && record.status === 'completed' && (
+          {record?.processing_time_ms && record.status === BaseProcessingStatus.COMPLETED && (
             <div className="text-xs text-muted-foreground text-center">
               Processing completed in {(record.processing_time_ms / 1000).toFixed(1)} seconds
             </div>
