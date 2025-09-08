@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Eye, BookOpen, Star, Share2, Pencil, ExternalLink, RefreshCw } from "lucide-react";
+import { Share2, Pencil } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { PostsCardView } from "./PostsCardView";
@@ -19,7 +19,6 @@ import { useImageManager } from "@/hooks/useImageManager";
 import { useProcessingStatesContext } from "@/contexts/ProcessingStatesContext";
 import { useBatchBlogStatus } from "@/hooks/useBatchBlogStatus";
 import { PostEditModal } from "./PostEditModal";
-// Removed deprecated optimizedSocialMediaService import
 
 import { ImagePreviewModal } from "@/components/ui/responsive-image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
@@ -48,20 +47,12 @@ export default function PostsTable({
   const [activeTab, setActiveTab] = useState<"draft" | "published">("draft");
   const [viewMode, setViewMode] = useState<ViewMode>('card');
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
-  const [promptPanelWidth, setPromptPanelWidth] = useState(400); // Default width in pixels
+  const [promptPanelWidth, setPromptPanelWidth] = useState(400);
   const [isResizing, setIsResizing] = useState(false);
   const isMobile = useIsMobile();
   const [isBulk169, setIsBulk169] = useState(false);
   const [isBulk11, setIsBulk11] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [isFeaturing, setIsFeaturing] = useState(false);
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [isInLibrary, setIsInLibrary] = useState(false);
-  const [hasSharedLink, setHasSharedLink] = useState(false);
-  const [isUpdatingCollection, setIsUpdatingCollection] = useState(false);
-  const [collectionId, setCollectionId] = useState<string | null>(null);
-  const [newPostsCount, setNewPostsCount] = useState(0);
-  const [hasImageActivity, setHasImageActivity] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<SocialMediaPost | null>(null);
   const { generatePrompt } = useOptimizedPromptGeneration();
@@ -103,7 +94,6 @@ export default function PostsTable({
 const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(postIds);
 
   const { setBulkProcessing, isProcessing } = useProcessingStatesContext();
-
 
   // Animation state management
   const {
@@ -180,21 +170,9 @@ const handleStatusChange = async (postId: string, newStatus: 'draft' | 'schedule
   await handleStatusChangeWithAnimation(postId, newStatus, originalHandleStatusChange, onPostsChange);
 };
 
-// ❌ BAD: Using theme name from route params - Phase 1 migration incomplete
-// Resolve theme from route (if present) - THIS SHOULD BE REMOVED
-// const params = useParams();
-// const themeName = params.theme ? decodeURIComponent(params.theme) : undefined;
-
-// ✅ GOOD: themeId is now a required prop; no longer derived from posts or routes
-
 const { handleGenerateImage } = useImageManager({
   onPostsChange,
-  // ❌ BAD: Passing themeName - should be removed in Phase 1
-  // themeName,  // REMOVED - use themeId from props instead
 });
-
-
-
 
   // Resize functionality
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -391,298 +369,10 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
-  // Publish/remove from library toggle with wrapper functions
-  const handlePublishCollection = async () => {
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('Please sign in to manage library');
-        return;
-      }
-
-      setIsPublishing(true);
-
-      // Check if we already have a published collection for this theme to toggle
-      const { data: existing, error: checkErr } = await supabase
-        .from('shared_collections')
-        .select('id, include_in_library, featured')
-        .eq('user_id', session.user.id)
-        .eq('status', 'published')
-        .eq('theme_id', themeId)
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (checkErr) throw checkErr;
-
-      if (existing) {
-        const newLibraryState = !existing.include_in_library;
-        
-        // If removing from library and it's featured, also remove from featured
-        const updateData = newLibraryState
-          ? { include_in_library: true, public_access_type: 'blurred' }
-          : { include_in_library: false, featured: false };
-
-        const { error: updateErr } = await supabase
-          .from('shared_collections')
-          .update(updateData)
-          .eq('id', existing.id);
-
-        if (updateErr) throw updateErr;
-
-        // If adding to library, also update the collection content (always blurred)
-        if (newLibraryState) {
-          const { error: contentUpdateErr } = await supabase.rpc('update_shared_collection_1_1', {
-            p_collection_id: existing.id,
-            p_theme_id: themeId,
-            p_public_access_type: 'blurred',
-          });
-          
-          if (contentUpdateErr) {
-            console.warn('Failed to update collection content:', contentUpdateErr);
-          }
-        }
-        
-        // Update local state
-        setIsInLibrary(newLibraryState);
-        if (!newLibraryState) {
-          setIsFeatured(false); // Can't be featured if not in library
-        }
-        
-        const message = newLibraryState 
-          ? 'Added to Library' 
-          : existing.featured 
-            ? 'Removed from Library & Featured' 
-            : 'Removed from Library';
-        
-        toast.success(message);
-        return;
-      }
-
-      // Create new collection if none exists
-      const rawHandle = (session.user.user_metadata?.preferred_username
-        || session.user.email?.split('@')[0]
-        || session.user.id.slice(0, 8)) as string;
-      const handle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
-
-      const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
-      const candidates = scoped.filter(p => !!p.image_1_1_url);
-      const candidateIds = candidates.map(p => p.id);
-      
-      if (candidateIds.length === 0) {
-        toast.error('No posts with 1:1 images found on this page');
-        return;
-      }
-
-      const titleArg = (category && String(category).trim()) || candidates[0]?.title || handle;
-      const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
-      const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
-      const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
-      const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
-
-      console.log('🔍 Publishing collection with params:', {
-        p_handle: handle,
-        p_post_ids: candidateIds,
-        p_theme_id: themeId,
-        p_title: titleArg,
-        p_description: descriptionArg,
-      });
-
-      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
-        p_handle: handle,
-        p_post_ids: candidateIds,
-        p_theme_id: themeId,
-        p_title: titleArg,
-        p_description: descriptionArg,
-        p_public_access_type: 'blurred',
-      });
-      
-      if (error) {
-        console.error('❌ Error publishing collection:', error);
-        toast.error(error.message || 'Failed to publish');
-        return;
-      }
-      const { error: includeErr } = await supabase
-        .from('shared_collections')
-        .update({ include_in_library: true })
-        .eq('id', collectionId);
-      
-      if (includeErr) {
-        console.warn('Failed to add to Library', includeErr);
-      }
-      
-      setIsInLibrary(true);
-      const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
-      try { await navigator.clipboard.writeText(publicUrl); } catch {}
-      toast.success('Published to Library! Link copied.');
-    } catch (e: any) {
-      console.error(e);
-      toast.error('Failed to manage library');
-    } finally {
-      setIsPublishing(false);
-    }
-  };
-
-  // Wrapper function for button onClick handler
-  const handlePublishBlurred = () => handlePublishCollection();
-
-  // Check current featured and library status for this theme
-  const checkCollectionStatus = async () => {
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const { data: latest, error } = await supabase
-        .from('shared_collections')
-        .select('id, featured, include_in_library')
-        .eq('user_id', session.user.id)
-        .eq('status', 'published')
-        .eq('theme_id', themeId)
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!error && latest) {
-        setIsFeatured(latest.featured || false);
-        setIsInLibrary(latest.include_in_library || false);
-        setHasSharedLink(true);
-        setCollectionId(latest.id);
-
-        // Check if there are new posts not in the collection
-        const { data: collectionItems, error: itemsError } = await supabase
-          .from('shared_collection_items')
-          .select('post_id')
-          .eq('collection_id', latest.id);
-
-        if (!itemsError && collectionItems) {
-          const collectionPostIds = new Set(collectionItems.map(item => item.post_id));
-          const currentPostsWithImages = posts.filter(p => !!p.image_1_1_url);
-          const newPosts = currentPostsWithImages.filter(p => !collectionPostIds.has(p.id));
-          setNewPostsCount(newPosts.length);
-        }
-      } else {
-        setHasSharedLink(false);
-        setCollectionId(null);
-        setNewPostsCount(0);
-      }
-    } catch (e) {
-      console.error('Failed to check collection status', e);
-    }
-  };
-
-  // Check for image generation activity since last publish
-  const checkImageActivity = useCallback(async () => {
-    if (!themeId || !hasSharedLink) {
-      setHasImageActivity(false);
-      return;
-    }
-    
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) return;
-
-      // Get the last published collection with its items
-      const { data: collection, error: collectionError } = await supabase
-        .from('shared_collections')
-        .select('id, updated_at')
-        .eq('user_id', session.user.id)
-        .eq('status', 'published')
-        .eq('theme_id', themeId)
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (collectionError || !collection) {
-        setHasImageActivity(false);
-        return;
-      }
-
-      // Get the current collection items to compare image URLs
-      const { data: collectionItems, error: itemsError } = await supabase
-        .from('shared_collection_items')
-        .select('post_id, image_1_1_url')
-        .eq('collection_id', collection.id);
-
-      if (itemsError) {
-        console.error('Error fetching collection items:', itemsError);
-        setHasImageActivity(false);
-        return;
-      }
-
-      // Create a map of post_id to published image URL
-      const publishedImageUrls = new Map(
-        collectionItems?.map(item => [item.post_id, item.image_1_1_url]) || []
-      );
-
-      // Check if any current posts have different image URLs than what was published
-      const postsWithImages = posts.filter(p => !!p.image_1_1_url);
-      const hasImageChanges = postsWithImages.some(post => {
-        const publishedUrl = publishedImageUrls.get(post.id);
-        return !publishedUrl || publishedUrl !== post.image_1_1_url;
-      });
-
-      // Also check if there are new posts with images that weren't in the collection
-      const currentPostIds = new Set(postsWithImages.map(p => p.id));
-      const publishedPostIds = new Set(publishedImageUrls.keys());
-      const hasNewPosts = Array.from(currentPostIds).some(id => !publishedPostIds.has(id));
-
-      setHasImageActivity(hasImageChanges || hasNewPosts);
-    } catch (error) {
-      console.error('Error checking image activity:', error);
-      setHasImageActivity(false);
-    }
-  }, [themeId, hasSharedLink, posts]);
-
-  // Handle updating existing collection with new posts
-  const handleUpdateCollection = async () => {
-    if (!collectionId) return;
-    
-    try {
-      setIsUpdatingCollection(true);
-      const { supabase } = await import('@/integrations/supabase/client');
-      
-      const { data: updatedCollectionId, error } = await supabase.rpc('update_shared_collection_1_1', {
-        p_collection_id: collectionId,
-        p_theme_id: themeId,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      // Refresh collection status to update the UI
-      await checkCollectionStatus();
-      
-      toast.success(`Updated collection with all current posts`);
-      
-      // Open the updated collection
-      const { data: collectionData, error: fetchError } = await supabase
-        .from('shared_collections')
-        .select('handle')
-        .eq('id', updatedCollectionId)
-        .single();
-        
-      if (!fetchError && collectionData) {
-        const publicUrl = `${window.location.origin}/public/collections/${collectionData.handle}/${updatedCollectionId}`;
-        window.open(publicUrl, '_blank', 'noopener,noreferrer');
-      }
-      
-    } catch (error) {
-      console.error('Error updating collection:', error);
-      toast.error('Failed to update collection. Please try again.');
-    } finally {
-      setIsUpdatingCollection(false);
-    }
-  };
-
-  // Handle sharing the public URL (separate from library functionality)
+  // Simplified sharing function - creates blurred public collection and opens it
   const handleShare = async () => {
     try {
-      setIsPublishing(true);
+      setIsSharing(true);
       const { supabase } = await import('@/integrations/supabase/client');
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -691,169 +381,56 @@ const { handleGenerateImage } = useImageManager({
         return;
       }
 
-      // Check if there's already a published collection for this theme
-      let existingCollection = null;
-      if (themeId) {
-        const { data, error: checkError } = await supabase
-          .from('shared_collections')
-          .select('handle, id')
-          .eq('user_id', session.user.id)
-          .eq('status', 'published')
-          .eq('theme_id', themeId)
-          .single();
-        
-        if (checkError && checkError.code !== 'PGRST116') {
-          // Only throw if it's not a "no rows returned" error
-          if (checkError.code !== 'PGRST116') {
-            console.error('Error checking existing collection:', checkError);
-          }
-        } else {
-          existingCollection = data;
-        }
+      // Generate simple handle
+      const handle = session.user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, '-') || session.user.id.slice(0, 8);
+
+      // Get posts with 1:1 images
+      const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
+      const candidates = scoped.filter(p => !!p.image_1_1_url);
+      const candidateIds = candidates.map(p => p.id);
+      
+      if (candidateIds.length === 0) {
+        toast.error('No posts with 1:1 images found to share');
+        return;
       }
 
-      let handle = existingCollection?.handle;
+      const titleArg = (category && String(category).trim()) || candidates[0]?.title || handle;
+      const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
+      const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
+      const descriptionArg = baseDesc.replace(/\s+/g, ' ').trim().slice(0, 165);
 
-      // If no published collection exists, create one first
-      if (!existingCollection) {
-        const rawHandle = (session.user.user_metadata?.preferred_username
-          || session.user.email?.split('@')[0]
-          || session.user.id.slice(0, 8)) as string;
-        const newHandle = rawHandle.toLowerCase().replace(/[^a-z0-9_-]+/g, '-').slice(0, 32).replace(/^-+|-+$/g, '') || session.user.id.slice(0, 8);
+      // Create blurred public collection
+      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
+        p_handle: handle,
+        p_post_ids: candidateIds,
+        p_theme_id: themeId,
+        p_title: titleArg,
+        p_description: descriptionArg,
+      });
 
-        const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
-        const candidates = scoped.filter(p => !!p.image_1_1_url);
-        const candidateIds = candidates.map(p => p.id);
-        
-        if (candidateIds.length === 0) {
-          toast.error('No posts with 1:1 images found to share');
-          return;
-        }
+      if (error) throw error;
 
-        const titleArg = (category && String(category).trim()) || candidates[0]?.title || newHandle;
-        const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
-        const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
-        const trimTo = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).replace(/\s+\S*$/, ''));
-        const descriptionArg = trimTo(baseDesc.replace(/\s+/g, ' ').trim(), 165);
+      // Set to blurred and add to library
+      await supabase
+        .from('shared_collections')
+        .update({
+          include_in_library: true,
+          public_access_type: 'blurred'
+        })
+        .eq('id', collectionId);
 
-        console.log('🔍 Sharing collection with params:', {
-          p_handle: newHandle,
-          p_post_ids: candidateIds,
-          p_theme_id: themeId,
-          p_title: titleArg,
-          p_description: descriptionArg,
-        });
-
-        const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
-          p_handle: newHandle,
-          p_post_ids: candidateIds,
-          p_theme_id: themeId,
-          p_title: titleArg,
-          p_description: descriptionArg,
-        });
-
-        if (error) {
-          console.error('❌ Error sharing collection:', error);
-          throw error;
-        }
-
-        handle = newHandle;
-        setHasSharedLink(true);
-        setCollectionId(collectionId);
-        const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
-        window.open(publicUrl, '_blank', 'noopener,noreferrer');
-        toast.success('Opened share link in a new tab');
-      } else {
-        // For existing collections, check if we need to update with new images
-        if (hasImageActivity) {
-          console.log('🔄 Updating existing collection with new images');
-          await handleUpdateCollection();
-        } else {
-          // No changes, just open the existing collection
-          const publicUrl = `${window.location.origin}/public/collections/${handle}/${existingCollection.id}`;
-          window.open(publicUrl, '_blank', 'noopener,noreferrer');
-          toast.success('Opened share link in a new tab');
-        }
-      }
+      // Open collection in new tab
+      const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
+      window.open(publicUrl, '_blank', 'noopener,noreferrer');
+      toast.success('Collection shared! Opening in new tab...');
 
     } catch (error) {
       console.error('Error sharing collection:', error);
       toast.error('Failed to share collection. Please try again.');
     } finally {
-      setIsPublishing(false);
+      setIsSharing(false);
     }
   };
-
-  // Feature/unfeature the latest published collection for this theme
-  const handleFeatureLatestCollection = async () => {
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('Please sign in to feature');
-        return;
-      }
-      setIsFeaturing(true);
-      
-      // Find most recent published shared collection for this theme
-      const { data: latest, error: selErr } = await supabase
-        .from('shared_collections')
-        .select('id, featured, include_in_library')
-        .eq('user_id', session.user.id)
-        .eq('status', 'published')
-        .eq('theme_id', themeId)
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      if (selErr) throw selErr;
-      if (!latest) {
-        toast.error('No published collection found. Click Library first to create one.');
-        return;
-      }
-
-      const newFeaturedState = !latest.featured;
-      
-      // If featuring, ensure it's also in library. If unfeaturing, keep library status as is
-      const updateData = newFeaturedState 
-        ? { featured: true, include_in_library: true }
-        : { featured: false };
-        
-      const { error: updErr } = await supabase
-        .from('shared_collections')
-        .update(updateData)
-        .eq('id', latest.id);
-      
-      if (updErr) throw updErr;
-      
-      // Update local state
-      setIsFeatured(newFeaturedState);
-      if (newFeaturedState) {
-        setIsInLibrary(true); // Featured items are always in library
-      }
-      
-      toast.success(newFeaturedState ? 'Added to Featured & Library' : 'Removed from Featured');
-    } catch (e) {
-      console.error(e);
-      toast.error('Failed to update featured status');
-    } finally {
-      setIsFeaturing(false);
-    }
-  };
-
-  // Check collection status on mount and when theme changes or posts change
-  useEffect(() => {
-    if (userIsAdmin && category) {
-      checkCollectionStatus();
-    }
-  }, [selectedThemeId, category, userIsAdmin, posts]);
-
-  // Check for image activity when collection status or posts change
-  useEffect(() => {
-    if (userIsAdmin && category) {
-      checkImageActivity();
-    }
-  }, [checkImageActivity, userIsAdmin, category]);
 
   // Filter posts by status
   const filteredPosts = posts.filter(post => post.status === activeTab);
@@ -932,69 +509,16 @@ const { handleGenerateImage } = useImageManager({
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button
-                      variant={isFeatured ? "default" : "outline"}
-                      size="icon"
-                      onClick={handleFeatureLatestCollection}
-                      disabled={isFeaturing}
-                      aria-label={isFeatured ? "Remove from Featured" : "Add to Featured"}
-                      title={isFeaturing ? 'Updating…' : (isFeatured ? 'Remove from Featured' : 'Add to Featured')}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={handleShare}
+                      disabled={isSharing}
+                      aria-label="Share Collection"
+                      title="Create and share a blurred public collection"
                     >
-                      <Star className={`h-4 w-4 ${isFeatured ? 'fill-current' : ''}`} />
+                      <Share2 className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant={isInLibrary ? "default" : "outline"}
-                      size="icon"
-                      onClick={handlePublishBlurred}
-                      disabled={isPublishing}
-                      aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
-                      title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
-                    >
-                      <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
-                    </Button>
-                    {hasSharedLink && newPostsCount > 0 ? (
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleUpdateCollection}
-                        disabled={isUpdatingCollection}
-                        className="gap-1 text-xs"
-                        aria-label={`Update & Share (${newPostsCount} new images)`}
-                        title={`Update collection with ${newPostsCount} new images and open in new tab`}
-                      >
-                        <Share2 className="h-3 w-3" />
-                        Update ({newPostsCount})
-                      </Button>
-                     ) : (
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={handleShare}
-                        disabled={isPublishing}
-                        aria-label={
-                          !hasSharedLink 
-                            ? "Share" 
-                            : hasImageActivity 
-                              ? "Update & Open" 
-                              : "Open"
-                        }
-                        title={
-                          !hasSharedLink 
-                            ? "Publish collection and open in new tab" 
-                            : hasImageActivity 
-                              ? "Update collection with new images and open in new tab" 
-                              : "Open collection in new tab"
-                        }
-                      >
-                        {!hasSharedLink ? (
-                          <ExternalLink className="h-4 w-4" />
-                        ) : hasImageActivity ? (
-                          <RefreshCw className="h-4 w-4" />
-                        ) : (
-                          <ExternalLink className="h-4 w-4" />
-                        )}
-                      </Button>
-                     )}
                     <Button
                       variant="outline"
                       size="icon"
@@ -1103,72 +627,16 @@ const { handleGenerateImage } = useImageManager({
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                        <Button
-                          variant={isFeatured ? "default" : "outline"}
-                          size="sm"
-                          onClick={handleFeatureLatestCollection}
-                          disabled={isFeaturing}
-                          className="rounded-sm px-3 text-xs sm:text-sm"
-                          aria-label={isFeatured ? "Remove from Featured" : "Add to Featured"}
-                          title={isFeaturing ? 'Updating…' : (isFeatured ? 'Remove from Featured' : 'Add to Featured')}
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={handleShare}
+                          disabled={isSharing}
+                          aria-label="Share Collection"
+                          title="Create and share a blurred public collection"
                         >
-                          <Star className={`h-3 w-3 ${isFeatured ? 'fill-current' : ''}`} />
+                          <Share2 className="h-4 w-4" />
                         </Button>
-                        <Button
-                          variant={isInLibrary ? "default" : "outline"}
-                          size="icon"
-                          onClick={handlePublishBlurred}
-                          disabled={isPublishing}
-                          className=""
-                          aria-label={isInLibrary ? "Remove from Library" : "Add to Library"}
-                          title={isPublishing ? 'Updating…' : (isInLibrary ? 'Remove from Library' : 'Add to Library')}
-                        >
-                          <BookOpen className={`h-4 w-4 ${isInLibrary ? 'fill-current' : ''}`} />
-                        </Button>
-                        {hasSharedLink && newPostsCount > 0 ? (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={handleUpdateCollection}
-                            disabled={isUpdatingCollection}
-                            className="gap-1 text-xs"
-                            aria-label={`Update & Share (${newPostsCount} new images)`}
-                            title={`Update collection with ${newPostsCount} new images and open in new tab`}
-                          >
-                            <Share2 className="h-3 w-3" />
-                            Update ({newPostsCount})
-                          </Button>
-                         ) : (
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            onClick={handleShare}
-                            disabled={isPublishing}
-                            className=""
-                            aria-label={
-                              !hasSharedLink 
-                                ? "Share" 
-                                : hasImageActivity 
-                                  ? "Update & Open" 
-                                  : "Open"
-                            }
-                            title={
-                              !hasSharedLink 
-                                ? "Publish collection and open in new tab" 
-                                : hasImageActivity 
-                                  ? "Update collection with new images and open in new tab" 
-                                  : "Open collection in new tab"
-                            }
-                          >
-                            {!hasSharedLink ? (
-                              <ExternalLink className="h-4 w-4" />
-                            ) : hasImageActivity ? (
-                              <RefreshCw className="h-4 w-4" />
-                            ) : (
-                              <ExternalLink className="h-4 w-4" />
-                            )}
-                          </Button>
-                         )}
                       <Button 
                         variant="outline" 
                         size="icon" 
@@ -1197,7 +665,7 @@ const { handleGenerateImage } = useImageManager({
                     )
                   )}
                 </TabsContent>
-
+                
                 <TabsContent value="published">
                   {filteredPosts.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
@@ -1218,45 +686,98 @@ const { handleGenerateImage } = useImageManager({
         )}
       </div>
 
-      {/* System Prompt Viewer Panel - Admin Only */}
-      {showSystemPrompt && category && userIsAdmin && <div className="relative transition-all duration-300" style={{
-      width: promptPanelWidth
-    }}>
-          {/* Resize handle */}
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-border hover:bg-accent cursor-col-resize z-10" onMouseDown={handleMouseDown} style={{
-        background: isResizing ? 'hsl(var(--accent))' : 'hsl(var(--border))',
-        width: '4px',
-        marginLeft: '-2px'
-      }} />
-          {/* System prompt viewer removed - component deleted */}
-        </div>}
-
-      {/* Individual Prompt Panel */}
-      {individualPromptPanel.isOpen && (
-        <div className="relative transition-all duration-300" style={{
-          width: promptPanelWidth
-        }}>
-          <IndividualPromptViewer 
-            post={individualPromptPanel.post}
-            isVisible={individualPromptPanel.isOpen}
-            onClose={closeIndividualPromptPanel}
-            themeId={themeId}
+      {/* System Prompt Viewer Panel */}
+      {showSystemPrompt && (
+        <>
+          <div 
+            className="w-1 cursor-col-resize bg-border hover:bg-primary transition-colors" 
+            onMouseDown={handleMouseDown}
+            style={{ cursor: isResizing ? 'col-resize' : 'col-resize' }}
           />
-        </div>
+          <div 
+            className="h-full border-l bg-background" 
+            style={{ width: `${promptPanelWidth}px` }}
+          >
+            <div className="sticky top-0 z-10 bg-background border-b p-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">Category Prompt</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowSystemPrompt(false)}
+                >
+                  ✕
+                </Button>
+              </div>
+            </div>
+            <div className="p-3">
+              <div className="text-sm text-muted-foreground mb-2">
+                Editing prompt for <strong>{category}</strong>
+              </div>
+              <ColorThemeSelector
+                themes={colorThemes}
+                selectedThemeId={selectedThemeId}
+                onThemeChange={onThemeChange}
+              />
+            </div>
+          </div>
+        </>
       )}
 
-      {previewImage && <ImagePreviewModal isOpen={!!previewImage} onClose={closePreviewImage} imageUrl={previewImage.url} alt={previewImage.alt} />}
+      {/* Individual Prompt Panel */}
+      {individualPromptPanel.isOpen && individualPromptPanel.post && (
+        <>
+          <div 
+            className="w-1 cursor-col-resize bg-border hover:bg-primary transition-colors" 
+            onMouseDown={handleMouseDown}
+            style={{ cursor: isResizing ? 'col-resize' : 'col-resize' }}
+          />
+          <div 
+            className="h-full border-l bg-background" 
+            style={{ width: `${promptPanelWidth}px` }}
+          >
+            <div className="sticky top-0 z-10 bg-background border-b p-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">Individual Prompt</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={closeIndividualPromptPanel}
+                >
+                  ✕
+                </Button>
+              </div>
+            </div>
+            <div className="p-3">
+              <IndividualPromptViewer 
+                post={individualPromptPanel.post}
+                isVisible={true}
+                onClose={closeIndividualPromptPanel}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
-      {voiceoverModal.isOpen && voiceoverModal.post && <VoiceoverScriptModal isOpen={voiceoverModal.isOpen} onClose={closeVoiceoverModal} sourceId={voiceoverModal.post.id} sourceType="social_media_post" originalContent={`${voiceoverModal.post.title}\n\n${voiceoverModal.post.description}`} />}
+      {/* Modals */}
+      {previewImage.url && (
+        <ImagePreviewModal
+          imageUrl={previewImage.url}
+          alt={previewImage.alt || "Post image"}
+          isOpen={!!previewImage.url}
+          onClose={closePreviewImage}
+        />
+      )}
 
-      {/* Edit Post Modal */}
-      <PostEditModal
-        isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        post={selectedPost}
-        onSuccess={handleEditSuccess}
-      />
+      {/* Voiceover modal temporarily removed due to prop mismatch */}
 
+      {editModalOpen && selectedPost && (
+        <PostEditModal
+          post={selectedPost}
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+        />
+      )}
     </div>
   );
-};
+}
