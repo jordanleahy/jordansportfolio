@@ -196,7 +196,6 @@ GENERATE ALL 26 LETTERS NOW:`;
         day: post.day,
         title: post.title,
         description: post.description,
-        theme: parsedData.theme,
         category: parsedData.category,
         generated_image_prompt: imagePrompt,
         individual_prompt_status: 'completed',
