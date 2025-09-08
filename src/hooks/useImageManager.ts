@@ -9,6 +9,7 @@ import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
 import { useParams } from 'react-router-dom';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 interface UseImageManagerProps {
   onPostsChange: () => void;
@@ -62,7 +63,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
       
       await supabase
         .from('social_media_posts')
-        .update({ [statusField]: 'uploading' })
+        .update({ [statusField]: ImageGenerationStatus.GENERATING })
         .eq('id', postId);
 
       // Get existing prompt from cache first, fallback to database
@@ -143,7 +144,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
         .from('social_media_posts')
         .update({ 
           [imageField]: urlData.publicUrl,
-          [statusField]: 'processing' // Will be updated by background processing
+          [statusField]: ImageGenerationStatus.GENERATING // Will be updated by background processing
         })
         .eq('id', postId);
 
@@ -154,23 +155,23 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
       try {
         // Mark watermark processing
         await supabase.from('social_media_posts')
-          .update({ [wmStatusField]: 'processing' })
+          .update({ [wmStatusField]: ImageGenerationStatus.GENERATING })
           .eq('id', postId);
 
         const wmFile = await createWatermarkedImageFile(blob, fileName, 'image/jpeg');
         const uploadResult = await uploadFileToStorage(wmFile, 'social-media-images', 'watermarked');
         if (uploadResult.success && uploadResult.url) {
           await supabase.from('social_media_posts')
-            .update({ [wmUrlField]: uploadResult.url, [wmStatusField]: 'complete' })
+            .update({ [wmUrlField]: uploadResult.url, [wmStatusField]: ImageGenerationStatus.COMPLETED })
             .eq('id', postId);
         } else {
           await supabase.from('social_media_posts')
-            .update({ [wmStatusField]: 'failed' })
+            .update({ [wmStatusField]: ImageGenerationStatus.FAILED })
             .eq('id', postId);
         }
       } catch (e) {
         await supabase.from('social_media_posts')
-          .update({ [wmStatusField]: 'failed' })
+          .update({ [wmStatusField]: ImageGenerationStatus.FAILED })
           .eq('id', postId);
       }
 
@@ -197,7 +198,7 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
       
       await supabase
         .from('social_media_posts')
-        .update({ [statusField]: 'failed' })
+        .update({ [statusField]: ImageGenerationStatus.FAILED })
         .eq('id', postId);
         
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };

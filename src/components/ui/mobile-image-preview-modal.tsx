@@ -16,6 +16,7 @@ import { useWatermarkStatus } from "@/hooks/useWatermarkStatus";
 
 import { useImageEdit } from "@/hooks/useImageEdit";
 import { useImageGenerationTimerContext } from "@/contexts/ImageGenerationTimerContext";
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 interface MobileImagePreviewModalProps {
   isOpen: boolean;
@@ -73,7 +74,7 @@ export const MobileImagePreviewModal = ({
   // Handle download
   const handleDownload = async () => {
     try {
-      const downloadUrl = wmUrl && wmStatus === 'complete' ? wmUrl : currentImageUrl;
+      const downloadUrl = wmUrl && wmStatus === ImageGenerationStatus.COMPLETED ? wmUrl : currentImageUrl;
       const response = await fetch(downloadUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

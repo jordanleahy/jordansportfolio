@@ -6,6 +6,7 @@ import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
 import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 import { ColorTheme } from '@/types/colorTheme';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 interface GenerationMetrics {
   correlationId: string;
@@ -219,7 +220,7 @@ export const useAdvancedImageGeneration = () => {
         .from('social_media_posts')
         .update({ 
           image_1_1_url: urlData.publicUrl,
-          image_1_1_status: 'complete'
+          image_1_1_status: ImageGenerationStatus.COMPLETED
         })
         .eq('id', post.id);
 
@@ -306,7 +307,7 @@ export const useAdvancedImageGeneration = () => {
   ) => {
     try {
       await supabase.from('social_media_posts')
-        .update({ image_1_1_watermark_status: 'processing' })
+        .update({ image_1_1_watermark_status: ImageGenerationStatus.GENERATING })
         .eq('id', postId);
 
       const wmFile = await createWatermarkedImageFile(blob, fileName, 'image/jpeg');
@@ -316,18 +317,18 @@ export const useAdvancedImageGeneration = () => {
         await supabase.from('social_media_posts')
           .update({ 
             image_1_1_watermark_url: uploadResult.url, 
-            image_1_1_watermark_status: 'complete' 
+            image_1_1_watermark_status: ImageGenerationStatus.COMPLETED 
           })
           .eq('id', postId);
       } else {
         await supabase.from('social_media_posts')
-          .update({ image_1_1_watermark_status: 'failed' })
+          .update({ image_1_1_watermark_status: ImageGenerationStatus.FAILED })
           .eq('id', postId);
       }
     } catch (error) {
       console.error('Background watermarking failed:', error);
       await supabase.from('social_media_posts')
-        .update({ image_1_1_watermark_status: 'failed' })
+        .update({ image_1_1_watermark_status: ImageGenerationStatus.FAILED })
         .eq('id', postId);
       throw error;
     }

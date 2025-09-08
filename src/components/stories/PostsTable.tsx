@@ -33,6 +33,7 @@ import { PostsTableProps } from '@/types/stories';
 import { useParams } from 'react-router-dom';
 import { ManualPostForm } from './ManualPostForm';
 import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 
 export default function PostsTable({

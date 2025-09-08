@@ -39,6 +39,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Database } from '@/integrations/supabase/types';
+import { ThemeLifecycleStatus } from '@/types/enums/status';
 
 /**
  * Database record structure for street vision transformations
@@ -297,7 +298,7 @@ export const useStreetVisionProcessing = (): UseStreetVisionProcessingReturn => 
         user_id: result.userId || '',
         user_prompt: prompt,
         original_image_url: result.originalImageUrl || '',
-        status: 'pending' as const,
+        status: ThemeLifecycleStatus.PENDING,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         // Set default values for required fields

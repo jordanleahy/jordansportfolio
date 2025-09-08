@@ -4,6 +4,7 @@ import { Loader2, Eye, NotebookPen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { BlogPostButtonForRowProps, BlogStatus } from '@/types/stories/ui';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 export const BlogPostButtonForRow: React.FC<BlogPostButtonForRowProps> = ({
   post,

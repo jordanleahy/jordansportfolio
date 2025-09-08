@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, ChevronLeft, ChevronRight, Download, Loader2 } from 'lucide-react';
 import type { SocialMediaPost } from '@/types/socialMedia';
 import type { PostMediaGalleryModalProps, MediaItem } from '@/types/stories/ui';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 export const PostMediaGalleryModal = ({
   isOpen,
@@ -95,17 +96,17 @@ export const PostMediaGalleryModal = ({
   };
 
   const getWatermarkInfo = () => {
-    if (currentMedia.type !== 'image') return { url: null as string | null, status: 'complete' };
-    if (currentMedia.aspectRatio === '16:9') return { url: (post as any).image_16_9_watermark_url || null, status: (post as any).image_16_9_watermark_status || 'none' };
-    if (currentMedia.aspectRatio === '9:16') return { url: (post as any).image_9_16_watermark_url || null, status: (post as any).image_9_16_watermark_status || 'none' };
-    if (currentMedia.aspectRatio === '3:4') return { url: (post as any).image_3_4_watermark_url || null, status: (post as any).image_3_4_watermark_status || 'none' };
-    if (currentMedia.aspectRatio === '4:3') return { url: (post as any).image_4_3_watermark_url || null, status: (post as any).image_4_3_watermark_status || 'none' };
-    if (currentMedia.aspectRatio === '1:1') return { url: (post as any).image_1_1_watermark_url || null, status: (post as any).image_1_1_watermark_status || 'none' };
-    return { url: null as string | null, status: 'none' };
+    if (currentMedia.type !== 'image') return { url: null as string | null, status: ImageGenerationStatus.COMPLETED };
+    if (currentMedia.aspectRatio === '16:9') return { url: (post as any).image_16_9_watermark_url || null, status: (post as any).image_16_9_watermark_status || ImageGenerationStatus.NONE };
+    if (currentMedia.aspectRatio === '9:16') return { url: (post as any).image_9_16_watermark_url || null, status: (post as any).image_9_16_watermark_status || ImageGenerationStatus.NONE };
+    if (currentMedia.aspectRatio === '3:4') return { url: (post as any).image_3_4_watermark_url || null, status: (post as any).image_3_4_watermark_status || ImageGenerationStatus.NONE };
+    if (currentMedia.aspectRatio === '4:3') return { url: (post as any).image_4_3_watermark_url || null, status: (post as any).image_4_3_watermark_status || ImageGenerationStatus.NONE };
+    if (currentMedia.aspectRatio === '1:1') return { url: (post as any).image_1_1_watermark_url || null, status: (post as any).image_1_1_watermark_status || ImageGenerationStatus.NONE };
+    return { url: null as string | null, status: ImageGenerationStatus.NONE };
   };
 
   const { url: wmUrl, status: wmStatus } = getWatermarkInfo();
-  const isDownloadLoading = currentMedia.type === 'image' && (wmStatus !== 'complete' || !wmUrl);
+  const isDownloadLoading = currentMedia.type === 'image' && (wmStatus !== ImageGenerationStatus.COMPLETED || !wmUrl);
 
   const handleDownload = async () => {
     try {

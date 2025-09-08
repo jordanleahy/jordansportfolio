@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import type { ImagePreviewModalProps } from '@/types/stories/ui';
 import { supabase } from '@/integrations/supabase/client';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 // Aspect ratio mapping for cleaner watermark logic
 const ASPECT_RATIO_MAPPING = {
@@ -56,7 +57,7 @@ export const ImagePreviewModal = ({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const isLoading = watermarkState.status !== 'complete' || !watermarkState.url;
+  const isLoading = watermarkState.status !== ImageGenerationStatus.COMPLETED || !watermarkState.url;
 
   // Simplified watermark fetching with better error handling
   useEffect(() => {

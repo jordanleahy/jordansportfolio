@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SocialMediaPost } from '@/types/socialMedia';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 interface GenerationOptions {
   aspectRatio?: string;
@@ -74,7 +75,7 @@ export const usePreventsDuplicateImageGeneration = () => {
       }
 
       if (!data?.success) {
-        if (data?.currentStatus === 'generating') {
+        if (data?.currentStatus === ImageGenerationStatus.GENERATING) {
           toast({
             title: "Generation in progress",
             description: "This image is already being generated in another tab or window.",
@@ -137,7 +138,7 @@ export const usePreventsDuplicateImageGeneration = () => {
         return null;
       }
 
-      return (data as any)?.[statusField] || 'none';
+      return (data as any)?.[statusField] || ImageGenerationStatus.NONE;
     } catch (error) {
       console.error('Error checking image status:', error);
       return null;
@@ -149,7 +150,7 @@ export const usePreventsDuplicateImageGeneration = () => {
     aspectRatio: string
   ): Promise<boolean> => {
     const status = await checkImageStatus(postId, aspectRatio);
-    return status === null || status === 'none' || status === 'failed' || status === 'error';
+    return status === null || status === ImageGenerationStatus.NONE || status === ImageGenerationStatus.FAILED || status === 'error';
   }, [checkImageStatus]);
 
   return {
