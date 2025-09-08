@@ -15,6 +15,7 @@ const corsHeaders = {
 const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
 // Generate correlation ID for request tracking
 const generateCorrelationId = () => {
@@ -34,7 +35,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
     const userSupabase = createClient(
       supabaseUrl!,
-      supabaseServiceKey!,
+      supabaseAnonKey!,
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
