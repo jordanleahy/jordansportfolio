@@ -154,17 +154,16 @@ serve(async (req) => {
 
     // Prepare OpenAI request
     const openAIRequestBody = {
-      model: 'gpt-image-1',
+      model: 'dall-e-3',
       prompt: enhancedPrompt,
-      size: size,
-      quality: quality,
-      output_format: outputFormat,
+      size: size === '1536x1024' ? '1792x1024' : size === '1024x1536' ? '1024x1792' : '1024x1024',
+      quality: quality === 'auto' || quality === 'medium' || quality === 'low' ? 'standard' : 'hd',
+      response_format: 'b64_json',
       n: 1,
-      user: correlationId,
-      ...(finalSeed && { seed: finalSeed })
+      user: correlationId
     };
 
-    logger.logOpenAIRequest('gpt-image-1', undefined, estimatedCost);
+    logger.logOpenAIRequest('dall-e-3', undefined, estimatedCost);
     logger.logImageGeneration(enhancedPrompt, 'started', undefined, {
       size,
       seed: finalSeed,
@@ -196,7 +195,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       
-      logger.logOpenAIResponse('gpt-image-1', undefined, undefined, {
+      logger.logOpenAIResponse('dall-e-3', undefined, undefined, {
         status: response.status,
         error: errorData
       });
@@ -211,7 +210,7 @@ serve(async (req) => {
         const errorTrackingTask = trackOpenAIUsage({
           userId,
           functionName: 'generate-image',
-          model: 'gpt-image-1',
+          model: 'dall-e-3',
           requestType: 'image_generation',
           success: false,
           estimatedCost: 0,
@@ -269,7 +268,7 @@ serve(async (req) => {
     const base64Image = data.data[0].b64_json;
     const processingTimeMs = Date.now() - logger.getContext().metadata?.startTime || 0;
     
-    logger.logOpenAIResponse('gpt-image-1', undefined, estimatedCost);
+    logger.logOpenAIResponse('dall-e-3', undefined, estimatedCost);
     logger.logImageGeneration(enhancedPrompt, 'completed', undefined, {
       size,
       seed: finalSeed,
@@ -284,7 +283,7 @@ serve(async (req) => {
       const usageTrackingTask = trackOpenAIUsage({
         userId,
         functionName: 'generate-image',
-        model: 'gpt-image-1',
+        model: 'dall-e-3',
         requestType: 'image_generation',
         success: true,
         estimatedCost,
