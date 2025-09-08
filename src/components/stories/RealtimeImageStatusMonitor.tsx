@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 interface RealtimeImageStatusMonitorProps {
   postId: string;
@@ -21,7 +22,7 @@ export const RealtimeImageStatusMonitor: React.FC<RealtimeImageStatusMonitorProp
   aspectRatio,
   className = ''
 }) => {
-  const [status, setStatus] = useState<string>('none');
+  const [status, setStatus] = useState<string>(ImageGenerationStatus.NONE);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export const RealtimeImageStatusMonitor: React.FC<RealtimeImageStatusMonitorProp
         .maybeSingle();
 
       if (!error && data) {
-        setStatus((data as any)[statusField] || 'none');
+        setStatus((data as any)[statusField] || ImageGenerationStatus.NONE);
         setLastUpdated(new Date((data as any).updated_at));
       }
 
@@ -58,7 +59,7 @@ export const RealtimeImageStatusMonitor: React.FC<RealtimeImageStatusMonitorProp
             const updatedAt = payload.new?.updated_at;
             
             if (newStatus !== undefined) {
-              setStatus(newStatus || 'none');
+              setStatus(newStatus || ImageGenerationStatus.NONE);
               if (updatedAt) {
                 setLastUpdated(new Date(updatedAt));
               }
@@ -86,21 +87,21 @@ export const RealtimeImageStatusMonitor: React.FC<RealtimeImageStatusMonitorProp
 
   const getStatusInfo = (status: string): StatusInfo => {
     switch (status) {
-      case 'generating':
+      case ImageGenerationStatus.GENERATING:
         return {
           status,
           label: 'Generating...',
           icon: <Loader2 className="h-3 w-3 animate-spin" />,
           variant: 'default'
         };
-      case 'complete':
+      case ImageGenerationStatus.COMPLETED:
         return {
           status,
           label: 'Complete',
           icon: <CheckCircle2 className="h-3 w-3" />,
           variant: 'secondary'
         };
-      case 'failed':
+      case ImageGenerationStatus.FAILED:
       case 'error':
         return {
           status,
@@ -108,7 +109,7 @@ export const RealtimeImageStatusMonitor: React.FC<RealtimeImageStatusMonitorProp
           icon: <AlertCircle className="h-3 w-3" />,
           variant: 'destructive'
         };
-      case 'none':
+      case ImageGenerationStatus.NONE:
       default:
         return {
           status,

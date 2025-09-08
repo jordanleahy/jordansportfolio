@@ -7,6 +7,7 @@ import { useCreditCheck } from '@/hooks/useCreditCheck';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 import { useToast } from '@/hooks/use-toast';
+import { ImageGenerationStatus } from '@/types/enums/status';
 
 interface PreventsDuplicateImageButtonProps {
   post: SocialMediaPost;
@@ -28,7 +29,7 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
   const { generateImage, checkImageStatus, canGenerateImage, isGenerating } = usePreventsDuplicateImageGeneration();
   const { getRegenerateButtonText, isButtonDisabled, getCooldownMessage, cooldown } = useUnifiedRegenerateStates();
   const { getCreditStatus } = useCreditCheck();
-  const [currentStatus, setCurrentStatus] = useState<string>('none');
+  const [currentStatus, setCurrentStatus] = useState<string>(ImageGenerationStatus.NONE);
   const [canGenerate, setCanGenerate] = useState(true);
   const { toast } = useToast();
 
@@ -56,7 +57,7 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
     const setupStatusMonitoring = async () => {
       // Check initial status
       const status = await checkImageStatus(post.id, aspectRatio);
-      setCurrentStatus(status || 'none');
+      setCurrentStatus(status || ImageGenerationStatus.NONE);
       setCanGenerate(await canGenerateImage(post.id, aspectRatio));
 
       // Setup real-time updates
@@ -83,23 +84,23 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
               });
               
               setCurrentStatus(newStatus);
-              setCanGenerate(['none', 'failed', 'error'].includes(newStatus));
+              setCanGenerate([ImageGenerationStatus.NONE, ImageGenerationStatus.FAILED, 'error'].includes(newStatus));
 
               // Show toast for status changes from other tabs
-              if (newStatus === 'generating' && currentStatus !== 'generating') {
+              if (newStatus === ImageGenerationStatus.GENERATING && currentStatus !== ImageGenerationStatus.GENERATING) {
                 toast({
                   title: "Generation started",
                   description: "Image generation started in another tab",
                   variant: "default",
                 });
-              } else if (newStatus === 'complete' && currentStatus === 'generating') {
+              } else if (newStatus === ImageGenerationStatus.COMPLETED && currentStatus === ImageGenerationStatus.GENERATING) {
                 toast({
                   title: "Generation complete",
                   description: "Image generation completed",
                   variant: "default",
                 });
                 onImageGenerated?.();
-              } else if (newStatus === 'failed' && currentStatus === 'generating') {
+              } else if (newStatus === ImageGenerationStatus.FAILED && currentStatus === ImageGenerationStatus.GENERATING) {
                 toast({
                   title: "Generation failed",
                   description: "Image generation failed",
@@ -155,7 +156,7 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
       return `Generate in ${cooldown.secondsRemaining}s`;
     }
 
-    if (isGenerating || currentStatus === 'generating') {
+    if (isGenerating || currentStatus === ImageGenerationStatus.GENERATING) {
       return (
         <>
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -164,7 +165,7 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
       );
     }
 
-    if (currentStatus === 'complete') {
+    if (currentStatus === ImageGenerationStatus.COMPLETED) {
       return (
         <>
           <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -173,7 +174,7 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
       );
     }
 
-    if (currentStatus === 'failed' || currentStatus === 'error') {
+    if (currentStatus === ImageGenerationStatus.FAILED || currentStatus === 'error') {
       return (
         <>
           <AlertCircle className="h-4 w-4 mr-2" />
@@ -191,10 +192,10 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
   };
 
   const getButtonVariant = () => {
-    if (currentStatus === 'failed' || currentStatus === 'error') {
+    if (currentStatus === ImageGenerationStatus.FAILED || currentStatus === 'error') {
       return 'destructive';
     }
-    if (currentStatus === 'complete') {
+    if (currentStatus === ImageGenerationStatus.COMPLETED) {
       return 'outline';
     }
     return variant;
@@ -203,7 +204,7 @@ export const PreventsDuplicateImageButton: React.FC<PreventsDuplicateImageButton
   const isButtonDisabledLocal = disabled || 
     !canGenerate || 
     isGenerating || 
-    currentStatus === 'generating' || 
+    currentStatus === ImageGenerationStatus.GENERATING || 
     !creditStatus.hasCredits ||
     creditStatus.isLoading ||
     cooldown.isActive; // Add cooldown to disabled logic
