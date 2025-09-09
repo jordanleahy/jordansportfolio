@@ -162,7 +162,7 @@ async function getDefaultColorTheme(supabase: any): Promise<any> {
     .select('*')
     .eq('is_default', true)
     .eq('is_system', true)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.log('No default color theme found, using fallback colors');
@@ -249,17 +249,16 @@ serve(async (req) => {
       .from('openai_agents')
       .select('id, name')
       .eq('name', 'System Prompt Generator')
-      .single();
+      .maybeSingle();
 
-    if (agentError || !agent) {
-      console.error('System Prompt Generator agent not found:', agentError);
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: ERROR_MESSAGES.AGENT_NOT_FOUND 
-      }), {
-        status: HTTP_STATUS.NOT_FOUND,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
-      });
+    if (agentError) {
+      console.error('Error querying System Prompt Generator agent:', agentError);
+    }
+    
+    if (!agent) {
+      console.log('System Prompt Generator agent not found, will create system prompt without agent reference');
+      // Continue without agent - we can still generate system prompts
+      agent = { id: 'default-agent-id', name: 'System Prompt Generator' };
     }
 
     console.log('Found System Prompt Generator agent:', agent.id);
@@ -489,8 +488,8 @@ Generate the complete system prompt with ALL placeholders replaced with specific
           .from('theme_system_prompts')
           .insert({
             user_id,
-            agent_id: agent.id,
-            agent_name: agent.name,
+            agent_id: agent?.id || 'default-agent-id',
+            agent_name: agent?.name || 'System Prompt Generator',
             name: `${actualTheme} Theme System Prompt`,
             theme: actualTheme,
             theme_id: theme_id,
@@ -499,7 +498,7 @@ Generate the complete system prompt with ALL placeholders replaced with specific
             description: `Generated system prompt for ${actualTheme} theme with ${contextCategory} context`
           })
           .select('id')
-          .single();
+          .maybeSingle();
 
         if (insertError) {
           console.error('Failed to save system prompt:', insertError);
