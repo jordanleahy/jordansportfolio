@@ -10,7 +10,7 @@ import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { PostsCardView } from "./PostsCardView";
 import { ViewToggle, ViewMode } from "./ViewToggle";
-import { ColorThemeSelector } from "./ColorThemeSelector";
+import { CategorySystemPromptViewer } from './CategorySystemPromptViewer';
 import { useColorThemes } from "@/hooks/useColorThemes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useModalManager } from "@/hooks/useModalManager";
@@ -799,11 +799,9 @@ const { handleGenerateImage } = useImageManager({
               </div>
             </div>
             <div className="p-3">
-              <div className="text-sm text-muted-foreground mb-2">
-                Editing prompt for <strong>{category}</strong>
-              </div>
-              <ColorThemeSelector
-                themes={colorThemes}
+              <CategorySystemPromptViewer
+                category={category}
+                themeId={themeId}
                 selectedThemeId={selectedThemeId}
                 onThemeChange={onThemeChange}
               />
