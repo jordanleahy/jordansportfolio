@@ -369,7 +369,7 @@ const { handleGenerateImage } = useImageManager({
     }
   };
 
-  // Simplified sharing function - creates blurred public collection and opens it
+  // Enhanced sharing function - generates optimized share content and creates LinkedIn posts
   const handleShare = async () => {
     try {
       setIsSharing(true);
@@ -381,52 +381,110 @@ const { handleGenerateImage } = useImageManager({
         return;
       }
 
-      // Generate simple handle
-      const handle = session.user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, '-') || session.user.id.slice(0, 8);
-
-      // Get posts with 1:1 images
+      // Get posts with 1:1 images for sharing
       const scoped = selectedThemeId ? posts.filter(p => p.color_theme_id === selectedThemeId) : posts;
       const candidates = scoped.filter(p => !!p.image_1_1_url);
-      const candidateIds = candidates.map(p => p.id);
       
-      if (candidateIds.length === 0) {
+      if (candidates.length === 0) {
         toast.error('No posts with 1:1 images found to share');
         return;
       }
 
-      const titleArg = (category && String(category).trim()) || candidates[0]?.title || handle;
-      const firstWithDesc = candidates.find(p => (p.description ?? '').trim().length > 0);
-      const baseDesc = firstWithDesc?.description || `A shareable ${candidateIds.length} image${candidateIds.length>1?'s':''} collection for ${titleArg}.`;
-      const descriptionArg = baseDesc.replace(/\s+/g, ' ').trim().slice(0, 165);
+      // Generate share content for posts that don't have it
+      const postsNeedingShareContent = candidates.filter(post => 
+        !post.share_title || !post.share_description
+      );
 
-      // Create blurred public collection
-      const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
-        p_handle: handle,
-        p_post_ids: candidateIds,
-        p_theme_id: themeId,
-        p_title: titleArg,
-        p_description: descriptionArg,
-      });
+      if (postsNeedingShareContent.length > 0) {
+        toast.info(`Generating optimized share content for ${postsNeedingShareContent.length} posts...`);
+        
+        // Generate share content for each post
+        await Promise.all(
+          postsNeedingShareContent.map(async (post) => {
+            try {
+              const { data, error } = await supabase.functions.invoke('generate-share-content', {
+                body: {
+                  post_id: post.id,
+                  platform: 'linkedin',
+                  hook_type: 'parent_problem'
+                }
+              });
 
-      if (error) throw error;
+              if (error) {
+                console.error(`Failed to generate share content for post ${post.id}:`, error);
+              }
+            } catch (error) {
+              console.error(`Error generating share content for post ${post.id}:`, error);
+            }
+          })
+        );
+        
+        // Refresh posts data to get updated share content
+        if (onPostsChange) {
+          onPostsChange();
+        }
+      }
 
-      // Set to blurred and add to library
-      await supabase
-        .from('shared_collections')
-        .update({
-          include_in_library: true,
-          public_access_type: 'blurred'
-        })
-        .eq('id', collectionId);
+      // Create LinkedIn sharing for the first post with share content
+      const shareablePost = candidates.find(post => post.share_title && post.share_description) || candidates[0];
+      
+      if (shareablePost) {
+        // Use share-optimized content or fall back to original
+        const shareTitle = shareablePost.share_title || shareablePost.title;
+        const shareDescription = shareablePost.share_description || shareablePost.description;
+        
+        // Add CTA and hashtags for LinkedIn
+        const linkedInHashtags = category === 'parenting' 
+          ? '#ParentingTips #ToddlerCalm #PeppaPig #ParentLife #ChildDevelopment'
+          : `#${category?.replace(/\s+/g, '')} #ParentingTips #Education`;
+        
+        const fullShareText = `${shareTitle}\n\n${shareDescription}\n\nLink in comments 👇\n\n${linkedInHashtags}`;
+        
+        // Create LinkedIn share URL
+        const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&summary=${encodeURIComponent(fullShareText)}`;
+        
+        // Also create blurred public collection as backup sharing method
+        const handle = session.user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9_-]/g, '-') || session.user.id.slice(0, 8);
+        const candidateIds = candidates.map(p => p.id);
+        const titleArg = shareTitle || (category && String(category).trim()) || candidates[0]?.title || handle;
+        const descriptionArg = (shareDescription || shareablePost.description || `A shareable collection of ${candidateIds.length} images`).replace(/\s+/g, ' ').trim().slice(0, 165);
 
-      // Open collection in new tab
-      const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
-      window.open(publicUrl, '_blank', 'noopener,noreferrer');
-      toast.success('Collection shared! Opening in new tab...');
+        const { data: collectionId, error } = await supabase.rpc('publish_shared_collection_1_1', {
+          p_handle: handle,
+          p_post_ids: candidateIds,
+          p_theme_id: themeId,
+          p_title: titleArg,
+          p_description: descriptionArg,
+        });
+
+        if (!error && collectionId) {
+          // Set to blurred and add to library
+          await supabase
+            .from('shared_collections')
+            .update({
+              include_in_library: true,
+              public_access_type: 'blurred'
+            })
+            .eq('id', collectionId);
+        }
+
+        // Open LinkedIn sharing
+        window.open(linkedInUrl, '_blank', 'noopener,noreferrer');
+        
+        // Also open collection as backup
+        if (collectionId) {
+          const publicUrl = `${window.location.origin}/public/collections/${handle}/${collectionId}`;
+          setTimeout(() => {
+            window.open(publicUrl, '_blank', 'noopener,noreferrer');
+          }, 500);
+        }
+        
+        toast.success('LinkedIn share opened with optimized content!');
+      }
 
     } catch (error) {
-      console.error('Error sharing collection:', error);
-      toast.error('Failed to share collection. Please try again.');
+      console.error('Error sharing content:', error);
+      toast.error('Failed to share content. Please try again.');
     } finally {
       setIsSharing(false);
     }

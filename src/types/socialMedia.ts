@@ -43,6 +43,9 @@ export interface SocialMediaPost {
   // Theme relationship
   theme_id?: string | null;
   
+  // Share-optimized content for social platforms
+  share_title?: string | null;
+  share_description?: string | null;
   
   status: PostStatus;
   scheduled_date?: string | null;
@@ -70,6 +73,10 @@ export interface CreateSocialMediaPost {
   
   // Theme relationship
   theme_id?: string;
+  
+  // Share-optimized content for social platforms
+  share_title?: string;
+  share_description?: string;
   
   status?: PostStatus;
   scheduled_date?: string;
