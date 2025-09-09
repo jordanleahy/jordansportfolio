@@ -214,8 +214,8 @@ GENERATE ALL 26 LETTERS NOW:`;
         ? `child-friendly illustration in ${visualElements} style showing` 
         : 'bright, colorful educational illustration suitable for young children (ages 3-6) showing';
 
-      // CRITICAL: Every image prompt starts with letter placement instruction
-      const imagePrompt = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image. Create a ${styleInstruction} ${word}. The image should be clean, child-friendly, and clearly represent the concept of ${word}. Use bright colors and simple, appealing visuals that would engage young children aged 3-6.`;
+      // CRITICAL: Every image prompt starts with letter placement and text instruction
+      const imagePrompt = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image and include the text "${letter} is for ${word}" prominently displayed. Create a ${styleInstruction} ${word}. The image should be clean, child-friendly, and clearly represent the concept of ${word}. Use bright colors and simple, appealing visuals that would engage young children aged 3-6. Make sure both the letter '${letter}' and the full text "${letter} is for ${word}" are clearly visible and readable.`;
 
       return {
         id: crypto.randomUUID(),

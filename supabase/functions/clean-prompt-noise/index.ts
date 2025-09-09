@@ -87,8 +87,11 @@ const cleanPrompt = (prompt: string): { cleaned: string; noise: string[] } => {
   // Ensure it starts with letter instruction if it had one
   if (prompt.includes('CRITICAL: Place a large, bold letter') && !cleaned.includes('CRITICAL: Place a large, bold letter')) {
     const letterMatch = prompt.match(/CRITICAL: Place a large, bold letter '([A-Z])'/);
+    const textMatch = prompt.match(/"([A-Z]) is for ([^"]+)"/);
     if (letterMatch) {
-      cleaned = `CRITICAL: Place a large, bold letter '${letterMatch[1]}' in the top-left corner of the image. ${cleaned}`;
+      const letter = letterMatch[1];
+      const word = textMatch ? textMatch[2] : 'Word';
+      cleaned = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image and include the text "${letter} is for ${word}" prominently displayed. ${cleaned}`;
     }
   }
   
