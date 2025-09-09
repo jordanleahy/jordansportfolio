@@ -19,6 +19,7 @@ export interface ConsistencyReport {
 
 export const usePromptConsistencyAnalysis = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
   const [report, setReport] = useState<ConsistencyReport | null>(null);
 
   const analyzeConsistency = async (themeId?: string, postIds?: string[]) => {
@@ -52,14 +53,53 @@ export const usePromptConsistencyAnalysis = () => {
     }
   };
 
+  const cleanPrompts = async (themeId?: string, postIds?: string[], dryRun = false) => {
+    if (!themeId && (!postIds || postIds.length === 0)) {
+      toast.error('Theme ID or post IDs are required for cleaning');
+      return null;
+    }
+
+    setIsCleaning(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'clean-prompt-noise',
+        {
+          body: { themeId, postIds, dryRun },
+        }
+      );
+
+      if (error) {
+        console.error('Cleaning error:', error);
+        toast.error('Failed to clean prompts');
+        return null;
+      }
+
+      if (dryRun) {
+        toast.success(`Analysis complete: ${data.summary.promptsCleaned} prompts can be cleaned`);
+      } else {
+        toast.success(`Successfully cleaned ${data.summary.promptsCleaned} prompts`);
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Unexpected cleaning error:', error);
+      toast.error('An unexpected error occurred during cleaning');
+      return null;
+    } finally {
+      setIsCleaning(false);
+    }
+  };
+
   const clearReport = () => {
     setReport(null);
   };
 
   return {
     analyzeConsistency,
+    cleanPrompts,
     clearReport,
     isAnalyzing,
+    isCleaning,
     report,
   };
 };

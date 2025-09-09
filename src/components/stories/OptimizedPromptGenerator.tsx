@@ -4,8 +4,9 @@ import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGeneration';
 import { useThemePromptProcessor } from '@/hooks/useThemePromptProcessor';
+import { usePromptConsistencyAnalysis } from '@/hooks/usePromptConsistencyAnalysis';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertCircle, Clock, Zap } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock, Zap, Sparkles } from 'lucide-react';
 
 interface OptimizedPromptGeneratorProps {
   themeId: string;
@@ -20,6 +21,7 @@ export const OptimizedPromptGenerator = ({ themeId, posts }: OptimizedPromptGene
   const [aspectRatio, setAspectRatio] = useState('1:1');
   const { metrics, generateBatch, isGenerating } = useOptimizedPromptGeneration();
   const { processThemePrompts, getThemeStatus } = useThemePromptProcessor();
+  const { cleanPrompts, isCleaning } = usePromptConsistencyAnalysis();
   
   const status = getThemeStatus(themeId);
   const postsWithoutPrompts = posts.filter(post => !post.generated_image_prompt);
@@ -45,6 +47,12 @@ export const OptimizedPromptGenerator = ({ themeId, posts }: OptimizedPromptGene
       aspectRatio,
       batchSize: 8 // Optimal batch size for performance
     });
+  };
+
+  const handleCleanPrompts = async () => {
+    await cleanPrompts(themeId);
+    // Refresh the page to show cleaned prompts
+    window.location.reload();
   };
 
   const getStatusIcon = () => {
@@ -111,7 +119,7 @@ export const OptimizedPromptGenerator = ({ themeId, posts }: OptimizedPromptGene
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button
           onClick={handleGenerateSelected}
           disabled={isGenerating || postsWithoutPrompts.length === 0}
@@ -127,6 +135,17 @@ export const OptimizedPromptGenerator = ({ themeId, posts }: OptimizedPromptGene
           size="sm"
         >
           Process Entire Theme
+        </Button>
+
+        <Button
+          onClick={handleCleanPrompts}
+          disabled={isCleaning || isGenerating}
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <Sparkles className="h-4 w-4" />
+          {isCleaning ? 'Cleaning...' : 'Clean Prompts'}
         </Button>
       </div>
 

@@ -178,17 +178,44 @@ GENERATE ALL 26 LETTERS NOW:`;
 
     console.log(`✅ [${correlationId}] Theme created with ID: ${themeId}`);
 
+    // Helper function to extract clean visual elements from description
+    const extractVisualElements = (desc: string) => {
+      if (!desc) return '';
+      
+      // Remove noise patterns and extract key visual elements
+      let cleanDesc = desc
+        .replace(/^ABC\s+/i, '') // Remove "ABC" prefix
+        .replace(/Create a\s+/i, '') // Remove "Create a"
+        .replace(/ABC book\s+/i, '') // Remove "ABC book"
+        .replace(/focused\s+(solely\s+)?on\s+/i, '') // Remove "focused on"
+        .replace(/\s*-\s*[^-]*ABCs?\s*/i, '') // Remove "- Something ABCs"
+        .replace(/A playful ABC series[^.]*\./i, '') // Remove description sentences
+        .replace(/Each card[^.]*\./i, '') // Remove explanation sentences
+        .trim();
+      
+      // Extract character names and main themes
+      const characters = cleanDesc.match(/(?:Peppa\s+(?:the\s+)?Pig|Mickey\s+Mouse|Thomas\s+(?:the\s+)?Tank|Dora\s+(?:the\s+)?Explorer)/i);
+      const themes = cleanDesc.match(/(?:eating\s+manners|table\s+manners|space|animals|vehicles|colors|numbers)/i);
+      
+      let result = '';
+      if (characters) result += characters[0];
+      if (themes) result += (result ? ', ' : '') + themes[0];
+      
+      return result || cleanDesc.split(/[.!?]/)[0]; // First sentence as fallback
+    };
+
     // Prepare posts with specialized image prompts that guarantee letter placement
     const postsWithImagePrompts = parsedData.posts.map((post: any, index: number) => {
       const letter = String.fromCharCode(65 + index); // A=65, B=66, etc.
       const word = post.title.split(' is for ')[1] || post.title.split(' ')[3]; // Extract word after "is for"
       
-      const styleInstruction = description 
-        ? `${description}-themed illustration showing` 
+      const visualElements = extractVisualElements(description);
+      const styleInstruction = visualElements 
+        ? `child-friendly illustration in ${visualElements} style showing` 
         : 'bright, colorful educational illustration suitable for young children (ages 3-6) showing';
 
       // CRITICAL: Every image prompt starts with letter placement instruction
-      const imagePrompt = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image. ${styleInstruction} ${word}. The image should be clean, child-friendly, and clearly represent the concept of ${word}. Use bright colors and simple, appealing visuals that would engage young children aged 3-6.`;
+      const imagePrompt = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image. Create a ${styleInstruction} ${word}. The image should be clean, child-friendly, and clearly represent the concept of ${word}. Use bright colors and simple, appealing visuals that would engage young children aged 3-6.`;
 
       return {
         id: crypto.randomUUID(),
