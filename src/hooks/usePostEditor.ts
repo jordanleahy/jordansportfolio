@@ -8,6 +8,8 @@ import { useOptimizedPromptGeneration } from '@/hooks/useOptimizedPromptGenerati
 interface EditPostData {
   title: string;
   description: string;
+  share_title?: string | null;
+  share_description?: string | null;
   regeneratePrompt?: boolean;
 }
 
@@ -25,17 +27,19 @@ export const usePostEditor = (): UsePostEditorReturn => {
 
   const editMutation = useMutation({
     mutationFn: async ({ postId, data }: { postId: string; data: EditPostData }) => {
-      const { title, description, regeneratePrompt } = data;
+      const { title, description, share_title, share_description, regeneratePrompt } = data;
       
       // Validate input
       if (!title.trim()) {
         throw new Error('Title cannot be empty');
       }
 
-      // Step 1: Update post content first
+      // Step 1: Update post content first (including share fields)
       const updatedPost = await optimizedSocialMediaService.updatePost(postId, {
         title: title.trim(),
-        description: description.trim()
+        description: description.trim(),
+        share_title,
+        share_description
       });
 
       // Step 2: If regenerate prompt is requested, do it after successful content update
