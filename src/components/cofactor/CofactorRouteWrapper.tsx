@@ -33,13 +33,19 @@ export const CofactorRouteWrapper: React.FC<CofactorRouteWrapperProps> = ({ chil
     window.history.back();
   };
 
-  // Redirect to auth if not logged in
   if (loading) {
     return <div>Loading...</div>;
   }
 
+  // For non-authenticated users, show password modal immediately
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return (
+      <CofactorPasswordModal
+        isOpen={true}
+        onClose={handleCloseModal}
+        onAuthenticate={handleAuthentication}
+      />
+    );
   }
 
   // If authenticated and has access, render the cofactor content
@@ -47,7 +53,7 @@ export const CofactorRouteWrapper: React.FC<CofactorRouteWrapperProps> = ({ chil
     return <>{children}</>;
   }
 
-  // Show password modal for unauthenticated users
+  // Show password modal for authenticated users without access
   return (
     <CofactorPasswordModal
       isOpen={showPasswordModal}

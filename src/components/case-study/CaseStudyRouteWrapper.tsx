@@ -34,13 +34,19 @@ export const CaseStudyRouteWrapper: React.FC<CaseStudyRouteWrapperProps> = ({ ch
     window.history.back();
   };
 
-  // Redirect to auth if not logged in
   if (loading) {
     return <div>Loading...</div>;
   }
 
+  // For non-authenticated users, show password modal immediately
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return (
+      <CaseStudyPasswordModal
+        isOpen={true}
+        onClose={handleCloseModal}
+        onAuthenticate={handleAuthentication}
+      />
+    );
   }
 
   // If authenticated and has access, render the case study content
@@ -48,7 +54,7 @@ export const CaseStudyRouteWrapper: React.FC<CaseStudyRouteWrapperProps> = ({ ch
     return <>{children}</>;
   }
 
-  // Show password modal for unauthenticated users
+  // Show password modal for authenticated users without access
   return (
     <CaseStudyPasswordModal
       isOpen={showPasswordModal}
