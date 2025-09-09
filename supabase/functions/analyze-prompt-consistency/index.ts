@@ -172,8 +172,15 @@ Please provide a detailed consistency analysis.`;
     let consistencyReport: ConsistencyReport;
     
     try {
-      // Try to parse as JSON first
-      consistencyReport = JSON.parse(analysisResult);
+      // Clean the response - remove markdown code blocks if present
+      let cleanedResult = analysisResult.trim();
+      if (cleanedResult.startsWith('```json')) {
+        cleanedResult = cleanedResult.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanedResult.startsWith('```')) {
+        cleanedResult = cleanedResult.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      consistencyReport = JSON.parse(cleanedResult);
     } catch (parseError) {
       console.error('Failed to parse OpenAI response as JSON:', parseError);
       // Fallback to a basic report
