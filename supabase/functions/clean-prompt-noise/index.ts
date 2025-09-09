@@ -91,7 +91,7 @@ const cleanPrompt = (prompt: string): { cleaned: string; noise: string[] } => {
     if (letterMatch) {
       const letter = letterMatch[1];
       const word = textMatch ? textMatch[2] : 'Word';
-      cleaned = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image and include the text "${letter} is for ${word}" prominently displayed. ${cleaned}`;
+      cleaned = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image and include the full text "${letter} is for ${word}" (not just "${word.toUpperCase()}") prominently displayed at the bottom. ${cleaned}`;
     }
   }
   
