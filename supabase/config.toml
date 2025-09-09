@@ -111,3 +111,9 @@ verify_jwt = true
 
 [functions.generate-abc-illustrations]
 verify_jwt = true
+
+[functions.generate-share-content]
+verify_jwt = true
+
+[functions.analyze-prompt-consistency]
+verify_jwt = true

@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Share2, Pencil } from "lucide-react";
+import { Share2, Pencil, BarChart3 } from "lucide-react";
 import { PostCard } from "./PostCard";
 import { PostsTableView } from "./PostsTableView";
 import { PostsCardView } from "./PostsCardView";
@@ -23,6 +23,8 @@ import { PostEditModal } from "./PostEditModal";
 import { ImagePreviewModal } from "@/components/ui/responsive-image-preview-modal";
 import { VoiceoverScriptModal } from "@/components/voiceover/VoiceoverScriptModal";
 import { useRowAnimations } from "@/hooks/useRowAnimations";
+import { usePromptConsistencyAnalysis } from "@/hooks/usePromptConsistencyAnalysis";
+import { PromptConsistencyModal } from "./PromptConsistencyModal";
 
 import { IndividualPromptViewer } from "./IndividualPromptViewer";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -113,6 +115,24 @@ const { blogStatuses, isLoading: blogStatusesLoading } = useBatchBlogStatus(post
     openPreviewImage,
     closePreviewImage
   } = useModalManager();
+
+  // Consistency analysis
+  const { analyzeConsistency, clearReport, isAnalyzing, report } = usePromptConsistencyAnalysis();
+  const [consistencyModalOpen, setConsistencyModalOpen] = useState(false);
+
+  const handleConsistencyAnalysis = useCallback(() => {
+    if (themeId) {
+      setConsistencyModalOpen(true);
+      analyzeConsistency(themeId);
+    } else {
+      toast.error('Theme ID is required for consistency analysis');
+    }
+  }, [themeId, analyzeConsistency]);
+
+  const handleConsistencyModalClose = useCallback(() => {
+    setConsistencyModalOpen(false);
+    clearReport();
+  }, [clearReport]);
 
   // Function to regenerate prompt directly for regular users
   const handleRegeneratePrompt = useCallback(async (post: SocialMediaPost) => {
@@ -695,6 +715,16 @@ const { handleGenerateImage } = useImageManager({
                         >
                           <Share2 className="h-4 w-4" />
                         </Button>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          onClick={handleConsistencyAnalysis}
+                          disabled={isAnalyzing || !themeId}
+                          aria-label="Analyze Prompt Consistency"
+                          title="Analyze consistency across image prompts"
+                        >
+                          <BarChart3 className="h-4 w-4" />
+                        </Button>
                       <Button 
                         variant="outline" 
                         size="icon" 
@@ -836,6 +866,13 @@ const { handleGenerateImage } = useImageManager({
           onClose={() => setEditModalOpen(false)}
         />
       )}
+
+      <PromptConsistencyModal
+        isOpen={consistencyModalOpen}
+        onClose={handleConsistencyModalClose}
+        report={report}
+        isLoading={isAnalyzing}
+      />
     </div>
   );
 }
