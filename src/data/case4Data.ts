@@ -99,7 +99,15 @@ export const case4Data: CaseStudyData = {
         text: "Prior authorizations are where good medicine goes to die. We need systems that work as hard as we do for our patients.",
         author: "Dr. Lisa Park"
       },
-      image: "/lovable-uploads/22b8a35a-15cc-4974-a7d9-ce1e82519c3e.png"
+      image: "/lovable-uploads/22b8a35a-15cc-4974-a7d9-ce1e82519c3e.png",
+      images: [
+        {
+          src: "/lovable-uploads/22b8a35a-15cc-4974-a7d9-ce1e82519c3e.png",
+          alt: "Prior authorization workflow analysis diagram",
+          caption: "Comprehensive workflow analysis mapping current prior authorization processes and pain points",
+          title: "Workflow Analysis"
+        }
+      ]
     },
     {
       icon: "Lightbulb",
@@ -110,7 +118,15 @@ export const case4Data: CaseStudyData = {
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
       ],
-      image: "/lovable-uploads/c15dbfc5-2be9-4d50-b008-0a714e5ef7a2.png"
+      image: "/lovable-uploads/c15dbfc5-2be9-4d50-b008-0a714e5ef7a2.png",
+      images: [
+        {
+          src: "/lovable-uploads/c15dbfc5-2be9-4d50-b008-0a714e5ef7a2.png",
+          alt: "AI workflow design interface",
+          caption: "AI-assisted workflow design showing automation points and human oversight integration",
+          title: "AI Workflow Design"
+        }
+      ]
     },
     {
       icon: "Target",
@@ -122,7 +138,15 @@ export const case4Data: CaseStudyData = {
         "MA reviewer feedback sessions",
         "Formulary accuracy validation testing"
       ],
-      image: "/lovable-uploads/9cd522b8-f130-45f8-8ddb-4e1e6d592f3a.png"
+      image: "/lovable-uploads/9cd522b8-f130-45f8-8ddb-4e1e6d592f3a.png",
+      images: [
+        {
+          src: "/lovable-uploads/9cd522b8-f130-45f8-8ddb-4e1e6d592f3a.png",
+          alt: "Prototype testing and validation",
+          caption: "Interactive prototypes being tested with healthcare providers for usability validation",
+          title: "Prototype Testing"
+        }
+      ]
     },
     {
       icon: "CheckCircle", 
@@ -133,7 +157,15 @@ export const case4Data: CaseStudyData = {
         "Performance monitoring and optimization",
         "User feedback integration and iteration"
       ],
-      image: "/lovable-uploads/9ab2951c-a9db-42c3-8615-dc9f27c9603f.png"
+      image: "/lovable-uploads/9ab2951c-a9db-42c3-8615-dc9f27c9603f.png",
+      images: [
+        {
+          src: "/lovable-uploads/9ab2951c-a9db-42c3-8615-dc9f27c9603f.png",
+          alt: "Implementation and optimization dashboard",
+          caption: "Production deployment results showing performance metrics and optimization outcomes",
+          title: "Implementation Results"
+        }
+      ]
     }
   ],
 
