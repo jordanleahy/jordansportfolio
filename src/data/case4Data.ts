@@ -8,7 +8,7 @@ export const case4Data: CaseStudyData = {
   heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
   role: "Senior UX Designer", 
   roleDetails: "Workflow design & user research lead",
-  timeline: "6 months",
+  timeline: "3 months",
   timelineDetails: "May 2022 - Nov 2022",
   tags: ["Prior Authorization", "Healthcare Workflow", "AI Automation", "Insurance Integration"],
   
