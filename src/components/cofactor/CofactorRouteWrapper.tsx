@@ -34,11 +34,11 @@ export const CofactorRouteWrapper: React.FC<CofactorRouteWrapperProps> = ({ chil
     return <div>Loading...</div>;
   }
 
-  // For non-authenticated users, check access and show modal if needed
+  // For non-authenticated users, always show modal if no access
   if (!user) {
     return (
       <CofactorPasswordModal
-        isOpen={showPasswordModal}
+        isOpen={!hasAccess}
         onClose={handleCloseModal}
         onAuthenticate={handleAuthentication}
       />
