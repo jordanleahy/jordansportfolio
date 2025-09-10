@@ -129,7 +129,14 @@ export const processData = {
         "Performance monitoring and optimization",
         "HEX Data Monitoring"
       ],
-      image: "/lovable-uploads/1b3b877d-b731-4436-97c0-423e675fc20d.png"
+      images: [
+        {
+          src: "/lovable-uploads/1b3b877d-b731-4436-97c0-423e675fc20d.png",
+          alt: "Implementation and validation dashboard",
+          caption: "Final implementation showing real-world performance monitoring and validation results",
+          title: "Implementation Dashboard"
+        }
+      ]
     }
   ] as ProcessStep[],
 };
