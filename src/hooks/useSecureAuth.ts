@@ -25,7 +25,7 @@ export const useSecureAuth = (contentType: 'case_study' | 'cofactor') => {
   const requestAccess = useCallback(async (password: string) => {
     setIsLoading(true);
     try {
-      const { data: accessGranted, error } = await supabase.rpc('grant_content_access', {
+      const { data: accessGranted, error } = await supabase.rpc('validate_content_password' as any, {
         content_type_param: contentType,
         password_param: password
       });
