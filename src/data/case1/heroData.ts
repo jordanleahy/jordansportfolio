@@ -7,5 +7,5 @@ export const heroData = {
   roleDetails: "End-to-end UX/UI ownership",
   timeline: "2.5 months",
   timelineDetails: "March - May 2024",
-  tags: ["Sepsis Detection", "Clinical AI", "Patient Safety", "Healthcare Dashboard"],
+  tags: ["Sepsis Detection", "Clinical AI", "Patient Safety", "Healthcare Dashboard", "Coding", "CDS", "DRG"],
 };
