@@ -4,8 +4,8 @@ export const case4Data: CaseStudyData = {
   // Hero Section
   title: "Drug Prior Authorization",
   description: "How I designed an ML & LLM powered prior authorization system that reduced response time from 3 days to 5 minutes, improving patient access to medications.",
-  heroImage: "/lovable-uploads/4c976661-d94f-48e5-ab44-e69c629f2f91.png",
-  heroImageAlt: "Drug Formulary Rules interface showing prior authorization workflow with extraction, parsing, scheduling, drafting, and e-submission steps",
+  heroImage: "/lovable-uploads/7797a6a2-0d0e-4a86-bfae-85b9bc4671d9.png",
+  heroImageAlt: "Taltz prior authorization and coverage interface showing formulary rules, step therapy requirements, and insurance form templates",
   role: "Senior UX Designer", 
   roleDetails: "Workflow design & user research lead",
   timeline: "3 months",
