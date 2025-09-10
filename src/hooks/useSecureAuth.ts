@@ -1,39 +1,46 @@
-import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+
+// Client-side password configuration
+const PASSWORDS = {
+  case_study: 'PawPatrolRocks',
+  cofactor: 'QueryInnovation2024' // You can change this password as needed
+};
 
 export const useSecureAuth = (contentType: 'case_study' | 'cofactor') => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const { toast } = useToast();
 
-  const checkAccess = useCallback(async () => {
-    try {
-      const { data: hasAccess, error } = await supabase.rpc('has_content_access', {
-        content_type_param: contentType
-      });
+  const getAccessKey = (type: string) => `content_access_${type}`;
 
-      if (error) throw error;
-      setHasAccess(hasAccess);
-      return hasAccess;
-    } catch (error) {
-      console.error('Error checking access:', error);
-      return false;
-    }
+  const checkAccess = useCallback(() => {
+    const accessKey = getAccessKey(contentType);
+    const hasStoredAccess = localStorage.getItem(accessKey) === 'granted';
+    setHasAccess(hasStoredAccess);
+    return hasStoredAccess;
   }, [contentType]);
+
+  // Check access on mount and when contentType changes
+  useEffect(() => {
+    checkAccess();
+  }, [checkAccess]);
 
   const requestAccess = useCallback(async (password: string) => {
     setIsLoading(true);
+    
+    // Simulate async operation for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     try {
-      const { data: accessGranted, error } = await supabase.rpc('validate_content_password' as any, {
-        content_type_param: contentType,
-        password_param: password
-      });
-
-      if (error) throw error;
-
-      if (accessGranted) {
+      const correctPassword = PASSWORDS[contentType];
+      
+      if (password === correctPassword) {
+        // Grant access and store in localStorage
+        const accessKey = getAccessKey(contentType);
+        localStorage.setItem(accessKey, 'granted');
         setHasAccess(true);
+        
         toast({
           title: "Access Granted",
           description: `Welcome to the ${contentType === 'case_study' ? 'case studies portfolio' : 'Query Innovation proposal'}.`

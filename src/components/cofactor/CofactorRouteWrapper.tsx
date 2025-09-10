@@ -14,14 +14,11 @@ export const CofactorRouteWrapper: React.FC<CofactorRouteWrapperProps> = ({ chil
   const { hasAccess, checkAccess } = useSecureAuth('cofactor');
 
   useEffect(() => {
-    if (user) {
-      checkAccess().then(access => {
-        if (!access) {
-          setShowPasswordModal(true);
-        }
-      });
+    const access = checkAccess();
+    if (!access) {
+      setShowPasswordModal(true);
     }
-  }, [user, checkAccess]);
+  }, [checkAccess]);
 
   const handleAuthentication = () => {
     setShowPasswordModal(false);
@@ -37,23 +34,23 @@ export const CofactorRouteWrapper: React.FC<CofactorRouteWrapperProps> = ({ chil
     return <div>Loading...</div>;
   }
 
-  // For non-authenticated users, show password modal immediately
+  // For non-authenticated users, check access and show modal if needed
   if (!user) {
     return (
       <CofactorPasswordModal
-        isOpen={true}
+        isOpen={showPasswordModal}
         onClose={handleCloseModal}
         onAuthenticate={handleAuthentication}
       />
     );
   }
 
-  // If authenticated and has access, render the cofactor content
+  // If has access (authenticated or not), render the cofactor content
   if (hasAccess) {
     return <>{children}</>;
   }
 
-  // Show password modal for authenticated users without access
+  // Show password modal for users without access
   return (
     <CofactorPasswordModal
       isOpen={showPasswordModal}
