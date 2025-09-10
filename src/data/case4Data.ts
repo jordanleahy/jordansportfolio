@@ -110,7 +110,7 @@ export const case4Data: CaseStudyData = {
         "Human in the loop validation workflows",
         "Exception handling and escalation paths"
       ],
-      image: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//4%20Prior%20Auth%20Flow.png"
+      image: "/lovable-uploads/c15dbfc5-2be9-4d50-b008-0a714e5ef7a2.png"
     },
     {
       icon: "Target",
