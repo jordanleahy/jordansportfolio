@@ -35,11 +35,14 @@ export const CaseStudyRouteWrapper: React.FC<CaseStudyRouteWrapperProps> = ({ ch
     return <div>Loading...</div>;
   }
 
-  // For non-authenticated users, always show modal if no access
+  // For non-authenticated users, show content if has access, otherwise show modal
   if (!user) {
+    if (hasAccess) {
+      return <>{children}</>;
+    }
     return (
       <CaseStudyPasswordModal
-        isOpen={!hasAccess}
+        isOpen={true}
         onClose={handleCloseModal}
         onAuthenticate={handleAuthentication}
       />
