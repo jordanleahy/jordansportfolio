@@ -60,7 +60,7 @@ export const processData = {
         "Alert hierarchy and notification design",
         "Hosted sepsis workshop"
       ],
-      image: "/lovable-uploads/f8f7651f-2323-4c8e-ae25-1fea2f84b40a.png",
+      image: "/lovable-uploads/758c2b99-8f51-4485-9be8-3e516cf888b1.png",
       images: [
         {
           src: "/lovable-uploads/0c9250c3-95a5-4d46-84cb-59d7e8c90c2a.png",
