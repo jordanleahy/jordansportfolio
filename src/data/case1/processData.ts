@@ -129,10 +129,10 @@ export const processData = {
         "Performance monitoring and optimization",
         "HEX Data Monitoring"
       ],
-      image: "/lovable-uploads/01bb54aa-6017-4d04-a0ee-4c13fb7ea139.png",
+      image: "/lovable-uploads/a0eec47d-02f2-4cf3-aa8e-ebbc800dde7d.png",
       images: [
         {
-          src: "/lovable-uploads/01bb54aa-6017-4d04-a0ee-4c13fb7ea139.png",
+          src: "/lovable-uploads/a0eec47d-02f2-4cf3-aa8e-ebbc800dde7d.png",
           alt: "Sepsis client agreement rates dashboard",
           caption: "Improved sepsis client agreement rates showing significant performance improvements at UHS",
           title: "Success Metrics Dashboard"
