@@ -138,13 +138,13 @@ export const case4Data: CaseStudyData = {
         "MA reviewer feedback sessions",
         "Formulary accuracy validation testing"
       ],
-      image: "/lovable-uploads/9cd522b8-f130-45f8-8ddb-4e1e6d592f3a.png",
+      image: "/lovable-uploads/83697929-9fd4-4f04-ac4a-c1870f5c0b73.png",
       images: [
         {
-          src: "/lovable-uploads/9cd522b8-f130-45f8-8ddb-4e1e6d592f3a.png",
-          alt: "Prototype testing and validation",
-          caption: "Interactive prototypes being tested with healthcare providers for usability validation",
-          title: "Prototype Testing"
+          src: "/lovable-uploads/83697929-9fd4-4f04-ac4a-c1870f5c0b73.png",
+          alt: "Taltz prior authorization prototype interface",
+          caption: "Interactive prototype showing Taltz prior authorization with formulary rules, step therapy requirements, and insurance form templates",
+          title: "Prior Authorization Prototype"
         }
       ]
     },
