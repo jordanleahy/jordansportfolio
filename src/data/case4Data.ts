@@ -99,7 +99,7 @@ export const case4Data: CaseStudyData = {
         text: "Prior authorizations are where good medicine goes to die. We need systems that work as hard as we do for our patients.",
         author: "Dr. Lisa Park"
       },
-      image: "/lovable-uploads/348c3d6c-121e-410e-ba53-762210f6abfb.png"
+      image: "/lovable-uploads/22b8a35a-15cc-4974-a7d9-ce1e82519c3e.png"
     },
     {
       icon: "Lightbulb",
