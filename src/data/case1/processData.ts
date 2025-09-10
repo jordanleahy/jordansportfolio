@@ -109,7 +109,7 @@ export const processData = {
         "A/B testing of alert mechanisms",
         "Clinical accuracy validation sessions"
       ],
-      image: "/lovable-uploads/8ca6d160-25dc-46d5-801b-829f6dd685c8.png",
+      image: "/lovable-uploads/88432ef6-b400-42a0-8cf0-492602c62862.png",
       images: [
         {
           src: "/lovable-uploads/18e65336-e421-4a4a-85c2-3405d7aa0871.png",
