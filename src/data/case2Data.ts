@@ -21,7 +21,7 @@ export const case2Data: CaseStudyData = {
   
   // Problem Section
   problemTitle: "The Challenge",
-  problemDescription: "Healthcare systems struggle with duplicate and copy-pasted clinical notes that create coding challenges. With 80% of clinical notes containing duplicated content, medical coders spend excessive time identifying unique, clinically relevant information for accurate ICD-10 assignment. Complex codes like Metabolic Encephalopathy require human-in-the-loop validation to confirm when altered mental status truly occurred by carefully reading through voluminous encounter notes.",
+  problemDescription: "RCM systems struggle with duplicate and copy-pasted clinical notes that create coding challenges. Complex codes like Metabolic Encephalopathy require human-in-the-loop validation to confirm when altered mental status truly occurred by carefully reading through voluminous encounter notes.",
   challenges: [
     {
       type: 'problem',
