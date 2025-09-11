@@ -36,7 +36,7 @@ export const case2Data: CaseStudyData = {
       type: 'need',
       title: 'System Requirements',
       items: [
-        "Automated duplicate content detection in clinical notes",
+        "Detect duplicate notes and consolidate",
         
         "Precise timeline extraction for altered mental status events",
         "Intelligent filtering to surface clinically unique content from voluminous notes"
