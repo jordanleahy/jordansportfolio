@@ -99,7 +99,7 @@ export const case2Data: CaseStudyData = {
         text: "Half my time is spent figuring out what's new versus what's copy-pasted from yesterday's note. We need better tools to focus on what actually matters for coding.",
         author: "Sarah Kim, Medical Coding Specialist"
       },
-      image: "/lovable-uploads/7c4067b6-454b-46e0-b311-4a2f09cbf2bc.png"
+      image: "/lovable-uploads/4b8e1995-63a9-454e-ba22-dfad991e818a.png"
     },
     {
       icon: "Lightbulb",
