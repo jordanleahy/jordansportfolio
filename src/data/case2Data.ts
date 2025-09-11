@@ -111,7 +111,7 @@ export const case2Data: CaseStudyData = {
     },
     {
       icon: "Lightbulb",
-      title: "2. AI-Assisted Interface Design",
+      title: "2. Understanding the Data",
       description: "Designing intelligent note analysis with human oversight",
       items: [
         "NLP-powered duplicate detection interface design",
