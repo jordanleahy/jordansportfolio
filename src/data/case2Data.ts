@@ -119,10 +119,10 @@ export const case2Data: CaseStudyData = {
         "ICD-10 suggestion workflow integration", 
         "Real-time note comparison visualization"
       ],
-      image: "/lovable-uploads/0b3ffafd-156b-4610-a3e9-0bbc1ea3535e.png",
+      image: "/lovable-uploads/3202d566-1ce1-4cb6-91bc-063ecae11125.png",
       images: [
         {
-          src: "/lovable-uploads/0b3ffafd-156b-4610-a3e9-0bbc1ea3535e.png",
+          src: "/lovable-uploads/3202d566-1ce1-4cb6-91bc-063ecae11125.png",
           alt: "Data model wireframes showing clinical note structure and analysis interface",
           caption: "Understanding Data Structure",
           title: "Data Model Analysis"
