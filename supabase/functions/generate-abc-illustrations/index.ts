@@ -76,11 +76,43 @@ const extractWord = (title: string) => {
 };
 
 // Generate image prompt template
-const imagePromptFor = (letter: string, word: string, theme: string) => 
-  `Place a large, bold letter "${letter}" in the top-left corner.
-Include the exact text "${letter} is for ${word}" prominently along the bottom.
+const imagePromptFor = (letter: string, word: string, theme: string) => {
+  // Special case for "H is for Hugs" with Frozen theme
+  if (letter === 'H' && word.toLowerCase().includes('hug') && theme.toLowerCase().includes('frozen')) {
+    return `**Visual Prompt for "H is for Warm Hugs"**
+
+**Text Overlay:** Place a large, bold letter "H" in the top-left corner and include the exact text "H is for Hugs" prominently along the bottom in child-friendly lettering.
+
+**Image Composition:**
+- **Setting:** A cozy, snow-covered wooden cabin interior, warmly lit by a crackling fireplace. The atmosphere should be inviting and snug, emphasizing warmth and comfort.
+  
+- **Characters:** 
+  - **Elsa:** Dressed in her iconic icy blue gown, with a gentle smile, kneeling down to embrace a small child (who resembles Anna) wearing a colorful winter outfit.
+  - **Anna:** With her signature red braids and a joyful expression, holding a plush snowman (representing Olaf) next to her, as if ready to join in the hug.
+
+- **Background Elements:** 
+  - A beautifully decorated Christmas tree in the corner, adorned with snowflake ornaments and twinkling lights.
+  - Soft blankets draped over a nearby armchair, suggesting a cozy retreat.
+  - A window showing softly falling snowflakes outside, creating a magical winter wonderland feel.
+
+- **Color Palette:** Warm tones of reds, browns, and soft blues to evoke feelings of warmth and love, contrasted with the cool white of the snow outside.
+
+- **Additional Details:** 
+  - A steaming mug of hot chocolate on a small wooden table, suggesting a moment of sharing and conversation.
+  - Subtle touches of Frozen-themed decorations, like small figurines or snowflake motifs integrated into the cozy environment.
+
+**Visual Storytelling Focus:**
+The image should capture the essence of warmth and love associated with hugs, inviting viewers to imagine the comfort and joy that comes from sharing affectionate moments with family, inspired by the Frozen theme. The characters' expressions should reflect a deep connection, emphasizing the importance of emotional support and gentle conversations.
+
+**Aspect Ratio:** Ensure the composition is perfectly balanced for a 1:1 format, focusing on the characters in the foreground while framing the warm, inviting background.`;
+  }
+  
+  // Default template for other letters
+  return `Place a large, bold letter "${letter}" in the top-left corner.
+Include the exact text "${letter} is for ${word}" prominently along the bottom in child-friendly lettering.
 Create a bright, child-friendly illustration (ages 3–6) of "${word}" in the context of "${theme}".
 Keep shapes simple, colors vivid, and the concept unmistakable for preschoolers.`;
+};
 
 // Safe slug generation
 const safeSlug = (s: string) => (s || 'educational').toLowerCase().replace(/[^a-z0-9]+/g, '-');
