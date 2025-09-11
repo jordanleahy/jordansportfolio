@@ -112,7 +112,7 @@ export const case2Data: CaseStudyData = {
     {
       icon: "Lightbulb",
       title: "2. Understanding the Data Model",
-      description: "Designing intelligent note analysis with human oversight",
+      description: "Disseminating what data we get vs what data should be available",
       items: [
         "NLP-powered duplicate detection interface design",
         "Clinical context highlighting and annotation tools",
