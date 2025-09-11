@@ -115,7 +115,7 @@ export const case2Data: CaseStudyData = {
       description: "Disseminating what data we get vs what data should be available",
       items: [
         "Discovered difference between duplicate note and copy and paste note",
-        "Clinical context highlighting and annotation tools",
+        "Discovered many notes that should not be shown in UI",
         "ICD-10 suggestion workflow integration", 
         "Real-time note comparison visualization"
       ],
