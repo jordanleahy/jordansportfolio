@@ -119,7 +119,15 @@ export const case2Data: CaseStudyData = {
         "ICD-10 suggestion workflow integration", 
         "Real-time note comparison visualization"
       ],
-      image: "/lovable-uploads/0b3ffafd-156b-4610-a3e9-0bbc1ea3535e.png"
+      image: "/lovable-uploads/0b3ffafd-156b-4610-a3e9-0bbc1ea3535e.png",
+      images: [
+        {
+          src: "/lovable-uploads/0b3ffafd-156b-4610-a3e9-0bbc1ea3535e.png",
+          alt: "Data model wireframes showing clinical note structure and analysis interface",
+          caption: "Understanding Data Structure",
+          title: "Data Model Analysis"
+        }
+      ]
     },
     {
       icon: "Target",
@@ -131,7 +139,15 @@ export const case2Data: CaseStudyData = {
         "CDI specialist feedback sessions on coding accuracy",
         "Workflow efficiency validation with timing studies"
       ],
-      image: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png"
+      image: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
+      images: [
+        {
+          src: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
+          alt: "Production implementation dashboard showing performance metrics and optimization results",
+          caption: "Implementation Results",
+          title: "Production Optimization"
+        }
+      ]
     },
     {
       icon: "CheckCircle", 
@@ -143,7 +159,15 @@ export const case2Data: CaseStudyData = {
         "Coding accuracy metrics and time-saving validation",
         "Ongoing UX optimization based on usage patterns"
       ],
-      image: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png"
+      image: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
+      images: [
+        {
+          src: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
+          alt: "Interactive prototype showing clinical validation workflow with medical coding specialists",
+          caption: "Clinical Validation Testing",
+          title: "Prototype Validation"
+        }
+      ]
     }
   ],
 
