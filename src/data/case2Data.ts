@@ -38,7 +38,7 @@ export const case2Data: CaseStudyData = {
       items: [
         "Detect duplicate notes and consolidate",
         
-        "Precise timeline extraction for altered mental status events",
+        "Detect \"copy and pasted\" notes that with same intent",
         "Intelligent filtering to surface clinically unique content from voluminous notes"
       ]
     }
