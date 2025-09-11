@@ -39,35 +39,35 @@ const SAFE_SPACE_CONFIGS: Record<string, SafeSpaceConfig> = {
     description: 'Centered layout with balanced margins on all sides',
     safeZones: 'Maintain balanced 18-20% margins on all sides, especially TOP MARGIN for letter-based content',
     composition: 'Centered layout with generous breathing room from top edge, well-framed central focus',
-    negativePrompts: 'No corner-to-corner compositions, maintain balanced spacing, no edge-hugging elements, NEVER allow letters to touch or get close to the top edge, no cramped letter positioning'
+    negativePrompts: 'avoid corner-to-corner compositions, maintain balanced spacing, avoid edge-hugging elements, avoid letters touching or getting close to the top edge, avoid cramped letter positioning'
   },
   '16:9': {
     aspectRatio: '16:9 Landscape Format',
     description: 'Wide horizontal layout with proper safe boundaries',
     safeZones: 'Maintain 15-20% margins on left and right sides, 10% margins on top and bottom',
     composition: 'Wide horizontal layout with workflow elements well within safe boundaries',
-    negativePrompts: 'No cramped horizontal layouts, no elements touching left/right edges, no edge-to-edge content'
+    negativePrompts: 'avoid cramped horizontal layouts, avoid elements touching left/right edges, avoid edge-to-edge content'
   },
   '9:16': {
     aspectRatio: '9:16 Portrait Format',
     description: 'Vertical orientation with generous breathing room',
     safeZones: 'Maintain 12-15% margins on top and bottom, 8-10% margins on left and right sides',
     composition: 'Vertical orientation with generous breathing room',
-    negativePrompts: 'No elements touching top/bottom edges, maintain vertical breathing room, no cramped vertical layouts'
+    negativePrompts: 'avoid elements touching top/bottom edges, maintain vertical breathing room, avoid cramped vertical layouts'
   },
   '4:3': {
     aspectRatio: '4:3 Standard Format',
     description: 'Balanced horizontal spacing with proper frame margins',
     safeZones: 'Maintain 12% margins on left and right, 10% margins on top and bottom',
     composition: 'Balanced horizontal spacing with proper frame margins',
-    negativePrompts: 'No cramped compositions, no elements touching frame borders, maintain horizontal balance'
+    negativePrompts: 'avoid cramped compositions, avoid elements touching frame borders, maintain horizontal balance'
   },
   '3:4': {
     aspectRatio: '3:4 Portrait Format',
     description: 'Optimized for social media viewing with proper vertical spacing',
     safeZones: 'Maintain 10-12% margins on top and bottom, 8% margins on left and right sides',
     composition: 'Optimized for social media viewing with proper vertical spacing',
-    negativePrompts: 'No elements touching edges, maintain social media safe zones, no cramped vertical content'
+    negativePrompts: 'avoid elements touching edges, maintain social media safe zones, avoid cramped vertical content'
   }
 };
 
@@ -92,6 +92,27 @@ export function getSafeSpaceRules(aspectRatio: string): SafeSpaceConfig {
   
   // Default to 1:1 if no match found
   return SAFE_SPACE_CONFIGS['1:1'];
+}
+
+/**
+ * Sanitize aggressive language that might trigger OpenAI's safety system
+ */
+function sanitizePrompt(prompt: string): string {
+  return prompt
+    // Replace aggressive imperatives with softer alternatives
+    .replace(/\bCRITICAL:\s*/gi, 'Important: ')
+    .replace(/\bCRITICAL\b/gi, 'important')
+    .replace(/\bMUST\b/gi, 'should')
+    .replace(/\bNEVER\b/gi, 'avoid')
+    .replace(/\bREQUIRED:\s*/gi, 'Please include: ')
+    .replace(/\bDEMAND\b/gi, 'request')
+    .replace(/\bINSIST\b/gi, 'prefer')
+    .replace(/\bFORBID\b/gi, 'avoid')
+    .replace(/\bPROHIBIT\b/gi, 'avoid')
+    // Replace command language with collaborative language
+    .replace(/\bEnsure that\b/gi, 'Please ensure that')
+    .replace(/\bMake sure\b/gi, 'Please make sure')
+    .replace(/\bDo not\b/gi, 'Please avoid');
 }
 
 /**
@@ -125,19 +146,19 @@ function getAdaptiveSafeSpaceRules(config: SafeSpaceConfig, positioning: ReturnT
   if (positioning.hasLetterPlacement && positioning.hasTopPositioning) {
     // Soften top margin restrictions for intentional letter placement
     safeZones = safeZones.replace(/TOP MARGIN for letter-based content/g, 'reasonable spacing around text elements');
-    negativePrompts = negativePrompts.replace(/NEVER allow letters to touch or get close to the top edge/g, 'maintain readable spacing for text elements');
+    negativePrompts = negativePrompts.replace(/avoid letters touching or getting close to the top edge/g, 'maintain readable spacing for text elements');
   }
 
   if (positioning.hasCornerPositioning) {
     // Allow corner placement but with readable margins
-    negativePrompts = negativePrompts.replace(/No corner-to-corner compositions/g, 'ensure adequate margins for corner elements');
-    negativePrompts = negativePrompts.replace(/no edge-hugging elements/g, 'provide sufficient spacing from edges');
+    negativePrompts = negativePrompts.replace(/avoid corner-to-corner compositions/g, 'ensure adequate margins for corner elements');
+    negativePrompts = negativePrompts.replace(/avoid edge-hugging elements/g, 'provide sufficient spacing from edges');
   }
 
   if (positioning.hasSpecificPlacement) {
     // Use guidance instead of prohibitions
     composition = `${composition}. Accommodate specific placement requests while maintaining visual balance`;
-    negativePrompts = negativePrompts.replace(/no cramped/g, 'avoid overly cramped');
+    negativePrompts = negativePrompts.replace(/avoid cramped/g, 'avoid overly cramped');
   }
 
   return `
@@ -150,8 +171,11 @@ function getAdaptiveSafeSpaceRules(config: SafeSpaceConfig, positioning: ReturnT
  * Append safe space rules to an image generation prompt
  */
 export function appendSafeSpaceRules(originalPrompt: string, aspectRatio: string): string {
+  // First sanitize the original prompt to remove aggressive language
+  const sanitizedPrompt = sanitizePrompt(originalPrompt);
+  
   const safeSpaceConfig = getSafeSpaceRules(aspectRatio);
-  const positioning = detectPositioningInstructions(originalPrompt);
+  const positioning = detectPositioningInstructions(sanitizedPrompt);
   
   // Check for potential conflicts
   const hasConflicts = (
@@ -185,5 +209,5 @@ ${safeSpaceConfig.aspectRatio}:
 Apply these composition guidelines to create a well-balanced image.`;
   }
 
-  return originalPrompt + safeSpaceText;
+  return sanitizedPrompt + safeSpaceText;
 }
