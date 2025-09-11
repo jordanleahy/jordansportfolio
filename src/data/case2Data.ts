@@ -114,7 +114,7 @@ export const case2Data: CaseStudyData = {
       title: "2. Understanding the Data Model",
       description: "Disseminating what data we get vs what data should be available",
       items: [
-        "NLP-powered duplicate detection interface design",
+        "Discovered difference between duplicate note and copy and paste note",
         "Clinical context highlighting and annotation tools",
         "ICD-10 suggestion workflow integration", 
         "Real-time note comparison visualization"
