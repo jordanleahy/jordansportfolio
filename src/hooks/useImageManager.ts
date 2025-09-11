@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useDebouncedCallback } from 'use-debounce';
-import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
@@ -23,7 +22,6 @@ interface UseImageManagerReturn {
 
 export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseImageManagerReturn => {
   const { setProcessing } = useProcessingStatesContext();
-  const queryClient = useQueryClient();
 
   // Debounced version of onPostsChange to prevent rapid refetches
   const debouncedOnPostsChange = useDebouncedCallback(onPostsChange, 200);
@@ -66,27 +64,14 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
         .update({ [statusField]: ImageGenerationStatus.GENERATING })
         .eq('id', postId);
 
-      // Get existing prompt from cache first, fallback to database
-      let generatedPrompt: string | null = null;
-      
-      // Try to get from React Query cache first
-      const cachedData = queryClient.getQueryData(['individual_prompt', postId]);
-      if (cachedData && typeof cachedData === 'object' && 'prompt' in cachedData) {
-        generatedPrompt = cachedData.prompt as string;
-        
-      }
-      
-      // If not in cache, query database
-      if (!generatedPrompt) {
-        
-        const { data: postData } = await supabase
-          .from('social_media_posts')
-          .select('generated_image_prompt')
-          .eq('id', postId)
-          .maybeSingle();
+      // Get existing prompt from database
+      const { data: postData } = await supabase
+        .from('social_media_posts')
+        .select('generated_image_prompt')
+        .eq('id', postId)
+        .maybeSingle();
 
-        generatedPrompt = postData?.generated_image_prompt;
-      }
+      const generatedPrompt = postData?.generated_image_prompt;
 
       if (!generatedPrompt) {
         throw new Error('No image prompt found. Please try again or contact support.');
