@@ -7,6 +7,84 @@ interface ABCRequest {
   user_id?: string;
 }
 
+// JSON Schema for structured output
+const ABC_SCHEMA = {
+  name: "abc_deck",
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["category", "theme", "theme_description", "posts"],
+    properties: {
+      category: { type: "string", minLength: 1, maxLength: 100 },
+      theme: { type: "string", minLength: 1, maxLength: 200 },
+      theme_description: { type: "string", minLength: 1, maxLength: 1000 },
+      posts: {
+        type: "array",
+        minItems: 26,
+        maxItems: 26,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["day", "title", "description"],
+          properties: {
+            day: { type: "integer", minimum: 1, maximum: 26 },
+            title: {
+              type: "string",
+              pattern: "^[A-Z] is for [A-Za-z][A-Za-z\\- ]*$",
+              minLength: 8,
+              maxLength: 80
+            },
+            description: { type: "string", minLength: 10, maxLength: 240 }
+          }
+        }
+      }
+    }
+  },
+  strict: true
+} as const;
+
+// Alphabet letters array
+const LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+
+// Generate minimal system prompt
+const buildSystemPrompt = (theme: string) => `
+You create structured ABC decks for children ages 3–6.
+
+Follow these principles:
+- 26 items exactly (A–Z), age-appropriate, positive tone.
+- Simple, concrete words kids know; no brand/IP.
+- Each title must be "[Letter] is for [Word]".
+- Descriptions are 1–2 short sentences max, plain language.
+- Keep content aligned to THEME while remaining kid-safe.
+
+THEME: ${theme || 'General preschool learning'}
+
+Return JSON that strictly matches the provided JSON Schema. Do not include any extra text.
+`.trim();
+
+// Generate user message
+const userMessage = (theme: string) =>
+  `Generate an A–Z deck for preschoolers aligned to THEME="${theme || 'General'}".
+- 26 items exactly, days 1..26.
+- Titles must be "[Letter] is for [Word]".
+- Descriptions: 1–2 short sentences.`;
+
+// Extract word from title
+const extractWord = (title: string) => {
+  const match = title.match(/^[A-Z] is for (.+)$/i);
+  return match ? match[1].trim() : title;
+};
+
+// Generate image prompt template
+const imagePromptFor = (letter: string, word: string, theme: string) => 
+  `Place a large, bold letter "${letter}" in the top-left corner.
+Include the exact text "${letter} is for ${word}" prominently along the bottom.
+Create a bright, child-friendly illustration (ages 3–6) of "${word}" in the context of "${theme}".
+Keep shapes simple, colors vivid, and the concept unmistakable for preschoolers.`;
+
+// Safe slug generation
+const safeSlug = (s: string) => (s || 'educational').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -56,54 +134,6 @@ serve(async (req) => {
     const { description = '' }: ABCRequest = await req.json();
     console.log(`📝 [${correlationId}] Processing ABC theme: "${description}"`);
 
-    // Create system prompt for ABC generation
-    const systemPrompt = `You are an expert educational content creator specializing in ABC books for young children (ages 3-6).
-
-Your task is to generate a complete A-Z alphabet series with 26 posts, one for each letter of the alphabet.
-
-THEME CONTEXT: ${description || 'Generic educational content suitable for young children'}
-
-CRITICAL REQUIREMENTS:
-1. Generate EXACTLY 26 posts, one for each letter A through Z
-2. Each post MUST follow the format: "[Letter] is for [Word]"
-3. All content must be appropriate for ages 3-6
-4. Use simple, clear language that young children can understand
-5. Choose words that are familiar and relatable to children
-
-STYLE GUIDELINES:
-${description ? `- Adapt all content to the "${description}" theme while maintaining educational value` : '- Use bright, colorful educational illustration style suitable for young children'}
-- Keep descriptions short and engaging (2-3 sentences maximum)
-- Focus on positive, encouraging language
-- Choose words that are fun and memorable for children
-
-OUTPUT FORMAT (JSON only):
-{
-  "category": "abc-${description ? description.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'educational'}",
-  "theme": "${description ? `ABC ${description}` : 'ABC Learning for Kids'}",
-  "theme_description": "${description ? `A fun alphabet series exploring letters A-Z with a ${description} theme, perfect for young learners.` : 'A fun and engaging way for preschool children to explore the alphabet, with each letter featuring a delightful word and concept.'}",
-  "posts": [
-    {
-      "day": 1,
-      "title": "A is for [Word]",
-      "description": "[2-3 sentences appropriate for ages 3-6, relating to the theme]"
-    },
-    // ... continue through all 26 letters of the alphabet
-  ]
-}
-
-EXAMPLES:
-
-Generic Educational:
-A is for Apple - "Apples are crunchy and sweet! They grow on trees and come in red, green, and yellow. Eating apples helps keep us healthy and strong."
-
-Space Theme:
-A is for Astronaut - "Astronauts are brave explorers who travel to space! They wear special suits and helmets to keep them safe. Astronauts get to see Earth from way up high!"
-
-Animal Theme:
-A is for Alligator - "Alligators are big reptiles with sharp teeth! They live in swamps and rivers where it's warm. Baby alligators are called hatchlings."
-
-GENERATE ALL 26 LETTERS NOW:`;
-
     console.log(`🤖 [${correlationId}] Calling OpenAI API for ABC generation...`);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -117,15 +147,18 @@ GENERATE ALL 26 LETTERS NOW:`;
         messages: [
           {
             role: 'system',
-            content: systemPrompt
+            content: buildSystemPrompt(description)
           },
           {
             role: 'user',
-            content: `Generate a complete A-Z alphabet series for: ${description || 'educational content for young children'}`
+            content: userMessage(description)
           }
         ],
-        max_completion_tokens: 6000,
-        response_format: { type: 'json_object' }
+        max_completion_tokens: 4000,
+        response_format: {
+          type: 'json_schema',
+          json_schema: ABC_SCHEMA
+        }
       })
     });
 
@@ -140,32 +173,40 @@ GENERATE ALL 26 LETTERS NOW:`;
     console.log(`📦 [${correlationId}] OpenAI response received, length:`, generatedContent.length);
 
     // Parse JSON response
-    let parsedData;
+    let parsed;
     try {
-      parsedData = JSON.parse(generatedContent);
+      parsed = JSON.parse(generatedContent);
     } catch (parseError) {
       console.error(`❌ [${correlationId}] JSON parsing failed:`, parseError);
       throw new Error('Failed to parse AI response as JSON');
     }
 
     // Validate that we have exactly 26 posts
-    if (!parsedData.posts || parsedData.posts.length !== 26) {
-      console.error(`❌ [${correlationId}] Invalid post count: ${parsedData.posts?.length}, expected 26`);
-      throw new Error(`Expected 26 posts for A-Z series, got ${parsedData.posts?.length}`);
+    if (!parsed.posts || parsed.posts.length !== 26) {
+      console.error(`❌ [${correlationId}] Invalid post count: ${parsed.posts?.length}, expected 26`);
+      throw new Error(`Expected 26 posts for A-Z series, got ${parsed.posts?.length}`);
     }
 
-    console.log(`✅ [${correlationId}] Generated ${parsedData.posts.length} ABC posts`);
+    console.log(`✅ [${correlationId}] Generated ${parsed.posts.length} ABC posts`);
 
     // Create theme in database
     const themeId = crypto.randomUUID();
+    
+    // Generate deterministic category and theme fields
+    const category = `abc-${safeSlug(description)}`;
+    const theme = description ? `ABC ${description}` : 'ABC Learning for Kids';
+    const theme_description = description
+      ? `A fun alphabet series exploring A–Z with a ${description} theme for young learners.`
+      : 'A playful, age-appropriate A–Z deck for preschoolers.';
+
     const { error: themeError } = await supabase
       .from('themes')
       .insert({
         id: themeId,
         user_id: user.id,
-        theme_name: parsedData.theme,
-        description: parsedData.theme_description,
-        category: parsedData.category,
+        theme_name: theme,
+        description: theme_description,
+        category: category,
         query: description || 'ABC educational content',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -178,45 +219,12 @@ GENERATE ALL 26 LETTERS NOW:`;
 
     console.log(`✅ [${correlationId}] Theme created with ID: ${themeId}`);
 
-    // Helper function to extract clean visual elements from description
-    const extractVisualElements = (desc: string) => {
-      if (!desc) return '';
+    // Prepare posts with templated image prompts
+    const postsWithImagePrompts = parsed.posts.map((post: any, index: number) => {
+      const letter = LETTERS[index];
+      const word = extractWord(post.title);
+      const themeContext = description || 'Preschool ABCs';
       
-      // Remove noise patterns and extract key visual elements
-      let cleanDesc = desc
-        .replace(/^ABC\s+/i, '') // Remove "ABC" prefix
-        .replace(/Create a\s+/i, '') // Remove "Create a"
-        .replace(/ABC book\s+/i, '') // Remove "ABC book"
-        .replace(/focused\s+(solely\s+)?on\s+/i, '') // Remove "focused on"
-        .replace(/\s*-\s*[^-]*ABCs?\s*/i, '') // Remove "- Something ABCs"
-        .replace(/A playful ABC series[^.]*\./i, '') // Remove description sentences
-        .replace(/Each card[^.]*\./i, '') // Remove explanation sentences
-        .trim();
-      
-      // Extract character names and main themes
-      const characters = cleanDesc.match(/(?:Peppa\s+(?:the\s+)?Pig|Mickey\s+Mouse|Thomas\s+(?:the\s+)?Tank|Dora\s+(?:the\s+)?Explorer)/i);
-      const themes = cleanDesc.match(/(?:eating\s+manners|table\s+manners|space|animals|vehicles|colors|numbers)/i);
-      
-      let result = '';
-      if (characters) result += characters[0];
-      if (themes) result += (result ? ', ' : '') + themes[0];
-      
-      return result || cleanDesc.split(/[.!?]/)[0]; // First sentence as fallback
-    };
-
-    // Prepare posts with specialized image prompts that guarantee letter placement
-    const postsWithImagePrompts = parsedData.posts.map((post: any, index: number) => {
-      const letter = String.fromCharCode(65 + index); // A=65, B=66, etc.
-      const word = post.title.split(' is for ')[1] || post.title.split(' ')[3]; // Extract word after "is for"
-      
-      const visualElements = extractVisualElements(description);
-      const styleInstruction = visualElements 
-        ? `child-friendly illustration in ${visualElements} style showing` 
-        : 'bright, colorful educational illustration suitable for young children (ages 3-6) showing';
-
-      // CRITICAL: Every image prompt starts with letter placement and text instruction
-      const imagePrompt = `CRITICAL: Place a large, bold letter '${letter}' in the top-left corner of the image and include the full text "${letter} is for ${word}" (not just "${word.toUpperCase()}") prominently displayed at the bottom. Create a ${styleInstruction} ${word}. The image should be clean, child-friendly, and clearly represent the concept of ${word}. Use bright colors and simple, appealing visuals that would engage young children aged 3-6. The text must show the complete phrase "${letter} is for ${word}" exactly as written.`;
-
       return {
         id: crypto.randomUUID(),
         user_id: user.id,
@@ -224,8 +232,8 @@ GENERATE ALL 26 LETTERS NOW:`;
         day: post.day,
         title: post.title,
         description: post.description,
-        category: parsedData.category,
-        generated_image_prompt: imagePrompt,
+        category: category,
+        generated_image_prompt: imagePromptFor(letter, word, themeContext),
         individual_prompt_status: 'completed',
         status: 'draft',
         created_at: new Date().toISOString(),
@@ -243,7 +251,7 @@ GENERATE ALL 26 LETTERS NOW:`;
       throw new Error(`Failed to create posts: ${postsError.message}`);
     }
 
-    console.log(`✅ [${correlationId}] Created ${postsWithImagePrompts.length} posts with specialized image prompts`);
+    console.log(`✅ [${correlationId}] Created ${postsWithImagePrompts.length} posts with templated image prompts`);
 
     // Update theme completion status
     const { error: updateError } = await supabase
@@ -269,10 +277,10 @@ GENERATE ALL 26 LETTERS NOW:`;
       JSON.stringify({
         success: true,
         theme_id: themeId,
-        category: parsedData.category,
-        theme_name: parsedData.theme,
+        category: category,
+        theme_name: theme,
         post_count: 26,
-        message: 'ABC Illustrations created successfully with guaranteed letter placement',
+        message: 'ABC Illustrations created successfully with optimized prompts',
         correlation_id: correlationId
       }),
       {
