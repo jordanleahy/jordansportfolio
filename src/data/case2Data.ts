@@ -87,7 +87,7 @@ export const case2Data: CaseStudyData = {
   processSteps: [
     {
       icon: "Eye",
-      title: "Research: Clinical Notes Display",
+      title: "1. Research: Clinical Notes Display",
       description: "Deep dive into medical coding workflows and note analysis pain points",
       items: [
         "Shadowed medical coders and CDI specialists",
