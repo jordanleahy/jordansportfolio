@@ -90,7 +90,7 @@ export const case2Data: CaseStudyData = {
       title: "1. Research: Clinical Notes Display",
       description: "Focused on identifying the core problem via ux audits and interviews",
       items: [
-        "Shadowed medical coders and CDI specialists",
+        "Shadowed internal CDI specialists",
         "Analyzed 100+ clinical notes for duplicate patterns", 
         "Mapped current note review and coding workflows",
         "Identified key clinical indicators for ICD-10 assignment"
