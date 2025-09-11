@@ -49,7 +49,7 @@ export const case2Data: CaseStudyData = {
     {
       icon: "Users",
       title: "My Role",
-      description: "Senior Product Designer",
+      description: "Research, Designer & PM",
       items: [
         "Clinical workflow research & analysis",
         "NLP-assisted UI design for note processing", 
