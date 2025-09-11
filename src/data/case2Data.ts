@@ -99,7 +99,21 @@ export const case2Data: CaseStudyData = {
         text: "Half my time is spent figuring out what's new versus what's copy-pasted from yesterday's note. We need better tools to focus on what actually matters for coding.",
         author: "Sarah Kim, Medical Coding Specialist"
       },
-      image: "/lovable-uploads/4ffaf121-202d-46a3-9265-101c3bc099d8.png"
+      image: "/lovable-uploads/4ffaf121-202d-46a3-9265-101c3bc099d8.png",
+      images: [
+        {
+          src: "/lovable-uploads/4ffaf121-202d-46a3-9265-101c3bc099d8.png",
+          alt: "Clinical workflow research showing CDI specialist reviewing encounter notes",
+          caption: "Research session with CDI specialists analyzing clinical note patterns",
+          title: "Clinical Workflow Analysis"
+        },
+        {
+          src: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
+          alt: "Raw encounter data analysis showing duplicate patterns and clinical indicators",
+          caption: "Manual analysis of raw encounter datasets revealing duplicate content patterns",
+          title: "Encounter Data Analysis"
+        }
+      ]
     },
     {
       icon: "Lightbulb",
