@@ -106,12 +106,6 @@ export const case2Data: CaseStudyData = {
           alt: "Clinical workflow research showing CDI specialist reviewing encounter notes",
           caption: "Irrelevant Notes",
           title: "Irrelevant Notes"
-        },
-        {
-          src: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
-          alt: "Raw encounter data analysis showing duplicate patterns and clinical indicators",
-          caption: "Manual analysis of raw encounter datasets revealing duplicate content patterns",
-          title: "Encounter Data Analysis"
         }
       ]
     },
