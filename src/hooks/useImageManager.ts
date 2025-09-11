@@ -1,13 +1,10 @@
-import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useDebouncedCallback } from 'use-debounce';
 import { supabase } from '@/integrations/supabase/client';
-import { SocialMediaPost } from '@/types/socialMedia';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
 import { useProcessingStatesContext } from '@/contexts/ProcessingStatesContext';
 import { createWatermarkedImageFile } from '@/utils/watermarkImage';
 import { uploadFileToStorage } from '@/utils/fileUpload';
-import { useParams } from 'react-router-dom';
 import { ImageGenerationStatus } from '@/types/enums/status';
 
 interface UseImageManagerProps {
@@ -30,14 +27,6 @@ export const useImageManager = ({ onPostsChange }: UseImageManagerProps): UseIma
   // const params = useParams();
   // const routeTheme = params.theme ? decodeURIComponent(params.theme) : undefined;
   // const theme = themeName ?? routeTheme;  // REMOVED - use post.theme_id instead
-  
-  const sanitizeTitle = useCallback((title: string) => {
-    return title.toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .trim()
-      .replace(/\s+/g, '_')
-      .substring(0, 50);
-  }, []);
 
 
 
