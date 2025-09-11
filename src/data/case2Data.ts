@@ -28,7 +28,7 @@ export const case2Data: CaseStudyData = {
       title: 'Clinical Documentation Issues',
       items: [
         "To many duplicate notes creating long scroll times", 
-        "Complex ICD-10 codes like Metabolic Encephalopathy require human validation to identify precise timing of altered mental status",
+        "Unable to create RCM value without organizing unstructured notes",
         "Volume of encounter notes makes finding critical clinical events needle-in-haystack problem"
       ]
     },
