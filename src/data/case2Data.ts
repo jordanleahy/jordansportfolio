@@ -116,7 +116,7 @@ export const case2Data: CaseStudyData = {
       items: [
         "Discovered difference between duplicate note and copy and paste note",
         "Discovered many notes that should not be shown in UI",
-        "ICD-10 suggestion workflow integration", 
+        "Designed atomic based components for data visualizatoin", 
         "Real-time note comparison visualization"
       ],
       image: "/lovable-uploads/3202d566-1ce1-4cb6-91bc-063ecae11125.png",
