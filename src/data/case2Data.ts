@@ -105,7 +105,7 @@ export const case2Data: CaseStudyData = {
           src: "/lovable-uploads/4ffaf121-202d-46a3-9265-101c3bc099d8.png",
           alt: "Clinical workflow research showing CDI specialist reviewing encounter notes",
           caption: "Irrelevant Notes",
-          title: "Clinical Workflow Analysis"
+          title: "Irrelevant Notes"
         },
         {
           src: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
