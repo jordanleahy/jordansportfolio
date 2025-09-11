@@ -119,7 +119,7 @@ export const case2Data: CaseStudyData = {
         "ICD-10 suggestion workflow integration", 
         "Real-time note comparison visualization"
       ],
-      image: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png"
+      image: "/lovable-uploads/0b3ffafd-156b-4610-a3e9-0bbc1ea3535e.png"
     },
     {
       icon: "Target",
