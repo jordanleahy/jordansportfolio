@@ -72,7 +72,7 @@ export const case2Data: CaseStudyData = {
     {
       icon: "Target",
       title: "Duration & Scope", 
-      description: "3 month timeline",
+      description: "3 weeks timeline",
       items: [
         "Clinical note analysis interface",
         "Duplicate detection algorithms UI",
