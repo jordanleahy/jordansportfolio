@@ -95,20 +95,95 @@ export function getSafeSpaceRules(aspectRatio: string): SafeSpaceConfig {
 }
 
 /**
+ * Detect specific positioning instructions in the original prompt
+ */
+function detectPositioningInstructions(prompt: string): {
+  hasTopPositioning: boolean;
+  hasCornerPositioning: boolean;
+  hasSpecificPlacement: boolean;
+  hasLetterPlacement: boolean;
+} {
+  const lowerPrompt = prompt.toLowerCase();
+  
+  return {
+    hasTopPositioning: /\b(top|upper|above|place.*top|position.*top)\b/.test(lowerPrompt),
+    hasCornerPositioning: /\b(corner|corners|top-left|top-right|bottom-left|bottom-right)\b/.test(lowerPrompt),
+    hasSpecificPlacement: /\b(place|position|put|locate).*\b(in|at|on|near)\b/.test(lowerPrompt),
+    hasLetterPlacement: /\b(letter|text|character|word).*\b(in|at|on|corner|top|bottom|left|right)\b/.test(lowerPrompt)
+  };
+}
+
+/**
+ * Generate adaptive safe space rules based on prompt content
+ */
+function getAdaptiveSafeSpaceRules(config: SafeSpaceConfig, positioning: ReturnType<typeof detectPositioningInstructions>): string {
+  let safeZones = config.safeZones;
+  let composition = config.composition;
+  let negativePrompts = config.negativePrompts;
+
+  // If user has specific positioning instructions, adapt the rules
+  if (positioning.hasLetterPlacement && positioning.hasTopPositioning) {
+    // Soften top margin restrictions for intentional letter placement
+    safeZones = safeZones.replace(/TOP MARGIN for letter-based content/g, 'reasonable spacing around text elements');
+    negativePrompts = negativePrompts.replace(/NEVER allow letters to touch or get close to the top edge/g, 'maintain readable spacing for text elements');
+  }
+
+  if (positioning.hasCornerPositioning) {
+    // Allow corner placement but with readable margins
+    negativePrompts = negativePrompts.replace(/No corner-to-corner compositions/g, 'ensure adequate margins for corner elements');
+    negativePrompts = negativePrompts.replace(/no edge-hugging elements/g, 'provide sufficient spacing from edges');
+  }
+
+  if (positioning.hasSpecificPlacement) {
+    // Use guidance instead of prohibitions
+    composition = `${composition}. Accommodate specific placement requests while maintaining visual balance`;
+    negativePrompts = negativePrompts.replace(/no cramped/g, 'avoid overly cramped');
+  }
+
+  return `
+- Safe Zones: ${safeZones}
+- Composition: ${composition}
+- Design Guidelines: ${negativePrompts}`;
+}
+
+/**
  * Append safe space rules to an image generation prompt
  */
 export function appendSafeSpaceRules(originalPrompt: string, aspectRatio: string): string {
   const safeSpaceConfig = getSafeSpaceRules(aspectRatio);
+  const positioning = detectPositioningInstructions(originalPrompt);
   
-  const safeSpaceText = `
+  // Check for potential conflicts
+  const hasConflicts = (
+    (positioning.hasLetterPlacement && positioning.hasTopPositioning) ||
+    positioning.hasCornerPositioning ||
+    positioning.hasSpecificPlacement
+  );
 
---- CRITICAL COMPOSITION REQUIREMENTS ---
+  let safeSpaceText: string;
+
+  if (hasConflicts) {
+    // Use adaptive rules that work with user's intent
+    const adaptiveRules = getAdaptiveSafeSpaceRules(safeSpaceConfig, positioning);
+    safeSpaceText = `
+
+--- COMPOSITION GUIDELINES ---
+${safeSpaceConfig.aspectRatio}:
+${adaptiveRules}
+
+These guidelines should enhance the composition while respecting the specific placement instructions above.`;
+  } else {
+    // Use standard rules for general prompts
+    safeSpaceText = `
+
+--- COMPOSITION REQUIREMENTS ---
 ${safeSpaceConfig.aspectRatio}:
 - Safe Zones: ${safeSpaceConfig.safeZones}
 - Composition: ${safeSpaceConfig.composition}
-- NEGATIVE CONSTRAINTS: ${safeSpaceConfig.negativePrompts}
+- Design Constraints: ${safeSpaceConfig.negativePrompts}
 
-These composition rules MUST override any conflicting instructions above. Ensure all elements respect the safe zone boundaries.`;
+Apply these composition guidelines to create a well-balanced image.`;
+  }
 
   return originalPrompt + safeSpaceText;
 }
