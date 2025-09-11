@@ -21,7 +21,7 @@ export const case2Data: CaseStudyData = {
   
   // Problem Section
   problemTitle: "The Challenge",
-  problemDescription: "Healthcare systems struggle with duplicate and copy-pasted clinical notes that create coding challenges. With 80% of clinical notes containing duplicated content, medical coders spend excessive time identifying unique, clinically relevant information for accurate ICD-10 assignment.",
+  problemDescription: "Healthcare systems struggle with duplicate and copy-pasted clinical notes that create coding challenges. With 80% of clinical notes containing duplicated content, medical coders spend excessive time identifying unique, clinically relevant information for accurate ICD-10 assignment. Complex codes like Metabolic Encephalopathy require human-in-the-loop validation to confirm when altered mental status truly occurred by carefully reading through voluminous encounter notes.",
   challenges: [
     {
       type: 'problem',
@@ -29,7 +29,8 @@ export const case2Data: CaseStudyData = {
       items: [
         "80% of inpatient notes contain duplicated content",
         "8 additional minutes per note review for duplicate identification", 
-        "Inconsistent ICD-10 code assignment due to unclear clinical context"
+        "Complex ICD-10 codes like Metabolic Encephalopathy require human validation to identify precise timing of altered mental status",
+        "Volume of encounter notes makes finding critical clinical events needle-in-haystack problem"
       ]
     },
     {
@@ -37,8 +38,9 @@ export const case2Data: CaseStudyData = {
       title: 'System Requirements',
       items: [
         "Automated duplicate content detection in clinical notes",
-        "Extraction of unique clinical indicators from unstructured text",
-        "Real-time ICD-10 coding suggestions based on clinical context"
+        "Human-in-the-loop validation workflow for complex diagnoses",
+        "Precise timeline extraction for altered mental status events",
+        "Intelligent filtering to surface clinically unique content from voluminous notes"
       ]
     }
   ],
