@@ -8,7 +8,7 @@ export const case2Data: CaseStudyData = {
   heroImageAlt: "Clinical decision support interface showing encounter notes, diagnosis codes, and ICD-10 coding suggestions for metabolic encephalopathy and other conditions",
   role: "Senior Product Designer", 
   roleDetails: "End-to-end UX/UI ownership",
-  timeline: "3 months",
+  timeline: "3 weeks",
   timelineDetails: "June - August 2024",
   tags: ["EMR", "Notes", "ICD-10", "Duplicates", "MetabolicEncephalopathy", "UnstructuredNotes"],
   
