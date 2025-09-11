@@ -39,7 +39,7 @@ export const case2Data: CaseStudyData = {
         "Detect duplicate notes and consolidate",
         
         "Detect \"copy and pasted\" notes that with same intent",
-        "Intelligent filtering to surface clinically unique content from voluminous notes"
+        "Identify and highlight original author of note"
       ]
     }
   ],
