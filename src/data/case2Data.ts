@@ -27,7 +27,6 @@ export const case2Data: CaseStudyData = {
       type: 'problem',
       title: 'Clinical Documentation Issues',
       items: [
-        "80% of inpatient notes contain duplicated content",
         "8 additional minutes per note review for duplicate identification", 
         "Complex ICD-10 codes like Metabolic Encephalopathy require human validation to identify precise timing of altered mental status",
         "Volume of encounter notes makes finding critical clinical events needle-in-haystack problem"
