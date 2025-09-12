@@ -190,7 +190,7 @@ export const case2Data: CaseStudyData = {
     },
     {
       icon: "FileText",
-      title: "Clinical Context Extraction",
+      title: "Removed Irrelevant Notes",
       description: "Advanced NLP extracts clinically relevant information from unstructured notes, highlighting key symptoms, treatments, and diagnostic indicators."
     },
     {
