@@ -156,7 +156,7 @@ export const case2Data: CaseStudyData = {
       items: [
         "Immediate rollout to all internal CDS users",
         "Post release survey which identified key improvements",
-        "Coding accuracy metrics and time-saving validation",
+        "Updated some interaction states based on user feedback",
         "Ongoing UX optimization based on usage patterns"
       ],
       image: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
