@@ -210,7 +210,7 @@ export const case2Data: CaseStudyData = {
   outcomesTitle: "Outcomes",
   userFeedback: {
     quote: "This system cut our note review time from 15 minutes to 7 minutes per encounter. We can finally focus on the clinical content that actually matters for accurate coding.",
-    author: "Michael Chen, Lead Medical Coder"
+    author: "Michael Chen, CDS Specialist"
   },
 
   // Reflection Section  
