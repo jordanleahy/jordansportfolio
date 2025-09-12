@@ -136,7 +136,7 @@ export const case2Data: CaseStudyData = {
       items: [
         "Interactive prototypes with real clinical note data",
         "Iterative testing with internal CDI employees",
-        "CDI specialist feedback sessions on coding accuracy",
+        "CDI specialist feedback sessions on what note are valuable",
         "Workflow efficiency validation with timing studies"
       ],
       image: "/lovable-uploads/prototyping-validation.png",
