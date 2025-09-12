@@ -201,7 +201,7 @@ export const case2Data: CaseStudyData = {
     {
       icon: "Clock", 
       title: "Increase Clicks Targets by 10,000%",
-      description: "Optimized interface reduces note review time by presenting only clinically unique content with clear visual indicators."
+      description: "Allowed users to select evidence to share by allow to click on whole row instead of small 24 x 24 check box"
     },
     {
       icon: "TrendingUp",
