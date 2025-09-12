@@ -108,13 +108,13 @@ export const case2Data: CaseStudyData = {
         text: "Half my time is spent figuring out what's new versus what's copy-pasted from yesterday's note. We need better tools to focus on what actually matters for coding.",
         author: "Sarah Kim, Internal CDS Specialist"
       },
-      image: "/lovable-uploads/different-time-author-notetype.png",
+      image: "/lovable-uploads/Frame_278.png",
       images: [
         {
-          src: "/lovable-uploads/different-time-author-notetype.png",
-          alt: "Clinical workflow research showing CDI specialist reviewing encounter notes",
-          caption: "Irrelevant Notes",
-          title: "Irrelevant Notes"
+          src: "/lovable-uploads/Frame_278.png",
+          alt: "Clinical notes interface showing duplicate pulmonology consultation notes with exact same content highlighted",
+          caption: "Duplicate Notes Analysis",
+          title: "Duplicate Notes Detection"
         }
       ]
     },
