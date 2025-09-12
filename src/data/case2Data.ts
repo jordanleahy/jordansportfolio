@@ -177,7 +177,7 @@ export const case2Data: CaseStudyData = {
     {
       icon: "Brain",
       title: "Duplicate Content Detection", 
-      description: "AI-powered analysis automatically identifies and highlights duplicated text across multiple clinical notes, allowing coders to focus on unique clinical content."
+      description: "ML powered analysis automatically identifies and highlights duplicated text across multiple clinical notes, allowing CDS users to focus on unique clinical content."
     },
     {
       icon: "FileText",
