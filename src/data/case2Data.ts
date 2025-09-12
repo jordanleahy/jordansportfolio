@@ -186,7 +186,7 @@ export const case2Data: CaseStudyData = {
     },
     {
       icon: "Target",
-      title: "ICD-10 Coding Suggestions",
+      title: "Note Meta Data",
       description: "Showing CDS users the frequency of note, how often it was noted and by how many authors."
     },
     {
