@@ -3,7 +3,7 @@ import { FinalProduct } from "@/types/caseStudy";
 export const finalProductData = {
   finalProduct: {
     title: "Final Product",
-    prototypeUrl: "https://embed.figma.com/proto/ZbQ01yIUUGhDrd8H0rzjfn/Sepsis-presentation?page-id=0%3A1&node-id=11073-40120&viewport=1489%2C-1171%2C0.17&scaling=scale-down-width&content-scaling=fixed&starting-point-node-id=11073%3A39176&embed-host=share",
+    prototypeUrl: "https://www.figma.com/deck/e5oYLg8wYGPuusnBdoTShm/Sepsis-Portfolio?node-id=4230-2473&viewport=99%2C-141%2C0.74&t=WM8lEMDEK9gKleiK-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1",
     description: "Interactive sepsis prediction system showcasing AI-powered clinical decision support and CDI validation workflows."
   } as FinalProduct,
 };
