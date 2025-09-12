@@ -200,7 +200,7 @@ export const case2Data: CaseStudyData = {
     },
     {
       icon: "Clock", 
-      title: "Streamlined Review Workflow",
+      title: "Increase Clicks Targets by 10,000%",
       description: "Optimized interface reduces note review time by presenting only clinically unique content with clear visual indicators."
     },
     {
