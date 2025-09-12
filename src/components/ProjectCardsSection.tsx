@@ -131,7 +131,7 @@ const ProjectCardsSection = () => {
                         <img 
                           src="/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png"
                           alt="Clinical decision support interface showing encounter notes, diagnosis codes, and ICD-10 coding suggestions for metabolic encephalopathy and other conditions"
-                          className="w-full aspect-video object-cover rounded-lg border border-border/50"
+                          className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
                           <p className="text-white text-sm font-medium text-center px-4">
