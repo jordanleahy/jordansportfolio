@@ -205,7 +205,7 @@ export const case2Data: CaseStudyData = {
     },
     {
       icon: "TrendingUp",
-      title: "Coding Accuracy Tracking",
+      title: "Add on Hover Highlights",
       description: "Built-in analytics track coding accuracy improvements and time savings across the coding team."
     },
     {
