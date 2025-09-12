@@ -187,7 +187,7 @@ export const case2Data: CaseStudyData = {
     {
       icon: "Target",
       title: "ICD-10 Coding Suggestions",
-      description: "Real-time coding suggestions based on unique clinical content, with confidence scoring and supporting evidence from the notes."
+      description: "Showing CDS users the frequency of note, how often it was noted and by how many authors."
     },
     {
       icon: "Clock", 
