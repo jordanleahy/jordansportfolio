@@ -206,7 +206,7 @@ export const case2Data: CaseStudyData = {
     {
       icon: "TrendingUp",
       title: "Add on Hover Highlights",
-      description: "Add yellow highlight on hover and along with row hover states for improved user experience."
+      description: "Enhanced interface with yellow highlights and row hover states that provide clear visual feedback for improved user interaction."
     },
     {
       icon: "Shield",
