@@ -47,7 +47,9 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         />
       )}
       
-      <FinalProductSection data={data.finalProduct} />
+      {data.finalProduct?.prototypeUrl && (
+        <FinalProductSection data={data.finalProduct} />
+      )}
       
       <ProblemSection
         title={data.problemTitle}
