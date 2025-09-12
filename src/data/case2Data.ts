@@ -139,13 +139,13 @@ export const case2Data: CaseStudyData = {
         "CDI specialist feedback sessions on coding accuracy",
         "Workflow efficiency validation with timing studies"
       ],
-      image: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
+      image: "/lovable-uploads/prototyping-validation.png",
       images: [
         {
-          src: "/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png",
-          alt: "Production implementation dashboard showing performance metrics and optimization results",
-          caption: "Implementation Results",
-          title: "Production Optimization"
+          src: "/lovable-uploads/prototyping-validation.png",
+          alt: "Prototype for clinical validation workflow highlighting duplicated notes and immune suppression medications",
+          caption: "Clinical Validation Prototype",
+          title: "Prototyping & Validation"
         }
       ]
     },
