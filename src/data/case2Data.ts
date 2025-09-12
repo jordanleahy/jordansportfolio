@@ -155,7 +155,7 @@ export const case2Data: CaseStudyData = {
       description: "Production deployment with continuous workflow improvement",
       items: [
         "Immediate rollout to all internal CDS users",
-        "Real-time performance monitoring and user feedback",
+        "Post release survey which identified key improvements",
         "Coding accuracy metrics and time-saving validation",
         "Ongoing UX optimization based on usage patterns"
       ],
