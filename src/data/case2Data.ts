@@ -265,7 +265,7 @@ export const case2Data: CaseStudyData = {
       "ICD-10 coding interface specifications"
     ],
     processDocumentation: [
-      "Medical coding workflow research findings",
+      "CDS workflow research findings",
       "Clinical validation methodology and results",
       "NLP model integration documentation"
     ]
