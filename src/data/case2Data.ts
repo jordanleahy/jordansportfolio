@@ -135,7 +135,7 @@ export const case2Data: CaseStudyData = {
       description: "Iterative testing with medical coding specialists and CDI teams",
       items: [
         "Interactive prototypes with real clinical note data",
-        "Usability testing with medical coders",
+        "Iterative testing with internal CDI employees",
         "CDI specialist feedback sessions on coding accuracy",
         "Workflow efficiency validation with timing studies"
       ],
