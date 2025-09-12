@@ -19,6 +19,15 @@ export const case2Data: CaseStudyData = {
     description: "Experience the intelligent clinical note analysis system that transforms unstructured notes into actionable coding insights."
   },
   
+  // Figma Presentation
+  figmaPresentation: {
+    enabled: true,
+    password: "",
+    presentationUrl: "https://embed.figma.com/deck/YzccBBTjy6NYErJbPGLtBr/Adding-reasoning-to-unstructured-notes?node-id=1-25&viewport=99%2C-141%2C0.74&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1&embed-host=share",
+    title: "Adding reasoning to unstructured notes",
+    description: "Interactive presentation showing the design process and solution"
+  },
+  
   // Problem Section
   problemTitle: "The Challenge",
   problemDescription: "RCM systems struggle with duplicate and copy-pasted clinical notes that create coding challenges. Complex codes like Metabolic Encephalopathy require human-in-the-loop validation to confirm when altered mental status truly occurred by carefully reading through voluminous encounter notes.",
