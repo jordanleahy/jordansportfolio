@@ -302,11 +302,11 @@ const BlogEditor = () => {
           data: postData
         });
         if (result.slug !== existingPost.slug) {
-          navigate(`/blog-editor/${result.slug}`);
+          navigate(`/blog-editor/${result.id}`);
         }
       } else {
         result = await createPostMutation.mutateAsync(postData);
-        navigate(`/blog-editor/${result.slug}`);
+        navigate(`/blog-editor/${result.id}`);
       }
 
       // Update local state to reflect the changes
@@ -430,7 +430,7 @@ const BlogEditor = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={() => handleSave(false)}
+                 onClick={() => handleSave(false)}
                 disabled={saving}
                 className="min-h-[44px] sm:min-h-[36px]"
                 aria-label="Save draft"
@@ -459,7 +459,7 @@ const BlogEditor = () => {
               </Button>
               <Button 
                 size="sm" 
-                onClick={() => handleSave(true)}
+                 onClick={() => handleSave(true)}
                 disabled={saving}
                 className="min-h-[44px] sm:min-h-[36px] bg-primary hover:bg-primary/90"
                 aria-label="Publish post"
