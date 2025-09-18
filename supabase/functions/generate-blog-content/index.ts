@@ -143,10 +143,19 @@ Focus on actionable insights for healthcare professionals.`;
       parsedContent = createFallbackContent(socialMediaPost);
     }
 
-    // Validate visual sections
-    if (!parsedContent.visual_sections || parsedContent.visual_sections.length !== 3) {
+    // Validate and normalize visual sections
+    if (!parsedContent.visual_sections || !Array.isArray(parsedContent.visual_sections) || parsedContent.visual_sections.length !== 3) {
       parsedContent.visual_sections = createDefaultSections(socialMediaPost);
     }
+    
+    // Ensure each visual section has required fields with proper types
+    parsedContent.visual_sections = parsedContent.visual_sections.map(section => ({
+      headline: section.headline || 'Section Title',
+      content: section.content || 'Section content goes here.',
+      image_url: section.image_url || null,
+      cta_text: section.cta_text || null,
+      cta_url: section.cta_url || null
+    }));
 
     // Generate slug
     const slug = parsedContent.hero_headline
@@ -261,21 +270,21 @@ function createDefaultSections(socialMediaPost: SocialMediaPost) {
     {
       headline: "Core Concepts",
       content: "This section explores the fundamental concepts and why they matter in healthcare operations. Understanding these basics is essential for effective implementation and achieving sustainable results in your organization.",
-      image_url: '',
+      image_url: null,
       cta_text: null,
       cta_url: null
     },
     {
-      headline: "Implementation Strategy",
+      headline: "Implementation Strategy", 
       content: "Here we examine practical approaches for implementing these concepts, including best practices, common challenges, and proven strategies that deliver measurable improvements in patient care and operational efficiency.",
-      image_url: '',
+      image_url: null,
       cta_text: null,
       cta_url: null
     },
     {
       headline: "Future Considerations",
       content: "Looking ahead, this section discusses emerging trends and strategic planning considerations that will help your organization prepare for upcoming changes and maintain competitive advantage in healthcare.",
-      image_url: '',
+      image_url: null,
       cta_text: null,
       cta_url: null
     }
