@@ -35,7 +35,7 @@ const BlogEditor = () => {
   const deletePostMutation = useDeleteBlogPost();
   
   // Fetch social media post data to get theme_id
-  const { data: socialMediaPost } = useSocialMediaPost(existingPost?.social_media_post_id);
+  const { data: socialMediaPost } = useSocialMediaPost(existingPost?.social_media_post_id || null);
 
   
   const [saving, setSaving] = useState(false);
