@@ -25,7 +25,7 @@ export const SimpleBlogPostButton: React.FC<SimpleBlogPostButtonProps> = ({ post
       if (blogStatus.status === 'published' && blogStatus.slug) {
         navigate(`/blog/${blogStatus.slug}`);
       } else {
-        navigate(`/admin-blog/${blogStatus.id}`);
+        navigate(`/blog-editor/${blogStatus.id}`);
       }
     } else {
       // Create new blog

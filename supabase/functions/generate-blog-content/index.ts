@@ -214,7 +214,7 @@ Focus on actionable insights for healthcare professionals.`;
     return new Response(JSON.stringify({
       success: true,
       blog_post: blogPost,
-      redirect_url: `/admin-blog/${blogPost.id}`,
+      redirect_url: `/blog-editor/${blogPost.id}`,
       message: 'Blog post created successfully'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
