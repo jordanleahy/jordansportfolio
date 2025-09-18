@@ -37,19 +37,6 @@ const BlogEditor = () => {
   // Fetch social media post data to get theme_id
   const { data: socialMediaPost } = useSocialMediaPost(existingPost?.social_media_post_id);
 
-  // Check if required hooks exist
-  if (!existingPost && id) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-destructive">Blog post not found</p>
-          <Button onClick={() => navigate('/admin-blog')} className="mt-4">
-            Back to Blog Admin
-          </Button>
-        </div>
-      </div>
-    );
-  }
   
   const [saving, setSaving] = useState(false);
   const [promptModalOpen, setPromptModalOpen] = useState<number | null>(null);
@@ -374,6 +361,20 @@ const BlogEditor = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-destructive">Error loading blog post</p>
+          <Button onClick={() => navigate('/admin-blog')} className="mt-4">
+            Back to Blog Admin
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Not found guard after hooks
+  if (id && !existingPost && !loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive">Blog post not found</p>
           <Button onClick={() => navigate('/admin-blog')} className="mt-4">
             Back to Blog Admin
           </Button>
