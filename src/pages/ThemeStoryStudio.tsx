@@ -219,6 +219,7 @@ This story brings together all the key insights from your ${themeData.theme_name
               onGenerate={handleGenerateStory}
               isGenerating={isGenerating}
               isGenerated={!!generatedContent}
+              themeId={themeId}
             />
           </div>
 

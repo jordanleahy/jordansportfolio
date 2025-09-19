@@ -1,11 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Settings, Sparkles, BookOpen, Users, Zap } from 'lucide-react';
+import { Settings, Sparkles, BookOpen, Users, Zap, Eye } from 'lucide-react';
 
 interface StoryConfig {
   style: 'narrative' | 'analytical' | 'educational' | 'tutorial';
@@ -20,6 +21,7 @@ interface StoryGenerationControlsProps {
   onGenerate: () => void;
   isGenerating: boolean;
   isGenerated: boolean;
+  themeId?: string;
 }
 
 export const StoryGenerationControls: React.FC<StoryGenerationControlsProps> = ({
@@ -27,7 +29,8 @@ export const StoryGenerationControls: React.FC<StoryGenerationControlsProps> = (
   onConfigChange,
   onGenerate,
   isGenerating,
-  isGenerated
+  isGenerated,
+  themeId
 }) => {
   const updateConfig = (key: keyof StoryConfig, value: string) => {
     onConfigChange({ ...config, [key]: value });
@@ -136,6 +139,28 @@ export const StoryGenerationControls: React.FC<StoryGenerationControlsProps> = (
           </div>
         </CardContent>
       </Card>
+
+      {/* Blog Preview Button */}
+      {themeId && (
+        <Card className="bg-muted/20 border-dashed">
+          <CardContent className="p-4">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="w-full h-10"
+            >
+              <Link to={`/stories/studio/${themeId}/blog-preview`}>
+                <Eye className="h-4 w-4 mr-2" />
+                Preview as Blog Post
+              </Link>
+            </Button>
+            <p className="text-xs text-muted-foreground mt-2 text-center">
+              See how your theme would look as a published blog article
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Configuration Panel */}
       <Card>
