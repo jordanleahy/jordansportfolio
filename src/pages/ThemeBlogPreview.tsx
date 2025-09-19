@@ -18,6 +18,10 @@ interface ThemeData {
     description: string;
     day?: number;
     image_16_9_url?: string;
+    image_1_1_url?: string;
+    image_4_3_url?: string;
+    image_9_16_url?: string;
+    image_3_4_url?: string;
   }>;
 }
 
@@ -28,7 +32,7 @@ export default function ThemeBlogPreview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchThemeData = async () => {
+  const fetchThemeData = async () => {
       if (!themeId) return;
 
       try {
@@ -41,10 +45,10 @@ export default function ThemeBlogPreview() {
 
         if (themeError) throw themeError;
 
-        // Fetch posts for this theme
+        // Fetch posts for this theme with 1:1 images prioritized
         const { data: posts, error: postsError } = await supabase
           .from('social_media_posts')
-          .select('id, title, description, day, image_16_9_url')
+          .select('id, title, description, day, image_16_9_url, image_1_1_url, image_4_3_url, image_9_16_url, image_3_4_url')
           .eq('theme_id', themeId)
           .order('day', { ascending: true });
 
@@ -73,11 +77,21 @@ export default function ThemeBlogPreview() {
   }, [themeId]);
 
   const createMockBlogPost = (theme: ThemeData): BlogPost => {
+    // Helper function to get the best available image (prioritizing 1:1, then others)
+    const getBestImage = (post: any) => {
+      return post.image_1_1_url || 
+             post.image_4_3_url || 
+             post.image_3_4_url || 
+             post.image_9_16_url || 
+             post.image_16_9_url || 
+             null;
+    };
+
     // Use first few posts for visual sections
     const visualSections: VisualSection[] = theme.posts.slice(0, 4).map((post, index) => ({
       headline: post.title,
       content: `${post.description} This section explores the key insights and practical applications that make this approach effective for modern businesses.`,
-      image_url: post.image_16_9_url || null,
+      image_url: getBestImage(post),
       cta_text: index === 0 ? "Learn More" : null,
       cta_url: index === 0 ? "#" : null
     }));
@@ -95,8 +109,8 @@ export default function ThemeBlogPreview() {
       // Hero section
       hero_headline: theme.theme_name,
       hero_subhead: theme.description || `Discover the comprehensive insights and strategies that make ${theme.theme_name.toLowerCase()} a game-changer for your business.`,
-      hero_image_url: theme.posts[0]?.image_16_9_url || null,
-      hero_image_16_9_url: theme.posts[0]?.image_16_9_url || null,
+      hero_image_url: getBestImage(theme.posts[0]),
+      hero_image_16_9_url: getBestImage(theme.posts[0]),
       hero_video_url: null,
       hero_badge: theme.category,
       
