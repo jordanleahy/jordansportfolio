@@ -87,8 +87,8 @@ export default function ThemeBlogPreview() {
              null;
     };
 
-    // Use first few posts for visual sections
-    const visualSections: VisualSection[] = theme.posts.slice(0, 4).map((post, index) => ({
+    // Create visual sections from ALL posts (not just first 4)
+    const visualSections: VisualSection[] = theme.posts.map((post, index) => ({
       headline: post.title,
       content: `${post.description} This section explores the key insights and practical applications that make this approach effective for modern businesses.`,
       image_url: getBestImage(post),
@@ -96,9 +96,9 @@ export default function ThemeBlogPreview() {
       cta_url: index === 0 ? "#" : null
     }));
 
-    // Create TL;DR bullets from remaining posts
-    const tldrBullets = theme.posts.slice(4, 8).map(post => 
-      `${post.title}: ${post.description.slice(0, 80)}${post.description.length > 80 ? '...' : ''}`
+    // Create TL;DR bullets from post titles (since we're using all posts for sections)
+    const tldrBullets = theme.posts.slice(0, 6).map(post => 
+      `${post.title}: Key insights and practical applications`
     );
 
     return {
@@ -146,8 +146,8 @@ export default function ThemeBlogPreview() {
       // Technical fields
       status: 'draft' as const,
       featured: false,
-      word_count: 850,
-      read_time: 4,
+      word_count: theme.posts.length * 120, // Approximate word count based on number of sections
+      read_time: Math.ceil((theme.posts.length * 120) / 200), // 200 words per minute reading speed
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       published_at: null,
