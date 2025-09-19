@@ -1,5 +1,8 @@
 
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Eye, EyeOff, GripVertical } from "lucide-react";
 
 interface BlogVisualSectionProps {
   headline: string;
@@ -9,6 +12,11 @@ interface BlogVisualSectionProps {
   ctaUrl?: string;
   index?: number;
   className?: string;
+  // Preview mode props
+  isPreview?: boolean;
+  isEnabled?: boolean;
+  onToggle?: (index: number) => void;
+  dayNumber?: number;
 }
 
 export const BlogVisualSection = ({ 
@@ -18,7 +26,11 @@ export const BlogVisualSection = ({
   ctaText, 
   ctaUrl,
   index = 0,
-  className = ""
+  className = "",
+  isPreview = false,
+  isEnabled = true,
+  onToggle,
+  dayNumber
 }: BlogVisualSectionProps) => {
   const isEven = index % 2 === 0;
 
@@ -33,7 +45,33 @@ export const BlogVisualSection = ({
     <div className={`py-12 px-4 ${className}`}>
       <div className="max-w-6xl mx-auto">
         {/* Apply Card styles directly to eliminate component overhead */}
-        <div className="rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden">
+        <div className={`rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden relative transition-all duration-200 ${!isEnabled && isPreview ? 'opacity-50 grayscale' : ''}`}>
+          {/* Preview Controls */}
+          {isPreview && (
+            <>
+              {/* Section Number Badge */}
+              <div className="absolute top-4 left-4 z-10">
+                <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
+                  {dayNumber ? `Day ${dayNumber}` : `Section ${index + 1}`}
+                </Badge>
+              </div>
+              
+              {/* Toggle Control */}
+              <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-lg p-2">
+                <GripVertical className="w-4 h-4 text-muted-foreground" />
+                {isEnabled ? (
+                  <Eye className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <EyeOff className="w-4 h-4 text-muted-foreground" />
+                )}
+                <Switch
+                  checked={isEnabled}
+                  onCheckedChange={() => onToggle?.(index)}
+                />
+              </div>
+            </>
+          )}
+          
           <div className={`md:flex ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
             {/* Image Side */}
             <div className="md:w-1/2">

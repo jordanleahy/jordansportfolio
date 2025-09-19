@@ -15,11 +15,18 @@ import { BlogService } from "@/services/blogService";
 interface BlogTemplateProps {
   post: BlogPost;
   className?: string;
+  // Preview mode props
+  isPreview?: boolean;
+  enabledSections?: boolean[];
+  onToggleSection?: (index: number) => void;
 }
 
 export const BlogTemplate = ({
   post,
-  className = ""
+  className = "",
+  isPreview = false,
+  enabledSections = [],
+  onToggleSection
 }: BlogTemplateProps) => {
   const [nextPost, setNextPost] = useState<BlogPost | null>(null);
 
@@ -92,7 +99,11 @@ export const BlogTemplate = ({
               imageUrl={section.image_url} 
               ctaText={section.cta_text} 
               ctaUrl={section.cta_url} 
-              index={index} 
+              index={index}
+              isPreview={isPreview}
+              isEnabled={enabledSections[index] ?? true}
+              onToggle={onToggleSection}
+              dayNumber={index + 1}
             />
           ))}
         </section>

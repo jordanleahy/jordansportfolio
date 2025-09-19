@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, VisualSection } from "@/types/blog";
 import { BlogTemplate } from "@/components/blog/BlogTemplate";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Card } from "@/components/ui/card";
-import { ArrowLeft, ExternalLink, GripVertical, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 interface ThemeData {
@@ -29,11 +27,11 @@ interface ThemeData {
 
 export default function ThemeBlogPreview() {
   const { themeId } = useParams<{ themeId: string }>();
+  const navigate = useNavigate();
   const [themeData, setThemeData] = useState<ThemeData | null>(null);
   const [mockBlogPost, setMockBlogPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
-  const [enabledSections, setEnabledSections] = useState<Record<string, boolean>>({});
-  const [showConfiguration, setShowConfiguration] = useState(false);
+  const [enabledSections, setEnabledSections] = useState<boolean[]>([]);
 
   useEffect(() => {
   const fetchThemeData = async () => {
@@ -66,14 +64,11 @@ export default function ThemeBlogPreview() {
         setThemeData(themeWithPosts);
 
         // Initialize all sections as enabled
-        const initialEnabledState: Record<string, boolean> = {};
-        themeWithPosts.posts.forEach(post => {
-          initialEnabledState[post.id] = true;
-        });
+        const initialEnabledState: boolean[] = new Array(themeWithPosts.posts.length).fill(true);
         setEnabledSections(initialEnabledState);
 
         // Create mock blog post from theme data
-        const mockPost = createMockBlogPost(themeWithPosts);
+        const mockPost = createMockBlogPost(themeWithPosts, initialEnabledState);
         setMockBlogPost(mockPost);
 
       } catch (error) {
@@ -87,7 +82,7 @@ export default function ThemeBlogPreview() {
     fetchThemeData();
   }, [themeId]);
 
-  const createMockBlogPost = (theme: ThemeData): BlogPost => {
+  const createMockBlogPost = (theme: ThemeData, enabledSectionsArray = enabledSections): BlogPost => {
     // Helper function to get the best available image (prioritizing 1:1, then others)
     const getBestImage = (post: any) => {
       return post.image_1_1_url || 
@@ -99,7 +94,7 @@ export default function ThemeBlogPreview() {
     };
 
     // Create visual sections from ENABLED posts only
-    const enabledPosts = theme.posts.filter(post => enabledSections[post.id]);
+    const enabledPosts = theme.posts.filter((post, index) => enabledSectionsArray[index]);
     const visualSections: VisualSection[] = enabledPosts.map((post, index) => ({
       headline: post.title,
       content: `${post.description} This section explores the key insights and practical applications that make this approach effective for modern businesses.`,
@@ -175,14 +170,15 @@ export default function ThemeBlogPreview() {
     }
   }, [enabledSections, themeData]);
 
-  const toggleSection = (postId: string) => {
-    setEnabledSections(prev => ({
-      ...prev,
-      [postId]: !prev[postId]
-    }));
+  const toggleSection = (index: number) => {
+    setEnabledSections(prev => {
+      const newSections = [...prev];
+      newSections[index] = !newSections[index];
+      return newSections;
+    });
   };
 
-  const enabledCount = Object.values(enabledSections).filter(Boolean).length;
+  const enabledCount = enabledSections.filter(Boolean).length;
 
   if (loading) {
     return (
@@ -197,11 +193,9 @@ export default function ThemeBlogPreview() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Theme not found</h1>
-          <Button asChild>
-            <Link to="/stories">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Stories
-            </Link>
+          <Button onClick={() => navigate('/stories/studio')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Stories
           </Button>
         </div>
       </div>
@@ -210,114 +204,53 @@ export default function ThemeBlogPreview() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Preview Header */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to={`/stories/studio/${themeId}`}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="container mx-auto px-4 py-3">
+          {/* Navigation & Actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/stories/studio')}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
                 Back to Studio
-              </Link>
-            </Button>
-            <div className="h-4 w-px bg-border" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowConfiguration(!showConfiguration)}
-            >
-              {showConfiguration ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
-              {showConfiguration ? 'Hide' : 'Configure'} Sections
-            </Button>
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-orange-500 rounded-full" />
-                Blog Preview
-              </span>
-              <span>•</span>
-              <span>{enabledCount}/{themeData?.posts.length || 0} sections</span>
-              <span>•</span>
-              <span>{mockBlogPost.word_count} words</span>
-              <span>•</span>
-              <span>{mockBlogPost.read_time} min read</span>
+              </Button>
+              
+              <div className="h-6 w-px bg-border" />
+              
+              <h1 className="text-lg font-semibold truncate max-w-[200px] sm:max-w-[300px]">
+                {themeData?.theme_name || 'Blog Preview'}
+              </h1>
+            </div>
+            
+            <div className="flex items-center gap-4">              
+              {/* Stats */}
+              <div className="text-sm text-muted-foreground">
+                {enabledSections.filter(Boolean).length} of {enabledSections.length} sections enabled
+                • {mockBlogPost?.read_time || 0} min read
+                • {mockBlogPost?.word_count || 0} words
+              </div>
             </div>
           </div>
-          
-          <Button variant="outline" size="sm" disabled>
-            <ExternalLink className="w-4 h-4 mr-2" />
-            Publish to Blog
-          </Button>
         </div>
       </div>
 
-      {/* Section Configuration Panel */}
-      {showConfiguration && (
-        <div className="border-b bg-muted/30">
-          <div className="container mx-auto px-4 py-6">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold mb-2">Configure Blog Sections</h2>
-              <p className="text-sm text-muted-foreground">
-                Toggle sections on/off to customize which posts appear in your final blog post. 
-                Disabled sections will be excluded from the generated content.
-              </p>
-            </div>
-            
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {themeData?.posts.map((post, index) => (
-                <Card 
-                  key={post.id} 
-                  className={`p-4 transition-all ${
-                    enabledSections[post.id] 
-                      ? 'bg-background border-border' 
-                      : 'bg-muted/50 border-dashed opacity-60'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-1">
-                      <GripVertical className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-medium text-muted-foreground bg-secondary px-2 py-1 rounded">
-                          Section {index + 1}
-                        </span>
-                        {post.day && (
-                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                            Day {post.day}
-                          </span>
-                        )}
-                      </div>
-                      <h3 className={`font-semibold text-sm mb-1 ${
-                        !enabledSections[post.id] ? 'line-through text-muted-foreground' : ''
-                      }`}>
-                        {post.title}
-                      </h3>
-                      <p className={`text-xs text-muted-foreground line-clamp-2 ${
-                        !enabledSections[post.id] ? 'opacity-50' : ''
-                      }`}>
-                        {post.description}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-center gap-2">
-                      <Switch
-                        checked={enabledSections[post.id]}
-                        onCheckedChange={() => toggleSection(post.id)}
-                      />
-                      <span className="text-xs text-muted-foreground">
-                        {enabledSections[post.id] ? 'Included' : 'Excluded'}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Blog Content */}
-      <BlogTemplate post={mockBlogPost} />
+      {/* Main Content */}
+      <div className="container mx-auto px-4">
+        {/* Blog Preview */}
+        {mockBlogPost && (
+          <BlogTemplate 
+            post={mockBlogPost} 
+            isPreview={true}
+            enabledSections={enabledSections}
+            onToggleSection={toggleSection}
+          />
+        )}
+      </div>
     </div>
   );
 }

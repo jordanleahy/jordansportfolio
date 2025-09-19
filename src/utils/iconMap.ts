@@ -1,5 +1,7 @@
 import { 
   Eye, 
+  EyeOff,
+  GripVertical,
   Lightbulb, 
   Target, 
   CheckCircle, 
@@ -16,6 +18,8 @@ import {
 
 export const iconMap = {
   Eye,
+  EyeOff,
+  GripVertical,
   Lightbulb,
   Target,
   CheckCircle,
