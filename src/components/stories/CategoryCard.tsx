@@ -11,6 +11,7 @@ import { useLongPress } from "@/hooks/useLongPress";
 import { useFailedThemeRecovery } from "@/hooks/useFailedThemeRecovery";
 import { ContextualActionMenu } from "@/components/ui/contextual-action-menu";
 import { CategoryCardProps } from '@/types/stories';
+import { ThemeStoryCard } from '@/components/story-studio/ThemeStoryCard';
 
 export const ThemeCard = ({ 
   theme, 
@@ -301,31 +302,41 @@ export const ThemeCard = ({
           </div>
         </div>
 
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-          onClick={(e) => { 
-            e.stopPropagation(); 
-            
-            
-            // Validate themeId before navigation
-            if (!themeId || themeId.startsWith('pending-') || themeId === 'shimmer-id') {
-              
-              return;
-            }
-            
-            if (onClick) {
-              onClick();
-            } else {
-              
-              navigate(`/stories/id/${themeId}`);
-            }
-          }}
-        >
-          View Details
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        <div className="space-y-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              if (!themeId || themeId.startsWith('pending-') || themeId === 'shimmer-id') {
+                return;
+              }
+              if (onClick) {
+                onClick();
+              } else {
+                navigate(`/stories/id/${themeId}`);
+              }
+            }}
+          >
+            View Details
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+          
+          {postCount >= 2 && !isShimmer && !isGeneratingTheme && (
+            <Button 
+              size="sm"
+              className="w-full bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/stories/studio/${themeId}`);
+              }}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              Create Story Blog
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

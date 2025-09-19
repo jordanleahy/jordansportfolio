@@ -78,6 +78,7 @@ import { JobsSkeletonLoader, CalendarSkeletonLoader } from "@/components/perform
 // Lazy load optimized components
 const OptimizedJobs = lazy(() => import("./pages/OptimizedJobs"));
 const StoriesDashboard = lazy(() => import("./pages/StoriesDashboard"));
+const ThemeStoryStudio = lazy(() => import("./pages/ThemeStoryStudio"));
 
 const ThemeDetail = lazy(() => import("./pages/ThemeDetail"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
@@ -166,6 +167,16 @@ function App() {
                     <Suspense fallback={<CalendarSkeletonLoader />}>
                       <StoriesDashboard />
                     </Suspense>
+                  } 
+                />
+                <Route 
+                  path="/stories/studio/:themeId" 
+                  element={
+                    <ProtectedRoute>
+                      <Suspense fallback={<CalendarSkeletonLoader />}>
+                        <ThemeStoryStudio />
+                      </Suspense>
+                    </ProtectedRoute>
                   } 
                 />
                 <Route 
