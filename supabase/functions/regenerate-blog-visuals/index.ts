@@ -67,12 +67,17 @@ serve(async (req) => {
           if (!section) continue;
 
           try {
-            // Step 1: Prompt generation using generate-content function for blog visuals
-            const promptRequestText = `Create a detailed image generation prompt for a blog section with the headline "${section.headline}" and content: "${section.content}". The blog is in the ${blogPost.category} category. Generate a professional, engaging visual prompt for ${aspectRatio} aspect ratio.`;
-            
+            // Step 1: Generate text-free image prompt using new template system
             const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-content', {
               body: {
-                prompt: promptRequestText,
+                content: {
+                  primary: section.headline,
+                  secondary: section.content
+                },
+                templateType: 'text-free',
+                textPolicy: 'none',
+                aspectRatio: aspectRatio,
+                category: blogPost.category,
                 type: 'image_prompt'
               },
             });
