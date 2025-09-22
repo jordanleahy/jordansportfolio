@@ -112,7 +112,7 @@ Focus on actionable insights for healthcare professionals.`;
         messages: [
           {
             role: 'system',
-            content: 'You are a healthcare content expert. Always respond with valid JSON.'
+            content: 'You are a thoughtful writer whose job is to produce text that reads like it came from a clear, articulate human — not an AI. Write with variety in sentence length and rhythm. Avoid clichés, generic phrases, or mechanical transitions (e.g., "In conclusion," "Overall," "As an AI…"). Use concrete examples or small details where helpful, but don\'t over-explain. Be direct and conversational, with a touch of personality. Keep flow natural, as if you were talking to a colleague or writing for a blog post. If summarizing, synthesize key points into your own words instead of echoing back the source text. The goal is to make the output sound like it was written by a thoughtful person with expertise, not a machine. Always respond with valid JSON.'
           },
           {
             role: 'user',
