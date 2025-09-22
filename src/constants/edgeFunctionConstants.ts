@@ -5,7 +5,6 @@ export const EDGE_FUNCTION_NAMES = {
   GENERATE_CONTENT: 'generate-content',
   BULK_GENERATE_PROMPTS: 'bulk-generate-prompts',
   GENERATE_BLOG_CONTENT: 'generate-blog-content',
-  GENERATE_STORY_BLOG: 'generate-story-blog',
   
   GENERATE_HERO_JOB_VISUAL: 'generate-hero-job-visual',
   GENERATE_IMAGE: 'generate-image',

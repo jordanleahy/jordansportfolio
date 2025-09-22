@@ -1,8 +1,5 @@
 
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Eye, EyeOff, GripVertical } from "lucide-react";
 
 interface BlogVisualSectionProps {
   headline: string;
@@ -12,12 +9,6 @@ interface BlogVisualSectionProps {
   ctaUrl?: string;
   index?: number;
   className?: string;
-  // Preview mode props
-  isPreview?: boolean;
-  isEnabled?: boolean;
-  onToggle?: (index: number) => void;
-  onRegenerateImage?: (sectionIndex: number) => void;
-  dayNumber?: number;
 }
 
 export const BlogVisualSection = ({ 
@@ -27,12 +18,7 @@ export const BlogVisualSection = ({
   ctaText, 
   ctaUrl,
   index = 0,
-  className = "",
-  isPreview = false,
-  isEnabled = true,
-  onToggle,
-  onRegenerateImage,
-  dayNumber
+  className = ""
 }: BlogVisualSectionProps) => {
   const isEven = index % 2 === 0;
 
@@ -47,37 +33,11 @@ export const BlogVisualSection = ({
     <div className={`py-12 px-4 ${className}`}>
       <div className="max-w-6xl mx-auto">
         {/* Apply Card styles directly to eliminate component overhead */}
-        <div className={`rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden relative transition-all duration-200 ${!isEnabled && isPreview ? 'opacity-50 grayscale' : ''}`}>
-          {/* Preview Controls */}
-          {isPreview && (
-            <>
-              {/* Section Number Badge */}
-              <div className="absolute top-4 left-4 z-10">
-                <Badge variant="secondary" className="bg-background/90 backdrop-blur-sm">
-                  {dayNumber ? `Day ${dayNumber}` : `Section ${index + 1}`}
-                </Badge>
-              </div>
-              
-              {/* Toggle Control */}
-              <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-background/90 backdrop-blur-sm rounded-lg p-2">
-                <GripVertical className="w-4 h-4 text-muted-foreground" />
-                {isEnabled ? (
-                  <Eye className="w-4 h-4 text-muted-foreground" />
-                ) : (
-                  <EyeOff className="w-4 h-4 text-muted-foreground" />
-                )}
-                <Switch
-                  checked={isEnabled}
-                  onCheckedChange={() => onToggle?.(index)}
-                />
-              </div>
-            </>
-          )}
-          
+        <div className="rounded-lg border bg-card text-card-foreground shadow-lg overflow-hidden">
           <div className={`md:flex ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
             {/* Image Side */}
             <div className="md:w-1/2">
-              <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center">
+              <div className="h-full bg-muted relative overflow-hidden min-h-[300px] flex items-center justify-center">
                 {isActualImage ? (
                   <img
                     src={imageUrl}
@@ -90,10 +50,7 @@ export const BlogVisualSection = ({
                     }}
                   />
                 ) : (
-                  <div 
-                    className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => isPreview && onRegenerateImage?.(index)}
-                  >
+                  <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground">
                     <div className="w-16 h-16 bg-muted-foreground/10 rounded-lg flex items-center justify-center mb-4">
                       <svg 
                         className="w-8 h-8" 
@@ -109,9 +66,7 @@ export const BlogVisualSection = ({
                         />
                       </svg>
                     </div>
-                    <p className="text-sm font-medium">
-                      {isPreview ? "Click to generate image" : "Image generating..."}
-                    </p>
+                    <p className="text-sm font-medium">Image generating...</p>
                     <p className="text-xs">Visual will appear shortly</p>
                   </div>
                 )}

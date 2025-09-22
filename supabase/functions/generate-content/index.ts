@@ -45,7 +45,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, type = 'general', templateType, textPolicy } = await req.json();
+    const { prompt, type = 'general' } = await req.json();
 
     if (!openAIApiKey) {
       throw new Error('OpenAI API key not configured');
@@ -70,20 +70,13 @@ serve(async (req) => {
       userId = user?.id || null;
     }
 
-    console.log(`Generating content for type: ${type}, templateType: ${templateType}, textPolicy: ${textPolicy}`);
+    console.log(`Generating content for type: ${type}`);
 
     let systemContent;
     let finalPrompt = prompt;
 
     if (type === 'image_prompt') {
-      // Determine system prompt based on template type
-      if (templateType === 'text-free' || textPolicy === 'none') {
-        systemContent = 'You are an expert at creating detailed, professional image generation prompts that produce purely visual content without any text, words, letters, or written elements. You specialize in visual metaphors, abstract representations, and symbolic imagery that communicates concepts through pure visual language. Focus on creating prompts that result in images with NO TEXT whatsoever - only colors, shapes, forms, lighting, and composition.';
-      } else if (templateType === 'minimal-text' || textPolicy === 'minimal') {
-        systemContent = 'You are an expert at creating clean, minimal image generation prompts that use text sparingly and strategically. When text is included, it should be minimal, purposeful, and integrated as a design element rather than informational content. Prioritize visual communication over textual elements.';
-      } else {
-        systemContent = 'You are an expert at creating detailed, professional image generation prompts for AI image generators. Focus on creating clear, specific prompts that will generate high-quality, professional visuals.';
-      }
+      systemContent = 'You are an expert at creating detailed, professional image generation prompts for AI image generators. Focus on creating clear, specific prompts that will generate high-quality, professional visuals.';
     } else {
       systemContent = 'You are a helpful assistant that generates high-quality content based on user prompts.';
     }

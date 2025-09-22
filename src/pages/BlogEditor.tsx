@@ -35,8 +35,7 @@ const BlogEditor = () => {
   const deletePostMutation = useDeleteBlogPost();
   
   // Fetch social media post data to get theme_id
-  const { data: socialMediaPost } = useSocialMediaPost(existingPost?.social_media_post_id || null);
-
+  const { data: socialMediaPost } = useSocialMediaPost(existingPost?.social_media_post_id);
   
   const [saving, setSaving] = useState(false);
   const [promptModalOpen, setPromptModalOpen] = useState<number | null>(null);
@@ -226,7 +225,7 @@ const BlogEditor = () => {
     setImageGenerationStatus('generating');
     try {
       await supabase.functions.invoke('regenerate-blog-visuals', {
-        body: { blogPostId: existingPost.id, sectionIndex: index, aspectRatio: '1:1' }
+        body: { blogPostId: existingPost.id, sectionIndex: index, aspectRatio: '4:3' }
       });
       toast({ title: 'Regenerating image', description: 'Working in the background. This will auto-update when ready.' });
     } catch (e: any) {
@@ -303,11 +302,11 @@ const BlogEditor = () => {
           data: postData
         });
         if (result.slug !== existingPost.slug) {
-          navigate(`/blog-editor/${result.id}`);
+          navigate(`/blog-editor/${result.slug}`);
         }
       } else {
         result = await createPostMutation.mutateAsync(postData);
-        navigate(`/blog-editor/${result.id}`);
+        navigate(`/blog-editor/${result.slug}`);
       }
 
       // Update local state to reflect the changes
@@ -361,20 +360,6 @@ const BlogEditor = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-destructive">Error loading blog post</p>
-          <Button onClick={() => navigate('/admin-blog')} className="mt-4">
-            Back to Blog Admin
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Not found guard after hooks
-  if (id && !existingPost && !loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-destructive">Blog post not found</p>
           <Button onClick={() => navigate('/admin-blog')} className="mt-4">
             Back to Blog Admin
           </Button>
@@ -445,7 +430,7 @@ const BlogEditor = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                 onClick={() => handleSave(false)}
+                onClick={() => handleSave(false)}
                 disabled={saving}
                 className="min-h-[44px] sm:min-h-[36px]"
                 aria-label="Save draft"
@@ -474,7 +459,7 @@ const BlogEditor = () => {
               </Button>
               <Button 
                 size="sm" 
-                 onClick={() => handleSave(true)}
+                onClick={() => handleSave(true)}
                 disabled={saving}
                 className="min-h-[44px] sm:min-h-[36px] bg-primary hover:bg-primary/90"
                 aria-label="Publish post"

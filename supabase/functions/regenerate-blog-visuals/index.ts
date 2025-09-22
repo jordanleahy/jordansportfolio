@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { blogPostId, sectionIndex = null, aspectRatio = '1:1', mockData = null } = await req.json();
+    const { blogPostId, sectionIndex = null, aspectRatio = '1:1' } = await req.json();
 
     if (!blogPostId) {
       return new Response(JSON.stringify({ error: 'Missing blogPostId' }), {
@@ -28,40 +28,25 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    let blogPost;
-    const isPreview = blogPostId.startsWith('mock-');
+    // Fetch the blog post
+    const { data: blogPost, error: fetchError } = await supabase
+      .from('blog_posts')
+      .select('id, category, visual_sections')
+      .eq('id', blogPostId)
+      .single();
 
-    if (isPreview && mockData) {
-      // Use provided mock data for preview
-      blogPost = {
-        id: blogPostId,
-        category: mockData.category || 'preview',
-        visual_sections: mockData.visual_sections || []
-      };
-    } else {
-      // Fetch the blog post from database
-      const { data: fetchedPost, error: fetchError } = await supabase
-        .from('blog_posts')
-        .select('id, category, visual_sections')
-        .eq('id', blogPostId)
-        .single();
-
-      if (fetchError || !fetchedPost) {
-        return new Response(JSON.stringify({ error: fetchError?.message || 'Post not found' }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      blogPost = fetchedPost;
+    if (fetchError || !blogPost) {
+      return new Response(JSON.stringify({ error: fetchError?.message || 'Post not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Update status to generating immediately (only for real posts, not previews)
-    if (!isPreview) {
-      await supabase
-        .from('blog_posts')
-        .update({ image_generation_status: 'generating', updated_at: new Date().toISOString() })
-        .eq('id', blogPostId);
-    }
+    // Update status to generating immediately
+    await supabase
+      .from('blog_posts')
+      .update({ image_generation_status: 'generating', updated_at: new Date().toISOString() })
+      .eq('id', blogPostId);
 
     // Background task
     const task = async () => {
@@ -82,17 +67,12 @@ serve(async (req) => {
           if (!section) continue;
 
           try {
-            // Step 1: Generate text-free image prompt using new template system
+            // Step 1: Prompt generation using generate-content function for blog visuals
+            const promptRequestText = `Create a detailed image generation prompt for a blog section with the headline "${section.headline}" and content: "${section.content}". The blog is in the ${blogPost.category} category. Generate a professional, engaging visual prompt for ${aspectRatio} aspect ratio.`;
+            
             const { data: promptData, error: promptError } = await supabase.functions.invoke('generate-content', {
               body: {
-                content: {
-                  primary: section.headline,
-                  secondary: section.content
-                },
-                templateType: 'text-free',
-                textPolicy: 'none',
-                aspectRatio: aspectRatio,
-                category: blogPost.category,
+                prompt: promptRequestText,
                 type: 'image_prompt'
               },
             });
@@ -149,29 +129,24 @@ serve(async (req) => {
           }
         }
 
-        // Only update database for real posts, not previews
-        if (!isPreview) {
-          const finalStatus = hasUpdates ? 'completed' : 'failed';
-          const updateData: any = {
-            image_generation_status: finalStatus,
-            updated_at: new Date().toISOString(),
-          };
-          if (hasUpdates) updateData.visual_sections = updatedSections;
-          updateData.visual_section_prompts = generatedPrompts;
+        const finalStatus = hasUpdates ? 'completed' : 'failed';
+        const updateData: any = {
+          image_generation_status: finalStatus,
+          updated_at: new Date().toISOString(),
+        };
+        if (hasUpdates) updateData.visual_sections = updatedSections;
+        updateData.visual_section_prompts = generatedPrompts;
 
-          await supabase
-            .from('blog_posts')
-            .update(updateData)
-            .eq('id', blogPostId);
-        }
+        await supabase
+          .from('blog_posts')
+          .update(updateData)
+          .eq('id', blogPostId);
       } catch (e) {
         console.error('Regeneration task failed:', e);
-        if (!isPreview) {
-          await supabase
-            .from('blog_posts')
-            .update({ image_generation_status: 'failed', updated_at: new Date().toISOString() })
-            .eq('id', blogPostId);
-        }
+        await supabase
+          .from('blog_posts')
+          .update({ image_generation_status: 'failed', updated_at: new Date().toISOString() })
+          .eq('id', blogPostId);
       }
     };
 

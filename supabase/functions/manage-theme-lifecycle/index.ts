@@ -134,20 +134,16 @@ serve(async (req) => {
               correlationId
             });
 
-            // Use service role for internal function calls to avoid auth issues
-            const serviceAuthHeader = `Bearer ${supabaseKey}`;
             const { data: themeData, error: themeError } = await supabase.functions.invoke(
               'user-idea-streaming-image-pipeline',
               {
                 body: {
                   description: body.description,
                   stream: false,
-                  themeId: tempThemeId, // Pass the theme ID for updates
-                  internalCall: true, // Flag for internal service calls
-                  userId: user.id // Pass user ID for data ownership
+                  themeId: tempThemeId // Pass the theme ID for updates
                 },
                 headers: {
-                  Authorization: serviceAuthHeader, // Use service role for internal calls
+                  Authorization: authHeader,
                 }
               }
             );

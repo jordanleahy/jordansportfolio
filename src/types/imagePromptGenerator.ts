@@ -14,8 +14,6 @@ export interface ImagePromptConfig {
   category?: string;
   aspectRatioOptions?: AspectRatioOption[];
   fixedAspectRatio?: AspectRatio;
-  templateType?: 'text-free' | 'minimal-text' | 'standard';
-  textPolicy?: 'none' | 'minimal' | 'allowed';
 }
 
 export interface ImagePromptContent {

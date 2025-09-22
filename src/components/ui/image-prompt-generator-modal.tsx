@@ -3,15 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Copy, Check, RefreshCw, Settings, ChevronDown, ChevronUp, Image } from 'lucide-react';
+import { Loader2, Copy, Check, RefreshCw, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { ImagePromptGeneratorModalProps } from '@/types/imagePromptGenerator';
 import type { AspectRatio } from '@/types/bulkImageGeneration';
-import type { TextPolicy } from '@/utils/promptTemplates';
 
 export const ImagePromptGeneratorModal = ({
   isOpen,
@@ -29,9 +27,6 @@ export const ImagePromptGeneratorModal = ({
   
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(
     config.fixedAspectRatio || config.aspectRatioOptions?.[0]?.value || "1:1"
-  );
-  const [selectedTextPolicy, setSelectedTextPolicy] = useState<TextPolicy>(
-    config.textPolicy || 'allowed'
   );
   const [basePrompt, setBasePrompt] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('');
@@ -60,9 +55,7 @@ export const ImagePromptGeneratorModal = ({
           postId: content.postId,
           themeId: config.themeId,
           aspectRatio: selectedAspectRatio,
-          colorTheme: null,
-          textPolicy: selectedTextPolicy,
-          templateType: config.templateType
+          colorTheme: null
         }
       });
 
@@ -172,39 +165,6 @@ export const ImagePromptGeneratorModal = ({
             </TabsList>
             
             <TabsContent value="prompt" className="space-y-6">
-              {/* Text Policy Selection */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Image className="h-5 w-5 text-muted-foreground" />
-                  <label className="text-sm font-medium">Image Style</label>
-                </div>
-                <Select value={selectedTextPolicy} onValueChange={(value: TextPolicy) => setSelectedTextPolicy(value)}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select image style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="allowed">
-                      <div className="flex flex-col">
-                        <span>Standard - Text Allowed</span>
-                        <span className="text-xs text-muted-foreground">Include text, labels, and written content as needed</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="minimal">
-                      <div className="flex flex-col">
-                        <span>Minimal Text</span>
-                        <span className="text-xs text-muted-foreground">Use text sparingly, only when essential</span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="none">
-                      <div className="flex flex-col">
-                        <span>Text-Free - Pure Visual</span>
-                        <span className="text-xs text-muted-foreground">No text, words, or letters - purely visual content</span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {isGenerating ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin mr-3" />
