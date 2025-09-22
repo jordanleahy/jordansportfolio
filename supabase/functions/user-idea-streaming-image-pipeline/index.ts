@@ -316,29 +316,38 @@ POST COUNT RULES:
   console.log('🤖 Calling OpenAI API...');
   console.log('🔑 OpenAI API key available:', !!openaiApiKey);
 
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5-mini',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: `Generate a social media theme for: ${truncatedDescription}`
-          }
-        ],
-        max_completion_tokens: 6000,
-        response_format: { type: 'json_object' }
-      })
-    });
+  // Retry logic for OpenAI API calls
+  const maxRetries = 3;
+  const baseDelay = 1000; // Start with 1 second
+  let lastError: Error | null = null;
+  let generatedContent = '';
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔄 OpenAI API attempt ${attempt}/${maxRetries}`);
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openaiApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-5-mini',
+          messages: [
+            {
+              role: 'system',
+              content: systemPrompt
+            },
+            {
+              role: 'user',
+              content: `Generate a social media theme for: ${truncatedDescription}`
+            }
+          ],
+          max_completion_tokens: 6000,
+          response_format: { type: 'json_object' }
+        })
+      });
 
     console.log('🎯 Token Management:', {
       estimatedPromptTokens: Math.ceil((systemPrompt.length + `Generate a social media theme for: ${truncatedDescription}`.length) / 4),
@@ -346,40 +355,76 @@ POST COUNT RULES:
       model: 'gpt-5-mini'
     });
 
-    console.log('📡 OpenAI Response status:', response.status);
-    console.log('📡 OpenAI Response headers:', Object.fromEntries(response.headers.entries()));
+      console.log('📡 OpenAI Response status:', response.status);
+      console.log('📡 OpenAI Response headers:', Object.fromEntries(response.headers.entries()));
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ OpenAI API error response:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
-    }
+      // Check for retryable errors (5xx server errors, rate limits)
+      if (!response.ok) {
+        const errorText = await response.text();
+        const isRetryable = response.status >= 500 || response.status === 429;
+        
+        console.error('❌ OpenAI API error response:', errorText);
+        
+        if (isRetryable && attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
+          console.log(`⏳ Retryable error (${response.status}), retrying in ${delay}ms...`);
+          lastError = new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue; // Try again
+        } else {
+          throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+        }
+      }
 
-    const data = await response.json();
-    console.log('📦 OpenAI Response data structure:', {
-      hasChoices: !!data.choices,
-      choicesLength: data.choices?.length,
-      hasMessage: !!data.choices?.[0]?.message,
-      hasContent: !!data.choices?.[0]?.message?.content,
-      usage: data.usage
-    });
-
-    // Log token usage details
-    if (data.usage) {
-      console.log('🎯 OpenAI Usage Analysis:', {
-        promptTokens: data.usage?.prompt_tokens || 0,
-        completionTokens: data.usage?.completion_tokens || 0,
-        totalTokens: data.usage?.total_tokens || 0,
-        maxAllowed: 6000,
-        hitLimit: (data.usage?.completion_tokens || 0) >= 6000,
-        model: 'gpt-5-mini',
-        estimatedCost: (((data.usage?.prompt_tokens || 0) * 0.00015 + (data.usage?.completion_tokens || 0) * 0.0006) / 1000).toFixed(6)
+      const data = await response.json();
+      console.log('📦 OpenAI Response data structure:', {
+        hasChoices: !!data.choices,
+        choicesLength: data.choices?.length,
+        hasMessage: !!data.choices?.[0]?.message,
+        hasContent: !!data.choices?.[0]?.message?.content,
+        usage: data.usage
       });
-    }
 
-    const generatedContent = data.choices[0].message.content.trim();
-    console.log('📝 Generated content length:', generatedContent.length);
-    console.log('📝 Generated content preview:', generatedContent.substring(0, 200) + '...');
+      // Log token usage details
+      if (data.usage) {
+        console.log('🎯 OpenAI Usage Analysis:', {
+          promptTokens: data.usage?.prompt_tokens || 0,
+          completionTokens: data.usage?.completion_tokens || 0,
+          totalTokens: data.usage?.total_tokens || 0,
+          maxAllowed: 6000,
+          hitLimit: (data.usage?.completion_tokens || 0) >= 6000,
+          model: 'gpt-5-mini',
+          estimatedCost: (((data.usage?.prompt_tokens || 0) * 0.00015 + (data.usage?.completion_tokens || 0) * 0.0006) / 1000).toFixed(6)
+        });
+      }
+
+      generatedContent = data.choices[0].message.content.trim();
+      console.log('📝 Generated content length:', generatedContent.length);
+      console.log('📝 Generated content preview:', generatedContent.substring(0, 200) + '...');
+
+      // Success! Break out of retry loop
+      console.log(`✅ OpenAI API call successful on attempt ${attempt}/${maxRetries}`);
+      break;
+
+    } catch (fetchError) {
+      console.error(`❌ OpenAI API fetch error (attempt ${attempt}/${maxRetries}):`, fetchError);
+      lastError = fetchError as Error;
+      
+      if (attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        console.log(`⏳ Retrying after fetch error in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      } else {
+        throw new Error(`OpenAI API request failed after ${maxRetries} attempts: ${fetchError.message}`);
+      }
+    }
+  }
+
+  // If we get here without success, throw the last error
+  if (lastError) {
+    throw new Error(`OpenAI API failed after ${maxRetries} attempts: ${lastError.message}`);
+  }
 
     // Robust JSON parsing with fallbacks
     const stripCodeFences = (text: string) => {
@@ -658,38 +703,65 @@ serve(async (req) => {
       });
     }
 
-    // Get authenticated user from the request
+    // Get authenticated user from the request or handle internal service calls
     const authHeader = req.headers.get('Authorization');
     let userId = null;
+    let isInternalCall = false;
 
     if (authHeader) {
       const authStart = Date.now();
-      const { data: { user }, error: authError } = await supabase.auth.getUser(
-        authHeader.replace('Bearer ', '')
-      );
-      logger.performance('Authentication', Date.now() - authStart);
+      
+      // Check if this is an internal service call
+      const isServiceRole = authHeader.includes(supabaseServiceKey);
+      
+      if (isServiceRole) {
+        // For internal service calls, get userId from request body
+        try {
+          const bodyText = await req.text();
+          const parsedBody = JSON.parse(bodyText);
+          userId = parsedBody.userId;
+          isInternalCall = parsedBody.internalCall || false;
+          console.log('🔧 Internal service call detected', { userId, isInternalCall });
+          
+          // Re-create request with body for downstream processing
+          req = new Request(req.url, {
+            method: req.method,
+            headers: req.headers,
+            body: bodyText
+          });
+        } catch (e) {
+          console.error('❌ Failed to parse internal call body:', e);
+        }
+      } else {
+        // Regular user authentication
+        const { data: { user }, error: authError } = await supabase.auth.getUser(
+          authHeader.replace('Bearer ', '')
+        );
+        logger.performance('Authentication', Date.now() - authStart);
 
-      if (authError || !user) {
-        logger.error('Authentication failed', authError, {
-          hasAuthHeader: !!authHeader
-        });
-        return new Response(JSON.stringify({
-          success: false,
-          error: 'User not authenticated',
-          correlationId
-        }), {
-          status: 401,
-          headers: {
-            ...streamingCorsHeaders,
-            'Content-Type': 'application/json'
-          }
-        });
+        if (authError || !user) {
+          logger.error('Authentication failed', authError, {
+            hasAuthHeader: !!authHeader
+          });
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'User not authenticated',
+            correlationId
+          }), {
+            status: 401,
+            headers: {
+              ...streamingCorsHeaders,
+              'Content-Type': 'application/json'
+            }
+          });
+        }
+
+        userId = user.id;
       }
-
-      userId = user.id;
+      
       // Update logger with user context
       logger = new RequestLogger(correlationId, userId);
-      logger.log('INFO', 'User authenticated successfully', { userId });
+      logger.log('INFO', 'User authenticated successfully', { userId, isInternalCall });
     } else {
       logger.error('Missing authorization header', null);
       return new Response(JSON.stringify({
