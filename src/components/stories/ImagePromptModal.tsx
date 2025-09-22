@@ -26,7 +26,8 @@ export const ImagePromptModal = ({ isOpen, onClose, title, description, postId, 
     edgeFunction: 'bulk-generate-prompts',
     category: category,
     themeId: themeId,
-    aspectRatioOptions
+    aspectRatioOptions,
+    textPolicy: 'allowed' // Default to allowing text
   };
 
   const content: ImagePromptContent = {

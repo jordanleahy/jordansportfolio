@@ -31,6 +31,7 @@ export interface SafeSpaceConfig {
   safeZones: string;
   composition: string;
   negativePrompts: string;
+  textPolicy?: 'none' | 'minimal' | 'allowed';
 }
 
 const SAFE_SPACE_CONFIGS: Record<string, SafeSpaceConfig> = {
@@ -170,7 +171,7 @@ function getAdaptiveSafeSpaceRules(config: SafeSpaceConfig, positioning: ReturnT
 /**
  * Append safe space rules to an image generation prompt
  */
-export function appendSafeSpaceRules(originalPrompt: string, aspectRatio: string): string {
+export function appendSafeSpaceRules(originalPrompt: string, aspectRatio: string, textPolicy?: 'none' | 'minimal' | 'allowed'): string {
   // First sanitize the original prompt to remove aggressive language
   const sanitizedPrompt = sanitizePrompt(originalPrompt);
   
@@ -209,5 +210,28 @@ ${safeSpaceConfig.aspectRatio}:
 Apply these composition guidelines to create a well-balanced image.`;
   }
 
-  return sanitizedPrompt + safeSpaceText;
+  // Add text exclusion rules if text-free policy is specified
+  let textExclusionRules = '';
+  if (textPolicy === 'none') {
+    textExclusionRules = `
+
+--- TEXT EXCLUSION REQUIREMENTS ---
+CRITICAL: This image must contain NO TEXT, NO WORDS, NO LETTERS, NO WRITTEN CONTENT whatsoever.
+- Exclude: All text, labels, signage, typography, letterforms, numerical displays
+- Exclude: Logos with text, readable content, written characters, symbols that could be interpreted as text
+- Focus: Pure visual communication through color, form, composition, lighting, and symbolic imagery
+- Use: Abstract representations, visual metaphors, organic shapes, geometric patterns
+`;
+  } else if (textPolicy === 'minimal') {
+    textExclusionRules = `
+
+--- MINIMAL TEXT GUIDELINES ---
+- Use text sparingly and only when essential to the concept
+- Limit to single words or very short phrases (maximum 1-2 key words)
+- Integrate text as design elements, not informational content
+- Prioritize visual communication over textual elements
+`;
+  }
+
+  return sanitizedPrompt + safeSpaceText + textExclusionRules;
 }

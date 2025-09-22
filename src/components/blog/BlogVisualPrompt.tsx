@@ -27,7 +27,8 @@ export const BlogVisualPrompt = ({ isOpen, onClose, headline, content, category 
     edgeFunction: 'bulk-generate-prompts',
     category: category,
     themeId,
-    aspectRatioOptions
+    aspectRatioOptions,
+    textPolicy: 'allowed' // Default to allowing text
   };
 
   const contentData: ImagePromptContent = {
