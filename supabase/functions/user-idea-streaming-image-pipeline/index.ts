@@ -426,6 +426,7 @@ POST COUNT RULES:
     throw new Error(`OpenAI API failed after ${maxRetries} attempts: ${lastError.message}`);
   }
 
+  try {
     // Robust JSON parsing with fallbacks
     const stripCodeFences = (text: string) => {
       return text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
@@ -503,9 +504,9 @@ POST COUNT RULES:
     console.log('🧹 Response sanitized - only expected fields will be processed');
     return sanitizedData;
 
-  } catch (fetchError) {
-    console.error('❌ OpenAI API fetch error:', fetchError);
-    throw new Error(`OpenAI API request failed: ${fetchError.message}`);
+  } catch (parseError) {
+    console.error('❌ JSON parsing error:', parseError);
+    throw new Error(`Failed to parse OpenAI response: ${parseError.message}`);
   }
 };
 
