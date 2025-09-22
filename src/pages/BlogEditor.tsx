@@ -226,7 +226,7 @@ const BlogEditor = () => {
     setImageGenerationStatus('generating');
     try {
       await supabase.functions.invoke('regenerate-blog-visuals', {
-        body: { blogPostId: existingPost.id, sectionIndex: index, aspectRatio: '4:3' }
+        body: { blogPostId: existingPost.id, sectionIndex: index, aspectRatio: '1:1' }
       });
       toast({ title: 'Regenerating image', description: 'Working in the background. This will auto-update when ready.' });
     } catch (e: any) {
