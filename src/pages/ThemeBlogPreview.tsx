@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, VisualSection } from "@/types/blog";
 import { BlogTemplate } from "@/components/blog/BlogTemplate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface ThemeData {
@@ -32,6 +32,7 @@ export default function ThemeBlogPreview() {
   const [mockBlogPost, setMockBlogPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [enabledSections, setEnabledSections] = useState<boolean[]>([]);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
   const fetchThemeData = async () => {
@@ -178,6 +179,63 @@ export default function ThemeBlogPreview() {
     });
   };
 
+  const handleCreateBlogPost = async () => {
+    if (!mockBlogPost || !themeData) return;
+    
+    setCreating(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Create a properly formatted blog post for Supabase
+      const blogData = {
+        user_id: user.id,
+        slug: mockBlogPost.slug,
+        status: 'draft' as const,
+        hero_headline: mockBlogPost.hero_headline,
+        hero_subhead: mockBlogPost.hero_subhead,
+        hero_image_url: mockBlogPost.hero_image_url,
+        hero_image_16_9_url: mockBlogPost.hero_image_16_9_url,
+        hero_video_url: mockBlogPost.hero_video_url,
+        hero_badge: mockBlogPost.hero_badge,
+        intro_content: mockBlogPost.intro_content,
+        visual_sections: mockBlogPost.visual_sections,
+        tldr_title: mockBlogPost.tldr_title,
+        tldr_bullets: mockBlogPost.tldr_bullets,
+        deep_dive_title: mockBlogPost.deep_dive_title,
+        deep_dive_content: mockBlogPost.deep_dive_content,
+        cta_text: mockBlogPost.cta_text,
+        cta_url: mockBlogPost.cta_url,
+        share_enabled: mockBlogPost.share_enabled,
+        meta_title: mockBlogPost.meta_title,
+        meta_description: mockBlogPost.meta_description,
+        meta_keywords: mockBlogPost.meta_keywords as string[],
+        category: mockBlogPost.category,
+        tags: mockBlogPost.tags as string[],
+        featured: mockBlogPost.featured,
+        word_count: mockBlogPost.word_count,
+        read_time: mockBlogPost.read_time,
+        theme: mockBlogPost.theme
+      };
+
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .insert([blogData])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success('Blog post created successfully!');
+      navigate(`/blog/${data.slug}`);
+    } catch (error) {
+      console.error('Error creating blog post:', error);
+      toast.error('Failed to create blog post');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const enabledCount = enabledSections.filter(Boolean).length;
 
   if (loading) {
@@ -227,7 +285,26 @@ export default function ThemeBlogPreview() {
               </h1>
             </div>
             
-            <div className="flex items-center gap-4">              
+            <div className="flex items-center gap-4">
+              {/* Create Blog Post Button */}
+              <Button 
+                onClick={handleCreateBlogPost}
+                disabled={enabledCount === 0 || creating}
+                className="flex items-center gap-2"
+              >
+                {creating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="w-4 h-4" />
+                    Create Blog Post
+                  </>
+                )}
+              </Button>
+              
               {/* Stats */}
               <div className="text-sm text-muted-foreground">
                 {enabledSections.filter(Boolean).length} of {enabledSections.length} sections enabled
