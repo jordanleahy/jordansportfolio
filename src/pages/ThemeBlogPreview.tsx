@@ -179,6 +179,33 @@ export default function ThemeBlogPreview() {
     });
   };
 
+  const handleRegenerateImage = async (sectionIndex: number) => {
+    if (!mockBlogPost || !themeData) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('regenerate-blog-visuals', {
+        body: {
+          blogPostId: mockBlogPost.id,
+          sectionIndex: sectionIndex,
+          aspectRatio: '1:1'
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success('Image regeneration started');
+      
+      // Refresh the page data after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error regenerating image:', error);
+      toast.error('Failed to start image regeneration');
+    }
+  };
+
   const handleCreateBlogPost = async () => {
     if (!mockBlogPost || !themeData) return;
     
@@ -336,6 +363,7 @@ export default function ThemeBlogPreview() {
             isPreview={true}
             enabledSections={enabledSections}
             onToggleSection={toggleSection}
+            onRegenerateImage={handleRegenerateImage}
           />
         )}
       </div>

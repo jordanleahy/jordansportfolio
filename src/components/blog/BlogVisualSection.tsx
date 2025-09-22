@@ -16,6 +16,7 @@ interface BlogVisualSectionProps {
   isPreview?: boolean;
   isEnabled?: boolean;
   onToggle?: (index: number) => void;
+  onRegenerateImage?: (sectionIndex: number) => void;
   dayNumber?: number;
 }
 
@@ -30,6 +31,7 @@ export const BlogVisualSection = ({
   isPreview = false,
   isEnabled = true,
   onToggle,
+  onRegenerateImage,
   dayNumber
 }: BlogVisualSectionProps) => {
   const isEven = index % 2 === 0;
@@ -88,7 +90,10 @@ export const BlogVisualSection = ({
                     }}
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground">
+                  <div 
+                    className="flex flex-col items-center justify-center text-center p-8 text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => isPreview && onRegenerateImage?.(index)}
+                  >
                     <div className="w-16 h-16 bg-muted-foreground/10 rounded-lg flex items-center justify-center mb-4">
                       <svg 
                         className="w-8 h-8" 
@@ -104,7 +109,9 @@ export const BlogVisualSection = ({
                         />
                       </svg>
                     </div>
-                    <p className="text-sm font-medium">Image generating...</p>
+                    <p className="text-sm font-medium">
+                      {isPreview ? "Click to generate image" : "Image generating..."}
+                    </p>
                     <p className="text-xs">Visual will appear shortly</p>
                   </div>
                 )}

@@ -19,6 +19,7 @@ interface BlogTemplateProps {
   isPreview?: boolean;
   enabledSections?: boolean[];
   onToggleSection?: (index: number) => void;
+  onRegenerateImage?: (sectionIndex: number) => void;
 }
 
 export const BlogTemplate = ({
@@ -26,7 +27,8 @@ export const BlogTemplate = ({
   className = "",
   isPreview = false,
   enabledSections = [],
-  onToggleSection
+  onToggleSection,
+  onRegenerateImage
 }: BlogTemplateProps) => {
   const [nextPost, setNextPost] = useState<BlogPost | null>(null);
 
@@ -103,6 +105,7 @@ export const BlogTemplate = ({
               isPreview={isPreview}
               isEnabled={enabledSections[index] ?? true}
               onToggle={onToggleSection}
+              onRegenerateImage={onRegenerateImage}
               dayNumber={index + 1}
             />
           ))}
