@@ -107,38 +107,37 @@ export default function ThemeStoryStudio() {
 
     setIsGenerating(true);
     try {
-      // TODO: Call edge function to generate story content
-      // For now, simulate generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      console.log('Generating story with config:', storyConfig);
       
-      setGeneratedContent(`# ${themeData.theme_name}: A Comprehensive Guide
+      const { data, error } = await supabase.functions.invoke('generate-story-blog', {
+        body: {
+          themeData,
+          storyConfig
+        }
+      });
 
-This is a preview of your generated story blog post. The full content would be generated based on all ${themeData.post_count} posts in this theme.
+      if (error) {
+        throw new Error(error.message || 'Failed to generate story content');
+      }
 
-## Introduction
-Based on your theme "${themeData.theme_name}", this comprehensive guide explores...
+      if (!data?.success) {
+        throw new Error(data?.message || 'Story generation failed');
+      }
 
-## Key Insights
-${themeData.posts.map((post, idx) => `
-### ${idx + 1}. ${post.title}
-${post.description}
-`).join('\n')}
-
-## Conclusion
-This story brings together all the key insights from your ${themeData.theme_name} theme...`);
-
-      setActiveView('preview');
+      setGeneratedContent(data.content);
       
       toast({
         title: "Story Generated!",
-        description: "Your theme-based blog story is ready for review"
+        description: `Created a ${storyConfig.length} ${storyConfig.style} story in ${storyConfig.tone} tone for ${storyConfig.audience} audience.`
       });
+
+      setActiveView('preview');
       
     } catch (error) {
       console.error('Error generating story:', error);
       toast({
         title: "Generation Failed",
-        description: "Failed to generate story content",
+        description: error instanceof Error ? error.message : "Failed to generate story content",
         variant: "destructive"
       });
     } finally {
