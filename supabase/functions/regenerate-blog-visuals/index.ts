@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { blogPostId, sectionIndex = null, aspectRatio = '1:1' } = await req.json();
+    const { blogPostId, sectionIndex = null, aspectRatio = '1:1', mockData = null } = await req.json();
 
     if (!blogPostId) {
       return new Response(JSON.stringify({ error: 'Missing blogPostId' }), {
@@ -28,25 +28,40 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch the blog post
-    const { data: blogPost, error: fetchError } = await supabase
-      .from('blog_posts')
-      .select('id, category, visual_sections')
-      .eq('id', blogPostId)
-      .single();
+    let blogPost;
+    const isPreview = blogPostId.startsWith('mock-');
 
-    if (fetchError || !blogPost) {
-      return new Response(JSON.stringify({ error: fetchError?.message || 'Post not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    if (isPreview && mockData) {
+      // Use provided mock data for preview
+      blogPost = {
+        id: blogPostId,
+        category: mockData.category || 'preview',
+        visual_sections: mockData.visual_sections || []
+      };
+    } else {
+      // Fetch the blog post from database
+      const { data: fetchedPost, error: fetchError } = await supabase
+        .from('blog_posts')
+        .select('id, category, visual_sections')
+        .eq('id', blogPostId)
+        .single();
+
+      if (fetchError || !fetchedPost) {
+        return new Response(JSON.stringify({ error: fetchError?.message || 'Post not found' }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      blogPost = fetchedPost;
     }
 
-    // Update status to generating immediately
-    await supabase
-      .from('blog_posts')
-      .update({ image_generation_status: 'generating', updated_at: new Date().toISOString() })
-      .eq('id', blogPostId);
+    // Update status to generating immediately (only for real posts, not previews)
+    if (!isPreview) {
+      await supabase
+        .from('blog_posts')
+        .update({ image_generation_status: 'generating', updated_at: new Date().toISOString() })
+        .eq('id', blogPostId);
+    }
 
     // Background task
     const task = async () => {
@@ -134,24 +149,29 @@ serve(async (req) => {
           }
         }
 
-        const finalStatus = hasUpdates ? 'completed' : 'failed';
-        const updateData: any = {
-          image_generation_status: finalStatus,
-          updated_at: new Date().toISOString(),
-        };
-        if (hasUpdates) updateData.visual_sections = updatedSections;
-        updateData.visual_section_prompts = generatedPrompts;
+        // Only update database for real posts, not previews
+        if (!isPreview) {
+          const finalStatus = hasUpdates ? 'completed' : 'failed';
+          const updateData: any = {
+            image_generation_status: finalStatus,
+            updated_at: new Date().toISOString(),
+          };
+          if (hasUpdates) updateData.visual_sections = updatedSections;
+          updateData.visual_section_prompts = generatedPrompts;
 
-        await supabase
-          .from('blog_posts')
-          .update(updateData)
-          .eq('id', blogPostId);
+          await supabase
+            .from('blog_posts')
+            .update(updateData)
+            .eq('id', blogPostId);
+        }
       } catch (e) {
         console.error('Regeneration task failed:', e);
-        await supabase
-          .from('blog_posts')
-          .update({ image_generation_status: 'failed', updated_at: new Date().toISOString() })
-          .eq('id', blogPostId);
+        if (!isPreview) {
+          await supabase
+            .from('blog_posts')
+            .update({ image_generation_status: 'failed', updated_at: new Date().toISOString() })
+            .eq('id', blogPostId);
+        }
       }
     };
 

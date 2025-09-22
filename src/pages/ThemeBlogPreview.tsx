@@ -187,7 +187,11 @@ export default function ThemeBlogPreview() {
         body: {
           blogPostId: mockBlogPost.id,
           sectionIndex: sectionIndex,
-          aspectRatio: '1:1'
+          aspectRatio: '1:1',
+          mockData: {
+            category: mockBlogPost.category,
+            visual_sections: mockBlogPost.visual_sections
+          }
         }
       });
 
