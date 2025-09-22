@@ -677,7 +677,7 @@ serve(async (req) => {
       });
     }
 
-    const { description, stream = true, overrideCategory } = requestBody;
+    const { description, stream = true, overrideCategory, userId: bodyUserId, internalCall } = requestBody;
 
     // Validate required fields
     if (!description || typeof description !== 'string' || !description.trim()) {
@@ -701,7 +701,7 @@ serve(async (req) => {
     // Get authenticated user from the request or handle internal service calls
     const authHeader = req.headers.get('Authorization');
     let userId = null;
-    let isInternalCall = false;
+    let isInternalCall = internalCall || false;
 
     if (authHeader) {
       const authStart = Date.now();
@@ -709,24 +709,11 @@ serve(async (req) => {
       // Check if this is an internal service call
       const isServiceRole = authHeader.includes(supabaseServiceKey);
       
-      if (isServiceRole) {
-        // For internal service calls, get userId from request body
-        try {
-          const bodyText = await req.text();
-          const parsedBody = JSON.parse(bodyText);
-          userId = parsedBody.userId;
-          isInternalCall = parsedBody.internalCall || false;
-          console.log('🔧 Internal service call detected', { userId, isInternalCall });
-          
-          // Re-create request with body for downstream processing
-          req = new Request(req.url, {
-            method: req.method,
-            headers: req.headers,
-            body: bodyText
-          });
-        } catch (e) {
-          console.error('❌ Failed to parse internal call body:', e);
-        }
+      if (isServiceRole && bodyUserId) {
+        // For internal service calls, use userId from request body
+        userId = bodyUserId;
+        isInternalCall = true;
+        console.log('🔧 Internal service call detected', { userId, isInternalCall });
       } else {
         // Regular user authentication
         const { data: { user }, error: authError } = await supabase.auth.getUser(
