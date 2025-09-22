@@ -75,7 +75,7 @@ export const BlogVisualSection = ({
           <div className={`md:flex ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
             {/* Image Side */}
             <div className="md:w-1/2">
-              <div className="h-full bg-muted relative overflow-hidden min-h-[300px] flex items-center justify-center">
+              <div className="aspect-square bg-muted relative overflow-hidden flex items-center justify-center">
                 {isActualImage ? (
                   <img
                     src={imageUrl}
