@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BlogPost, VisualSection } from "@/types/blog";
 import { BlogTemplate } from "@/components/blog/BlogTemplate";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, PlusCircle } from "lucide-react";
+import { ArrowLeft, PlusCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 interface ThemeData {
@@ -303,6 +303,17 @@ export default function ThemeBlogPreview() {
                     Create Blog Post
                   </>
                 )}
+              </Button>
+
+              {/* View Published Blog Button */}
+              <Button 
+                variant="outline"
+                onClick={() => navigate(`/blog/${mockBlogPost?.slug}`)}
+                disabled={!mockBlogPost?.slug}
+                className="flex items-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View Published Blog
               </Button>
               
               {/* Stats */}
