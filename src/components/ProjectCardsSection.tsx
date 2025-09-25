@@ -59,7 +59,7 @@ const ProjectCardsSection = () => {
 
   return (
     <>
-      <section id="case-studies" className="py-24 px-4 bg-background">
+      <section id="case-studies" className="py-24 px-4 bg-background hidden">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
