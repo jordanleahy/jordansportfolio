@@ -122,7 +122,73 @@ function App() {
               <ProcessingStatesProvider>
                 <ImageGenerationTimerProvider>
                 <Routes>
-                  <Route path="*" element={<MaintenanceMode />} />
+                  <Route path="/" element={<Index />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:id" element={<BlogDetail />} />
+                  <Route path="/company-portfolio" element={<CompanyPortfolio />} />
+                  <Route path="/ascertain-to-the-moon" element={<AscertainToTheMoon />} />
+                  <Route path="/home-health" element={<HomeHealth />} />
+                  <Route path="/ai-city-planner" element={<AICityPlanner />} />
+                  <Route path="/chart-type-coverage-cost" element={<ChartTypeCoverageCost />} />
+                  <Route path="/pixar-converter" element={<PixarConverter />} />
+                  
+                  <Route path="/cases/1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
+                  <Route path="/cases/2" element={<CaseStudyRouteWrapper><Case2 /></CaseStudyRouteWrapper>} />
+                  <Route path="/cases/3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
+                  <Route path="/cases/4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
+                  
+                  <Route path="/library" element={<Library />} />
+                  <Route path="/comparisons" element={<ComparisonIndex />} />
+                  <Route path="/comparisons/:id" element={<ComparisonDetail />} />
+                  <Route path="/rcm-companies" element={<RCMCompanies />} />
+                  <Route path="/investors" element={<Investors />} />
+                  
+                  <Route path="/cofactor-proposal" element={<CofactorRouteWrapper><CofactorProposal /></CofactorRouteWrapper>} />
+                  
+                  <Route path="/subscription" element={<Suspense fallback={<div>Loading...</div>}><Subscription /></Suspense>} />
+                  <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+                  
+                  <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
+                  <Route path="/vendors/:id" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
+                  <Route path="/public-vendor/:id" element={<PublicVendorView />} />
+                  <Route path="/shared-collection/:shareId" element={<PublicSharedCollection />} />
+                  
+                  <Route path="/billing" element={<ProtectedRoute><BillingPage /></ProtectedRoute>} />
+                  <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+                  
+                  <Route path="/jobs" element={<Suspense fallback={<JobsSkeletonLoader />}><OptimizedJobs /></Suspense>} />
+                  <Route path="/stories" element={<Suspense fallback={<div>Loading...</div>}><StoriesDashboard /></Suspense>} />
+                  <Route path="/stories/:themeId" element={<Suspense fallback={<div>Loading...</div>}><ThemeDetail /></Suspense>} />
+                  <Route path="/stories/:themeId/posts/:postId" element={<Suspense fallback={<div>Loading...</div>}><PostDetail /></Suspense>} />
+                  <Route path="/story-ship" element={<Suspense fallback={<div>Loading...</div>}><StoryShip /></Suspense>} />
+                  <Route path="/new-investor-deck" element={<Suspense fallback={<div>Loading...</div>}><NewInvestorDeck /></Suspense>} />
+                  <Route path="/detailed-investor-deck" element={<Suspense fallback={<div>Loading...</div>}><DetailedInvestorDeck /></Suspense>} />
+                  
+                  <Route element={<AdminLayout />}>
+                    <Route path="/admin/blog" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><AdminBlog /></Suspense></AdminRoute>} />
+                    <Route path="/admin/blog/new" element={<AdminRoute><BlogEditor /></AdminRoute>} />
+                    <Route path="/admin/blog/edit/:id" element={<AdminRoute><BlogEditor /></AdminRoute>} />
+                    <Route path="/admin/comparisons" element={<AdminRoute><AdminComparisons /></AdminRoute>} />
+                    <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
+                    <Route path="/admin/comparisons/edit/:id" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
+                    <Route path="/admin/use-cases" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><AdminUseCases /></Suspense></AdminRoute>} />
+                    <Route path="/admin/use-cases/new" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><UseCaseForm /></Suspense></AdminRoute>} />
+                    <Route path="/admin/use-cases/edit/:id" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><UseCaseForm /></Suspense></AdminRoute>} />
+                    <Route path="/admin/use-cases/preview/:id" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><UseCasePreview /></Suspense></AdminRoute>} />
+                    <Route path="/admin/api-usage" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><ApiUsage /></Suspense></AdminRoute>} />
+                    <Route path="/admin/subscription-analytics" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><SubscriptionAnalytics /></Suspense></AdminRoute>} />
+                    <Route path="/admin/users" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><AdminUsers /></Suspense></AdminRoute>} />
+                    <Route path="/admin/users/:userId" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><AdminUserDetail /></Suspense></AdminRoute>} />
+                    <Route path="/admin/seed-analytics" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><SeedAnalytics /></Suspense></AdminRoute>} />
+                    <Route path="/admin/prompts" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><AdminPrompts /></Suspense></AdminRoute>} />
+                    <Route path="/admin/work-reports" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><WorkReportPage /></Suspense></AdminRoute>} />
+                    <Route path="/admin/work-reports/:id" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><WorkReportDetailPage /></Suspense></AdminRoute>} />
+                  </Route>
+                  
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
                 </ImageGenerationTimerProvider>
               </ProcessingStatesProvider>
