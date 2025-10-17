@@ -12,7 +12,6 @@ import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import BlogTeaser from "@/components/BlogTeaser";
 import ContactSection from "@/components/ContactSection";
-import RecentBlogsSection from "@/components/RecentBlogsSection";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 
 // Lazy load heavy HeroParallax component
@@ -114,7 +113,6 @@ const About = () => {
       
       {/* Portfolio Content - Reordered sections */}
       <CompaniesSection />
-      <RecentBlogsSection />
       <ProjectCardsSection />
       <TestimonialsSection />
       <ContactSection />
