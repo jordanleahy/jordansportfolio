@@ -135,10 +135,10 @@ function App() {
                   <Route path="/chart-type-coverage-cost" element={<ChartTypeCoverageCost />} />
                   <Route path="/pixar-converter" element={<PixarConverter />} />
                   
-                  <Route path="/cases/1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
-                  <Route path="/cases/2" element={<CaseStudyRouteWrapper><Case2 /></CaseStudyRouteWrapper>} />
-                  <Route path="/cases/3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
-                  <Route path="/cases/4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
+                  <Route path="/cases/case1" element={<CaseStudyRouteWrapper><Case1 /></CaseStudyRouteWrapper>} />
+                  <Route path="/cases/case2" element={<CaseStudyRouteWrapper><Case2 /></CaseStudyRouteWrapper>} />
+                  <Route path="/cases/case3" element={<CaseStudyRouteWrapper><Case3 /></CaseStudyRouteWrapper>} />
+                  <Route path="/cases/case4" element={<CaseStudyRouteWrapper><Case4 /></CaseStudyRouteWrapper>} />
                   
                   <Route path="/library" element={<Library />} />
                   <Route path="/comparisons" element={<ComparisonIndex />} />
