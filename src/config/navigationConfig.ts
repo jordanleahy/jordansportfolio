@@ -32,7 +32,6 @@ export const navigationConfig: NavigationItem[] = [
   // Public items (marketing routes)
   { href: "/", label: "Home", icon: Home, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/stories", label: "Stories", icon: BookOpen, accessLevel: 'public', showInDesktop: true, showInMobile: true },
-  { href: "/blog", label: "Blog", icon: FileText, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/about", label: "About", icon: Target, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
   // Authenticated items
@@ -44,7 +43,7 @@ export const navigationConfig: NavigationItem[] = [
 ];
 
 export const getNavigationItems = (user: any, isAdmin: boolean, hideMarketingRoutes: boolean = false): NavigationItem[] => {
-  const marketingRoutes = ['/', '/about', '/blog'];
+  const marketingRoutes = ['/', '/about'];
   
   return navigationConfig.filter(item => {
     // Filter by access level
