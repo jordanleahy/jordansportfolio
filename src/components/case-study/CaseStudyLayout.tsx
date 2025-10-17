@@ -1,7 +1,6 @@
 import { SEOHead } from "./SEOHead";
 import { CaseStudyPage } from "./CaseStudyPage";
 import { CaseStudyHero } from "./CaseStudyHero";
-import { FinalProductSection } from "./FinalProductSection";
 import { FigmaPresentationViewer } from "./FigmaPresentationViewer";
 import { ProblemSection } from "./ProblemSection";
 import { TeamSection } from "./TeamSection";
@@ -45,10 +44,6 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
           title={data.figmaPresentation.title}
           presentationUrl={data.figmaPresentation.presentationUrl}
         />
-      )}
-      
-      {data.finalProduct?.prototypeUrl && (
-        <FinalProductSection data={data.finalProduct} />
       )}
       
       <ProblemSection
