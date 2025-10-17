@@ -8,7 +8,6 @@ import CompaniesSection from "@/components/CompaniesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
 import ContactSection from "@/components/ContactSection";
-import RecentBlogsSection from "@/components/RecentBlogsSection";
 
 
 
@@ -78,7 +77,6 @@ const Index = () => {
       <ProjectCardsSection />
       <TestimonialsSection />
       <ContactSection />
-      <RecentBlogsSection />
     </AppLayout>
   );
 };
