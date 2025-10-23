@@ -152,7 +152,8 @@ function App() {
                   <Route path="/subscription-success" element={<SubscriptionSuccess />} />
                   
                   <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
-                  <Route path="/vendors/:id" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
+                  <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
+                  <Route path="/vendors/:slugname/:slug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
                   <Route path="/public-vendor/:id" element={<PublicVendorView />} />
                   <Route path="/shared-collection/:shareId" element={<PublicSharedCollection />} />
                   
