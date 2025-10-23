@@ -1,16 +1,33 @@
 
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { VendorPageLayout } from '@/components/vendors/VendorPageLayout';
 import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
 import { AddVendorModal } from '@/components/vendors/AddVendorModal';
 import { VendorDeleteDialog } from '@/components/vendors/VendorDeleteDialog';
 import { useVendorsPageOptimized } from '@/hooks/useVendorsPageOptimized';
 import { VENDOR_CATEGORIES } from '@/types/vendor';
+import { useVendorBySlug } from '@/hooks/useVendors';
+import { getVendorCategory } from '@/utils/vendorUtils';
 
 export default function Vendors() {
   const { slugname } = useParams<{ slugname: string }>();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isValidCategory = !!slugname && !!(VENDOR_CATEGORIES as any)[slugname as keyof typeof VENDOR_CATEGORIES];
+
+  const { data: vendorBySlug, isLoading: isLoadingVendorLookup } = useVendorBySlug(slugname || '');
+
+  useEffect(() => {
+    if (!isValidCategory && vendorBySlug) {
+      const category = getVendorCategory(vendorBySlug);
+      const base = location.pathname.startsWith('/admin/') ? '/admin/vendors' : '/vendors';
+      navigate(`${base}/${category}/${vendorBySlug.slug}`, { replace: true });
+    }
+  }, [isValidCategory, vendorBySlug, navigate, location]);
 
   // Use the optimized provider hook
   const {
@@ -31,8 +48,23 @@ export default function Vendors() {
     confirmDeleteVendor
   } = useVendorsPageOptimized();
 
-  // Validate category
-  if (!slugname || !VENDOR_CATEGORIES[slugname as keyof typeof VENDOR_CATEGORIES]) {
+  // Validate category or redirect if slug is a vendor
+  if (!isValidCategory) {
+    // While checking if this slug is actually a vendor, show loading
+    if (isLoadingVendorLookup) {
+      return (
+        <VendorPageLayout title="Loading...">
+          <div />
+        </VendorPageLayout>
+      );
+    }
+
+    // If a vendor exists for this slug, the effect above will redirect
+    if (vendorBySlug) {
+      return null;
+    }
+
+    // Otherwise, show the original error
     return (
       <VendorPageLayout
         title="Category Not Found"
