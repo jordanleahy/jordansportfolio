@@ -153,7 +153,7 @@ function App() {
                   
                   <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
                   <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
-                  <Route path="/vendors/:slugname/:slug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
+                  <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
                   <Route path="/public-vendor/:id" element={<PublicVendorView />} />
                   <Route path="/shared-collection/:shareId" element={<PublicSharedCollection />} />
                   
@@ -168,13 +168,20 @@ function App() {
                   <Route path="/new-investor-deck" element={<Suspense fallback={<div>Loading...</div>}><NewInvestorDeck /></Suspense>} />
                   <Route path="/detailed-investor-deck" element={<Suspense fallback={<div>Loading...</div>}><DetailedInvestorDeck /></Suspense>} />
                   
-                  <Route element={<AdminLayout />}>
+                  <Route element={<AdminLayout />}> 
                     <Route path="/admin/blog" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><AdminBlog /></Suspense></AdminRoute>} />
                     <Route path="/admin/blog/new" element={<AdminRoute><BlogEditor /></AdminRoute>} />
                     <Route path="/admin/blog/edit/:id" element={<AdminRoute><BlogEditor /></AdminRoute>} />
                     <Route path="/admin/comparisons" element={<AdminRoute><AdminComparisons /></AdminRoute>} />
                     <Route path="/admin/comparisons/new" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
                     <Route path="/admin/comparisons/edit/:id" element={<AdminRoute><ComparisonForm /></AdminRoute>} />
+
+                    {/* Admin Vendors routes */}
+                    <Route path="/admin/vendors" element={<AdminRoute><VendorsIndex /></AdminRoute>} />
+                    <Route path="/admin/vendors/:slugname" element={<AdminRoute><Vendors /></AdminRoute>} />
+                    <Route path="/admin/vendors/:vendorSlug" element={<AdminRoute><VendorDetail /></AdminRoute>} />
+                    <Route path="/admin/vendors/:slugname/:vendorSlug" element={<AdminRoute><VendorDetail /></AdminRoute>} />
+
                     <Route path="/admin/use-cases" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><AdminUseCases /></Suspense></AdminRoute>} />
                     <Route path="/admin/use-cases/new" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><UseCaseForm /></Suspense></AdminRoute>} />
                     <Route path="/admin/use-cases/edit/:id" element={<AdminRoute><Suspense fallback={<div>Loading...</div>}><UseCaseForm /></Suspense></AdminRoute>} />
