@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { VendorPageLayout } from '@/components/vendors/VendorPageLayout';
 import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
 import { AddVendorModal } from '@/components/vendors/AddVendorModal';
@@ -10,6 +10,8 @@ import { getVendorCategory } from '@/utils/vendorUtils';
 
 export default function VendorsIndex() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminView = location.pathname.startsWith('/admin');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Use the optimized provider hook
@@ -33,9 +35,10 @@ export default function VendorsIndex() {
 
   const handleVendorClick = useCallback((vendor: any) => {
     const category = getVendorCategory(vendor);
-    const vendorDetailUrl = `/vendors/${category}/${vendor.slug}`;
+    const baseUrl = isAdminView ? '/admin/vendors' : '/vendors';
+    const vendorDetailUrl = `${baseUrl}/${category}/${vendor.slug}`;
     navigate(vendorDetailUrl);
-  }, [navigate]);
+  }, [navigate, isAdminView]);
 
   return (
     <VendorPageLayout
@@ -58,7 +61,8 @@ export default function VendorsIndex() {
           allVendors={allVendors}
           user={user}
           isLoadingAuth={isLoadingAuth}
-          onAddVendor={() => setIsAddModalOpen(true)}
+          onAddVendor={isAdminView ? () => setIsAddModalOpen(true) : undefined}
+          readOnly={!isAdminView}
         />
       </div>
       

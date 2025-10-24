@@ -16,6 +16,7 @@ export default function Vendors() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const isAdminView = location.pathname.startsWith('/admin');
 
   const isValidCategory = !!slugname && !!(VENDOR_CATEGORIES as any)[slugname as keyof typeof VENDOR_CATEGORIES];
 
@@ -94,7 +95,8 @@ export default function Vendors() {
           allVendors={allVendors}
           user={user}
           isLoadingAuth={isLoadingAuth}
-          onAddVendor={() => setIsAddModalOpen(true)}
+          onAddVendor={isAdminView ? () => setIsAddModalOpen(true) : undefined}
+          readOnly={!isAdminView}
         />
       </div>
       

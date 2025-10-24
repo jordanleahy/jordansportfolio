@@ -151,9 +151,9 @@ function App() {
                   <Route path="/subscription" element={<Suspense fallback={<div>Loading...</div>}><Subscription /></Suspense>} />
                   <Route path="/subscription-success" element={<SubscriptionSuccess />} />
                   
-                  <Route path="/vendors" element={<ProtectedRoute><VendorsIndex /></ProtectedRoute>} />
-                  <Route path="/vendors/:slugname" element={<ProtectedRoute><Vendors /></ProtectedRoute>} />
-                  <Route path="/vendors/:slugname/:vendorSlug" element={<ProtectedRoute><VendorDetail /></ProtectedRoute>} />
+                  <Route path="/vendors" element={<VendorsIndex />} />
+                  <Route path="/vendors/:slugname" element={<Vendors />} />
+                  <Route path="/vendors/:slugname/:vendorSlug" element={<PublicVendorView />} />
                   <Route path="/public-vendor/:id" element={<PublicVendorView />} />
                   <Route path="/shared-collection/:shareId" element={<PublicSharedCollection />} />
                   

@@ -22,6 +22,7 @@ interface VendorsCardGridProps {
   user?: any;
   isLoadingAuth?: boolean;
   onAddVendor?: () => void;
+  readOnly?: boolean;
 }
 
 type SortField = 'company_name' | 'founding_year' | 'company_type';
@@ -37,7 +38,8 @@ export function VendorsCardGrid({
   allVendors,
   user: propUser,
   isLoadingAuth,
-  onAddVendor
+  onAddVendor,
+  readOnly = false
 }: VendorsCardGridProps) {
   const navigate = useNavigate();
   const {
@@ -71,17 +73,22 @@ export function VendorsCardGrid({
       timestamp: new Date().toISOString()
     });
 
-    // Always use the simplified URL structure
-    const vendorDetailUrl = `/admin/vendors/${vendor.slug}`;
+    // Use admin or public URL based on readOnly mode
+    const isAdminView = window.location.pathname.startsWith('/admin');
+    const vendorDetailUrl = isAdminView 
+      ? `/admin/vendors/${vendor.slug}`
+      : `/vendors/${slugname || 'all'}/${vendor.slug}`;
     
-    console.log('🎯 [VendorsCardGrid] Navigating with simplified URL:', {
+    console.log('🎯 [VendorsCardGrid] Navigating with URL:', {
       from: window.location.href,
       to: vendorDetailUrl,
-      vendorSlug: vendor.slug
+      vendorSlug: vendor.slug,
+      isAdminView,
+      readOnly
     });
     
     navigate(vendorDetailUrl);
-  }, [navigate]);
+  }, [navigate, slugname, readOnly]);
   
   const sortedVendors = useMemo(() => 
     sortVendors(vendors, sortField, sortDirection),
@@ -120,8 +127,8 @@ export function VendorsCardGrid({
           {/* View Toggle */}
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           
-          {/* Add Vendor Button */}
-          {onAddVendor && <div>
+          {/* Add Vendor Button - Only show in admin mode */}
+          {!readOnly && onAddVendor && <div>
               {isLoadingAuth ? <Button disabled size="sm" className="gap-2">
                   <Plus className="h-4 w-4" />
                   Loading...
@@ -139,7 +146,7 @@ export function VendorsCardGrid({
       {/* View Content - Card or Table */}
       {viewMode === 'card' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {sortedVendors.map(vendor => <EditableVendorCard key={vendor.id} vendor={vendor} onVendorClick={handleVendorClick} onDeleteClick={onDeleteClick} onSave={onSave} canEdit={!!currentUser} />)}
+          {sortedVendors.map(vendor => <EditableVendorCard key={vendor.id} vendor={vendor} onVendorClick={handleVendorClick} onDeleteClick={readOnly ? undefined : onDeleteClick} onSave={readOnly ? undefined : onSave} canEdit={!readOnly && !!currentUser} />)}
           {sortedVendors.length === 0 && <div className="col-span-full">
               <Card>
                 <CardContent className="text-center py-8 text-muted-foreground">
@@ -152,7 +159,7 @@ export function VendorsCardGrid({
         <VendorsTableView 
           vendors={sortedVendors}
           onVendorClick={handleVendorClick}
-          onDeleteClick={onDeleteClick}
+          onDeleteClick={readOnly ? undefined : onDeleteClick}
         />
       )}
     </div>;
