@@ -174,7 +174,7 @@ export const useStructuredComparisonBySlug = (slug: string) => {
   });
 };
 
-// Hook to fetch published comparisons for public index page
+// Hook to fetch published comparisons for public index page with metadata
 export const useComparisons = () => {
   return useQuery({
     queryKey: ["comparisons"],
@@ -189,7 +189,41 @@ export const useComparisons = () => {
         throw error;
       }
 
-      return data || [];
+      if (!data) return [];
+
+      // Fetch companies, features count, and use cases count for each comparison
+      const enrichedData = await Promise.all(
+        data.map(async (comparison) => {
+          const [
+            { data: companies },
+            { data: features },
+            { data: useCases }
+          ] = await Promise.all([
+            supabase
+              .from("comparison_companies")
+              .select("name, company_position")
+              .eq("comparison_id", comparison.id)
+              .order("company_position"),
+            supabase
+              .from("comparison_features")
+              .select("id")
+              .eq("comparison_id", comparison.id),
+            supabase
+              .from("comparison_use_cases")
+              .select("id")
+              .eq("comparison_id", comparison.id)
+          ]);
+
+          return {
+            ...comparison,
+            companies: companies || [],
+            featureCount: features?.length || 0,
+            useCaseCount: useCases?.length || 0
+          };
+        })
+      );
+
+      return enrichedData;
     },
   });
 };
