@@ -60,16 +60,16 @@ export function EditableVendorCard({
 
   return (
     <Card 
-      className={`transition-colors h-full flex flex-col ${
+      className={`transition-all duration-200 h-full flex flex-col ${
         isEditing 
           ? 'ring-2 ring-primary bg-muted/20' 
-          : 'cursor-pointer hover:bg-muted/50'
+          : 'cursor-pointer hover:shadow-lg hover:border-primary/30'
       }`}
       onClick={handleCardClick}
     >
-      <CardHeader className="pb-3 flex-shrink-0">
-        <CardTitle className="text-lg flex items-center justify-between">
-          <div className="min-w-0 flex-1">
+      <CardHeader className="pb-4 flex-shrink-0 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-2">
             {isEditing ? (
               <div className="space-y-2">
                 <TextEditor
@@ -85,19 +85,17 @@ export function EditableVendorCard({
               </div>
             ) : (
               <>
-                <div className="font-semibold truncate">{vendor.company_name}</div>
-                <div className="text-sm text-muted-foreground font-normal truncate">
-                  {vendor.headquarters}
+                <CardTitle className="text-xl font-bold leading-tight">
+                  {vendor.company_name}
+                </CardTitle>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Building className="h-3.5 w-3.5 flex-shrink-0" />
+                  <span className="truncate">{vendor.headquarters}</span>
                 </div>
-                {vendor.category && (
-                  <Badge variant="outline" className="text-xs mt-1">
-                    {VENDOR_CATEGORIES[vendor.category].title.replace(' Companies', '')}
-                  </Badge>
-                )}
               </>
             )}
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+          <div className="flex items-center gap-1.5 flex-shrink-0">
             {isEditing ? (
               <>
                 <Button
@@ -169,12 +167,28 @@ export function EditableVendorCard({
               </>
             )}
           </div>
-        </CardTitle>
+        </div>
+        
+        {/* Category Badge & Company Type */}
+        {!isEditing && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {vendor.category && (
+              <Badge variant="secondary" className="text-xs font-medium">
+                {VENDOR_CATEGORIES[vendor.category].title.replace(' Companies', '')}
+              </Badge>
+            )}
+            {vendor.company_type && (
+              <Badge variant="outline" className="text-xs">
+                {vendor.company_type}
+              </Badge>
+            )}
+          </div>
+        )}
       </CardHeader>
       
-      <CardContent className="space-y-4 flex-1 flex flex-col" onClick={(e) => isEditing && e.stopPropagation()}>
+      <CardContent className="space-y-5 flex-1 flex flex-col" onClick={(e) => isEditing && e.stopPropagation()}>
+        {/* Description - Primary content */}
         <div>
-          <div className="text-sm font-medium mb-1">Description</div>
           {isEditing ? (
             <TextEditor
               value={editData.description}
@@ -184,30 +198,16 @@ export function EditableVendorCard({
               maxLength={1000}
             />
           ) : (
-            <div className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
               {vendor.description}
-            </div>
+            </p>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        {/* Key Stats Grid */}
+        <div className="grid grid-cols-2 gap-4 py-3 border-y">
           <div>
-            <div className="font-medium mb-1">Type</div>
-            {isEditing ? (
-              <SelectEditor
-                value={editData.company_type}
-                onChange={(value) => updateField('company_type', value)}
-                options={COMPANY_TYPE_OPTIONS}
-                placeholder="Select type"
-              />
-            ) : (
-              <div className="text-muted-foreground text-xs">
-                {vendor.company_type}
-              </div>
-            )}
-          </div>
-          <div>
-            <div className="font-medium mb-1">Founded</div>
+            <div className="text-xs text-muted-foreground mb-1">Founded</div>
             {isEditing ? (
               <TextEditor
                 value={editData.founding_year?.toString() || ''}
@@ -215,40 +215,39 @@ export function EditableVendorCard({
                 placeholder="Year"
               />
             ) : (
-              <div className="text-muted-foreground text-xs">
+              <div className="text-base font-semibold">
                 {vendor.founding_year || 'N/A'}
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground mb-1">Funding</div>
+            {isEditing ? (
+              <div className="space-y-2">
+                <TextEditor
+                  value={editData.total_funding || ''}
+                  onChange={(value) => updateField('total_funding', value)}
+                  placeholder="Total funding"
+                />
+                <TextEditor
+                  value={editData.funding_stage || ''}
+                  onChange={(value) => updateField('funding_stage', value)}
+                  placeholder="Funding stage"
+                />
+              </div>
+            ) : (
+              <div className="text-base font-semibold truncate">
+                {vendor.total_funding || 'N/A'}
               </div>
             )}
           </div>
         </div>
 
+        {/* Core Services - Highlight */}
         <div>
-          <div className="font-medium mb-1 text-sm">Funding</div>
-          {isEditing ? (
-            <div className="space-y-2">
-              <TextEditor
-                value={editData.total_funding || ''}
-                onChange={(value) => updateField('total_funding', value)}
-                placeholder="Total funding"
-              />
-              <TextEditor
-                value={editData.funding_stage || ''}
-                onChange={(value) => updateField('funding_stage', value)}
-                placeholder="Funding stage"
-              />
-            </div>
-          ) : (
-            <div className="text-xs text-muted-foreground">
-              {vendor.total_funding || 'Not disclosed'}
-              {vendor.funding_stage && (
-                <div className="text-xs mt-1">{vendor.funding_stage}</div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div>
-          <div className="font-medium mb-1 text-sm">Core Services</div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+            Core Services
+          </div>
           {isEditing ? (
             <ArrayEditor
               value={editData.core_services}
@@ -257,57 +256,73 @@ export function EditableVendorCard({
               maxItems={8}
             />
           ) : (
-            <ul className="text-xs text-muted-foreground space-y-1">
-              {vendor.core_services.map((service, idx) => (
-                <li key={idx} className="flex items-start">
-                  <span className="mr-2">•</span>
+            <div className="space-y-1.5">
+              {vendor.core_services.slice(0, 3).map((service, idx) => (
+                <div key={idx} className="flex items-start text-sm">
+                  <span className="text-primary mr-2 mt-0.5">•</span>
                   <span>{service}</span>
-                </li>
+                </div>
               ))}
-            </ul>
+              {vendor.core_services.length > 3 && (
+                <div className="text-xs text-muted-foreground ml-4">
+                  +{vendor.core_services.length - 3} more
+                </div>
+              )}
+            </div>
           )}
         </div>
 
-        <div>
-          <div className="font-medium mb-1 text-sm">Target Customers</div>
-          {isEditing ? (
-            <ArrayEditor
-              value={editData.customers}
-              onChange={(value) => updateField('customers', value)}
-              placeholder="Add customer type"
-              maxItems={6}
-            />
-          ) : (
-            <ul className="text-xs text-muted-foreground space-y-1">
-              {vendor.customers.map((customer, idx) => (
-                <li key={idx} className="flex items-start">
-                  <span className="mr-2">•</span>
-                  <span>{customer}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {/* Secondary Info - Collapsed */}
+        <div className="pt-2 space-y-3 text-xs">
+          <div>
+            <div className="font-medium text-muted-foreground mb-1.5">Target Customers</div>
+            {isEditing ? (
+              <ArrayEditor
+                value={editData.customers}
+                onChange={(value) => updateField('customers', value)}
+                placeholder="Add customer type"
+                maxItems={6}
+              />
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {vendor.customers.slice(0, 3).map((customer, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs font-normal">
+                    {customer}
+                  </Badge>
+                ))}
+                {vendor.customers.length > 3 && (
+                  <Badge variant="outline" className="text-xs font-normal">
+                    +{vendor.customers.length - 3}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
 
-        <div>
-          <div className="font-medium mb-1 text-sm">Specialties</div>
-          {isEditing ? (
-            <ArrayEditor
-              value={editData.specialties}
-              onChange={(value) => updateField('specialties', value)}
-              placeholder="Add specialty"
-              maxItems={6}
-            />
-          ) : (
-            <ul className="text-xs text-muted-foreground space-y-1">
-              {vendor.specialties.map((specialty, idx) => (
-                <li key={idx} className="flex items-start">
-                  <span className="mr-2">•</span>
-                  <span>{specialty}</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <div>
+            <div className="font-medium text-muted-foreground mb-1.5">Specialties</div>
+            {isEditing ? (
+              <ArrayEditor
+                value={editData.specialties}
+                onChange={(value) => updateField('specialties', value)}
+                placeholder="Add specialty"
+                maxItems={6}
+              />
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {vendor.specialties.slice(0, 3).map((specialty, idx) => (
+                  <Badge key={idx} variant="secondary" className="text-xs font-normal">
+                    {specialty}
+                  </Badge>
+                ))}
+                {vendor.specialties.length > 3 && (
+                  <Badge variant="secondary" className="text-xs font-normal">
+                    +{vendor.specialties.length - 3}
+                  </Badge>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

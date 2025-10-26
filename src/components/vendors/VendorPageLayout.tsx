@@ -27,11 +27,14 @@ export const VendorPageLayout: React.FC<VendorPageLayoutProps> = ({
     <PageLayout showNavigation={showNavigation}>
       <div className={className}>
         {title && (
-          <div className="space-y-2 mb-6">
-            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-            {subtitle && (
-              <p className="text-sm text-muted-foreground">{subtitle}</p>
-            )}
+          <div className="mb-12">
+            <div className="space-y-3">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight">{title}</h1>
+              {subtitle && (
+                <p className="text-lg text-muted-foreground max-w-2xl">{subtitle}</p>
+              )}
+            </div>
+            <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary/50 mt-6 rounded-full" />
           </div>
         )}
         
