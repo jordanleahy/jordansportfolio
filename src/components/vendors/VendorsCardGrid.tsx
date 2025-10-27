@@ -146,8 +146,7 @@ export function VendorsCardGrid({
                   onClick={() => handleSort('company_type')}
                   className="h-8"
                 >
-                  Type
-                  {sortField === 'company_type' && <span className="text-xs ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
+                  {sortField === 'company_type' ? (sortDirection === 'asc' ? 'A-Z' : 'Z-A') : 'Type'}
                 </Button>
               </div>
             )}
