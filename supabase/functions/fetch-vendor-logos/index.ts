@@ -11,7 +11,7 @@ interface LogoFetchResult {
   company_name: string;
   social_logo_url: string | null;
   landscape_logo_url: string | null;
-  source: 'clearbit' | 'website' | 'failed';
+  source: 'logo.dev' | 'website' | 'failed';
   status: 'success' | 'partial' | 'failed';
   error?: string;
 }
@@ -113,7 +113,7 @@ async function fetchLogosForVendor(
         company_name: vendor.company_name,
         social_logo_url: vendor.social_logo_url,
         landscape_logo_url: vendor.landscape_logo_url,
-        source: 'clearbit',
+        source: 'logo.dev',
         status: 'success',
         error: 'Skipped - logos already exist',
       };
@@ -134,9 +134,22 @@ async function fetchLogosForVendor(
 
     console.log(`Fetching logos for ${vendor.company_name} (${domain})`);
 
-    // Try Clearbit Logo API (free, no auth needed)
-    const clearbitUrl = `https://logo.clearbit.com/${domain}`;
-    const logoBlob = await fetchWithRetry(clearbitUrl);
+    // Try Logo.dev API (Clearbit's recommended replacement)
+    const logoDevApiKey = Deno.env.get('LOGO_DEV_API_KEY');
+    if (!logoDevApiKey) {
+      return {
+        vendor_id: vendor.id,
+        company_name: vendor.company_name,
+        social_logo_url: null,
+        landscape_logo_url: null,
+        source: 'failed',
+        status: 'failed',
+        error: 'Logo.dev API key not configured',
+      };
+    }
+
+    const logoDevUrl = `https://img.logo.dev/${domain}?token=${logoDevApiKey}&format=png`;
+    const logoBlob = await fetchWithRetry(logoDevUrl);
 
     if (!logoBlob) {
       return {
@@ -146,7 +159,7 @@ async function fetchLogosForVendor(
         landscape_logo_url: null,
         source: 'failed',
         status: 'failed',
-        error: 'No logo found from Clearbit',
+        error: 'No logo found from Logo.dev',
       };
     }
 
@@ -168,7 +181,7 @@ async function fetchLogosForVendor(
         company_name: vendor.company_name,
         social_logo_url: null,
         landscape_logo_url: null,
-        source: 'clearbit',
+        source: 'logo.dev',
         status: 'failed',
         error: `Upload failed: ${uploadError.message}`,
       };
@@ -198,7 +211,7 @@ async function fetchLogosForVendor(
         company_name: vendor.company_name,
         social_logo_url: logoUrl,
         landscape_logo_url: logoUrl,
-        source: 'clearbit',
+        source: 'logo.dev',
         status: 'partial',
         error: `Logo fetched but update failed: ${updateError.message}`,
       };
@@ -210,7 +223,7 @@ async function fetchLogosForVendor(
       company_name: vendor.company_name,
       social_logo_url: logoUrl,
       landscape_logo_url: logoUrl,
-      source: 'clearbit',
+      source: 'logo.dev',
       status: 'success',
     };
   } catch (error) {

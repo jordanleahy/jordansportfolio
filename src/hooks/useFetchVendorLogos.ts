@@ -13,7 +13,7 @@ interface LogoFetchResult {
   company_name: string;
   social_logo_url: string | null;
   landscape_logo_url: string | null;
-  source: 'clearbit' | 'website' | 'failed';
+  source: 'logo.dev' | 'website' | 'failed';
   status: 'success' | 'partial' | 'failed';
   error?: string;
 }
