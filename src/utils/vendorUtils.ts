@@ -46,6 +46,15 @@ export const sortVendors = <T extends Vendor>(
       // Convert date strings to Date objects for proper comparison
       aVal = new Date(aVal as string);
       bVal = new Date(bVal as string);
+    } else if (sortField === 'total_funding') {
+      // Parse funding amounts for numeric comparison
+      const parseFunding = (fundingStr: string | undefined): number => {
+        if (!fundingStr) return 0;
+        const amount = parseFloat(fundingStr.replace(/[$M,]/g, ''));
+        return isNaN(amount) ? 0 : amount * 1000000;
+      };
+      aVal = parseFunding(aVal as string);
+      bVal = parseFunding(bVal as string);
     } else if (typeof aVal === 'string') {
       aVal = aVal.toLowerCase();
       bVal = bVal.toLowerCase();

@@ -33,7 +33,7 @@ interface VendorsCardGridProps {
   readOnly?: boolean;
 }
 
-type SortField = 'company_name' | 'founding_year' | 'company_type';
+type SortField = 'company_name' | 'founding_year' | 'company_type' | 'total_funding';
 type SortDirection = 'asc' | 'desc';
 
 export function VendorsCardGrid({
@@ -116,55 +116,6 @@ export function VendorsCardGrid({
               </div>
             )}
             
-            {/* Quick Funding Filter */}
-            {filters && onFiltersChange && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant={filters.fundingRange?.length ? 'default' : 'outline'} 
-                    size="sm" 
-                    className="gap-1.5"
-                  >
-                    <DollarSign className="h-3.5 w-3.5" />
-                    Funding
-                    {filters.fundingRange?.length ? (
-                      <span className="ml-1 bg-background text-foreground rounded-full px-1.5 text-xs">
-                        {filters.fundingRange.length}
-                      </span>
-                    ) : null}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
-                  <DropdownMenuLabel>Funding Amount</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {[
-                    { value: 'over-100m', label: 'Over $100M' },
-                    { value: '50m-100m', label: '$50M - $100M' },
-                    { value: '10m-50m', label: '$10M - $50M' },
-                    { value: 'under-10m', label: 'Under $10M' },
-                    { value: 'no-funding', label: 'No Funding' }
-                  ].map((range) => (
-                    <DropdownMenuCheckboxItem
-                      key={range.value}
-                      checked={filters.fundingRange?.includes(range.value) || false}
-                      onCheckedChange={(checked) => {
-                        const currentRanges = filters.fundingRange || [];
-                        const newRanges = checked
-                          ? [...currentRanges, range.value]
-                          : currentRanges.filter(r => r !== range.value);
-                        onFiltersChange({
-                          ...filters,
-                          fundingRange: newRanges.length > 0 ? newRanges : undefined
-                        });
-                      }}
-                    >
-                      {range.label}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            
             {/* Sort Controls - Secondary */}
             {viewMode === 'card' && (
               <div className="flex gap-1.5 items-center">
@@ -180,6 +131,16 @@ export function VendorsCardGrid({
                   {sortField === 'company_name' && <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                 </Button>
                 <Button 
+                  variant={sortField === 'total_funding' ? 'default' : 'ghost'} 
+                  size="sm" 
+                  onClick={() => handleSort('total_funding')}
+                  className="gap-1.5 h-8"
+                >
+                  <DollarSign className="h-3.5 w-3.5" />
+                  Funding
+                  {sortField === 'total_funding' && <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
+                </Button>
+                <Button 
                   variant={sortField === 'company_type' ? 'default' : 'ghost'} 
                   size="sm" 
                   onClick={() => handleSort('company_type')}
@@ -187,16 +148,6 @@ export function VendorsCardGrid({
                 >
                   Type
                   {sortField === 'company_type' && <span className="text-xs ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
-                </Button>
-                <Button 
-                  variant={sortField === 'founding_year' ? 'default' : 'ghost'} 
-                  size="sm" 
-                  onClick={() => handleSort('founding_year')} 
-                  className="gap-1.5 h-8"
-                >
-                  <Calendar className="h-3.5 w-3.5" />
-                  Founded
-                  {sortField === 'founding_year' && <span className="text-xs">{sortDirection === 'asc' ? '↑' : '↓'}</span>}
                 </Button>
               </div>
             )}
