@@ -179,6 +179,8 @@ Begin your comprehensive website analysis now and return the complete JSON objec
 };
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { useLocation } from 'react-router-dom';
+
 export default function VendorDetail() {
   const {
     slugname: category,
@@ -188,6 +190,8 @@ export default function VendorDetail() {
     vendorSlug: string;
   }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
   const [showPrompt, setShowPrompt] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [generatedPrompt, setGeneratedPrompt] = useState("");
@@ -924,7 +928,7 @@ Research all ${investors.length} firms listed above and return comprehensive dat
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/admin/vendors" className="text-sm">Vendors</Link>
+                  <Link to={isAdminRoute ? "/admin/vendors" : "/vendors"} className="text-sm">Vendors</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               {category && (
@@ -932,7 +936,7 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                      <Link to={`/admin/vendors/${category}`} className="text-sm">{categoryConfig.title}</Link>
+                      <Link to={`${isAdminRoute ? '/admin' : ''}/vendors/${category}`} className="text-sm">{categoryConfig.title}</Link>
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 </>
