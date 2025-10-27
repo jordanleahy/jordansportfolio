@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Save, X, Upload, Trash2, Eye, Download } from 'lucide-react';
+import { Edit, Save, X, Upload, Trash2, Eye, Download, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { uploadImage, deleteImage } from '@/utils/imageUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { type Vendor } from '@/types/vendor';
+import { useFetchVendorLogos } from '@/hooks/useFetchVendorLogos';
 
 interface VendorImage {
   id: string;
@@ -38,6 +39,11 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
   const [dragActive, setDragActive] = useState(false);
   
   const { toast } = useToast();
+  const fetchLogosMutation = useFetchVendorLogos();
+
+  const handleFetchLogos = () => {
+    fetchLogosMutation.mutate({ vendor_id: vendor.id, force: true });
+  };
 
   const startEdit = () => setIsEditing(true);
   const cancelEdit = () => {
@@ -315,6 +321,25 @@ export function VendorImageGallery({ vendor, canEdit, onSave }: VendorImageGalle
         </CardHeader>
         
         <CardContent>
+          {/* Fetch Logos Button */}
+          {isEditing && (
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleFetchLogos}
+                disabled={fetchLogosMutation.isPending}
+                className="w-full sm:w-auto"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {fetchLogosMutation.isPending ? 'Fetching Logos...' : 'Auto-Fetch Logos from Website'}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">
+                Automatically fetch company logos from public sources
+              </p>
+            </div>
+          )}
+
           {/* Logo Upload Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Social Logo (1:1) */}
