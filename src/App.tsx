@@ -142,7 +142,7 @@ function App() {
                   
                   <Route path="/library" element={<Library />} />
                   <Route path="/comparisons" element={<ComparisonIndex />} />
-                  <Route path="/comparisons/:id" element={<ComparisonDetail />} />
+                  <Route path="/comparison/:comparisonType" element={<ComparisonDetail />} />
                   <Route path="/rcm-companies" element={<RCMCompanies />} />
                   <Route path="/investors" element={<Investors />} />
                   
