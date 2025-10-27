@@ -1,7 +1,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Building, Calendar, Plus } from 'lucide-react';
+import { Building, Calendar, Plus, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { type Vendor, type VendorFiltersState } from '@/types/vendor';
@@ -10,6 +10,14 @@ import { VendorFilters } from './VendorFilters';
 import { ViewToggle, type ViewMode } from './ViewToggle';
 import { VendorsTableView } from './VendorsTableView';
 import { sortVendors } from '@/utils/vendorUtils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface VendorsCardGridProps {
   vendors: Vendor[];
@@ -106,6 +114,55 @@ export function VendorsCardGrid({
               <div className="mr-2">
                 <VendorFilters filters={filters} onFiltersChange={onFiltersChange} vendors={allVendors} />
               </div>
+            )}
+            
+            {/* Quick Funding Filter */}
+            {filters && onFiltersChange && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant={filters.fundingRange?.length ? 'default' : 'outline'} 
+                    size="sm" 
+                    className="gap-1.5"
+                  >
+                    <DollarSign className="h-3.5 w-3.5" />
+                    Funding
+                    {filters.fundingRange?.length ? (
+                      <span className="ml-1 bg-background text-foreground rounded-full px-1.5 text-xs">
+                        {filters.fundingRange.length}
+                      </span>
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  <DropdownMenuLabel>Funding Amount</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {[
+                    { value: 'no-funding', label: 'No Funding' },
+                    { value: 'under-10m', label: 'Under $10M' },
+                    { value: '10m-50m', label: '$10M - $50M' },
+                    { value: '50m-100m', label: '$50M - $100M' },
+                    { value: 'over-100m', label: 'Over $100M' }
+                  ].map((range) => (
+                    <DropdownMenuCheckboxItem
+                      key={range.value}
+                      checked={filters.fundingRange?.includes(range.value) || false}
+                      onCheckedChange={(checked) => {
+                        const currentRanges = filters.fundingRange || [];
+                        const newRanges = checked
+                          ? [...currentRanges, range.value]
+                          : currentRanges.filter(r => r !== range.value);
+                        onFiltersChange({
+                          ...filters,
+                          fundingRange: newRanges.length > 0 ? newRanges : undefined
+                        });
+                      }}
+                    >
+                      {range.label}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
             
             {/* Sort Controls - Secondary */}
