@@ -138,11 +138,11 @@ export function VendorsCardGrid({
                   <DropdownMenuLabel>Funding Amount</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {[
-                    { value: 'no-funding', label: 'No Funding' },
-                    { value: 'under-10m', label: 'Under $10M' },
-                    { value: '10m-50m', label: '$10M - $50M' },
+                    { value: 'over-100m', label: 'Over $100M' },
                     { value: '50m-100m', label: '$50M - $100M' },
-                    { value: 'over-100m', label: 'Over $100M' }
+                    { value: '10m-50m', label: '$10M - $50M' },
+                    { value: 'under-10m', label: 'Under $10M' },
+                    { value: 'no-funding', label: 'No Funding' }
                   ].map((range) => (
                     <DropdownMenuCheckboxItem
                       key={range.value}
