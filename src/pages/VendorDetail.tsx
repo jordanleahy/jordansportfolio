@@ -931,16 +931,6 @@ Research all ${investors.length} firms listed above and return comprehensive dat
                   <Link to={isAdminRoute ? "/admin/vendors" : "/vendors"} className="text-sm">Vendors</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              {category && (
-                <>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink asChild>
-                      <Link to={`${isAdminRoute ? '/admin' : ''}/vendors/${category}`} className="text-sm">{categoryConfig.title}</Link>
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                </>
-              )}
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-sm font-medium">{vendor.company_name}</BreadcrumbPage>
