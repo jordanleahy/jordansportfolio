@@ -6,45 +6,45 @@
 
 @layer base {
   :root {
-    /* Jordan Leahy Brand Colors - Blue Design System */
-    --background: 210 14% 97%; /* Background: #F9FAFB */
-    --foreground: 210 11% 15%; /* Soft Charcoal: #2F2F32 */
+    /* Vibrant Professional Color System */
+    --background: 220 25% 98%; /* Crisp white with subtle blue tint */
+    --foreground: 220 20% 20%; /* Deep charcoal */
 
     --card: 0 0% 100%; /* Pure white for cards */
-    --card-foreground: 210 11% 15%; /* Soft Charcoal */
+    --card-foreground: 220 20% 20%; /* Deep charcoal */
 
     --popover: 0 0% 100%; /* Pure white */
-    --popover-foreground: 210 11% 15%; /* Soft Charcoal */
+    --popover-foreground: 220 20% 20%; /* Deep charcoal */
 
-    --primary: 210 11% 15%; /* Black: #2F2F32 */
-    --primary-foreground: 0 0% 100%; /* White text on black */
+    --primary: 221 83% 53%; /* Vibrant Royal Blue: #4169E1 */
+    --primary-foreground: 0 0% 100%; /* White text on blue */
 
-    --secondary: 210 14% 92%; /* Light gray for secondary */
-    --secondary-foreground: 210 11% 15%; /* Soft Charcoal */
+    --secondary: 271 81% 56%; /* Rich Purple: #8B5CF6 */
+    --secondary-foreground: 0 0% 100%; /* White text on purple */
 
-    --muted: 210 14% 92%; /* Light gray backgrounds */
-    --muted-foreground: 215 16% 47%; /* Steel Gray: #6E7681 */
+    --muted: 220 17% 94%; /* Light neutral gray */
+    --muted-foreground: 220 13% 46%; /* Medium gray */
 
-    --accent: 181 69% 32%; /* Civic Teal: #1D8E8E */
-    --accent-foreground: 210 40% 98%; /* Light text on teal */
+    --accent: 168 76% 42%; /* Energetic Teal: #14B8A6 */
+    --accent-foreground: 0 0% 100%; /* White text on teal */
 
-    --destructive: 0 72% 51%; /* Error Red: #D64545 */
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%; /* Vibrant Red: #EF4444 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%; /* Subtle border */
-    --input: 214 32% 91%; /* Input background */
-    --ring: 210 11% 15%; /* Black for focus rings to match primary */
+    --border: 220 17% 88%; /* Subtle border */
+    --input: 220 17% 94%; /* Input background */
+    --ring: 221 83% 53%; /* Primary blue for focus rings */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 210 14% 97%;
-    --sidebar-foreground: 210 11% 15%;
-    --sidebar-primary: 210 11% 15%; /* Black */
-    --sidebar-primary-foreground: 0 0% 100%; /* White text on black */
-    --sidebar-accent: 210 14% 92%;
-    --sidebar-accent-foreground: 210 11% 15%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 210 11% 15%; /* Black for focus rings */
+    --sidebar-background: 220 25% 98%;
+    --sidebar-foreground: 220 20% 20%;
+    --sidebar-primary: 221 83% 53%; /* Vibrant blue */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text on blue */
+    --sidebar-accent: 220 17% 94%;
+    --sidebar-accent-foreground: 220 20% 20%;
+    --sidebar-border: 220 17% 88%;
+    --sidebar-ring: 221 83% 53%; /* Primary blue for focus rings */
     
     /* Enhanced Design System */
     /* Elevation shadows */
@@ -60,10 +60,12 @@
     --shadow-accent-lg: 0 8px 24px hsl(var(--accent) / 0.25);
     
     /* Gradient definitions */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(215 16% 20%));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(181 69% 40%));
+    --gradient-primary: linear-gradient(135deg, hsl(221 83% 53%), hsl(221 83% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(271 81% 56%), hsl(271 81% 68%));
+    --gradient-accent: linear-gradient(135deg, hsl(168 76% 42%), hsl(168 76% 54%));
+    --gradient-hero: linear-gradient(135deg, hsl(221 83% 53%), hsl(271 81% 56%), hsl(168 76% 42%));
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --gradient-overlay: linear-gradient(135deg, hsl(var(--accent) / 0.1), hsl(var(--primary) / 0.05));
+    --gradient-overlay: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--accent) / 0.05));
     
     /* Section spacing */
     --section-padding: 6rem;
@@ -71,43 +73,43 @@
   }
 
   .dark {
-    /* Dark mode with blue system */
-    --background: 210 11% 15%; /* Soft Charcoal background */
-    --foreground: 210 14% 97%; /* Light text */
+    /* Dark mode with vibrant system */
+    --background: 220 25% 10%; /* Deep dark background */
+    --foreground: 220 15% 95%; /* Light text */
 
-    --card: 210 11% 18%; /* Slightly lighter charcoal */
-    --card-foreground: 210 14% 97%; /* Light text */
+    --card: 220 20% 14%; /* Slightly lighter dark */
+    --card-foreground: 220 15% 95%; /* Light text */
 
-    --popover: 210 11% 18%; /* Slightly lighter charcoal */
-    --popover-foreground: 210 14% 97%; /* Light text */
+    --popover: 220 20% 14%; /* Slightly lighter dark */
+    --popover-foreground: 220 15% 95%; /* Light text */
 
-    --primary: 210 11% 15%; /* Black: #2F2F32 */
-    --primary-foreground: 0 0% 100%; /* White text on black */
+    --primary: 221 83% 58%; /* Brighter blue for dark mode */
+    --primary-foreground: 0 0% 100%; /* White text on blue */
 
-    --secondary: 215 16% 20%; /* Dark gray for secondary */
-    --secondary-foreground: 210 14% 97%; /* Light text */
+    --secondary: 271 81% 62%; /* Brighter purple for dark mode */
+    --secondary-foreground: 0 0% 100%; /* White text on purple */
 
-    --muted: 215 16% 20%; /* Dark gray backgrounds */
-    --muted-foreground: 215 16% 47%; /* Steel Gray */
+    --muted: 220 20% 18%; /* Dark muted */
+    --muted-foreground: 220 15% 60%; /* Medium gray */
 
-    --accent: 181 69% 32%; /* Civic Teal */
-    --accent-foreground: 210 40% 98%; /* Light text on teal */
+    --accent: 168 76% 50%; /* Brighter teal for dark mode */
+    --accent-foreground: 0 0% 100%; /* White text on teal */
 
-    --destructive: 0 72% 51%; /* Error Red */
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 65%; /* Brighter red for dark mode */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 215 16% 20%; /* Subtle dark border */
-    --input: 215 16% 20%; /* Input background */
-    --ring: 210 11% 15%; /* Black for focus rings to match primary */
+    --border: 220 20% 22%; /* Subtle dark border */
+    --input: 220 20% 18%; /* Input background */
+    --ring: 221 83% 58%; /* Primary blue for focus rings */
     
-    --sidebar-background: 210 11% 15%;
-    --sidebar-foreground: 210 14% 97%;
-    --sidebar-primary: 210 11% 15%; /* Black */
-    --sidebar-primary-foreground: 0 0% 100%; /* White text on black */
-    --sidebar-accent: 215 16% 20%;
-    --sidebar-accent-foreground: 210 14% 97%;
-    --sidebar-border: 215 16% 20%;
-    --sidebar-ring: 210 11% 15%; /* Black for focus rings */
+    --sidebar-background: 220 25% 10%;
+    --sidebar-foreground: 220 15% 95%;
+    --sidebar-primary: 221 83% 58%; /* Vibrant blue */
+    --sidebar-primary-foreground: 0 0% 100%; /* White text on blue */
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 220 15% 95%;
+    --sidebar-border: 220 20% 22%;
+    --sidebar-ring: 221 83% 58%; /* Primary blue for focus rings */
 
     /* Enhanced scrollbar for webkit browsers */
     --scrollbar-track: var(--muted);
@@ -125,10 +127,12 @@
     --shadow-accent-md: 0 4px 16px hsl(var(--accent) / 0.30);
     --shadow-accent-lg: 0 8px 24px hsl(var(--accent) / 0.35);
     
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(215 16% 25%));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(181 69% 40%));
+    --gradient-primary: linear-gradient(135deg, hsl(221 83% 58%), hsl(221 83% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(271 81% 62%), hsl(271 81% 74%));
+    --gradient-accent: linear-gradient(135deg, hsl(168 76% 50%), hsl(168 76% 62%));
+    --gradient-hero: linear-gradient(135deg, hsl(221 83% 58%), hsl(271 81% 62%), hsl(168 76% 50%));
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
-    --gradient-overlay: linear-gradient(135deg, hsl(var(--accent) / 0.15), hsl(var(--primary) / 0.10));
+    --gradient-overlay: linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--accent) / 0.10));
     
     /* Layout and spacing */
     --section-padding: 6rem;
@@ -210,8 +214,16 @@
     background: var(--gradient-primary);
   }
   
+  .bg-gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
   .bg-gradient-accent {
     background: var(--gradient-accent);
+  }
+  
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
   }
   
   .bg-gradient-subtle {
@@ -220,6 +232,28 @@
   
   .bg-gradient-overlay {
     background: var(--gradient-overlay);
+  }
+  
+  /* Text gradient utilities */
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-secondary {
+    background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-hero {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   /* Shadow utilities */
