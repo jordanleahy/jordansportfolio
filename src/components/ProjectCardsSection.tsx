@@ -36,16 +36,6 @@ const projects = [
     icon: Shield,
     color: "bg-green-500",
     path: "/cases/case4"
-  },
-  {
-    id: "case3",
-    title: "Denial and Appeal Resolution",
-    company: "Revenue Cycle Solutions",
-    description: "Designed a denial and appeal resolution application for managing denials, including the drafting of templates and sending to payer.",
-    tags: ["#Appeals", "#Research", "#UX"],
-    icon: FileText,
-    color: "bg-purple-500",
-    path: "/cases/case3"
   }
 ];
 
