@@ -46,6 +46,63 @@
     --sidebar-border: 214 32% 91%;
     --sidebar-ring: 210 11% 15%; /* Black for focus rings */
     
+    /* Typography System */
+    /* Font Families */
+    --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    
+    /* Font Sizes - T-shirt sizing */
+    --text-xs: 0.75rem;      /* 12px */
+    --text-sm: 0.875rem;     /* 14px */
+    --text-base: 1rem;       /* 16px */
+    --text-lg: 1.125rem;     /* 18px */
+    --text-xl: 1.25rem;      /* 20px */
+    --text-2xl: 1.5rem;      /* 24px */
+    --text-3xl: 1.875rem;    /* 30px */
+    --text-4xl: 2.25rem;     /* 36px */
+    --text-5xl: 3rem;        /* 48px */
+    --text-6xl: 3.75rem;     /* 60px */
+    --text-7xl: 4.5rem;      /* 72px */
+    
+    /* Semantic Typography Scale */
+    --text-display-2xl: 4.5rem;    /* 72px - Hero headlines */
+    --text-display-xl: 3.75rem;    /* 60px - Large display */
+    --text-display-lg: 3rem;       /* 48px - Display */
+    --text-heading-xl: 2.25rem;    /* 36px - Page titles */
+    --text-heading-lg: 1.875rem;   /* 30px - Section titles */
+    --text-heading-md: 1.5rem;     /* 24px - Card titles */
+    --text-heading-sm: 1.25rem;    /* 20px - Small headings */
+    --text-body-lg: 1.125rem;      /* 18px - Large body */
+    --text-body-base: 1rem;        /* 16px - Default body */
+    --text-body-sm: 0.875rem;      /* 14px - Small body */
+    --text-caption: 0.75rem;       /* 12px - Captions, labels */
+    
+    /* Font Weights */
+    --font-light: 300;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+    --font-extrabold: 800;
+    --font-black: 900;
+    
+    /* Line Heights */
+    --leading-none: 1;
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.625;
+    --leading-loose: 2;
+    
+    /* Letter Spacing */
+    --tracking-tighter: -0.05em;
+    --tracking-tight: -0.025em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.025em;
+    --tracking-wider: 0.05em;
+    --tracking-widest: 0.1em;
+    
     /* Enhanced Design System */
     /* Elevation shadows */
     --shadow-sm: 0 1px 2px 0 hsl(var(--primary) / 0.05);
@@ -68,6 +125,16 @@
     /* Section spacing */
     --section-padding: 6rem;
     --section-padding-lg: 8rem;
+  }
+  
+  /* Responsive Typography - Mobile */
+  @media (max-width: 768px) {
+    :root {
+      --text-display-2xl: 3rem;      /* 48px on mobile */
+      --text-display-xl: 2.5rem;     /* 40px on mobile */
+      --text-display-lg: 2.25rem;    /* 36px on mobile */
+      --text-heading-xl: 1.875rem;   /* 30px on mobile */
+    }
   }
 
   .dark {
@@ -267,6 +334,32 @@
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid hsl(var(--border) / 0.5);
+  }
+  
+  /* Typography Presets */
+  .text-display {
+    font-size: var(--text-display-lg);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+  }
+  
+  .text-heading {
+    font-size: var(--text-heading-xl);
+    font-weight: var(--font-bold);
+    line-height: var(--leading-tight);
+  }
+  
+  .text-subheading {
+    font-size: var(--text-heading-md);
+    font-weight: var(--font-semibold);
+    line-height: var(--leading-snug);
+  }
+  
+  .text-body {
+    font-size: var(--text-body-base);
+    font-weight: var(--font-normal);
+    line-height: var(--leading-normal);
   }
 }
 

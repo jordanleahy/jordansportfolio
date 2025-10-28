@@ -35,8 +35,8 @@ const ContactSection = () => {
       }} viewport={{
         once: true
       }} className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Let's Work Together</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <h2 className="text-heading-xl font-bold mb-4 text-foreground">Let's Work Together</h2>
+          <p className="text-muted-foreground text-body-lg max-w-2xl mx-auto">
             I'm always interested in new opportunities, challenging projects, and meaningful collaborations. 
             Let's discuss how we can create better healthcare experiences together.
           </p>
@@ -62,14 +62,14 @@ const ContactSection = () => {
                   <div className="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                     <method.icon className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-bold text-foreground mb-2">{method.label}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">{method.description}</p>
+                  <h3 className="font-bold text-foreground mb-2 text-heading-sm">{method.label}</h3>
+                  <p className="text-body-sm text-muted-foreground mb-3">{method.description}</p>
                   <Button variant="outline" size="sm" asChild className="w-full">
                     <a 
                       href="https://mail.google.com/mail/?view=cm&fs=1&to=jordanwilliamleahy@gmail.com&su=Lets%20chat%20RCM"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm"
+                      className="text-body-sm"
                     >
                        {method.value}
                     </a>
@@ -95,9 +95,9 @@ const ContactSection = () => {
             <CardContent className="p-8">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <MapPin className="h-5 w-5 text-accent" />
-                <span className="text-muted-foreground">New York, NY • Open to Remote</span>
+                <span className="text-muted-foreground text-body-base">New York, NY • Open to Remote</span>
               </div>
-              <h3 className="text-xl font-bold mb-4 text-foreground">
+              <h3 className="text-heading-sm font-bold mb-4 text-foreground">
                 Ready to discuss your next project?
               </h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

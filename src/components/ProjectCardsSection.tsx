@@ -74,11 +74,11 @@ const ProjectCardsSection = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
                 </span>
-                <span className="text-sm font-medium text-accent">Featured Work</span>
+                <span className="text-body-sm font-medium text-accent">Featured Work</span>
               </div>
             </motion.div>
-            <h2 className="text-5xl font-bold mb-6 text-foreground">Case Studies</h2>
-            <p className="text-muted-foreground text-xl max-w-2xl mx-auto">
+            <h2 className="text-display-lg font-bold mb-6 text-foreground">Case Studies</h2>
+            <p className="text-muted-foreground text-body-lg max-w-2xl mx-auto">
               Deep dives into healthcare design challenges and solutions
             </p>
           </motion.div>
@@ -120,7 +120,7 @@ const ProjectCardsSection = () => {
                       </motion.div>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold mb-2 text-foreground leading-tight group-hover:text-accent transition-colors duration-300">{project.title}</h3>
+                      <h3 className="text-heading-md font-bold mb-2 text-foreground leading-tight group-hover:text-accent transition-colors duration-300">{project.title}</h3>
                     </div>
                   </CardHeader>
                   
@@ -134,7 +134,7 @@ const ProjectCardsSection = () => {
                           key="case1-image-updated"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                          <p className="text-white text-sm font-medium text-center px-4">
+                          <p className="text-white text-body-sm font-medium text-center px-4">
                             Click and enter password for case details
                           </p>
                         </div>
@@ -151,7 +151,7 @@ const ProjectCardsSection = () => {
                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                          <p className="text-white text-sm font-medium text-center px-4">
+                          <p className="text-white text-body-sm font-medium text-center px-4">
                             Click and enter password for case details
                           </p>
                         </div>
@@ -167,11 +167,11 @@ const ProjectCardsSection = () => {
                            alt="Drug Prior Authorization interface showing workflow steps"
                            className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                          />
-                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                           <p className="text-white text-sm font-medium text-center px-4">
-                             Click and enter password for case details
-                           </p>
-                         </div>
+                          <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                            <p className="text-white text-body-sm font-medium text-center px-4">
+                              Click and enter password for case details
+                            </p>
+                          </div>
                        </div>
                      </div>
                   )}
@@ -187,7 +187,7 @@ const ProjectCardsSection = () => {
                   )}
                   
                   <CardContent className="pt-0 relative z-10">
-                    <p className="text-card-foreground mb-6 leading-relaxed text-base">
+                    <p className="text-card-foreground mb-6 leading-relaxed text-body-base">
                       {project.description}
                     </p>
                     
@@ -202,7 +202,7 @@ const ProjectCardsSection = () => {
                         >
                           <Badge 
                             variant="secondary" 
-                            className="font-mono text-xs bg-gradient-to-r from-primary to-primary/80 text-primary-foreground tracking-wide hover:shadow-accent-sm transition-shadow duration-300"
+                            className="font-mono text-caption bg-gradient-to-r from-primary to-primary/80 text-primary-foreground tracking-wide hover:shadow-accent-sm transition-shadow duration-300"
                           >
                             {tag}
                           </Badge>
