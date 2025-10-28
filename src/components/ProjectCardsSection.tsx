@@ -59,18 +59,37 @@ const ProjectCardsSection = () => {
 
   return (
     <>
-      <section id="case-studies" className="py-24 px-4 bg-background">
-        <div className="max-w-7xl mx-auto">
+      <section id="case-studies" className="py-32 px-4 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute top-20 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-16"
           >
-            <h2 className="text-3xl font-bold mb-4 text-foreground">Case Studies</h2>
-            <p className="text-muted-foreground text-lg">
-              Case studies showcasing healthcare design innovation
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="inline-block mb-4"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                </span>
+                <span className="text-sm font-medium text-accent">Featured Work</span>
+              </div>
+            </motion.div>
+            <h2 className="text-5xl font-bold mb-6 text-foreground">Case Studies</h2>
+            <p className="text-muted-foreground text-xl max-w-2xl mx-auto">
+              Deep dives into healthcare design challenges and solutions
             </p>
           </motion.div>
           
@@ -80,30 +99,38 @@ const ProjectCardsSection = () => {
                 key={project.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+                transition={{ duration: 0.6, delay: index * 0.15 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -8, rotate: -1 }}
+                whileHover={{ y: -12 }}
               >
                 <Card 
-                  className={`h-full group hover:shadow-xl transition-all duration-300 border-2 border-accent/20 hover:border-accent ${
-                    project.id === 'case3' ? 'cursor-default' : 'cursor-pointer'
+                  className={`h-full group relative overflow-hidden transition-all duration-500 border-2 hover:shadow-custom-2xl ${
+                    project.id === 'case3' ? 'cursor-default border-border' : 'cursor-pointer border-accent/10 hover:border-accent/50'
                   }`}
                   onClick={project.id === 'case3' ? undefined : () => handleCaseStudyNavigation(project.path)}
                 >
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="p-3 rounded-lg bg-accent/10 mb-4">
-                        <project.icon className="h-6 w-6 text-accent" />
-                      </div>
-                      <motion.div
-                        whileHover={{ x: 4 }}
-                        transition={{ duration: 0.2 }}
+                  {/* Gradient overlay on hover */}
+                  {project.id !== 'case3' && (
+                    <div className="absolute inset-0 bg-gradient-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  )}
+                  <CardHeader className="pb-4 relative z-10">
+                    <div className="flex items-start justify-between mb-4">
+                      <motion.div 
+                        className="p-3 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/20 shadow-accent-sm"
+                        whileHover={{ scale: 1.05, rotate: 5 }}
+                        transition={{ duration: 0.3 }}
                       >
-                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors" />
+                        <project.icon className="h-6 w-6 text-accent" />
+                      </motion.div>
+                      <motion.div
+                        whileHover={{ x: 6, scale: 1.2 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors duration-300" />
                       </motion.div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold mb-1 text-foreground">{project.title}</h3>
+                      <h3 className="text-2xl font-bold mb-2 text-foreground leading-tight group-hover:text-accent transition-colors duration-300">{project.title}</h3>
                     </div>
                   </CardHeader>
                   
@@ -169,26 +196,37 @@ const ProjectCardsSection = () => {
                     </div>
                   )}
                   
-                  <CardContent className="pt-0">
-                    <p className="text-card-foreground mb-4 leading-relaxed">
+                  <CardContent className="pt-0 relative z-10">
+                    <p className="text-card-foreground mb-6 leading-relaxed text-base">
                       {project.description}
                     </p>
                     
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {project.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="font-mono text-xs bg-primary text-primary-foreground tracking-wide">
-                          {tag}
-                        </Badge>
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {project.tags.map((tag, tagIndex) => (
+                        <motion.div
+                          key={tag}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          whileInView={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.1 + tagIndex * 0.05 }}
+                          viewport={{ once: true }}
+                        >
+                          <Badge 
+                            variant="secondary" 
+                            className="font-mono text-xs bg-gradient-to-r from-primary to-primary/80 text-primary-foreground tracking-wide hover:shadow-accent-sm transition-shadow duration-300"
+                          >
+                            {tag}
+                          </Badge>
+                        </motion.div>
                       ))}
                     </div>
                     
                     <Button 
                       variant="outline" 
-                      className="w-full" 
+                      className="w-full group/btn hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all duration-300" 
                       disabled={project.id === 'case3'}
                     >
                       {project.id === 'case3' ? 'Available on Tuesday, Sep 15, 2025' : 'View Case Study'}
-                      {project.id !== 'case3' && <ArrowRight className="ml-2 h-4 w-4" />}
+                      {project.id !== 'case3' && <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />}
                     </Button>
                   </CardContent>
                 </Card>

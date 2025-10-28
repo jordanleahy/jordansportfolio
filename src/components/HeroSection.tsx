@@ -1,97 +1,113 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { FileText, Globe, Mail, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { FileText, Mail, Globe, Sparkles } from "lucide-react";
 
 const HeroSection = () => {
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center bg-background px-4 pt-20">
-      <div className="text-center max-w-6xl mx-auto">
+    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 pt-20">
+      {/* Enhanced background with gradients */}
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-primary/5" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-20" />
+      
+      {/* Animated gradient orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      
+      <div className="max-w-6xl mx-auto text-center relative z-10">
+        {/* Floating badge */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.6 }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-accent/20 to-accent/10 border border-accent/30 shadow-accent-sm mb-8"
         >
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-foreground">
-            Jordan Leahy
-          </h1>
-          <h2 className="text-xl md:text-2xl font-medium text-accent mb-6">
-            Staff Product Designer, Healthcare RCM
-          </h2>
+          <Sparkles className="h-4 w-4 text-accent" />
+          <span className="text-sm font-medium text-accent">Staff Product Designer, Healthcare RCM</span>
         </motion.div>
+        
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-5xl md:text-7xl font-bold mb-8 leading-tight"
+        >
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-accent to-foreground">
+            Jordan Leahy
+          </span>
+        </motion.h1>
         
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-          className="text-lg md:text-xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed"
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-xl md:text-2xl text-muted-foreground mb-16 leading-relaxed max-w-4xl mx-auto"
         >
           I design data-dense healthcare tools that reduce denials, improve agree rates, and make operations faster—from Figma to production, with results that scale.
         </motion.p>
-        
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex flex-wrap justify-center gap-6"
         >
-          <Button 
-            size="lg" 
-            className="w-full sm:w-auto"
-            onClick={() => {
-              const element = document.getElementById('projects');
-              if (element) element.scrollIntoView({ behavior: 'smooth' });
-            }}
+          <motion.div
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center"
+            <Button
+              size="lg"
+              onClick={() => scrollToSection("projects")}
+              className="text-lg px-10 py-7 bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent shadow-accent-md hover:shadow-accent-lg transition-all duration-300 flex items-center gap-2"
             >
-              <Globe className="mr-2 h-5 w-5" />
+              <Globe className="h-5 w-5" />
               View Projects
-            </motion.div>
-          </Button>
-          
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="w-full sm:w-auto"
-            asChild
+            </Button>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <motion.a
-              href="https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//2025_Jordan%20Leahy%20Resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center"
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="text-lg px-10 py-7 border-2 hover:border-accent hover:bg-accent/5 hover:shadow-accent-sm transition-all duration-300"
             >
-              <FileText className="mr-2 h-5 w-5" />
-              Resume
-            </motion.a>
-          </Button>
-          
-          {/* Job Watcher button removed */}
-          
-          <Button 
-            size="lg" 
-            variant="outline" 
-            className="w-full sm:w-auto"
-            onClick={() => {
-              const element = document.getElementById('contact');
-              if (element) element.scrollIntoView({ behavior: 'smooth' });
-            }}
+              <a
+                href="https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//2025_Jordan%20Leahy%20Resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2"
+              >
+                <FileText className="h-5 w-5" />
+                Resume
+              </a>
+            </Button>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center"
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => scrollToSection("contact")}
+              className="text-lg px-10 py-7 hover:bg-secondary/80 transition-all duration-300 flex items-center gap-2"
             >
-              <Mail className="mr-2 h-5 w-5" />
+              <Mail className="h-5 w-5" />
               Contact
-            </motion.div>
-          </Button>
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     </section>
