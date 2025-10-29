@@ -25,8 +25,8 @@
     --muted: 210 14% 92%; /* Light gray backgrounds */
     --muted-foreground: 215 16% 47%; /* Steel Gray: #6E7681 */
 
-    --accent: 181 69% 32%; /* Civic Teal: #1D8E8E */
-    --accent-foreground: 210 40% 98%; /* Light text on teal */
+    --accent: 180 81% 14%; /* Deep Teal: #074141 */
+    --accent-foreground: 0 0% 100%; /* White text on deep teal */
 
     --destructive: 0 72% 51%; /* Error Red: #D64545 */
     --destructive-foreground: 210 40% 98%;
@@ -165,8 +165,8 @@
     --muted: 215 16% 20%; /* Dark gray backgrounds */
     --muted-foreground: 215 16% 47%; /* Steel Gray */
 
-    --accent: 181 69% 32%; /* Civic Teal */
-    --accent-foreground: 210 40% 98%; /* Light text on teal */
+    --accent: 180 81% 14%; /* Deep Teal: #074141 */
+    --accent-foreground: 0 0% 100%; /* White text on deep teal */
 
     --destructive: 0 72% 51%; /* Error Red */
     --destructive-foreground: 210 40% 98%;
