@@ -117,7 +117,7 @@ const ProjectCardsSection = () => {
                       </motion.div>
                     </div>
                     <div>
-                      <h3 className="text-heading-md font-bold mb-2 text-foreground leading-tight group-hover:text-accent transition-colors duration-300">{project.title}</h3>
+                      <h3 className="font-['Inter'] text-[24px] font-medium leading-[31.2px] mb-2 text-black">{project.title}</h3>
                     </div>
                   </CardHeader>
                   
