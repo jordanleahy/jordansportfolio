@@ -109,7 +109,7 @@ export const Header = () => {
       <div className="text-[14px] font-medium text-accent leading-[24px] tracking-[1.12px] uppercase mb-4">
         JORDAN LEAHY
       </div>
-      <h1 className="text-2xl md:text-[64px] font-medium text-primary md:leading-[70.4px] drop-shadow-sm">
+      <h1 className="text-2xl md:text-[64px] font-medium text-[#042F3A] md:leading-[70.4px] drop-shadow-sm">
         Digital Health Product Designer
       </h1>
       <p className="max-w-2xl text-[18px] md:text-[18px] mt-8 font-normal leading-[27px] tracking-[-0.18px] text-black drop-shadow-sm">
