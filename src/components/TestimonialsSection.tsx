@@ -14,7 +14,7 @@ const testimonials = [
   },
   {
     quote: "Jordan demonstrated a deep understanding of our users' needs and seamlessly translated complex requirements into intuitive and elegant experiences.",
-    author: "Drug Prior Authorization and Appeals Management",
+    author: "Bryan Lawson",
     role: "Clinical Operations Lead",
     avatar: bryanLawsonProfile
   },
