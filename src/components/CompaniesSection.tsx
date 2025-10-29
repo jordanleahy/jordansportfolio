@@ -103,6 +103,8 @@ const CompaniesSection = () => {
                 onClick={() => {
                   if (company.name === "Revenue Cycle Management") {
                     window.open("https://www.smarterdx.com/", "_blank", "noopener,noreferrer");
+                  } else if (company.name === "Prior Authorization") {
+                    window.open("https://prescriberpoint.com/", "_blank", "noopener,noreferrer");
                   }
                 }}
               >
