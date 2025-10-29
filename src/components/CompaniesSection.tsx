@@ -109,6 +109,8 @@ const CompaniesSection = () => {
                     window.open("https://www.bcg.com/x/", "_blank", "noopener,noreferrer");
                   } else if (company.name === "Claims Intelligence") {
                     window.open("https://www.definitivehc.com/", "_blank", "noopener,noreferrer");
+                  } else if (company.name === "Digital Health Agency") {
+                    window.open("https://htdhealth.com/", "_blank", "noopener,noreferrer");
                   }
                 }}
               >
