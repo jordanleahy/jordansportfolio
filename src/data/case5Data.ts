@@ -30,7 +30,7 @@ export const case5Data: CaseStudyData = {
   
   // Problem Section
   problemTitle: "The Challenge",
-  problemDescription: "R1 had 3 legacy systems that managed denials and appeals with a complex process of collecting information, saving information and drafting appeal letters.",
+  problemDescription: "R1 had 3 legacy systems that managed denials and appeals with a complex process of collecting information, saving information and drafting appeal letters. Appeal members had to navigate between a task management system for tracking work queues, a payer portal integration tool for retrieving denial codes and documentation requirements, and a separate word processing application for drafting appeal letters. This fragmented workflow required constant context-switching, manual copy-pasting of claim details, and duplicate data entry across platforms. Critical information like payer-specific appeal guidelines, denial reason codes, and supporting clinical documentation was scattered across different systems, forcing appeal members to maintain personal notes and reference documents. The inefficiency resulted in increased resolution times, higher error rates in appeal submissions, and difficulty meeting payer response deadlines.",
   challenges: [
     {
       type: "problem",
