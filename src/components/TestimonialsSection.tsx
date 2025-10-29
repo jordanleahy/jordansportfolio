@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ruthNacyProfile from "@/assets/ruth-nacy-profile.jpeg";
 import bryanLawsonProfile from "@/assets/bryan-lawson-profile.jpeg";
 import drugPriorAuthAvatar from "@/assets/bryan-lawson.jpeg";
+import shannonEplingProfile from "@/assets/shannon-epling.jpeg";
 
 const testimonials = [
   {
@@ -21,8 +22,9 @@ const testimonials = [
   },
   {
     quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
-    author: "Pharma Innovation",
-    role: "Senior Partner & Design Director"
+    author: "Shannon Epling",
+    role: "Senior Partner & Design Director",
+    avatar: shannonEplingProfile
   },
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
