@@ -23,7 +23,7 @@ const testimonials = [
   {
     quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
     author: "Shannon Epling",
-    role: "Senior Partner & Design Director",
+    role: "Clinical Content Strategist, PrescriberPoint",
     avatar: shannonEplingProfile
   },
   {
