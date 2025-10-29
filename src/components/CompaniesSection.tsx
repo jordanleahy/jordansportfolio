@@ -98,7 +98,14 @@ const CompaniesSection = () => {
               whileHover={{ scale: 1.05, y: -2 }}
               className="group relative w-full"
             >
-              <div className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer w-full h-full">
+              <div 
+                className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer w-full h-full"
+                onClick={() => {
+                  if (company.name === "Revenue Cycle Management") {
+                    window.open("https://www.smarterdx.com/", "_blank", "noopener,noreferrer");
+                  }
+                }}
+              >
                 <div className="w-12 h-12 mx-auto mb-3 bg-accent/10 rounded-lg flex items-center justify-center text-accent font-bold text-sm overflow-hidden">
                   {(company as any).logoUrl ? (
                     <img 
