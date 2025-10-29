@@ -47,15 +47,19 @@ const ProjectCardsSection = () => {
   return (
     <>
       <section id="case-studies" className="py-32 px-4 relative overflow-hidden bg-[#074141]">
-        {/* Dot Grid Pattern */}
-        <div className="absolute inset-0 pointer-events-none opacity-20">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="dotPattern" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.3)" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#dotPattern)" />
+        {/* Topographic Contour Lines Pattern */}
+        <div className="absolute inset-0 pointer-events-none opacity-15">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0">
+            <path d="M0,100 Q250,120 500,100 T1000,100 T1500,100 T2000,100" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" fill="none" />
+            <path d="M0,180 Q200,200 400,180 T800,180 T1200,180 T1600,180 T2000,180" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" />
+            <path d="M0,250 Q300,230 600,250 T1200,250 T1800,250 T2000,250" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" fill="none" />
+            <path d="M0,320 Q220,340 440,320 T880,320 T1320,320 T1760,320 T2000,320" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" fill="none" />
+            <path d="M0,400 Q280,380 560,400 T1120,400 T1680,400 T2000,400" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" />
+            <path d="M0,480 Q240,500 480,480 T960,480 T1440,480 T1920,480 T2000,480" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" fill="none" />
+            <path d="M0,560 Q320,540 640,560 T1280,560 T1920,560 T2000,560" stroke="rgba(255,255,255,0.35)" strokeWidth="1.5" fill="none" />
+            <path d="M0,640 Q180,660 360,640 T720,640 T1080,640 T1440,640 T1800,640 T2000,640" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" fill="none" />
+            <path d="M0,720 Q260,700 520,720 T1040,720 T1560,720 T2000,720" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5" fill="none" />
+            <path d="M0,800 Q210,820 420,800 T840,800 T1260,800 T1680,800 T2000,800" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" fill="none" />
           </svg>
         </div>
         
