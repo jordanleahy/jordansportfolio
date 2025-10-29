@@ -7,7 +7,7 @@ import ruthNacyProfile from "@/assets/ruth-nacy-profile.jpeg";
 const testimonials = [
   {
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
-    author: "CDI Revenue Cycle Management",
+    author: "Ruth Nacey",
     role: "Director of Product",
     avatar: ruthNacyProfile
   },
