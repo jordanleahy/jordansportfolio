@@ -57,7 +57,7 @@ export const FigmaPasswordSection = ({
                 </motion.div>
                 <h2 className="text-3xl font-bold mb-2">{title}</h2>
                 {description && (
-                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px]" style={{ color: '#000' }}>
                     {description}
                   </p>
                 )}

@@ -42,7 +42,7 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                     </div>
                     <div className="flex-1 md:order-1">
                       <h3 className="text-2xl font-bold mb-2">{step.title}</h3>
-                      <p className="text-muted-foreground mb-4">{step.description}</p>
+                      <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px] mb-4" style={{ color: '#000' }}>{step.description}</p>
                       {step.items && (
                         <ul className="space-y-2 mb-4">
                           {step.items.map((item, itemIndex) => (

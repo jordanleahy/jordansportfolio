@@ -28,7 +28,7 @@ export const OutcomesSection = ({ title, userFeedback }: OutcomesSectionProps) =
               <blockquote className="text-xl italic text-muted-foreground mb-4 leading-relaxed">
                 "{userFeedback.quote}"
               </blockquote>
-              <p className="text-sm text-muted-foreground">— {userFeedback.author}</p>
+              <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px]" style={{ color: '#000' }}>— {userFeedback.author}</p>
             </div>
           </Card>
         )}

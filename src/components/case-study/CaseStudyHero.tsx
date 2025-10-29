@@ -56,12 +56,12 @@ export const CaseStudyHero = ({
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             <div>
               <h3 className="font-semibold text-muted-foreground mb-2">My Role</h3>
-              <p>{role}</p>
+              <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px]" style={{ color: '#000' }}>{role}</p>
               {roleDetails && <p className="text-sm text-muted-foreground">{roleDetails}</p>}
             </div>
             <div>
               <h3 className="font-semibold text-muted-foreground mb-2">Timeline</h3>
-              <p>{timeline}</p>
+              <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px]" style={{ color: '#000' }}>{timeline}</p>
             </div>
           </div>
 

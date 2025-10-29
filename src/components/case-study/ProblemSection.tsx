@@ -20,7 +20,7 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
           viewport={{ once: true }}
         >
           <h2 className="text-3xl font-bold mb-6">{title}</h2>
-          <p className="text-lg leading-relaxed text-muted-foreground mb-6">{description}</p>
+          <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px] mb-6" style={{ color: '#000' }}>{description}</p>
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {challenges.map((challenge, index) => (
               <div key={index} className="space-y-6">
