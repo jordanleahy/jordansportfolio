@@ -95,16 +95,21 @@ export const products = [
   {
     title: "Medical Coding Tools",
     link: "/cases/case4",
-    thumbnail: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/hero-parallax/8c1110c1-02c2-4041-987c-a9d030ffef3b.png",
+    thumbnail: "https://wgmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images/hero-parallax/8c1110c1-02c2-4041-987c-a9d030ffef3b.png",
   },
   {
-    title: "Healthcare Analytics Platform",
-    link: "/cases/case1",
-    thumbnail: getStorageImageUrl("4c976661-d94f-48e5-ab44-e69c629f2f91.png"),
+    title: "R1 Resolution Dashboard",
+    link: "/cases/case5",
+    thumbnail: "/lovable-uploads/placeholder-r1-dashboard.png",
   },
   {
-    title: "Clinical Operations Dashboard",
-    link: "/cases/case1",
-    thumbnail: getStorageImageUrl("762c3624-2485-4556-b7c7-63709fc409aa.png"),
+    title: "Payer Workflow Management",
+    link: "/cases/case5",
+    thumbnail: "/lovable-uploads/placeholder-r1-workflow.png",
+  },
+  {
+    title: "RCM Task Optimization",
+    link: "/cases/case5",
+    thumbnail: "/lovable-uploads/placeholder-r1-tasks.png",
   },
 ];

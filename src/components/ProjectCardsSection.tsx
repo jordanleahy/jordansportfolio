@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Workflow, FileText } from "lucide-react";
+import { ArrowRight, Brain, Shield, Workflow, FileText, Activity } from "lucide-react";
 import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 
@@ -33,6 +33,15 @@ const projects = [
     tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
     icon: Shield,
     path: "/cases/case4"
+  },
+  {
+    id: "case5",
+    title: "R1 RCM Resolution Workflow",
+    company: "R1 RCM",
+    description: "Redesigned resolution workflow to reduce denial follow-up time by 30%",
+    tags: ["#Healthcare", "#RCM", "#Workflow", "#Efficiency"],
+    icon: Activity,
+    path: "/cases/case5"
   }
 ];
 
@@ -162,6 +171,23 @@ const ProjectCardsSection = () => {
                          <img 
                            src="/lovable-uploads/866199b0-8a85-4f7b-957a-f215fd29176b.png"
                            alt="Drug Prior Authorization interface showing workflow steps"
+                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
+                         />
+                          <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                            <p className="text-white text-body-sm font-medium text-center px-4">
+                              Click and enter password for case details
+                            </p>
+                          </div>
+                       </div>
+                     </div>
+                  )}
+                  
+                  {project.id === "case5" && (
+                     <div className="px-6 pb-4">
+                       <div className="relative group/image">
+                         <img 
+                           src="/lovable-uploads/placeholder-r1-preview.png"
+                           alt="R1 Resolution dashboard showing payer call tasks"
                            className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
                          />
                           <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
