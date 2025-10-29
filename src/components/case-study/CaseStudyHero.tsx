@@ -34,7 +34,7 @@ export const CaseStudyHero = ({
         >
           <div className="mb-6">
             <h1 className="text-center font-medium text-[56px] leading-[61.6px] tracking-[0.84px] mb-2" style={{ color: '#042F3A' }}>{title}</h1>
-            <p className="text-lg text-muted-foreground mb-6">{description}</p>
+            <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px] mb-6" style={{ color: '#000' }}>{description}</p>
             
             {/* Hero Image */}
             <motion.div 
