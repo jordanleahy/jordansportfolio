@@ -27,7 +27,7 @@ const testimonials = [
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
     author: "Spencer Rizk DNP, APRN-CNP",
-    role: "Medical Doctor",
+    role: "Clinical Staff, One Medical",
     avatar: drugPriorAuthAvatar
   }
 ];
