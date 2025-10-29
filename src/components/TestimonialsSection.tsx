@@ -9,7 +9,7 @@ const testimonials = [
   {
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
     author: "Ruth Nacey",
-    role: "Director of Product",
+    role: "Director of Product, SmarterDx",
     avatar: ruthNacyProfile
   },
   {
