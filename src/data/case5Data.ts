@@ -30,7 +30,7 @@ export const case5Data: CaseStudyData = {
   
   // Problem Section
   problemTitle: "The Challenge",
-  problemDescription: "R1's existing Resolution product required multiple tabs and manual copy-paste across systems when working payer denials. Appeal members lost time context-switching between call scripts, portal logins, and internal documentation. This slowed down follow-ups and increased average resolution time, impacting the company's ability to meet SLAs and client satisfaction targets.",
+  problemDescription: "R1 had 3 legacy systems that managed denials and appeals with a complex process of collecting information, saving information and drafting appeal letters.",
   challenges: [
     {
       type: "problem",
