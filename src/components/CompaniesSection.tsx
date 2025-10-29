@@ -105,6 +105,8 @@ const CompaniesSection = () => {
                     window.open("https://www.smarterdx.com/", "_blank", "noopener,noreferrer");
                   } else if (company.name === "Prior Authorization") {
                     window.open("https://prescriberpoint.com/", "_blank", "noopener,noreferrer");
+                  } else if (company.name === "Pharma Innovation") {
+                    window.open("https://www.bcg.com/x/", "_blank", "noopener,noreferrer");
                   }
                 }}
               >
