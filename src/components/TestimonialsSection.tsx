@@ -13,7 +13,7 @@ const testimonials = [
     avatar: ruthNacyProfile
   },
   {
-    quote: "Working alongside Jordan was like having a trusted partner who truly understood the value of clear, data dense, medical information display.",
+    quote: "Jordan demonstrated a deep understanding of our users' needs and seamlessly translated complex requirements into intuitive and elegant experiences.",
     author: "Drug Prior Authorization and Appeals Management",
     role: "Clinical Operations Lead",
     avatar: bryanLawsonProfile
