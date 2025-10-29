@@ -75,7 +75,7 @@ const ProjectCardsSection = () => {
               </div>
             </motion.div>
             <h2 className="text-center mb-6 text-white text-[56px] font-medium leading-[61.6px] tracking-[0.84px]">Case Studies</h2>
-            <p className="text-white/80 text-body-lg max-w-2xl mx-auto">
+            <p className="text-white text-center text-[18px] font-normal leading-[27px] tracking-[-0.18px] max-w-2xl mx-auto">
               Deep dives into healthcare design challenges and solutions
             </p>
           </motion.div>
