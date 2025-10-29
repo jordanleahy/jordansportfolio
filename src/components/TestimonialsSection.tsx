@@ -46,7 +46,7 @@ const TestimonialsSection = () => {
           className="text-center mb-12"
         >
           <h2 className="text-center mb-4 text-[#042F3A] text-[56px] font-medium leading-[61.6px] tracking-[0.84px]">What People Say</h2>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-black font-['Inter'] text-[18px] font-normal leading-[27px] tracking-[-0.18px]">
             Feedback from colleagues and collaborators
           </p>
         </motion.div>
