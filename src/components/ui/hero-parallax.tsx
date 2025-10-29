@@ -106,6 +106,9 @@ export const HeroParallax = ({
 export const Header = () => {
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0 z-20">
+      <div className="text-xs md:text-sm font-medium text-primary tracking-wider uppercase mb-4">
+        JORDAN LEAHY
+      </div>
       <h1 className="text-2xl md:text-[64px] font-medium text-primary md:leading-[70.4px] drop-shadow-sm">
         Jordan Leahy <br /> Lead Product Designer
       </h1>
