@@ -21,7 +21,7 @@ const testimonials = [
     avatar: bryanLawsonProfile
   },
   {
-    quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
+    quote: "we tackled complex drug data, turning it into organized, accurate comparison information that HCPs could easily navigate.",
     author: "Shannon Epling",
     role: "Clinical Content Strategist, PrescriberPoint",
     avatar: shannonEplingProfile
