@@ -3,7 +3,7 @@ import { CaseStudyData } from "@/types/caseStudy";
 export const case5Data: CaseStudyData = {
   // Hero Section
   title: "Redesigning the Resolution Workflow to Reduce Denial Follow-Up Time by 30%",
-  description: "Led the redesign of R1 RCM's Resolution product to improve efficiency for payer follow-up teams handling claim denials. The new interface unified call, portal, and appeal workflows into one screen, reducing context switching and cognitive load for agents.",
+  description: "Led the redesign of R1 RCM's Resolution product to improve efficiency for payer follow-up teams handling claim denials. The new interface unified call, portal, and appeal workflows into one screen, reducing context switching and cognitive load for appeal members.",
   heroImage: "/lovable-uploads/placeholder-r1-hero.png",
   heroImageAlt: "A screenshot of the redesigned R1 Resolution dashboard showing payer call tasks, portal updates, and appeal statuses in one view.",
   role: "Lead Product Designer",
@@ -30,13 +30,13 @@ export const case5Data: CaseStudyData = {
   
   // Problem Section
   problemTitle: "The Challenge",
-  problemDescription: "R1's existing Resolution product required multiple tabs and manual copy-paste across systems when working payer denials. Agents lost time context-switching between call scripts, portal logins, and internal documentation. This slowed down follow-ups and increased average resolution time, impacting the company's ability to meet SLAs and client satisfaction targets.",
+  problemDescription: "R1's existing Resolution product required multiple tabs and manual copy-paste across systems when working payer denials. Appeal members lost time context-switching between call scripts, portal logins, and internal documentation. This slowed down follow-ups and increased average resolution time, impacting the company's ability to meet SLAs and client satisfaction targets.",
   challenges: [
     {
       type: "problem",
       title: "Workflow Inefficiencies",
       items: [
-        "Agents manually tracked payer interactions across multiple systems.",
+        "Appeal members manually tracked payer interactions across multiple systems.",
         "Key claim details were buried within nested screens.",
         "Lack of visibility into pending or escalated tasks."
       ]
@@ -45,7 +45,7 @@ export const case5Data: CaseStudyData = {
       type: "need",
       title: "Design Requirements",
       items: [
-        "Enable agents to complete all resolution tasks from one screen.",
+        "Enable appeal members to complete all resolution tasks from one screen.",
         "Provide clear visibility into task status and payer response deadlines.",
         "Integrate contextual data (notes, payer details, documentation) inline."
       ]
@@ -59,7 +59,7 @@ export const case5Data: CaseStudyData = {
       title: "My Role",
       description: "Owned UX strategy, user research, and visual design across all resolution workflows.",
       items: [
-        "Conducted user interviews with appeal writers and resolution agents.",
+        "Conducted user interviews with appeal writers and resolution appeal members.",
         "Mapped end-to-end workflows across payer call, portal, and appeal tasks.",
         "Created prototypes for triage and follow-up flows.",
         "Collaborated with product and engineering to define implementation scope."
@@ -95,7 +95,7 @@ export const case5Data: CaseStudyData = {
       title: "1. Research & Discovery",
       description: "Mapped current-state workflows to identify pain points in daily resolution work.",
       items: [
-        "Conducted 8 contextual interviews with agents.",
+        "Conducted 8 contextual interviews with appeal members.",
         "Performed heuristic analysis of the legacy tool.",
         "Synthesized recurring issues with navigation and visibility.",
         "Defined key moments of friction and delay."
@@ -125,7 +125,7 @@ export const case5Data: CaseStudyData = {
         "Aligned prototype data states with backend readiness."
       ],
       quote: {
-        text: "This design makes it easier for new agents to understand the full context without jumping screens.",
+        text: "This design makes it easier for new appeal members to understand the full context without jumping screens.",
         author: "Product Manager, Payer Workflows"
       },
       image: "/lovable-uploads/placeholder-r1-ideation.png",
@@ -141,9 +141,9 @@ export const case5Data: CaseStudyData = {
     {
       icon: "Target",
       title: "3. Prototyping & Validation",
-      description: "Validated usability and comprehension with experienced agents.",
+      description: "Validated usability and comprehension with experienced appeal members.",
       items: [
-        "Conducted remote usability sessions with 6 agents.",
+        "Conducted remote usability sessions with 6 appeal members.",
         "Measured task completion time and satisfaction.",
         "Iterated on column density and data grouping.",
         "Refined hierarchy for call vs. portal task types."
@@ -221,7 +221,7 @@ export const case5Data: CaseStudyData = {
   // Outcomes Section
   outcomesTitle: "Outcomes",
   userFeedback: {
-    quote: "Agents completed 30% more tasks per hour and reduced average resolution time from 9 to 6 minutes per claim.",
+    quote: "Appeal members completed 30% more tasks per hour and reduced average resolution time from 9 to 6 minutes per claim.",
     author: "Operations Director, R1 RCM"
   },
   
