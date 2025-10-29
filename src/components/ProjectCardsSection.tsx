@@ -184,7 +184,7 @@ const ProjectCardsSection = () => {
                   )}
                   
                   <CardContent className="pt-0 relative z-10">
-                    <p className="text-card-foreground mb-6 leading-relaxed text-body-base">
+                    <p className="text-card-foreground mb-6 leading-relaxed text-body-base flex flex-col items-start self-stretch">
                       {project.description}
                     </p>
                     
