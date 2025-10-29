@@ -16,8 +16,8 @@
     --popover: 0 0% 100%; /* Pure white */
     --popover-foreground: 210 11% 15%; /* Soft Charcoal */
 
-    --primary: 210 11% 15%; /* Black: #2F2F32 */
-    --primary-foreground: 0 0% 100%; /* White text on black */
+    --primary: 187 82% 12%; /* Dark Teal: #042F3A */
+    --primary-foreground: 0 0% 100%; /* White text on dark teal */
 
     --secondary: 210 14% 92%; /* Light gray for secondary */
     --secondary-foreground: 210 11% 15%; /* Soft Charcoal */
@@ -156,8 +156,8 @@
     --popover: 210 11% 18%; /* Slightly lighter charcoal */
     --popover-foreground: 210 14% 97%; /* Light text */
 
-    --primary: 210 11% 15%; /* Black: #2F2F32 */
-    --primary-foreground: 0 0% 100%; /* White text on black */
+    --primary: 187 82% 12%; /* Dark Teal: #042F3A */
+    --primary-foreground: 0 0% 100%; /* White text on dark teal */
 
     --secondary: 215 16% 20%; /* Dark gray for secondary */
     --secondary-foreground: 210 14% 97%; /* Light text */
