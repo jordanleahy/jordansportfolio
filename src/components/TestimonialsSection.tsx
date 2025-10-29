@@ -4,6 +4,7 @@ import { Quote, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ruthNacyProfile from "@/assets/ruth-nacy-profile.jpeg";
 import bryanLawsonProfile from "@/assets/bryan-lawson-profile.jpeg";
+import drugPriorAuthAvatar from "@/assets/bryan-lawson.jpeg";
 
 const testimonials = [
   {
@@ -26,7 +27,8 @@ const testimonials = [
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
     author: "Drug Prior Authorization and Appeals Management",
-    role: "Medical Doctor"
+    role: "Medical Doctor",
+    avatar: drugPriorAuthAvatar
   }
 ];
 
