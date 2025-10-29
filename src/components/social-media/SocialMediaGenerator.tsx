@@ -227,10 +227,10 @@ export const SocialMediaGenerator: React.FC<SocialMediaGeneratorProps> = ({ blog
       <CardContent className="space-y-6">
         {/* Agent Setup Check */}
         {!agentExists && (
-          <div className="p-4 border border-orange-200 bg-orange-50 rounded-lg">
+          <div className="p-4 border border-warning/20 bg-warning/10 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-orange-800">Setup Required</h4>
+                <h4 className="font-medium text-warning">Setup Required</h4>
                 <p className="text-sm text-orange-700">
                   Social Media Agent needs to be created first.
                 </p>

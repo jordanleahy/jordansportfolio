@@ -42,7 +42,7 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {jobApplication?.resume_link && (
-              <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
+              <Button asChild size="lg" className="bg-info hover:bg-info/90">
                 <a href={jobApplication.resume_link} target="_blank" rel="noopener noreferrer">
                   <FileText className="w-5 h-5 mr-2" />
                   View Resume
@@ -147,9 +147,9 @@ const PublicPortfolioView = ({ portfolio }: PublicPortfolioViewProps) => {
       )}
 
       {/* Footer */}
-      <footer className="py-12 px-4 bg-gray-900 text-white">
+      <footer className="py-12 px-4 bg-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             This personalized portfolio was generated for {portfolio.company_name}
           </p>
           <p className="text-sm text-gray-500 mt-2">

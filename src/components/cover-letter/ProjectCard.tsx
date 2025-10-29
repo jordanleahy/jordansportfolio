@@ -36,7 +36,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) =>
       <CardContent>
         <div className="flex flex-wrap gap-2 mb-4">
           {project.tags.map((tag, index) => (
-            <span key={index} className="px-2 py-1 bg-gray-800 text-white text-xs rounded-full">
+            <span key={index} className="px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full">
               {tag}
             </span>
           ))}

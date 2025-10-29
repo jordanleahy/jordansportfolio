@@ -52,15 +52,15 @@ export default function PublicVendorView() {
   const getCompanyTypeBadgeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'startup':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-800/20 dark:text-emerald-300';
+        return 'bg-success/10 text-success dark:bg-success/20';
       case 'private':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-800/20 dark:text-blue-300';
+        return 'bg-info/10 text-info dark:bg-info/20';
       case 'public':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-800/20 dark:text-purple-300';
+        return 'bg-accent/10 text-accent dark:bg-accent/20';
       case 'subsidiary':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-800/20 dark:text-orange-300';
+        return 'bg-warning/10 text-warning dark:bg-warning/20';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800/20 dark:text-gray-300';
+        return 'bg-muted text-muted-foreground dark:bg-muted/20';
     }
   };
 

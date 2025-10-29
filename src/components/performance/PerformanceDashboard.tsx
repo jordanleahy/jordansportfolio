@@ -133,7 +133,7 @@ export const PerformanceDashboard: React.FC = () => {
           <CardContent>
             <div className="space-y-2">
               {stats.recentErrors.slice(0, 5).map((error, index) => (
-                <div key={index} className="text-sm text-red-600 p-2 bg-red-50 rounded">
+                <div key={index} className="text-sm text-destructive p-2 bg-destructive/10 rounded">
                   {error}
                 </div>
               ))}

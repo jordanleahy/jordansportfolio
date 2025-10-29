@@ -176,9 +176,9 @@ export const IndividualPromptViewer: React.FC<IndividualPromptViewerProps> = ({
               key={index}
               className={
                 part.added
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+                  ? 'bg-success/10 text-success dark:bg-success/20'
                   : part.removed
-                  ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300 line-through'
+                  ? 'bg-destructive/10 text-destructive dark:bg-destructive/20 line-through'
                   : 'text-muted-foreground'
               }
             >

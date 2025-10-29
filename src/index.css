@@ -30,6 +30,14 @@
 
     --destructive: 0 72% 51%; /* Error Red: #D64545 */
     --destructive-foreground: 210 40% 98%;
+    
+    /* Status Colors */
+    --success: 142 71% 45%; /* Green for success states */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%; /* Orange for warning states */
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 60%; /* Blue for info states */
+    --info-foreground: 0 0% 100%;
 
     --border: 214 32% 91%; /* Subtle border */
     --input: 214 32% 91%; /* Input background */
@@ -162,6 +170,14 @@
 
     --destructive: 0 72% 51%; /* Error Red */
     --destructive-foreground: 210 40% 98%;
+    
+    /* Status Colors - Dark Mode */
+    --success: 142 71% 45%; /* Green for success states */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%; /* Orange for warning states */
+    --warning-foreground: 0 0% 100%;
+    --info: 217 91% 60%; /* Blue for info states */
+    --info-foreground: 0 0% 100%;
 
     --border: 215 16% 20%; /* Subtle dark border */
     --input: 215 16% 20%; /* Input background */

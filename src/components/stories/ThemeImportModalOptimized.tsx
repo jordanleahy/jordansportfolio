@@ -206,8 +206,8 @@ AVOID:
 
           {/* Success Message */}
           {showSuccessMessage && (
-            <Alert className="border-green-200 bg-green-50 text-green-800">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+            <Alert className="border-success/20 bg-success/10 text-success">
+              <CheckCircle className="h-4 w-4 text-success" />
               <AlertDescription>
                 <strong>Success!</strong> Your theme has been imported successfully. The modal will close automatically.
               </AlertDescription>

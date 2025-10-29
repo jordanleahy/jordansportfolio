@@ -64,11 +64,11 @@ export const PipelineProgressModal: React.FC<PipelineProgressModalProps> = ({
 
           {/* Result Summary */}
           {result && (
-            <div className="space-y-2 p-3 bg-green-50 rounded-lg border border-green-200">
-              <p className="text-sm font-medium text-green-800">
+            <div className="space-y-2 p-3 bg-success/10 rounded-lg border border-success/20">
+              <p className="text-sm font-medium text-success">
                 Success! Created "{result.theme}"
               </p>
-              <p className="text-sm text-green-600">
+              <p className="text-sm text-success">
                 • {result.postCount} posts generated
                 • Theme image created
                 • Category: {result.category}
@@ -78,8 +78,8 @@ export const PipelineProgressModal: React.FC<PipelineProgressModalProps> = ({
 
           {/* Error Details */}
           {error && (
-            <div className="space-y-2 p-3 bg-red-50 rounded-lg border border-red-200">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="space-y-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+              <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
 

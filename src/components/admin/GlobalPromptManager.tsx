@@ -43,10 +43,10 @@ export const GlobalPromptManager: React.FC = () => {
 
   const getStatusBadge = () => {
     if (isProcessing) {
-      return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Processing</Badge>;
+      return <Badge variant="secondary" className="bg-info/10 text-info">Processing</Badge>;
     }
     if (status.postsMissing === 0) {
-      return <Badge variant="default" className="bg-green-100 text-green-800">Complete</Badge>;
+      return <Badge variant="default" className="bg-success/10 text-success">Complete</Badge>;
     }
     return <Badge variant="destructive">Missing Prompts</Badge>;
   };
@@ -93,20 +93,20 @@ export const GlobalPromptManager: React.FC = () => {
               <div className="text-2xl font-bold text-primary">{status.totalPosts}</div>
               <div className="text-sm text-muted-foreground">Total Posts</div>
             </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">{status.postsWithPrompts}</div>
+            <div className="text-center p-3 bg-success/10 rounded-lg">
+              <div className="text-2xl font-bold text-success">{status.postsWithPrompts}</div>
               <div className="text-sm text-muted-foreground">With Prompts</div>
             </div>
-            <div className="text-center p-3 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">{status.postsMissing}</div>
+            <div className="text-center p-3 bg-destructive/10 rounded-lg">
+              <div className="text-2xl font-bold text-destructive">{status.postsMissing}</div>
               <div className="text-sm text-muted-foreground">Missing</div>
             </div>
           </div>
 
           {/* Current Processing */}
           {isProcessing && (
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-2 text-blue-800">
+            <div className="p-4 bg-info/10 rounded-lg border border-info/20">
+              <div className="flex items-center gap-2 text-info">
                 <RefreshCw className="h-4 w-4 animate-spin" />
                 <span className="font-medium">Processing...</span>
               </div>

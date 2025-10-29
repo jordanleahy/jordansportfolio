@@ -30,11 +30,11 @@ import type { PostsTableViewProps } from '@/types/stories/ui';
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'published':
-      return 'bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 transition-colors';
+      return 'bg-success/10 text-success border-success/20 hover:bg-success/20 transition-colors';
     case 'scheduled':
-      return 'bg-blue-500/10 text-blue-700 border-blue-500/20 hover:bg-blue-500/20 transition-colors';
+      return 'bg-info/10 text-info border-info/20 hover:bg-info/20 transition-colors';
     default:
-      return 'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 hover:bg-yellow-500/20 transition-colors';
+      return 'bg-warning/10 text-warning border-warning/20 hover:bg-warning/20 transition-colors';
   }
 };
 

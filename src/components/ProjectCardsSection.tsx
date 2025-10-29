@@ -14,7 +14,6 @@ const projects = [
     description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
-    color: "bg-blue-500",
     path: "/cases/case1"
   },
   {
@@ -24,7 +23,6 @@ const projects = [
     description: "Inpatient EMR notes are essential for assigning the correct ICD-10 codes but they are often \"duplicates\" or \"copy and pasted\" making it hard for systems and humans to assign the right codes.",
     tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates", "#MetabolicEncephalopathy", "#UnstructuredNotes"],
     icon: FileText,
-    color: "bg-orange-500",
     path: "/cases/case2"
   },
   {
@@ -34,7 +32,6 @@ const projects = [
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
     icon: Shield,
-    color: "bg-green-500",
     path: "/cases/case4"
   }
 ];

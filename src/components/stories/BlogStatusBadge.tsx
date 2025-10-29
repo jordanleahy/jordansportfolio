@@ -28,13 +28,13 @@ export const BlogStatusBadge = ({ postId, className, blogStatus }: BlogStatusBad
   const getBlogStatusColor = (status: string) => {
     switch (status) {
       case CONTENT_STATUS.PUBLISHED:
-        return 'bg-emerald-500/20 text-emerald-700 border-emerald-500/20';
+        return 'bg-success/20 text-success border-success/20';
       case CONTENT_STATUS.DRAFT:
-        return 'bg-purple-500/20 text-purple-700 border-purple-500/20';
+        return 'bg-accent/20 text-accent border-accent/20';
       case CONTENT_STATUS.SCHEDULED:
-        return 'bg-blue-500/20 text-blue-700 border-blue-500/20';
+        return 'bg-info/20 text-info border-info/20';
       default:
-        return 'bg-gray-500/20 text-gray-700 border-gray-500/20';
+        return 'bg-muted/20 text-muted-foreground border-muted/20';
     }
   };
 

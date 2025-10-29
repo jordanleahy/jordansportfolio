@@ -125,7 +125,7 @@ export const ResponsiveTestModal = ({ isOpen, onClose }: ResponsiveTestModalProp
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+          <div className="text-xs text-muted-foreground mt-4 p-3 bg-info/10 rounded-lg">
             <strong>Responsive Features Tested:</strong>
             <ul className="mt-1 space-y-1">
               <li>• Modal width adapts to screen size (95vw mobile, max-w-4xl desktop)</li>

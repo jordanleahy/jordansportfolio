@@ -26,14 +26,14 @@ export const VendorQAResults = ({
   isProcessing 
 }: VendorQAResultsProps) => {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-    if (score >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-    return 'text-red-600 bg-red-50 border-red-200';
+    if (score >= 80) return 'text-success bg-success/10 border-success/20';
+    if (score >= 60) return 'text-warning bg-warning/10 border-warning/20';
+    return 'text-destructive bg-destructive/10 border-destructive/20';
   };
 
   const getScoreIcon = (score: number) => {
-    if (score >= 70) return <CheckCircle className="h-5 w-5 text-green-600" />;
-    return <XCircle className="h-5 w-5 text-red-600" />;
+    if (score >= 70) return <CheckCircle className="h-5 w-5 text-success" />;
+    return <XCircle className="h-5 w-5 text-destructive" />;
   };
 
   return (
@@ -53,11 +53,11 @@ export const VendorQAResults = ({
         </CardHeader>
         <CardContent className="space-y-2 sm:space-y-3">
           <div className="flex items-center gap-2 mb-2">
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div 
                 className={`h-2 rounded-full ${
-                  qaResult.qualityScore >= 80 ? 'bg-green-500' :
-                  qaResult.qualityScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                  qaResult.qualityScore >= 80 ? 'bg-success' :
+                  qaResult.qualityScore >= 60 ? 'bg-warning' : 'bg-destructive'
                 }`}
                 style={{ width: `${qaResult.qualityScore}%` }}
               />
@@ -77,7 +77,7 @@ export const VendorQAResults = ({
         <Card>
           <CardHeader className="pb-2 sm:pb-3">
             <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-              <CheckCircle className="h-4 w-4 text-blue-600 flex-shrink-0" />
+              <CheckCircle className="h-4 w-4 text-info flex-shrink-0" />
               <span>Analysis Feedback</span>
             </CardTitle>
           </CardHeader>
@@ -85,7 +85,7 @@ export const VendorQAResults = ({
             <ul className="space-y-2">
               {qaResult.feedback.map((item, index) => (
                 <li key={index} className="text-xs sm:text-sm flex items-start gap-2">
-                  <span className="text-blue-600 mt-1 flex-shrink-0">•</span>
+                  <span className="text-info mt-1 flex-shrink-0">•</span>
                   <span className="leading-relaxed break-words">{item}</span>
                 </li>
               ))}
@@ -96,9 +96,9 @@ export const VendorQAResults = ({
 
       {/* Warnings */}
       {qaResult.warnings.length > 0 && (
-        <Card className="border-orange-200 bg-orange-50">
+        <Card className="border-warning/20 bg-warning/10">
           <CardHeader className="pb-2 sm:pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm sm:text-base text-orange-800">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base text-warning">
               <AlertTriangle className="h-4 w-4 flex-shrink-0" />
               <span>Warnings</span>
             </CardTitle>
@@ -106,8 +106,8 @@ export const VendorQAResults = ({
           <CardContent>
             <ul className="space-y-2">
               {qaResult.warnings.map((item, index) => (
-                <li key={index} className="text-xs sm:text-sm text-orange-700 flex items-start gap-2">
-                  <span className="text-orange-600 mt-1 flex-shrink-0">⚠</span>
+                <li key={index} className="text-xs sm:text-sm text-warning flex items-start gap-2">
+                  <span className="text-warning mt-1 flex-shrink-0">⚠</span>
                   <span className="leading-relaxed break-words">{item}</span>
                 </li>
               ))}
@@ -118,9 +118,9 @@ export const VendorQAResults = ({
 
       {/* Suggestions */}
       {qaResult.suggestions.length > 0 && (
-        <Card className="border-purple-200 bg-purple-50">
+        <Card className="border-accent/20 bg-accent/10">
           <CardHeader className="pb-2 sm:pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm sm:text-base text-purple-800">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base text-accent">
               <Lightbulb className="h-4 w-4 flex-shrink-0" />
               <span>Improvement Suggestions</span>
             </CardTitle>
@@ -128,8 +128,8 @@ export const VendorQAResults = ({
           <CardContent>
             <ul className="space-y-2">
               {qaResult.suggestions.map((item, index) => (
-                <li key={index} className="text-xs sm:text-sm text-purple-700 flex items-start gap-2">
-                  <span className="text-purple-600 mt-1 flex-shrink-0">💡</span>
+                <li key={index} className="text-xs sm:text-sm text-accent flex items-start gap-2">
+                  <span className="text-accent mt-1 flex-shrink-0">💡</span>
                   <span className="leading-relaxed break-words">{item}</span>
                 </li>
               ))}

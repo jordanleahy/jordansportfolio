@@ -177,7 +177,7 @@ export const ImagePromptGeneratorModal = ({
                       <label className="text-sm font-medium">Generated Image Prompt:</label>
                       <div className="flex items-center gap-2 flex-wrap">
                         {isFromCache && (
-                          <span className="text-xs text-muted-foreground bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
+                          <span className="text-xs text-muted-foreground bg-info/10 dark:bg-info/20 px-2 py-1 rounded">
                             From Cache
                           </span>
                         )}

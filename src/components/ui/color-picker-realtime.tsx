@@ -168,14 +168,14 @@ export function ColorPickerRealtime({
         {/* Status Bar */}
         <div className="flex items-center gap-2 text-sm">
           {isPreviewMode && (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="outline" className="bg-info/10 text-info border-info/20">
               <Eye className="h-3 w-3 mr-1" />
               Preview Mode
             </Badge>
           )}
           
           {lastChangeUser && lastChangeUser !== 'current-user' && (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="bg-success/10 text-success border-success/20">
               Updated by {lastChangeUser}
             </Badge>
           )}

@@ -27,8 +27,8 @@ export const ReflectionSection = ({ title, reflections }: ReflectionSectionProps
             const isChallenge = reflection.type === 'challenge';
             const isLearning = reflection.type === 'learning';
             
-            const iconColor = isSuccess ? 'text-green-500' : isChallenge ? 'text-orange-500' : 'text-blue-500';
-            const bgColor = isSuccess ? 'bg-green-500/10' : isChallenge ? 'bg-orange-500/10' : 'bg-blue-500/10';
+            const iconColor = isSuccess ? 'text-success' : isChallenge ? 'text-warning' : 'text-info';
+            const bgColor = isSuccess ? 'bg-success/10' : isChallenge ? 'bg-warning/10' : 'bg-info/10';
             const IconComponent = isSuccess ? CheckCircle : isChallenge ? AlertTriangle : ArrowRight;
 
             return (

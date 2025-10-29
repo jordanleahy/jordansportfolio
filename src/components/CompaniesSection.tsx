@@ -126,14 +126,14 @@ const CompaniesSection = () => {
                           onChange={(e) => handleFileChange(company.name, e)}
                           className="hidden"
                         />
-                        <div className="bg-white text-black p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <div className="bg-card text-card-foreground p-2 rounded-full hover:bg-accent hover:text-accent-foreground transition-colors">
                           <Upload size={16} />
                         </div>
                       </label>
                       {(company as any).logoUrl && (
                         <button
                           onClick={() => removeLogo(company.name)}
-                          className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                          className="bg-destructive text-destructive-foreground p-2 rounded-full hover:bg-destructive/90 transition-colors"
                         >
                           <X size={16} />
                         </button>

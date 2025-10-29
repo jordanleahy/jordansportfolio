@@ -98,7 +98,7 @@ export const GenerationProgress = ({
             {index < steps.length - 1 && (
               <div className={cn(
                 "w-2 h-px bg-border mx-1",
-                step.completed && "bg-green-200"
+                step.completed && "bg-success/20"
               )} />
             )}
           </div>
@@ -151,7 +151,7 @@ export const GenerationProgress = ({
             {index < steps.length - 1 && (
               <div className={cn(
                 "w-4 h-px bg-border",
-                step.completed && "bg-green-200"
+                step.completed && "bg-success/20"
               )} />
             )}
           </div>
