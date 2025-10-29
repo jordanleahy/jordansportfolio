@@ -46,7 +46,7 @@ const ProjectCardsSection = () => {
 
   return (
     <>
-      <section id="case-studies" className="py-32 px-4 relative overflow-hidden">
+      <section id="case-studies" className="py-32 px-4 relative overflow-hidden bg-[#074141]">
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-20 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
@@ -71,11 +71,11 @@ const ProjectCardsSection = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
                 </span>
-                <span className="text-body-sm font-medium text-accent">Featured Work</span>
+                <span className="text-body-sm font-medium text-white">Featured Work</span>
               </div>
             </motion.div>
-            <h2 className="text-center mb-6 text-[#042F3A] text-[56px] font-medium leading-[61.6px] tracking-[0.84px]">Case Studies</h2>
-            <p className="text-muted-foreground text-body-lg max-w-2xl mx-auto">
+            <h2 className="text-center mb-6 text-white text-[56px] font-medium leading-[61.6px] tracking-[0.84px]">Case Studies</h2>
+            <p className="text-white/80 text-body-lg max-w-2xl mx-auto">
               Deep dives into healthcare design challenges and solutions
             </p>
           </motion.div>
