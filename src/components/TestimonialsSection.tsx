@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Quote, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ruthNacyProfile from "@/assets/ruth-nacy-profile.jpeg";
+import bryanLawsonProfile from "@/assets/bryan-lawson-profile.jpeg";
 
 const testimonials = [
   {
@@ -14,7 +15,8 @@ const testimonials = [
   {
     quote: "Working alongside Jordan was like having a trusted partner who truly understood the value of clear, data dense, medical information display.",
     author: "Drug Prior Authorization and Appeals Management",
-    role: "Clinical Operations Lead"
+    role: "Clinical Operations Lead",
+    avatar: bryanLawsonProfile
   },
   {
     quote: "His ability to balance creativity with practicality ensured our projects not only looked exceptional but also delivered outstanding user experiences.",
