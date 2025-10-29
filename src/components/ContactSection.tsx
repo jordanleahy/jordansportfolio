@@ -35,7 +35,7 @@ const ContactSection = () => {
       }} viewport={{
         once: true
       }} className="text-center mb-16">
-          <h2 className="text-heading-xl font-bold mb-4 text-foreground">Let's Work Together</h2>
+          <h2 className="text-center mb-4 text-[#042F3A] text-[56px] font-medium leading-[61.6px] tracking-[0.84px]">Let's Work Together</h2>
           <p className="text-muted-foreground text-body-lg max-w-2xl mx-auto">
             I'm always interested in new opportunities, challenging projects, and meaningful collaborations. 
             Let's discuss how we can create better healthcare experiences together.
