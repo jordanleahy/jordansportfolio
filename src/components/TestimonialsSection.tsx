@@ -26,7 +26,7 @@ const testimonials = [
   },
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
-    author: "Drug Prior Authorization and Appeals Management",
+    author: "Spencer Rizk DNP, APRN-CNP",
     role: "Medical Doctor",
     avatar: drugPriorAuthAvatar
   }
