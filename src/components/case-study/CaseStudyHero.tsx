@@ -33,7 +33,7 @@ export const CaseStudyHero = ({
           transition={{ duration: 0.6 }}
         >
           <div className="mb-6">
-            <h1 className="text-4xl font-bold mb-2">{title}</h1>
+            <h1 className="text-center font-medium text-[56px] leading-[61.6px] tracking-[0.84px] mb-2" style={{ color: '#042F3A' }}>{title}</h1>
             <p className="text-lg text-muted-foreground mb-6">{description}</p>
             
             {/* Hero Image */}
