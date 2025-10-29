@@ -107,6 +107,8 @@ const CompaniesSection = () => {
                     window.open("https://prescriberpoint.com/", "_blank", "noopener,noreferrer");
                   } else if (company.name === "Pharma Innovation") {
                     window.open("https://www.bcg.com/x/", "_blank", "noopener,noreferrer");
+                  } else if (company.name === "Claims Intelligence") {
+                    window.open("https://www.definitivehc.com/", "_blank", "noopener,noreferrer");
                   }
                 }}
               >
