@@ -36,7 +36,7 @@ const ContactSection = () => {
         once: true
       }} className="text-center mb-16">
           <h2 className="text-center mb-4 text-[#042F3A] text-[56px] font-medium leading-[61.6px] tracking-[0.84px]">Let's Work Together</h2>
-          <p className="text-muted-foreground text-body-lg max-w-2xl mx-auto">
+          <p className="text-black font-['Inter'] text-[18px] font-normal leading-[27px] tracking-[-0.18px] max-w-2xl mx-auto">
             I'm always interested in new opportunities, challenging projects, and meaningful collaborations. 
             Let's discuss how we can create better healthcare experiences together.
           </p>
