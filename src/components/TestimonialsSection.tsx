@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote } from "lucide-react";
+import { Quote, User } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const testimonials = [
   {
@@ -58,9 +59,16 @@ const TestimonialsSection = () => {
                   <blockquote className="font-sans text-lg mb-4 leading-relaxed text-card-foreground">
                     "{testimonial.quote}"
                   </blockquote>
-                  <div className="border-t border-accent/20 pt-4">
-                    <p className="font-sans font-semibold text-foreground">{testimonial.author}</p>
-                    <p className="font-sans text-sm text-accent">{testimonial.role}</p>
+                  <div className="border-t border-accent/20 pt-4 flex items-center gap-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="bg-accent/10">
+                        <User className="h-6 w-6 text-accent" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-sans font-semibold text-foreground">{testimonial.author}</p>
+                      <p className="font-sans text-sm text-accent">{testimonial.role}</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
