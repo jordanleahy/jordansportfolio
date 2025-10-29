@@ -1,7 +1,6 @@
 import { SEOHead } from "./SEOHead";
 import { CaseStudyPage } from "./CaseStudyPage";
 import { CaseStudyHero } from "./CaseStudyHero";
-import { FinalProductSection } from "./FinalProductSection";
 import { FigmaPasswordSection } from "./FigmaPasswordSection";
 import { ProblemSection } from "./ProblemSection";
 import { TeamSection } from "./TeamSection";
@@ -39,8 +38,6 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         timelineDetails={data.timelineDetails}
         tags={data.tags}
       />
-      
-      <FinalProductSection data={data.finalProduct} />
       
       {data.figmaPresentation?.enabled && (
         <FigmaPasswordSection
