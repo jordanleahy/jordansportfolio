@@ -110,7 +110,7 @@ export const Header = () => {
         JORDAN LEAHY
       </div>
       <h1 className="text-2xl md:text-[64px] font-medium text-primary md:leading-[70.4px] drop-shadow-sm">
-        Jordan Leahy <br /> Digital Health Product Designer
+        Digital Health Product Designer
       </h1>
       <p className="max-w-2xl text-[18px] md:text-[18px] mt-8 font-normal leading-[27px] tracking-[-0.18px] text-black drop-shadow-sm">
        I'm focused on identifying repetitive manual tasks in revenue cycle and automating them using AI and thoughtful, user-centered design. 
