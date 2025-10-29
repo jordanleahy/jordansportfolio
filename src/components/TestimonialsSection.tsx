@@ -1,13 +1,15 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote, User } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ruthNacyProfile from "@/assets/ruth-nacy-profile.jpeg";
 
 const testimonials = [
   {
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
     author: "CDI Revenue Cycle Management",
-    role: "Director of Product"
+    role: "Director of Product",
+    avatar: ruthNacyProfile
   },
   {
     quote: "Working alongside Jordan was like having a trusted partner who truly understood the value of clear, data dense, medical information display.",
@@ -61,6 +63,9 @@ const TestimonialsSection = () => {
                   </blockquote>
                   <div className="border-t border-accent/20 pt-4 flex items-center gap-3">
                     <Avatar className="h-12 w-12">
+                      {testimonial.avatar && (
+                        <AvatarImage src={testimonial.avatar} alt={testimonial.author} />
+                      )}
                       <AvatarFallback className="bg-accent/10">
                         <User className="h-6 w-6 text-accent" />
                       </AvatarFallback>
