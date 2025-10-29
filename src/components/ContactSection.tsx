@@ -22,7 +22,7 @@ const ContactSection = () => {
     href: "https://calendly.com/jordanleahy",
     description: "Free consultation available"
   }];
-  return <section id="contact" className="py-24 px-4 bg-background">
+  return <section id="contact" className="py-24 px-4 bg-white">
       <div className="max-w-4xl mx-auto">
         <motion.div initial={{
         opacity: 0,
