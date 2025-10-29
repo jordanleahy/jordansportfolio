@@ -47,6 +47,18 @@ const ProjectCardsSection = () => {
   return (
     <>
       <section id="case-studies" className="py-32 px-4 relative overflow-hidden bg-[#074141]">
+        {/* Dot Grid Pattern */}
+        <div className="absolute inset-0 pointer-events-none opacity-20">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="dotPattern" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.3)" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dotPattern)" />
+          </svg>
+        </div>
+        
         {/* Background decoration */}
         <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent pointer-events-none" />
         <div className="absolute top-20 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
