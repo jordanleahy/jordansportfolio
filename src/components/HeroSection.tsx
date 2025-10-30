@@ -11,9 +11,9 @@ const HeroSection = () => {
   };
 
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 pt-20">
+    <section id="hero" className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 pt-20 bg-white">
       {/* Enhanced background with gradients */}
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-background to-primary/5" />
+      <div className="absolute inset-0 bg-white" />
       <div className="absolute inset-0 bg-grid-pattern opacity-20" />
       
       {/* Animated gradient orbs */}
