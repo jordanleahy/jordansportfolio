@@ -1,0 +1,262 @@
+{
+  "vendorLayoutDesign": {
+    "overview": "Two-column responsive vendor profile layout with header, breadcrumb navigation, and sidebar",
+    "technology": {
+      "framework": "React with TypeScript",
+      "styling": "Tailwind CSS with shadcn/ui components",
+      "routing": "React Router",
+      "dataFetching": "React Query"
+    },
+    "structure": {
+      "layoutHierarchy": [
+        "PageLayout (base wrapper)",
+        "Container (container mx-auto py-8 px-4)",
+        "Breadcrumb Navigation",
+        "Header Section",
+        "Main Content Grid (3 columns on lg, 1 column on mobile)"
+      ]
+    },
+    "sections": {
+      "breadcrumb": {
+        "component": "Breadcrumb",
+        "structure": "Home > Category > Company Name",
+        "styling": "Fixed at top of container"
+      },
+      "header": {
+        "layout": "flex-col md:flex-row with gap-4",
+        "elements": [
+          {
+            "element": "Company Name",
+            "tag": "h1",
+            "classes": "text-2xl sm:text-3xl md:text-4xl font-bold"
+          },
+          {
+            "element": "Company Type Badge",
+            "component": "Badge",
+            "variants": {
+              "startup": "bg-success/10 text-success",
+              "private": "bg-info/10 text-info",
+              "public": "bg-accent/10 text-accent",
+              "subsidiary": "bg-warning/10 text-warning"
+            }
+          },
+          {
+            "element": "Location & Founded",
+            "display": "flex items-center gap-3",
+            "icons": ["Building", "Calendar"]
+          },
+          {
+            "element": "Visit Website Button",
+            "component": "Button",
+            "size": "lg",
+            "position": "right aligned"
+          }
+        ]
+      },
+      "mainGrid": {
+        "layout": "grid grid-cols-1 lg:grid-cols-3 gap-8",
+        "leftColumn": {
+          "span": "lg:col-span-2",
+          "sections": [
+            {
+              "name": "Core Services",
+              "component": "Card",
+              "icon": "Target",
+              "dataField": "core_services",
+              "display": "Bulleted list with primary colored bullets"
+            },
+            {
+              "name": "Specialties",
+              "component": "Card",
+              "icon": "Sparkles",
+              "dataField": "specialties",
+              "display": "Bulleted list"
+            },
+            {
+              "name": "Target Customers",
+              "component": "Card",
+              "icon": "Users",
+              "dataField": "customers",
+              "display": "Bulleted list"
+            },
+            {
+              "name": "Key Features",
+              "component": "Card",
+              "icon": "Lightbulb",
+              "dataField": "key_features",
+              "display": "Bulleted list"
+            },
+            {
+              "name": "Key Benefits",
+              "component": "Card",
+              "icon": "DollarSign",
+              "dataField": "key_benefits",
+              "display": "Bulleted list"
+            },
+            {
+              "name": "Competitive Advantages",
+              "component": "Card",
+              "icon": "Target",
+              "dataField": "competitive_advantages",
+              "display": "Bulleted list"
+            },
+            {
+              "name": "Notable Customers",
+              "component": "Card",
+              "icon": "Building",
+              "dataField": "notable_customers",
+              "display": "Bulleted list",
+              "grid": "md:grid-cols-2"
+            },
+            {
+              "name": "Competitors",
+              "component": "Card",
+              "icon": "Target",
+              "dataField": "competitors",
+              "display": "Bulleted list",
+              "grid": "md:grid-cols-2"
+            },
+            {
+              "name": "Image Gallery",
+              "component": "VendorImageGallery",
+              "dataField": "vendor_images",
+              "conditional": "Only if images exist"
+            }
+          ]
+        },
+        "rightColumn": {
+          "span": "1 column",
+          "sections": [
+            {
+              "name": "Company Stats",
+              "component": "Card",
+              "fields": [
+                {
+                  "label": "Founded",
+                  "dataField": "founding_year",
+                  "display": "text-xl font-semibold"
+                },
+                {
+                  "label": "Headquarters",
+                  "dataField": "headquarters",
+                  "display": "font-medium"
+                },
+                {
+                  "label": "Company Type",
+                  "dataField": "company_type",
+                  "display": "font-medium"
+                }
+              ]
+            },
+            {
+              "name": "Funding Information",
+              "component": "Card",
+              "icon": "DollarSign",
+              "fields": [
+                {
+                  "label": "Total Funding",
+                  "dataField": "total_funding",
+                  "display": "text-xl font-semibold",
+                  "fallback": "Not disclosed"
+                },
+                {
+                  "label": "Funding Stage",
+                  "dataField": "funding_stage",
+                  "display": "font-medium"
+                },
+                {
+                  "label": "Key Investors",
+                  "dataField": "key_investors",
+                  "display": "Bulleted list (small bullets)"
+                },
+                {
+                  "label": "Employees",
+                  "dataField": "employee_count_range",
+                  "display": "font-medium"
+                },
+                {
+                  "label": "Business Model",
+                  "dataField": "business_model",
+                  "display": "font-medium"
+                },
+                {
+                  "label": "Geographic Presence",
+                  "dataField": "geographic_presence",
+                  "display": "font-medium"
+                }
+              ]
+            },
+            {
+              "name": "Contact Information",
+              "component": "Card",
+              "conditional": "Only if contact fields exist",
+              "fields": [
+                {
+                  "label": "Email",
+                  "dataField": "contact_email",
+                  "type": "link",
+                  "display": "text-primary hover:underline"
+                },
+                {
+                  "label": "Phone",
+                  "dataField": "contact_phone",
+                  "display": "font-medium"
+                },
+                {
+                  "label": "Address",
+                  "dataField": "contact_address",
+                  "display": "font-medium text-right"
+                },
+                {
+                  "label": "Social Links",
+                  "fields": ["linkedin_url", "twitter_url"],
+                  "display": "Button group with outline variant"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "designTokens": {
+      "spacing": {
+        "container": "mx-auto py-8 px-4",
+        "sectionGap": "space-y-6 or space-y-8",
+        "cardGap": "gap-6 md:gap-8"
+      },
+      "typography": {
+        "h1": "text-2xl sm:text-3xl md:text-4xl font-bold",
+        "cardTitle": "text-lg font-semibold",
+        "bodyText": "text-sm leading-relaxed text-muted-foreground",
+        "statValue": "text-xl font-semibold",
+        "label": "text-sm text-muted-foreground"
+      },
+      "colors": {
+        "bullets": "bg-primary rounded-full",
+        "badges": "Dynamic based on type with /10 opacity",
+        "links": "text-primary hover:underline"
+      },
+      "components": {
+        "card": "Card with CardHeader and CardContent",
+        "button": "shadcn Button component",
+        "badge": "shadcn Badge component",
+        "breadcrumb": "shadcn Breadcrumb components"
+      }
+    },
+    "responsiveBreakpoints": {
+      "mobile": "default (1 column)",
+      "tablet": "md: (some 2 column grids)",
+      "desktop": "lg: (3 column main grid)"
+    },
+    "keyFeatures": [
+      "Clean, professional vendor profile design",
+      "Responsive two-column layout",
+      "Organized content cards with icons",
+      "Sidebar for stats and funding info",
+      "Breadcrumb navigation",
+      "SEO optimized with meta tags",
+      "Conditional rendering for missing data",
+      "Social links and contact information"
+    ]
+  }
+}
