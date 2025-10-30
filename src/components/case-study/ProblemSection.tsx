@@ -12,8 +12,20 @@ interface ProblemSectionProps {
 
 export const ProblemSection = ({ title, description, challenges, iframeUrl, iframeTitle }: ProblemSectionProps) => {
   return (
-    <section className="py-12 px-4 bg-[#084542]">
-      <div className="max-w-4xl mx-auto">
+    <section className="py-12 px-4 bg-[#084542] relative overflow-hidden">
+      {/* Line Pattern Overlay */}
+      <div className="absolute inset-0">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="line-pattern" x="0" y="0" width="100" height="4" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="100" y2="0" stroke="#ffffff" strokeWidth="0.5" opacity="0.1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#line-pattern)" />
+        </svg>
+      </div>
+      
+      <div className="max-w-4xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
