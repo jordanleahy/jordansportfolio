@@ -219,6 +219,11 @@
     --container-max-width: 1400px;
     --content-max-width: 1200px;
 }
+
+  /* Global heading typography - apply primary color to all headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-primary;
+  }
 }
 
 @layer components {
