@@ -62,6 +62,14 @@ export const Header = () => {
         Clinical AI Product Designer
       </h1>
       <p className="max-w-2xl text-[18px] md:text-[18px] mt-8 font-normal leading-[27px] tracking-[-0.18px] text-black drop-shadow-sm">I'm focused on identifying repetitive manual tasks in revenue cycle and automating them using AI and thoughtful, user-centered design.</p>
+      <div className="mt-8">
+        <a 
+          href="mailto:jordanwilliamleahy@gmail.com"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent/90 transition-all duration-300 shadow-accent-md hover:shadow-accent-lg"
+        >
+          Contact Me
+        </a>
+      </div>
     </div>;
 };
 export const ProductCard = ({
