@@ -5,6 +5,7 @@ import { VendorPageLayout } from '@/components/vendors/VendorPageLayout';
 import { VendorsCardGrid } from '@/components/vendors/VendorsCardGrid';
 import { AddVendorModal } from '@/components/vendors/AddVendorModal';
 import { VendorDeleteDialog } from '@/components/vendors/VendorDeleteDialog';
+import { VendorExportButton } from '@/components/VendorExportButton';
 import { useVendorsPageOptimized } from '@/hooks/useVendorsPageOptimized';
 import { getVendorCategory } from '@/utils/vendorUtils';
 
@@ -48,6 +49,9 @@ export default function VendorsIndex() {
       error={vendorsError}
     >
       <div className="space-y-6">
+        <div className="flex justify-end">
+          <VendorExportButton />
+        </div>
         <VendorsCardGrid 
           vendors={filteredVendors.map(vendor => ({
             ...vendor,
