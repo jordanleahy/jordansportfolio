@@ -81,9 +81,9 @@ const CompaniesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Trusted by Leading Healthcare Companies</h2>
+          <h2 className="text-3xl font-bold mb-4 text-foreground">Trusted by Leading Healthcare Organizations</h2>
           <p className="text-[#000] text-[18px] font-normal leading-[27px] tracking-[-0.18px]">
-            Delivering design excellence across the healthcare ecosystem
+            Transforming patient data into actionable insights that improve diagnostic accuracy and safety
           </p>
         </motion.div>
         
