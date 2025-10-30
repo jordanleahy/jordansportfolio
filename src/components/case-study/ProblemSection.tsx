@@ -40,7 +40,7 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
                   <h4 className="font-semibold mb-2">{challenge.title}</h4>
                   <ul className="space-y-2">
                     {challenge.items.map((item, itemIndex) => (
-                      <li key={itemIndex} className="text-muted-foreground text-sm flex items-start gap-2">
+                      <li key={itemIndex} className="text-sm flex items-start gap-2" style={{ color: '#000' }}>
                         <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                         {item}
                       </li>

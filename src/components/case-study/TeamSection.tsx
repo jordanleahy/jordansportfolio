@@ -42,7 +42,7 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                       {member.description && <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px] mb-4" style={{ color: '#000' }}>{member.description}</p>}
                       <ul className="space-y-2">
                         {member.items.map((item, itemIndex) => (
-                          <li key={itemIndex} className="text-sm text-muted-foreground flex items-start gap-2">
+                          <li key={itemIndex} className="text-sm flex items-start gap-2" style={{ color: '#000' }}>
                             <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                             {item}
                           </li>

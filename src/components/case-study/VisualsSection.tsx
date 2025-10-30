@@ -24,7 +24,7 @@ export const VisualsSection = ({ data }: VisualsSectionProps) => {
             <h3 className="text-xl font-bold mb-4">Design Artifacts</h3>
             <ul className="space-y-2">
               {data.designArtifacts.map((item, index) => (
-                <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                <li key={index} className="text-sm flex items-start gap-2" style={{ color: '#000' }}>
                   <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                   {item}
                 </li>
@@ -36,7 +36,7 @@ export const VisualsSection = ({ data }: VisualsSectionProps) => {
             <h3 className="text-xl font-bold mb-4">Process Documentation</h3>
             <ul className="space-y-2">
               {data.processDocumentation.map((item, index) => (
-                <li key={index} className="text-sm text-muted-foreground flex items-start gap-2">
+                <li key={index} className="text-sm flex items-start gap-2" style={{ color: '#000' }}>
                   <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                   {item}
                 </li>

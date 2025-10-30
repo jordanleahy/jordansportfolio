@@ -46,7 +46,7 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                       {step.items && (
                         <ul className="space-y-2 mb-4">
                           {step.items.map((item, itemIndex) => (
-                            <li key={itemIndex} className="text-sm text-muted-foreground flex items-start gap-2">
+                            <li key={itemIndex} className="text-sm flex items-start gap-2" style={{ color: '#000' }}>
                               <span className="w-1 h-1 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                               {item}
                             </li>
