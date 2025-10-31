@@ -1,5 +1,5 @@
 export const problemData = {
-  problemTitle: "Improving Data Discoverability and Navigation",
+  problemTitle: "The Challenge",
   problemDescription: "Users struggled to find and synthesize hospital insights across multiple data tabs, resulting in increased time on task and lower engagement. The goal was to redesign the Hospital Profile experience to make data discovery faster and more intuitive for diverse user groups.",
   challenges: [
     {

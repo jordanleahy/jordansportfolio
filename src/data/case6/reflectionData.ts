@@ -1,5 +1,5 @@
 export const reflectionData = {
-  reflectionTitle: "Learnings & Next Steps",
+  reflectionTitle: "Reflection & Learnings",
   reflections: [
     {
       type: "success" as const,
