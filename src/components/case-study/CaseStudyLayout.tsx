@@ -1,6 +1,7 @@
 import { SEOHead } from "./SEOHead";
 import { CaseStudyPage } from "./CaseStudyPage";
 import { CaseStudyHero } from "./CaseStudyHero";
+import { CaseStudyNavigation } from "./CaseStudyNavigation";
 import { FigmaPasswordSection } from "./FigmaPasswordSection";
 import { ProblemSection } from "./ProblemSection";
 import { TeamSection } from "./TeamSection";
@@ -27,17 +28,21 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         path={path}
       />
       
-      <CaseStudyHero 
-        title={data.title}
-        description={data.description}
-        heroImage={data.heroImage}
-        heroImageAlt={data.heroImageAlt}
-        role={data.role}
-        roleDetails={data.roleDetails}
-        timeline={data.timeline}
-        timelineDetails={data.timelineDetails}
-        tags={data.tags}
-      />
+      <CaseStudyNavigation />
+      
+      <div id="context">
+        <CaseStudyHero 
+          title={data.title}
+          description={data.description}
+          heroImage={data.heroImage}
+          heroImageAlt={data.heroImageAlt}
+          role={data.role}
+          roleDetails={data.roleDetails}
+          timeline={data.timeline}
+          timelineDetails={data.timelineDetails}
+          tags={data.tags}
+        />
+      </div>
       
       {data.figmaPresentation?.enabled && (
         <FigmaPasswordSection
@@ -48,35 +53,45 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         />
       )}
       
-      <ProblemSection
-        title={data.problemTitle}
-        description={data.problemDescription}
-        challenges={data.challenges}
-        iframeUrl={data.problemIframeUrl}
-        iframeTitle={data.problemIframeTitle}
-      />
+      <div id="problem">
+        <ProblemSection
+          title={data.problemTitle}
+          description={data.problemDescription}
+          challenges={data.challenges}
+          iframeUrl={data.problemIframeUrl}
+          iframeTitle={data.problemIframeTitle}
+        />
+      </div>
       
       <TeamSection teamMembers={data.teamMembers} />
       
-      <ProcessSection 
-        title={data.processTitle}
-        steps={data.processSteps}
-      />
+      <div id="process">
+        <ProcessSection 
+          title={data.processTitle}
+          steps={data.processSteps}
+        />
+      </div>
       
-      <SolutionSection 
-        title={data.solutionTitle}
-        features={data.features}
-      />
+      <div id="solution">
+        <SolutionSection 
+          title={data.solutionTitle}
+          features={data.features}
+        />
+      </div>
       
-      <OutcomesSection 
-        title={data.outcomesTitle}
-        userFeedback={data.userFeedback}
-      />
+      <div id="impact">
+        <OutcomesSection 
+          title={data.outcomesTitle}
+          userFeedback={data.userFeedback}
+        />
+      </div>
       
-      <ReflectionSection 
-        title={data.reflectionTitle}
-        reflections={data.reflections}
-      />
+      <div id="reflection">
+        <ReflectionSection 
+          title={data.reflectionTitle}
+          reflections={data.reflections}
+        />
+      </div>
       
       <VisualsSection data={data.visualsAndArtifacts} />
       

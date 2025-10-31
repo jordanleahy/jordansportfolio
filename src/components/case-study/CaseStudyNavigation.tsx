@@ -1,0 +1,97 @@
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+
+interface NavItem {
+  id: string;
+  label: string;
+}
+
+const navItems: NavItem[] = [
+  { id: "context", label: "CONTEXT" },
+  { id: "problem", label: "PROBLEM" },
+  { id: "process", label: "PROCESS" },
+  { id: "solution", label: "SOLUTION" },
+  { id: "impact", label: "IMPACT" },
+  { id: "reflection", label: "REFLECTION" },
+];
+
+export const CaseStudyNavigation = () => {
+  const [activeSection, setActiveSection] = useState<string>("context");
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "-20% 0px -70% 0px",
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observe all sections
+    navItems.forEach(({ id }) => {
+      const element = document.getElementById(id);
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleClick = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  return (
+    <nav className="hidden lg:block fixed left-8 top-1/2 -translate-y-1/2 z-40">
+      <ul className="space-y-6">
+        {navItems.map(({ id, label }) => {
+          const isActive = activeSection === id;
+          return (
+            <li key={id}>
+              <button
+                onClick={() => handleClick(id)}
+                className="group flex items-center gap-3 text-left"
+              >
+                <div className="relative">
+                  <div
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      isActive ? "bg-primary scale-150" : "bg-muted-foreground/30"
+                    }`}
+                  />
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeIndicator"
+                      className="absolute inset-0 w-2 h-2 rounded-full bg-primary"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                </div>
+                <span
+                  className={`text-xs font-medium tracking-wider transition-colors duration-300 ${
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+};
