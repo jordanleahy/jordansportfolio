@@ -45,9 +45,9 @@ export const processData = {
       },
       images: [
         {
-          src: "/lovable-uploads/figma-sitemap.png", // TODO: Upload actual image
-          alt: "Figma sitemap and wireframe layout for Hospital Profile",
-          caption: "Manual sitemap and wireframes outlining project scope."
+          src: "/lovable-uploads/figma-sitemap-full.png",
+          alt: "Comprehensive Figma sitemap showing all Hospital Profile screens, tabs, and navigation structure",
+          caption: "Complete sitemap mapping all Hospital Profile tabs and information architecture."
         }
       ]
     },
@@ -65,9 +65,9 @@ export const processData = {
       },
       images: [
         {
-          src: "/lovable-uploads/design-iterations.png", // TODO: Upload actual image
-          alt: "Definitive Healthcare high-fidelity design iterations with annotations for keeps, removes, and edits",
-          caption: "Design iterations integrating feedback and prioritizing data."
+          src: "/lovable-uploads/hospital-profile-annotated.png",
+          alt: "Annotated Hospital Profile design showing key sections including general information, payment metrics, and dashboard components",
+          caption: "Final Hospital Profile design with annotations highlighting key improvements and prioritized data sections."
         }
       ]
     }
