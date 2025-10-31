@@ -36,14 +36,26 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
               >
                 <Card className="p-6 h-full">
                   <div className="flex flex-col">
-                    <Avatar className="w-12 h-12 mb-4">
-                      {member.title === "My Role" && (
-                        <AvatarImage src={jordanHeadshot} alt={member.title} />
-                      )}
-                      <AvatarFallback className="bg-primary/10">
-                        <IconComponent className="h-6 w-6 text-primary" />
-                      </AvatarFallback>
-                    </Avatar>
+                    {member.title === "Team & Stakeholders" ? (
+                      <div className="flex -space-x-2 mb-4">
+                        {member.items.slice(0, 5).map((item, i) => (
+                          <Avatar key={i} className="w-12 h-12 border-2 border-background">
+                            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                              {item.split(' ').slice(-1)[0].substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                    ) : (
+                      <Avatar className="w-12 h-12 mb-4">
+                        {member.title === "My Role" && (
+                          <AvatarImage src={jordanHeadshot} alt={member.title} />
+                        )}
+                        <AvatarFallback className="bg-primary/10">
+                          <IconComponent className="h-6 w-6 text-primary" />
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
                     <div className="w-full">
                       <h3 className="text-xl font-bold mb-2">{member.title}</h3>
                       {member.description && <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px] mb-4" style={{ color: '#000' }}>{member.description}</p>}
