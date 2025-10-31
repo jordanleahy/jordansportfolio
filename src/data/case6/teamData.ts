@@ -17,7 +17,7 @@ export const teamData = {
       title: "Team & Stakeholders",
       description: "",
       items: [
-        "2 Validation Analyst",
+        "1 Customer Service User",
         "2 Appeal Writer",
         "3 Software Engineers",
         "Product Manager"
