@@ -37,8 +37,8 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                 <Card className="p-8">
                   {/* Main content section */}
                   <div className="flex flex-col md:flex-row md:gap-8">
-                    <div className="p-3 bg-primary/10 rounded-lg mb-4 md:mb-0 w-12 h-12 flex items-center justify-center md:self-start">
-                      <IconComponent className="h-6 w-6 text-primary" />
+                    <div className="p-4 bg-primary/15 rounded-lg mb-4 md:mb-0 w-16 h-16 flex items-center justify-center md:self-start shadow-sm">
+                      <IconComponent className="h-8 w-8 text-primary" />
                     </div>
                     <div className="flex-1 md:order-1">
                       <h3 className="text-2xl font-bold mb-2">{step.title}</h3>

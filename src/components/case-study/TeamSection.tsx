@@ -129,12 +129,12 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                         ))}
                       </div>
                     ) : (
-                      <Avatar className="w-12 h-12 mb-4">
+                      <Avatar className="w-16 h-16 mb-4 shadow-sm">
                         {member.title === "My Role" && (
                           <AvatarImage src={jordanHeadshot} alt={member.title} />
                         )}
-                        <AvatarFallback className="bg-primary/10">
-                          <IconComponent className="h-6 w-6 text-primary" />
+                        <AvatarFallback className="bg-primary/15">
+                          <IconComponent className="h-8 w-8 text-primary" />
                         </AvatarFallback>
                       </Avatar>
                     )}

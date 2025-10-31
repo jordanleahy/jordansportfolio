@@ -36,8 +36,8 @@ export const SolutionSection = ({ title, features }: SolutionSectionProps) => {
               >
                 <Card className="p-6 h-full">
                   <div className="flex flex-col">
-                    <div className="bg-primary/10 p-3 rounded-lg w-12 h-12 flex items-center justify-center mb-4">
-                      <IconComponent className="h-6 w-6 text-primary" />
+                    <div className="bg-primary/15 p-4 rounded-lg w-16 h-16 flex items-center justify-center mb-4 shadow-sm">
+                      <IconComponent className="h-8 w-8 text-primary" />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
