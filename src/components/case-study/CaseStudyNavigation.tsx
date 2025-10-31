@@ -8,7 +8,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: "context", label: "CONTEXT" },
-  { id: "problem", label: "PROBLEM" },
+  { id: "problem", label: "CHALLENGE" },
   { id: "process", label: "PROCESS" },
   { id: "solution", label: "SOLUTION" },
   { id: "impact", label: "IMPACT" },
