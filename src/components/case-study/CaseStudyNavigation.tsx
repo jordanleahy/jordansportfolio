@@ -6,16 +6,29 @@ interface NavItem {
   label: string;
 }
 
-const navItems: NavItem[] = [
-  { id: "context", label: "CONTEXT" },
-  { id: "problem", label: "CHALLENGE" },
-  { id: "process", label: "PROCESS" },
-  { id: "solution", label: "SOLUTION" },
-  { id: "impact", label: "IMPACT" },
-  { id: "reflection", label: "REFLECTION" },
-];
+interface CaseStudyNavigationProps {
+  problemTitle: string;
+  processTitle: string;
+  solutionTitle: string;
+  outcomesTitle: string;
+  reflectionTitle: string;
+}
 
-export const CaseStudyNavigation = () => {
+export const CaseStudyNavigation = ({
+  problemTitle,
+  processTitle,
+  solutionTitle,
+  outcomesTitle,
+  reflectionTitle,
+}: CaseStudyNavigationProps) => {
+  const navItems: NavItem[] = [
+    { id: "context", label: "CONTEXT" },
+    { id: "problem", label: problemTitle.toUpperCase() },
+    { id: "process", label: processTitle.toUpperCase() },
+    { id: "solution", label: solutionTitle.toUpperCase() },
+    { id: "impact", label: outcomesTitle.toUpperCase() },
+    { id: "reflection", label: reflectionTitle.toUpperCase() },
+  ];
   const [activeSection, setActiveSection] = useState<string>("context");
 
   useEffect(() => {

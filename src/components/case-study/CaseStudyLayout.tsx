@@ -28,7 +28,13 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         path={path}
       />
       
-      <CaseStudyNavigation />
+      <CaseStudyNavigation
+        problemTitle={data.problemTitle}
+        processTitle={data.processTitle}
+        solutionTitle={data.solutionTitle}
+        outcomesTitle={data.outcomesTitle}
+        reflectionTitle={data.reflectionTitle}
+      />
       
       <div id="context">
         <CaseStudyHero 
