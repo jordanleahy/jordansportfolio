@@ -2,7 +2,6 @@ import { SEOHead } from "./SEOHead";
 import { CaseStudyPage } from "./CaseStudyPage";
 import { CaseStudyHero } from "./CaseStudyHero";
 import { CaseStudyNavigation } from "./CaseStudyNavigation";
-import { FigmaPasswordSection } from "./FigmaPasswordSection";
 import { ProblemSection } from "./ProblemSection";
 import { TeamSection } from "./TeamSection";
 import { ProcessSection } from "./ProcessSection";
@@ -49,15 +48,6 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
           tags={data.tags}
         />
       </div>
-      
-      {data.figmaPresentation?.enabled && (
-        <FigmaPasswordSection
-          title={data.figmaPresentation.title}
-          description={data.figmaPresentation.description}
-          password={data.figmaPresentation.password}
-          presentationUrl={data.figmaPresentation.presentationUrl}
-        />
-      )}
       
       <div id="problem">
         <ProblemSection
