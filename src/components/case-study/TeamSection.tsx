@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { TeamMember } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
 import { ImageThumbnails } from "@/components/ui/lightbox";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import jordanHeadshot from "@/assets/jordan-headshot.jpeg";
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
@@ -36,6 +37,7 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                 <Card className="p-6 h-full">
                   <div className="flex flex-col">
                     <Avatar className="w-12 h-12 mb-4">
+                      <AvatarImage src={jordanHeadshot} alt={member.title} />
                       <AvatarFallback className="bg-primary/10">
                         <IconComponent className="h-6 w-6 text-primary" />
                       </AvatarFallback>
