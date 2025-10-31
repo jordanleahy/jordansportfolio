@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mail, Linkedin, Download, MapPin, Calendar } from "lucide-react";
-import linkedinLogo from "@/assets/linkedin-logo.svg";
+
 const ContactSection = () => {
   const contactMethods = [{
     icon: Mail,
@@ -60,11 +60,7 @@ const ContactSection = () => {
               <Card className="h-full hover:shadow-lg transition-all duration-300 border border-border group">
                 <CardContent className="p-6 text-center">
                   <div className="w-12 h-12 mx-auto mb-4 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    {method.label === "LinkedIn" ? (
-                      <img src={linkedinLogo} alt="LinkedIn" className="h-6 w-6" />
-                    ) : (
-                      <method.icon className="h-6 w-6 text-primary" />
-                    )}
+                    <method.icon className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-bold text-foreground mb-2 text-heading-sm">{method.label}</h3>
                   <p className="text-body-sm text-muted-foreground mb-3">{method.description}</p>
