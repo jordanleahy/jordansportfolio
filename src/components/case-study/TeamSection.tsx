@@ -8,6 +8,7 @@ import jordanHeadshot from "@/assets/jordan-headshot.jpeg";
 import joshHeadshot from "@/assets/josh-headshot.png";
 import ruthHeadshot from "@/assets/ruth-headshot.png";
 import scottHeadshot from "@/assets/scott-headshot.png";
+import parimalHeadshot from "@/assets/parimal-headshot.png";
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
@@ -84,6 +85,21 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                                 <AvatarImage src={scottHeadshot} alt="Scott Fleming" />
                                 <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
                                   SF
+                                </AvatarFallback>
+                              </Avatar>
+                            </a>
+                          ) : i === 3 ? (
+                            <a 
+                              key={i} 
+                              href="https://www.linkedin.com/in/parimal-patel/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="hover:z-10 transition-transform hover:scale-110"
+                            >
+                              <Avatar className="w-12 h-12 border-2 border-background">
+                                <AvatarImage src={parimalHeadshot} alt="Parimal Patel" />
+                                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                                  PP
                                 </AvatarFallback>
                               </Avatar>
                             </a>
