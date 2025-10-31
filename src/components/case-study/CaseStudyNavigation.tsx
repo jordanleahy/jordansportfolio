@@ -68,7 +68,8 @@ export const CaseStudyNavigation = ({
 
   return (
     <nav className="hidden lg:block fixed left-8 top-1/2 -translate-y-1/2 z-40">
-      <ul className="space-y-6">
+      <div className="bg-background/95 backdrop-blur-sm rounded-lg px-6 py-8 shadow-lg border">
+        <ul className="space-y-6">
         {navItems.map(({ id, label }) => {
           const isActive = activeSection === id;
           return (
@@ -105,6 +106,7 @@ export const CaseStudyNavigation = ({
           );
         })}
       </ul>
+      </div>
     </nav>
   );
 };
