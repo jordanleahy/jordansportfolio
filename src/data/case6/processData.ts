@@ -73,6 +73,26 @@ export const processData = {
           src: "/lovable-uploads/hospital-profile-annotated.png",
           alt: "Annotated Hospital Profile design showing key sections including general information, payment metrics, and dashboard components",
           caption: "Final Hospital Profile design with annotations highlighting key improvements and prioritized data sections."
+        },
+        {
+          src: "/lovable-uploads/hospital-profile-annotated-v2.png",
+          alt: "Detailed annotation of Hospital Profile showing data organization, field changes, and navigation structure",
+          caption: "Comprehensive design annotations showing data consolidation and information architecture decisions."
+        },
+        {
+          src: "/lovable-uploads/metrics-dashboard-detail.png",
+          alt: "Detailed metrics dashboard showing key financial and clinical metrics with customization toggles",
+          caption: "Interactive metrics dashboard design with 500+ customizable data points and toggle controls."
+        },
+        {
+          src: "/lovable-uploads/highlights-interface.png",
+          alt: "User research highlights interface showing tagged content and video analysis",
+          caption: "Research synthesis tool showing user feedback categorization and video insights."
+        },
+        {
+          src: "/lovable-uploads/user-interview-video.png",
+          alt: "User interview session with transcript showing key feedback moments",
+          caption: "User interview documentation capturing real-time feedback and insights."
         }
       ]
     }
