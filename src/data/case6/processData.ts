@@ -70,11 +70,6 @@ export const processData = {
       },
       images: [
         {
-          src: "/lovable-uploads/hospital-profile-annotated.png",
-          alt: "Annotated Hospital Profile design showing key sections including general information, payment metrics, and dashboard components",
-          caption: "Final Hospital Profile design with annotations highlighting key improvements and prioritized data sections."
-        },
-        {
           src: "/lovable-uploads/hospital-profile-annotated-v2.png",
           alt: "Detailed annotation of Hospital Profile showing data organization, field changes, and navigation structure",
           caption: "Comprehensive design annotations showing data consolidation and information architecture decisions."
