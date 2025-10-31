@@ -5,11 +5,6 @@ import { iconMap } from "@/utils/iconMap";
 import { ImageThumbnails } from "@/components/ui/lightbox";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import jordanHeadshot from "@/assets/jordan-headshot.jpeg";
-import joshHeadshot from "@/assets/josh-headshot.png";
-import ruthHeadshot from "@/assets/ruth-headshot.png";
-import scottHeadshot from "@/assets/scott-headshot.png";
-import parimalHeadshot from "@/assets/parimal-headshot.png";
-import dijsHeadshot from "@/assets/dijs-headshot.png";
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
@@ -41,92 +36,30 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
               >
                 <Card className="p-6 h-full">
                   <div className="flex flex-col">
-                    {member.title === "Team & Stakeholders" ? (
+                    {member.title === "Team & Stakeholders" && member.teamMembers ? (
                       <div className="flex -space-x-2 mb-4">
-                        {member.items.slice(0, 5).map((item, i) => (
-                          i === 0 ? (
-                            <a 
-                              key={i} 
-                              href="https://www.linkedin.com/in/josh-geleris/" 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:z-10 transition-transform hover:scale-110"
-                            >
+                        {member.teamMembers.map((teamMember, i) => {
+                          const AvatarWrapper = teamMember.linkedInUrl ? 'a' : 'div';
+                          const avatarProps = teamMember.linkedInUrl ? {
+                            href: teamMember.linkedInUrl,
+                            target: "_blank",
+                            rel: "noopener noreferrer",
+                            className: "hover:z-10 transition-transform hover:scale-110"
+                          } : {
+                            className: "hover:z-10"
+                          };
+                          
+                          return (
+                            <AvatarWrapper key={i} {...avatarProps}>
                               <Avatar className="w-12 h-12 border-2 border-background">
-                                <AvatarImage src={joshHeadshot} alt="Josh Geleris" />
+                                <AvatarImage src={teamMember.photo} alt={teamMember.name} />
                                 <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                                  JG
+                                  {teamMember.initials}
                                 </AvatarFallback>
                               </Avatar>
-                            </a>
-                          ) : i === 1 ? (
-                            <a 
-                              key={i} 
-                              href="https://www.linkedin.com/in/ruth-nacey-2130749/" 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:z-10 transition-transform hover:scale-110"
-                            >
-                              <Avatar className="w-12 h-12 border-2 border-background">
-                                <AvatarImage src={ruthHeadshot} alt="Ruth Nacey" />
-                                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                                  RN
-                                </AvatarFallback>
-                              </Avatar>
-                            </a>
-                          ) : i === 2 ? (
-                            <a 
-                              key={i} 
-                              href="https://www.linkedin.com/in/thescottfleming/" 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:z-10 transition-transform hover:scale-110"
-                            >
-                              <Avatar className="w-12 h-12 border-2 border-background">
-                                <AvatarImage src={scottHeadshot} alt="Scott Fleming" />
-                                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                                  SF
-                                </AvatarFallback>
-                              </Avatar>
-                            </a>
-                          ) : i === 3 ? (
-                            <a 
-                              key={i} 
-                              href="https://www.linkedin.com/in/parimal-patel/" 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:z-10 transition-transform hover:scale-110"
-                            >
-                              <Avatar className="w-12 h-12 border-2 border-background">
-                                <AvatarImage src={parimalHeadshot} alt="Parimal Patel" />
-                                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                                  PP
-                                </AvatarFallback>
-                              </Avatar>
-                            </a>
-                          ) : i === 4 ? (
-                            <a 
-                              key={i} 
-                              href="https://www.linkedin.com/in/dijs/" 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="hover:z-10 transition-transform hover:scale-110"
-                            >
-                              <Avatar className="w-12 h-12 border-2 border-background">
-                                <AvatarImage src={dijsHeadshot} alt="Team Member" />
-                                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                                  DJ
-                                </AvatarFallback>
-                              </Avatar>
-                            </a>
-                          ) : (
-                            <Avatar key={i} className="w-12 h-12 border-2 border-background">
-                              <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                                {item.split(' ').slice(-1)[0].substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                          )
-                        ))}
+                            </AvatarWrapper>
+                          );
+                        })}
                       </div>
                     ) : (
                       <Avatar className="w-16 h-16 mb-4 shadow-sm">

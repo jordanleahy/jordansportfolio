@@ -43,6 +43,12 @@ export interface TeamMember {
     alt: string;
     caption?: string;
   }>;
+  teamMembers?: Array<{
+    name: string;
+    photo: string;
+    linkedInUrl?: string;
+    initials: string;
+  }>;
 }
 
 export interface Reflection {
