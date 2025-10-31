@@ -37,7 +37,9 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                 <Card className="p-6 h-full">
                   <div className="flex flex-col">
                     <Avatar className="w-12 h-12 mb-4">
-                      <AvatarImage src={jordanHeadshot} alt={member.title} />
+                      {member.title === "My Role" && (
+                        <AvatarImage src={jordanHeadshot} alt={member.title} />
+                      )}
                       <AvatarFallback className="bg-primary/10">
                         <IconComponent className="h-6 w-6 text-primary" />
                       </AvatarFallback>
