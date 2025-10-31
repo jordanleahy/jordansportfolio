@@ -18,7 +18,6 @@ export const teamData = {
       description: "",
       items: [
         "1 Customer Service User",
-        "2 Appeal Writer",
         "3 Software Engineers",
         "Product Manager"
       ],
