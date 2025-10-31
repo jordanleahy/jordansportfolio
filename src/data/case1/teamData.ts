@@ -21,7 +21,6 @@ export const teamData = {
         "2 CDI Specialist",
         "1 Data Scientists",
         "3 Engineers", 
-        "1 Clinical Informaticist",
         "MD Cofounder"
       ]
     },
