@@ -7,6 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import jordanHeadshot from "@/assets/jordan-headshot.jpeg";
 import joshHeadshot from "@/assets/josh-headshot.png";
 import ruthHeadshot from "@/assets/ruth-headshot.png";
+import scottHeadshot from "@/assets/scott-headshot.png";
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
@@ -68,6 +69,21 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                                 <AvatarImage src={ruthHeadshot} alt="Ruth Nacey" />
                                 <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
                                   RN
+                                </AvatarFallback>
+                              </Avatar>
+                            </a>
+                          ) : i === 2 ? (
+                            <a 
+                              key={i} 
+                              href="https://www.linkedin.com/in/thescottfleming/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="hover:z-10 transition-transform hover:scale-110"
+                            >
+                              <Avatar className="w-12 h-12 border-2 border-background">
+                                <AvatarImage src={scottHeadshot} alt="Scott Fleming" />
+                                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                                  SF
                                 </AvatarFallback>
                               </Avatar>
                             </a>
