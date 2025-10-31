@@ -15,9 +15,19 @@ export const processData = {
       },
       images: [
         {
-          src: "/lovable-uploads/user-feedback-themes.png", // TODO: Upload actual image
-          alt: "User feedback visualization showing common themes like easier navigation and search improvements",
-          caption: "Common user feedback themes from customer interviews."
+          src: "/lovable-uploads/definitive-healthcare-screens.png",
+          alt: "Definitive Healthcare platform showing hospital profile dashboard across multiple devices",
+          caption: "Current platform state across desktop, tablet, and mobile."
+        },
+        {
+          src: "/lovable-uploads/user-interview-notes.png",
+          alt: "User interview notes from Danielle DeCosta, Nikita Macklin, and Vinny Romano highlighting key insights",
+          caption: "User interview notes revealing navigation and information architecture challenges."
+        },
+        {
+          src: "/lovable-uploads/page-analytics.png",
+          alt: "Pendo analytics showing 3.3 million total page views across Hospital Profile tabs",
+          caption: "Page view analytics showing Summary Tab dominated usage at 3.3M views."
         }
       ]
     },
