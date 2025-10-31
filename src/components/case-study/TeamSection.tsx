@@ -5,6 +5,7 @@ import { iconMap } from "@/utils/iconMap";
 import { ImageThumbnails } from "@/components/ui/lightbox";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import jordanHeadshot from "@/assets/jordan-headshot.jpeg";
+import joshHeadshot from "@/assets/josh-headshot.png";
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
@@ -39,11 +40,28 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                     {member.title === "Team & Stakeholders" ? (
                       <div className="flex -space-x-2 mb-4">
                         {member.items.slice(0, 5).map((item, i) => (
-                          <Avatar key={i} className="w-12 h-12 border-2 border-background">
-                            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-                              {item.split(' ').slice(-1)[0].substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
+                          i === 0 ? (
+                            <a 
+                              key={i} 
+                              href="https://www.linkedin.com/in/josh-geleris/" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="hover:z-10 transition-transform hover:scale-110"
+                            >
+                              <Avatar className="w-12 h-12 border-2 border-background">
+                                <AvatarImage src={joshHeadshot} alt="Josh Geleris" />
+                                <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                                  JG
+                                </AvatarFallback>
+                              </Avatar>
+                            </a>
+                          ) : (
+                            <Avatar key={i} className="w-12 h-12 border-2 border-background">
+                              <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                                {item.split(' ').slice(-1)[0].substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                          )
                         ))}
                       </div>
                     ) : (
