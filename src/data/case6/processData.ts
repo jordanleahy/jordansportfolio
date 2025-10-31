@@ -48,6 +48,11 @@ export const processData = {
           src: "/lovable-uploads/figma-sitemap-full.png",
           alt: "Comprehensive Figma sitemap showing all Hospital Profile screens, tabs, and navigation structure",
           caption: "Complete sitemap mapping all Hospital Profile tabs and information architecture."
+        },
+        {
+          src: "/lovable-uploads/ia-wireframe-detail.png",
+          alt: "Detailed Hospital Profile wireframe showing comprehensive data sections and navigation structure",
+          caption: "Wireframe detail highlighting information architecture and data organization."
         }
       ]
     },
