@@ -1,17 +1,38 @@
+import { TeamMember } from "@/types/caseStudy";
+
 export const teamData = {
   teamMembers: [
     {
-      icon: "Users" as const,
-      title: "Cross-functional Collaboration",
-      description: "Worked with product, customer success, and data science teams to align insights, prioritize user needs, and validate improvements.",
-      items: ["Product Manager", "Customer Success Lead", "UX Researcher"],
-      images: [
-        {
-          src: "/lovable-uploads/pendo-usage-data.png", // TODO: Upload actual image
-          alt: "Usage data visual showing hospital profile analytics from Pendo",
-          caption: "Quantitative Pendo data used to identify top engagement areas."
-        }
+      icon: "Users",
+      title: "My Role",
+      description: "Senior Product Designer",
+      items: [
+        "User research & workflow analysis",
+        "Information architecture & wireframing",
+        "Prototype development & testing"
+      ]
+    },
+    {
+      icon: "Users",
+      title: "Team & Stakeholders",
+      description: "",
+      items: [
+        "2 Validation Analyst",
+        "2 Appeal Writer",
+        "3 Software Engineers",
+        "Product Manager"
+      ]
+    },
+    {
+      icon: "Target",
+      title: "Duration & Scope",
+      description: "4 month timeline",
+      items: [
+        "Denial and appeal management UI",
+        "Top denial templates",
+        "ML prediction template design",
+        "Automated workflow creation"
       ]
     }
-  ]
+  ] as TeamMember[],
 };
