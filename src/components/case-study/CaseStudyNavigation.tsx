@@ -21,6 +21,9 @@ export const CaseStudyNavigation = ({
   outcomesTitle,
   reflectionTitle,
 }: CaseStudyNavigationProps) => {
+  const [activeSection, setActiveSection] = useState<string>("context");
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+
   const navItems: NavItem[] = [
     { id: "context", label: "CONTEXT" },
     { id: "problem", label: problemTitle.toUpperCase() },
@@ -29,7 +32,23 @@ export const CaseStudyNavigation = ({
     { id: "impact", label: outcomesTitle.toUpperCase() },
     { id: "reflection", label: reflectionTitle.toUpperCase() },
   ];
-  const [activeSection, setActiveSection] = useState<string>("context");
+
+  useEffect(() => {
+    // Check if we've scrolled past the context section
+    const handleScroll = () => {
+      const contextSection = document.getElementById("context");
+      if (contextSection) {
+        const rect = contextSection.getBoundingClientRect();
+        // Show navigation when context section is mostly out of view
+        setIsVisible(rect.bottom < window.innerHeight * 0.3);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Check initial state
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     const observerOptions = {
@@ -67,7 +86,11 @@ export const CaseStudyNavigation = ({
   };
 
   return (
-    <nav className="hidden lg:block fixed left-8 top-1/2 -translate-y-1/2 z-40">
+    <nav 
+      className={`hidden lg:block fixed left-8 top-1/2 -translate-y-1/2 z-40 transition-opacity duration-300 ${
+        isVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+    >
       <div className="bg-background/95 backdrop-blur-sm rounded-lg px-6 py-8 shadow-lg border">
         <ul className="space-y-6">
         {navItems.map(({ id, label }) => {
