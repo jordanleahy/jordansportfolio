@@ -23,8 +23,45 @@ const ContactSection = () => {
     href: "https://calendly.com/jordanleahy",
     description: "Free consultation available"
   }];
-  return <section id="contact" className="py-24 px-4 bg-white">
-      <div className="max-w-4xl mx-auto">
+  return <section id="contact" className="py-24 px-4 bg-white relative overflow-hidden">
+      {/* Medical-Themed Background Pattern */}
+      <div className="absolute inset-0">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            {/* Wave opacity gradient */}
+            <linearGradient id="contact-wave-opacity" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#042F3A" stopOpacity="0.12" />
+              <stop offset="20%" stopColor="#042F3A" stopOpacity="0.04" />
+              <stop offset="40%" stopColor="#042F3A" stopOpacity="0.10" />
+              <stop offset="60%" stopColor="#042F3A" stopOpacity="0.03" />
+              <stop offset="80%" stopColor="#042F3A" stopOpacity="0.09" />
+              <stop offset="100%" stopColor="#042F3A" stopOpacity="0.05" />
+            </linearGradient>
+            
+            <pattern id="contact-medical-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+              {/* Medical Cross */}
+              <path d="M18,12 L18,18 L12,18 L12,22 L18,22 L18,28 L22,28 L22,22 L28,22 L28,18 L22,18 L22,12 Z" fill="url(#contact-wave-opacity)" />
+              
+              {/* Molecular Structure */}
+              <circle cx="70" cy="20" r="2.5" fill="url(#contact-wave-opacity)" />
+              <circle cx="78" cy="15" r="2" fill="url(#contact-wave-opacity)" />
+              <circle cx="78" cy="25" r="2" fill="url(#contact-wave-opacity)" />
+              <line x1="70" y1="20" x2="78" y2="15" stroke="url(#contact-wave-opacity)" strokeWidth="0.8" />
+              <line x1="70" y1="20" x2="78" y2="25" stroke="url(#contact-wave-opacity)" strokeWidth="0.8" />
+              
+              {/* DNA Helix */}
+              <path d="M55,65 Q 60,70 65,65 T 75,65" stroke="url(#contact-wave-opacity)" strokeWidth="1.2" fill="none" />
+              <path d="M55,70 Q 60,65 65,70 T 75,70" stroke="url(#contact-wave-opacity)" strokeWidth="1.2" fill="none" />
+              <line x1="55" y1="65" x2="55" y2="70" stroke="url(#contact-wave-opacity)" strokeWidth="0.6" />
+              <line x1="65" y1="65" x2="65" y2="70" stroke="url(#contact-wave-opacity)" strokeWidth="0.6" />
+              <line x1="75" y1="65" x2="75" y2="70" stroke="url(#contact-wave-opacity)" strokeWidth="0.6" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#contact-medical-pattern)" />
+        </svg>
+      </div>
+      
+      <div className="max-w-4xl mx-auto relative z-10">
         <motion.div initial={{
         opacity: 0,
         y: 20
