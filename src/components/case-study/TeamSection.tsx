@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { TeamMember } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
 import { ImageThumbnails } from "@/components/ui/lightbox";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface TeamSectionProps {
   teamMembers: TeamMember[];
@@ -34,9 +35,11 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
               >
                 <Card className="p-6 h-full">
                   <div className="flex flex-col">
-                    <div className="p-3 bg-primary/10 rounded-lg mb-4 w-12 h-12 flex items-center justify-center">
-                      <IconComponent className="h-6 w-6 text-primary" />
-                    </div>
+                    <Avatar className="w-12 h-12 mb-4">
+                      <AvatarFallback className="bg-primary/10">
+                        <IconComponent className="h-6 w-6 text-primary" />
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="w-full">
                       <h3 className="text-xl font-bold mb-2">{member.title}</h3>
                       {member.description && <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px] mb-4" style={{ color: '#000' }}>{member.description}</p>}
