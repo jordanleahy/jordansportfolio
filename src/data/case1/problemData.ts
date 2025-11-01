@@ -8,18 +8,18 @@ export const problemData = {
       type: 'problem',
       title: 'Clinical Impact',
       items: [
-        "One of the most commonly denied inpatient diagnoses",
-        "Often lacks clear alignment with Sepsis-3 or SIRS criteria",
-        "High financial and quality impact when denied or downcoded"
+        "CDI teams spent hours manually validating each Sepsis case across disconnected systems",
+        "Sepsis claims denied at 2-3x the rate of other diagnoses due to insufficient documentation",
+        "$20-40K lost per denial when reviewers couldn't find criteria buried in fragmented data"
       ]
     },
     {
       type: 'need',
       title: 'Design Challenges',
       items: [
-        "Fragmented documentation across vitals, labs, and notes",
-        "Cognitive overload validating clinical criteria under time pressure",
-        "Inconsistent provider terminology and unclear diagnostic intent"
+        "Reviewers toggled between 6+ data sources to manually confirm SIRS criteria",
+        "Critical timestamps and vital trends were scattered—making validation error-prone",
+        "Inconsistent clinical documentation led to missed criteria and preventable denials"
       ]
     }
   ] as Challenge[],
