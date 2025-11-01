@@ -1,6 +1,6 @@
 export const problemData = {
   problemTitle: "Challenge",
-  problemDescription: "Users struggled to find and synthesize hospital insights across multiple data tabs, resulting in increased time on task and lower engagement. The goal was to redesign the Hospital Profile experience to make data discovery faster and more intuitive for diverse user groups.",
+  problemDescription: "Rushed development without proper UX planning created an unstructured data experience filled with duplicate information and navigation chaos.",
   challenges: [
     {
       type: "problem" as const,
