@@ -61,7 +61,7 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "0px 0px -100px 0px" }}
-                transition={{ delay: index * 0.4, duration: 0.9, ease: "easeOut" }}
+                transition={{ delay: 2 + (index * 0.4), duration: 0.9, ease: "easeOut" }}
               >
                 <Card className="p-8 hover:shadow-xl transition-shadow duration-300">
                   <h4 className="font-bold text-lg mb-4">{challenge.title}</h4>
