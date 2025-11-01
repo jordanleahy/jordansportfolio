@@ -12,7 +12,7 @@ interface ProblemSectionProps {
 
 export const ProblemSection = ({ title, description, challenges, iframeUrl, iframeTitle }: ProblemSectionProps) => {
   return (
-    <section className="py-24 md:py-32 px-4 bg-[#084542] relative overflow-hidden min-h-[80vh] flex items-center">
+    <section className="px-4 bg-[#084542] relative overflow-hidden">
       {/* Line Pattern Overlay */}
       <div className="absolute inset-0">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -28,13 +28,9 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
       {/* Decorative accent line */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0"></div>
       
-      <div className="max-w-4xl mx-auto relative z-10 w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+      {/* First Section: Title and Description (100vh) */}
+      <div className="min-h-screen flex items-center justify-center relative z-10">
+        <div className="max-w-4xl mx-auto w-full">
           <motion.h2 
             className="font-bold text-4xl md:text-5xl lg:text-6xl mb-8 text-white leading-tight"
             initial={{ opacity: 0, y: 20 }}
@@ -45,7 +41,7 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
             {title}
           </motion.h2>
           <motion.p 
-            className="text-xl md:text-2xl font-normal leading-relaxed mb-12 text-white/95 max-w-4xl"
+            className="text-xl md:text-2xl font-normal leading-relaxed text-white/95 max-w-4xl"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -53,15 +49,21 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
           >
             {description}
           </motion.p>
+        </div>
+      </div>
+
+      {/* Second Section: Challenge Cards */}
+      <div className="py-24 relative z-10">
+        <div className="max-w-4xl mx-auto w-full">
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             {challenges.map((challenge, index) => (
               <motion.div 
                 key={index} 
                 className="space-y-6"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.6 + (index * 0.2), duration: 0.5 }}
+                viewport={{ once: true, margin: "0px 0px -150px 0px" }}
+                transition={{ delay: index * 0.3, duration: 0.8, ease: "easeOut" }}
               >
                 <Card className="p-8 hover:shadow-xl transition-shadow duration-300">
                   <h4 className="font-bold text-lg mb-4">{challenge.title}</h4>
@@ -89,7 +91,7 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
               />
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
