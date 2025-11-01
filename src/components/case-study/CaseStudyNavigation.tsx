@@ -14,7 +14,7 @@ export const CaseStudyNavigation = ({}: CaseStudyNavigationProps = {}) => {
 
   const navItems: NavItem[] = [
     { id: "context", label: "CONTEXT" },
-    { id: "problem", label: "THE CHALLENGE" },
+    { id: "problem", label: "CHALLENGE" },
     { id: "team", label: "TEAM" },
     { id: "process", label: "DESIGN PROCESS" },
     { id: "solution", label: "SOLUTION & KEY FEATURES" },
