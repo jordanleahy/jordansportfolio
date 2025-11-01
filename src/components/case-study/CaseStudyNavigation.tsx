@@ -17,7 +17,7 @@ export const CaseStudyNavigation = ({}: CaseStudyNavigationProps = {}) => {
     { id: "problem", label: "CHALLENGE" },
     { id: "team", label: "TEAM" },
     { id: "process", label: "DESIGN PROCESS" },
-    { id: "solution", label: "SOLUTION & KEY FEATURES" },
+    { id: "solution", label: "SOLUTION" },
     { id: "impact", label: "OUTCOMES" },
     { id: "reflection", label: "REFLECTION & LEARNINGS" },
   ];
