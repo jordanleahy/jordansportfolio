@@ -1,8 +1,8 @@
 import definitiveHealthcareHero from "@/assets/definitive-healthcare-hero.png";
 
 export const heroData = {
-  title: "Redesigning the Hospital Profile Experience at Definitive Healthcare",
-  description: "Led a data-driven redesign of the Hospital Profile interface to improve usability, navigation, and data discoverability for over 3 million annual page views. Collaborated with product and customer teams to prioritize insights, streamline navigation, and scale data presentation across healthcare verticals.",
+  title: "3 Million Views, Zero Clarity: Redesigning Definitive Healthcare's Hospital Profiles",
+  description: "Led a data-driven redesign to transform navigation chaos into clarity. Partnered with Product Management, Customer Success, and Data Science to restructure information architecture, streamline workflows, and reduce user effort across a product receiving 3 million annual page views.",
   heroImage: definitiveHealthcareHero,
   heroImageAlt: "Definitive Healthcare hospital profile interface showing healthcare data metrics and user feedback bubbles.",
   role: "Lead Product Designer",
