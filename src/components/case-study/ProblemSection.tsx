@@ -12,31 +12,22 @@ interface ProblemSectionProps {
 }
 
 export const ProblemSection = ({ title, description, challenges, iframeUrl, iframeTitle }: ProblemSectionProps) => {
+  const [cardsRevealed, setCardsRevealed] = useState(false);
   const [showCards, setShowCards] = useState(false);
-  const [hasViewed, setHasViewed] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (hasViewed) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
-            // Lock scroll
-            document.body.style.overflow = 'hidden';
-            setHasViewed(true);
-
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5 && !cardsRevealed) {
             // Wait 2 seconds before showing cards
             setTimeout(() => {
               setShowCards(true);
-              
-              // Keep scroll locked until both cards finish animating
-              // Second card: 0.4s delay + 0.9s duration = 1.3s
-              // Total: 2s + 1.3s = 3.3s, add buffer for 3.5s
+              // Mark as revealed after animation completes
               setTimeout(() => {
-                document.body.style.overflow = '';
-              }, 1500); // 1.5s after cards start (total 3.5s from initial lock)
+                setCardsRevealed(true);
+              }, 1500);
             }, 2000);
           }
         });
@@ -49,13 +40,16 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
     }
 
     return () => {
-      document.body.style.overflow = '';
       observer.disconnect();
     };
-  }, [hasViewed]);
+  }, [cardsRevealed]);
 
   return (
-    <section ref={sectionRef} className="py-24 md:py-32 px-4 bg-[#084542] relative overflow-hidden min-h-screen flex items-center">
+    <section 
+      ref={sectionRef} 
+      className={`py-24 md:py-32 px-4 bg-[#084542] relative overflow-hidden min-h-screen flex items-center ${!cardsRevealed ? 'snap-start snap-always' : ''}`}
+      style={{ scrollSnapStop: !cardsRevealed ? 'always' : 'normal' } as React.CSSProperties}
+    >
       {/* Line Pattern Overlay */}
       <div className="absolute inset-0">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">

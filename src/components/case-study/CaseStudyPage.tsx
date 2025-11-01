@@ -15,7 +15,7 @@ export const CaseStudyPage = ({ children }: CaseStudyPageProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background snap-y snap-mandatory overflow-y-scroll">
       {/* Header */}
       <motion.header 
         initial={{ opacity: 0, y: -20 }}
