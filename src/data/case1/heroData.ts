@@ -2,7 +2,7 @@ import smarterDxDevices from "@/assets/smarterdx-devices.png";
 
 export const heroData = {
   title: "Redesigned clinical diagnostics to boost accuracy 60% through thoughtful design",
-  description: "In Pre-bill prior to a new primary diagnosis confirmation, a human in the loop will often review the chart to confirm such recommendation.",
+  description: "I transformed how clinical teams validate Sepsis diagnoses—ensuring hospitals get paid for the critical care they actually delivered.",
   heroImage: smarterDxDevices,
   heroImageAlt: "SmarterDx healthcare platform displayed across multiple devices including laptop and tablets, showcasing AI-powered clinical intelligence and patient journey capture interface",
   role: "Senior Product Designer", 
