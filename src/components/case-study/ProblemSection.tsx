@@ -28,7 +28,7 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
       {/* Decorative accent line */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/0 via-primary/50 to-primary/0"></div>
       
-      <div className="max-w-5xl mx-auto relative z-10 w-full">
+      <div className="max-w-4xl mx-auto relative z-10 w-full">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
