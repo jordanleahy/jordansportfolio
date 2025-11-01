@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Challenge } from "@/types/caseStudy";
+import { useEffect, useState, useRef } from "react";
 
 interface ProblemSectionProps {
   title: string;
@@ -11,8 +12,44 @@ interface ProblemSectionProps {
 }
 
 export const ProblemSection = ({ title, description, challenges, iframeUrl, iframeTitle }: ProblemSectionProps) => {
+  const [showCards, setShowCards] = useState(false);
+  const [hasViewed, setHasViewed] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (hasViewed) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5) {
+            // Lock scroll
+            document.body.style.overflow = 'hidden';
+            setHasViewed(true);
+
+            // Wait 2 seconds before showing cards and unlocking scroll
+            setTimeout(() => {
+              setShowCards(true);
+              document.body.style.overflow = '';
+            }, 2000);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      observer.disconnect();
+    };
+  }, [hasViewed]);
+
   return (
-    <section className="py-24 md:py-32 px-4 bg-[#084542] relative overflow-hidden min-h-screen flex items-center">
+    <section ref={sectionRef} className="py-24 md:py-32 px-4 bg-[#084542] relative overflow-hidden min-h-screen flex items-center">
       {/* Line Pattern Overlay */}
       <div className="absolute inset-0">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -54,14 +91,13 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
             {description}
           </motion.p>
           <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {challenges.map((challenge, index) => (
+            {showCards && challenges.map((challenge, index) => (
               <motion.div 
                 key={index} 
                 className="space-y-6"
                 initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -100px 0px" }}
-                transition={{ delay: 2 + (index * 0.4), duration: 0.9, ease: "easeOut" }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.4, duration: 0.9, ease: "easeOut" }}
               >
                 <Card className="p-8 hover:shadow-xl transition-shadow duration-300">
                   <h4 className="font-bold text-lg mb-4">{challenge.title}</h4>
