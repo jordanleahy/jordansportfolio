@@ -1,5 +1,5 @@
 export const solutionData = {
-  solutionTitle: "Solution & Key Features",
+  solutionTitle: "Solution",
   features: [
     {
       icon: "TrendingUp" as const,
