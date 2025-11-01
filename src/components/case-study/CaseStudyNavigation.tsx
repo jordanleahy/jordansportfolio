@@ -6,34 +6,20 @@ interface NavItem {
   label: string;
 }
 
-interface CaseStudyNavigationProps {
-  problemTitle: string;
-  teamTitle: string;
-  processTitle: string;
-  solutionTitle: string;
-  outcomesTitle: string;
-  reflectionTitle: string;
-}
+interface CaseStudyNavigationProps {}
 
-export const CaseStudyNavigation = ({
-  problemTitle,
-  teamTitle,
-  processTitle,
-  solutionTitle,
-  outcomesTitle,
-  reflectionTitle,
-}: CaseStudyNavigationProps) => {
+export const CaseStudyNavigation = ({}: CaseStudyNavigationProps = {}) => {
   const [activeSection, setActiveSection] = useState<string>("context");
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const navItems: NavItem[] = [
     { id: "context", label: "CONTEXT" },
-    { id: "problem", label: problemTitle.toUpperCase() },
-    { id: "team", label: teamTitle.toUpperCase() },
-    { id: "process", label: processTitle.toUpperCase() },
-    { id: "solution", label: solutionTitle.toUpperCase() },
-    { id: "impact", label: outcomesTitle.toUpperCase() },
-    { id: "reflection", label: reflectionTitle.toUpperCase() },
+    { id: "problem", label: "THE CHALLENGE" },
+    { id: "team", label: "TEAM" },
+    { id: "process", label: "DESIGN PROCESS" },
+    { id: "solution", label: "SOLUTION & KEY FEATURES" },
+    { id: "impact", label: "OUTCOMES" },
+    { id: "reflection", label: "REFLECTION & LEARNINGS" },
   ];
 
   useEffect(() => {
