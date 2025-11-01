@@ -62,7 +62,7 @@ export const TeamSection = ({ teamMembers }: TeamSectionProps) => {
                         })}
                       </div>
                     ) : (
-                      <Avatar className="w-16 h-16 mb-4 shadow-sm">
+                      <Avatar className="w-12 h-12 mb-4 shadow-sm">
                         {member.title === "My Role" && (
                           <AvatarImage src={jordanHeadshot} alt={member.title} />
                         )}
