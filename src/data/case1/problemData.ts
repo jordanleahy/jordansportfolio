@@ -2,7 +2,7 @@ import { Challenge } from "@/types/caseStudy";
 
 export const problemData = {
   problemTitle: "The Challenge",
-  problemDescription: "This was a project at SmarterDx where I was designing for internal Clinical Document Specialists to review Sepsis opportunities. The business goal was to improve Sepsis client agree rates from 23% to avg 50% +/- and reduce internal case review time.",
+  problemDescription: "The original MVP design presented raw Elastic search data dumps that forced clinicians to manually piece together fragmented vitals, labs, and notes causing cognitive overload and inconsistent Sepsis diagnostic decisions.",
   challenges: [
     {
       type: 'problem',
