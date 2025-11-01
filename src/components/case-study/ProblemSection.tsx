@@ -27,10 +27,16 @@ export const ProblemSection = ({ title, description, challenges, iframeUrl, ifra
             document.body.style.overflow = 'hidden';
             setHasViewed(true);
 
-            // Wait 2 seconds before showing cards and unlocking scroll
+            // Wait 2 seconds before showing cards
             setTimeout(() => {
               setShowCards(true);
-              document.body.style.overflow = '';
+              
+              // Keep scroll locked until both cards finish animating
+              // Second card: 0.4s delay + 0.9s duration = 1.3s
+              // Total: 2s + 1.3s = 3.3s, add buffer for 3.5s
+              setTimeout(() => {
+                document.body.style.overflow = '';
+              }, 1500); // 1.5s after cards start (total 3.5s from initial lock)
             }, 2000);
           }
         });
