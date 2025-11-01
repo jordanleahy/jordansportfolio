@@ -29,6 +29,7 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
       
       <CaseStudyNavigation
         problemTitle={data.problemTitle}
+        teamTitle="Team"
         processTitle={data.processTitle}
         solutionTitle={data.solutionTitle}
         outcomesTitle={data.outcomesTitle}
@@ -59,7 +60,9 @@ export const CaseStudyLayout = ({ data, path }: CaseStudyLayoutProps) => {
         />
       </div>
       
-      <TeamSection teamMembers={data.teamMembers} />
+      <div id="team">
+        <TeamSection teamMembers={data.teamMembers} />
+      </div>
       
       <div id="process">
         <ProcessSection 

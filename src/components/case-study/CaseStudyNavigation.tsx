@@ -8,6 +8,7 @@ interface NavItem {
 
 interface CaseStudyNavigationProps {
   problemTitle: string;
+  teamTitle: string;
   processTitle: string;
   solutionTitle: string;
   outcomesTitle: string;
@@ -16,6 +17,7 @@ interface CaseStudyNavigationProps {
 
 export const CaseStudyNavigation = ({
   problemTitle,
+  teamTitle,
   processTitle,
   solutionTitle,
   outcomesTitle,
@@ -27,6 +29,7 @@ export const CaseStudyNavigation = ({
   const navItems: NavItem[] = [
     { id: "context", label: "CONTEXT" },
     { id: "problem", label: problemTitle.toUpperCase() },
+    { id: "team", label: teamTitle.toUpperCase() },
     { id: "process", label: processTitle.toUpperCase() },
     { id: "solution", label: solutionTitle.toUpperCase() },
     { id: "impact", label: outcomesTitle.toUpperCase() },
