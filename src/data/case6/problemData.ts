@@ -4,18 +4,18 @@ export const problemData = {
   challenges: [
     {
       type: "problem" as const,
-      title: "Complex Data Structure and Low Usability",
+      title: "3 Million Views = 3 Million Struggles",
       items: [
-        "Users found navigation confusing and search unintuitive.",
-        "High cognitive load when comparing hospitals and analyzing metrics."
+        "High page views weren't engagement—they were users lost in navigation",
+        "Comparing hospitals meant juggling multiple tabs with duplicate metrics"
       ]
     },
     {
       type: "need" as const,
-      title: "Simplify Access to Insights",
+      title: "Users Needed Answers, Not Explorations",
       items: [
-        "Users wanted summary views instead of multiple tab explorations.",
-        "Stakeholders needed clarity on which metrics users valued most."
+        "Summary views that surface insights instead of forcing tab-by-tab discovery",
+        "Clear prioritization of which metrics actually drive decisions"
       ]
     }
   ],

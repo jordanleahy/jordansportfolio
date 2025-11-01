@@ -1,7 +1,7 @@
 import definitiveHealthcareHero from "@/assets/definitive-healthcare-hero.png";
 
 export const heroData = {
-  title: "3 Million Views, Zero Clarity: Redesigning Definitive Healthcare's Hospital Profiles",
+  title: "3 Million Views, Zero Clarity",
   description: "Led a data-driven redesign to transform navigation chaos into clarity. Partnered with Product Management, Customer Success, and Data Science to restructure information architecture, streamline workflows, and reduce user effort across a product receiving 3 million annual page views.",
   heroImage: definitiveHealthcareHero,
   heroImageAlt: "Definitive Healthcare hospital profile interface showing healthcare data metrics and user feedback bubbles.",
