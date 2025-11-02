@@ -222,6 +222,7 @@ const ProjectCardsSection = () => {
                           src="/case6-definitive-healthcare.png"
                           alt="Definitive Healthcare dashboard showing multi-device interface with navigation, data analytics, and clinical metrics"
                           className="w-full aspect-video object-cover rounded-lg border border-border/50"
+                          key="case6-image-v2"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
                           <p className="text-white text-body-sm font-medium text-center px-4">
