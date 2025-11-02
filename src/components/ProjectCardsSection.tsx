@@ -120,9 +120,7 @@ const ProjectCardsSection = () => {
                   <CardHeader className="pb-4 relative z-10">
                     <div className="flex items-start justify-between mb-4">
                       <motion.div 
-                        className="p-3 rounded-xl bg-gradient-to-br from-accent/20 to-accent/10 border border-accent/20 shadow-accent-sm"
-                        whileHover={{ scale: 1.05, rotate: 5 }}
-                        transition={{ duration: 0.3 }}
+                        className="p-3"
                       >
                         {project.id === 'case1' ? (
                           <img src={smarterdxLogo} alt="SmarterDx Logo" className="h-6 w-auto" />
