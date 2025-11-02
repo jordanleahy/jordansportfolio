@@ -69,19 +69,19 @@ export const StackedCarousel = ({
     // Only show current and future cards (hide previous cards)
     if (diff < 0 || diff > 2) return { display: 'none' };
 
-    // Desktop stacked effect - cards peek from bottom-right
+    // Desktop stacked effect - larger offsets for better clickability
     const desktopTransform = {
-      x: diff * 20,
-      y: diff * 20,
-      scale: 1 - diff * 0.05,
+      x: diff * 50,
+      y: diff * 50,
+      scale: 1 - diff * 0.08,
       opacity: 1 - diff * 0.2,
     };
 
-    // Mobile stacked effect - smaller offsets
+    // Mobile stacked effect - proportional offsets
     const mobileTransform = {
-      x: diff * 15,
-      y: diff * 15,
-      scale: 1 - diff * 0.08,
+      x: diff * 35,
+      y: diff * 35,
+      scale: 1 - diff * 0.1,
       opacity: 1 - diff * 0.25,
     };
 
