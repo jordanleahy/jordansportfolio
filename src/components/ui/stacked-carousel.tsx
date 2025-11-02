@@ -1,9 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSwipeGestures } from '@/hooks/useSwipeGestures';
-import { Lightbox } from '@/components/ui/lightbox';
 import { cn } from '@/lib/utils';
 
 interface Image {
@@ -25,7 +24,6 @@ export const StackedCarousel = ({
   className
 }: StackedCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % images.length);
@@ -37,10 +35,6 @@ export const StackedCarousel = ({
 
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
-  }, []);
-
-  const handleImageClick = useCallback(() => {
-    setIsLightboxOpen(true);
   }, []);
 
   // Keyboard navigation
@@ -131,7 +125,7 @@ export const StackedCarousel = ({
                   zIndex: style.zIndex,
                   transformStyle: 'preserve-3d',
                 }}
-                onClick={index === currentIndex ? handleImageClick : () => goToSlide(index)}
+                onClick={() => goToSlide(index)}
               >
                 <div className="w-full h-full rounded-lg overflow-hidden shadow-2xl bg-card">
                   <img
@@ -170,7 +164,7 @@ export const StackedCarousel = ({
                 style={{
                   zIndex: images.length - absIndex,
                 }}
-                onClick={index === currentIndex ? handleImageClick : () => goToSlide(index)}
+                onClick={() => goToSlide(index)}
               >
                 <div className="w-full h-full rounded-lg overflow-hidden shadow-lg bg-card">
                   <img
@@ -235,13 +229,6 @@ export const StackedCarousel = ({
         </Button>
       </div>
 
-      {/* Lightbox */}
-      <Lightbox
-        images={images}
-        isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
-        initialIndex={currentIndex}
-      />
     </div>
   );
 };
