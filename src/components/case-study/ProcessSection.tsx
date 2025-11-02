@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { ProcessStep } from "@/types/caseStudy";
 import { iconMap } from "@/utils/iconMap";
-import { ImageThumbnails } from "@/components/ui/lightbox";
+import { StackedCarousel } from "@/components/ui/stacked-carousel";
 
 interface ProcessSectionProps {
   title: string;
@@ -72,10 +72,10 @@ export const ProcessSection = ({ title, steps }: ProcessSectionProps) => {
                     )}
                   </div>
                   
-                  {/* Thumbnails section - full width below main content */}
+                  {/* Stacked Carousel section - full width below main content */}
                   {step.images && step.images.length > 0 && (
                     <div className="mt-6 pt-6 border-t border-border">
-                      <ImageThumbnails images={step.images} />
+                      <StackedCarousel images={step.images} aspectRatio="16/9" />
                     </div>
                   )}
                 </Card>
