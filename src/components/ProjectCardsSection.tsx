@@ -6,6 +6,7 @@ import { ArrowRight, Brain, Shield, Workflow, FileText, Activity } from "lucide-
 import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 import smarterdxLogo from "@/assets/smarterdx-logo.png";
+import prescriberPointLogo from "@/assets/prescriberpoint-logo.png";
 
 const projects = [
   {
@@ -124,6 +125,8 @@ const ProjectCardsSection = () => {
                       >
                         {project.id === 'case1' ? (
                           <img src={smarterdxLogo} alt="SmarterDx Logo" className="h-6 w-auto" />
+                        ) : project.id === 'case4' ? (
+                          <img src={prescriberPointLogo} alt="PrescriberPoint Logo" className="h-6 w-auto" />
                         ) : (
                           <project.icon className="h-6 w-6 text-accent" />
                         )}
