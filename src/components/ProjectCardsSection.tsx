@@ -143,7 +143,7 @@ const ProjectCardsSection = () => {
                         <img 
                           src="/lovable-uploads/94645942-c8fe-4408-a81b-37d80b01c845.png"
                           alt="Healthcare encounter interface showing diagnosis codes, patient information, and clinical decision support workflow"
-                          className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
+                          className="w-full aspect-video object-cover rounded-lg border border-border/50"
                           key="case1-image-updated"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
@@ -161,7 +161,7 @@ const ProjectCardsSection = () => {
                         <img 
                           src="/lovable-uploads/3b1ac111-f65f-41c5-ba02-e27142d30d31.png"
                           alt="Clinical decision support interface showing encounter notes, diagnosis codes, and ICD-10 coding suggestions for metabolic encephalopathy and other conditions"
-                          className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
+                          className="w-full aspect-video object-cover rounded-lg border border-border/50"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
                           <p className="text-white text-body-sm font-medium text-center px-4">
@@ -178,7 +178,7 @@ const ProjectCardsSection = () => {
                          <img 
                            src="/lovable-uploads/866199b0-8a85-4f7b-957a-f215fd29176b.png"
                            alt="Drug Prior Authorization interface showing workflow steps"
-                           className="w-full aspect-video object-cover rounded-lg border border-border/50 blur-[1px]"
+                           className="w-full aspect-video object-cover rounded-lg border border-border/50"
                          />
                           <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
                             <p className="text-white text-body-sm font-medium text-center px-4">
