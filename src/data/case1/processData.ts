@@ -65,8 +65,13 @@ export const processData = {
         "Alert hierarchy and notification design",
         "Hosted sepsis workshop"
       ],
-      image: "/lovable-uploads/758c2b99-8f51-4485-9be8-3e516cf888b1.png",
       images: [
+        {
+          src: "/lovable-uploads/758c2b99-8f51-4485-9be8-3e516cf888b1.png",
+          alt: "Dashboard ideation and wireframing session",
+          caption: "Collaborative design sessions with clinical teams",
+          title: "Ideation Session"
+        },
         {
           src: "/lovable-uploads/0c9250c3-95a5-4d46-84cb-59d7e8c90c2a.png",
           alt: "User research and ideation board with sticky notes",
@@ -114,8 +119,13 @@ export const processData = {
         "A/B testing of alert mechanisms",
         "Clinical accuracy validation sessions"
       ],
-      image: "/lovable-uploads/88432ef6-b400-42a0-8cf0-492602c62862.png",
       images: [
+        {
+          src: "/lovable-uploads/88432ef6-b400-42a0-8cf0-492602c62862.png",
+          alt: "Prototype and clinical testing interface",
+          caption: "Iterative testing with CDI staff",
+          title: "Testing Interface"
+        },
         {
           src: "/lovable-uploads/18e65336-e421-4a4a-85c2-3405d7aa0871.png",
           alt: "Scenario 3 testing results showing EMR data impact assessment",
@@ -134,8 +144,13 @@ export const processData = {
         "Performance monitoring and optimization",
         "HEX Data Monitoring"
       ],
-      image: "/lovable-uploads/26c1c64e-1bdb-441a-87ff-338d3961cad3.png",
       images: [
+        {
+          src: "/lovable-uploads/26c1c64e-1bdb-441a-87ff-338d3961cad3.png",
+          alt: "Implementation and validation metrics",
+          caption: "Deployment and real-world performance monitoring",
+          title: "Performance Metrics"
+        },
         {
           src: "/lovable-uploads/26c1c64e-1bdb-441a-87ff-338d3961cad3.png",
           alt: "Sepsis client agreement rates dashboard",
