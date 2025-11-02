@@ -7,7 +7,7 @@ export const problemData = {
       title: "3 Million Views = 3 Million Struggles",
       items: [
         "High page views weren't engagement—they were users lost in navigation",
-        "Comparing hospitals meant juggling multiple tabs with duplicate metrics"
+        "Finding hospital data meant juggling multiple tabs with duplicate metrics"
       ]
     },
     {
