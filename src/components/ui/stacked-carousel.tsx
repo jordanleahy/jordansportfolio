@@ -106,7 +106,7 @@ export const StackedCarousel = ({
         className="relative w-full overflow-visible origin-top-left"
         style={{ 
           aspectRatio,
-          transform: 'scaleX(0.9375) scaleY(0.796875)',
+          transform: 'scale(0.9375)',
         }}
       >
         {/* Desktop: Horizontally stacked cards */}
