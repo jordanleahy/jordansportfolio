@@ -14,7 +14,7 @@ export const problemData = {
       type: "need" as const,
       title: "Users Needed Answers, Not Explorations",
       items: [
-        "Summary views that surface insights instead of forcing tab-by-tab discovery",
+        "Summary views that surface insights instead of forcing tab by tab discovery",
         "Clear prioritization of which metrics actually drive decisions"
       ]
     }
