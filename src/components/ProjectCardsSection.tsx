@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain, Shield, Workflow, FileText, Activity } from "lucide-react";
+import { ArrowRight, Brain, Shield, Workflow, FileText, Activity, Layout } from "lucide-react";
 import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 import smarterdxLogo from "@/assets/smarterdx-logo.png";
@@ -35,6 +35,15 @@ const projects = [
     tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
     icon: Shield,
     path: "/cases/case4"
+  },
+  {
+    id: "case6",
+    title: "3 Million Views, Zero Clarity",
+    company: "Healthcare Data Analytics",
+    description: "Led a data-driven redesign to transform navigation chaos into clarity. Partnered with Product Management, Customer Success, and Data Science to restructure information architecture, streamline workflows, and reduce user effort across a product receiving 3 million annual page views.",
+    tags: ["#DataDriven", "#UX", "#Navigation", "#InformationArchitecture", "#Workflow"],
+    icon: Layout,
+    path: "/cases/case6"
   }
 ];
 
@@ -203,6 +212,23 @@ const ProjectCardsSection = () => {
                         alt="Denial and Appeal Resolution interface showing appeal management workflow"
                         className="w-full aspect-video object-cover rounded-lg border border-border/50"
                       />
+                    </div>
+                  )}
+                  
+                  {project.id === "case6" && (
+                    <div className="px-6 pb-4">
+                      <div className="relative group/image">
+                        <img 
+                          src="/case6-definitive-healthcare.png"
+                          alt="Definitive Healthcare dashboard showing multi-device interface with navigation, data analytics, and clinical metrics"
+                          className="w-full aspect-video object-cover rounded-lg border border-border/50"
+                        />
+                        <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                          <p className="text-white text-body-sm font-medium text-center px-4">
+                            Click and enter password for case details
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                   
