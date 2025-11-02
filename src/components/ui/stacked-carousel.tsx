@@ -71,7 +71,7 @@ export const StackedCarousel = ({
 
     // Horizontal stacking with height reduction - Framer style
     const desktopTransform = {
-      x: diff * 80, // Increased horizontal offset for better clickability
+      x: diff * 120, // Increased horizontal offset for maximum visibility
       y: 0, // No vertical offset
       scaleY: 1 - diff * 0.15, // Reduce height progressively
       scaleX: 1 - diff * 0.05, // Slight width reduction
@@ -80,7 +80,7 @@ export const StackedCarousel = ({
 
     // Mobile stacked effect - smaller offsets
     const mobileTransform = {
-      x: diff * 50,
+      x: diff * 70,
       y: 0,
       scaleY: 1 - diff * 0.15,
       scaleX: 1 - diff * 0.08,
