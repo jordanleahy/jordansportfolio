@@ -99,8 +99,11 @@ export const StackedCarousel = ({
       {/* Carousel Container */}
       <div 
         ref={swipeRef}
-        className="relative w-full overflow-visible"
-        style={{ aspectRatio }}
+        className="relative w-full overflow-visible origin-top-left"
+        style={{ 
+          aspectRatio,
+          transform: 'scaleY(0.75)',
+        }}
       >
         {/* Desktop: Horizontally stacked cards */}
         <div className="hidden md:block relative w-full h-full">
