@@ -69,19 +69,21 @@ export const StackedCarousel = ({
     // Only show current and future cards (hide previous cards)
     if (diff < 0 || diff > 2) return { display: 'none' };
 
-    // Desktop stacked effect - larger offsets for better clickability
+    // Horizontal stacking with height reduction - Framer style
     const desktopTransform = {
-      x: diff * 50,
-      y: diff * 50,
-      scale: 1 - diff * 0.08,
+      x: diff * 60, // Horizontal offset only
+      y: 0, // No vertical offset
+      scaleY: 1 - diff * 0.15, // Reduce height progressively
+      scaleX: 1 - diff * 0.05, // Slight width reduction
       opacity: 1 - diff * 0.2,
     };
 
-    // Mobile stacked effect - proportional offsets
+    // Mobile stacked effect - smaller offsets
     const mobileTransform = {
-      x: diff * 35,
-      y: diff * 35,
-      scale: 1 - diff * 0.1,
+      x: diff * 40,
+      y: 0,
+      scaleY: 1 - diff * 0.15,
+      scaleX: 1 - diff * 0.08,
       opacity: 1 - diff * 0.25,
     };
 
@@ -100,7 +102,7 @@ export const StackedCarousel = ({
         className="relative w-full overflow-visible"
         style={{ aspectRatio }}
       >
-        {/* Desktop: Stacked cards */}
+        {/* Desktop: Horizontally stacked cards */}
         <div className="hidden md:block relative w-full h-full">
           {images.map((image, index) => {
             const style = getCardStyle(index);
@@ -112,14 +114,15 @@ export const StackedCarousel = ({
                 animate={{
                   x: style.desktop.x,
                   y: style.desktop.y,
-                  scale: style.desktop.scale,
+                  scaleX: style.desktop.scaleX,
+                  scaleY: style.desktop.scaleY,
                   opacity: style.desktop.opacity,
                 }}
                 transition={{
                   duration: 0.4,
                   ease: [0.32, 0.72, 0, 1],
                 }}
-                className="absolute inset-0 cursor-pointer"
+                className="absolute inset-0 cursor-pointer origin-left"
                 style={{
                   zIndex: style.zIndex,
                 }}
@@ -138,7 +141,7 @@ export const StackedCarousel = ({
           })}
         </div>
 
-        {/* Mobile: Stacked cards */}
+        {/* Mobile: Horizontally stacked cards */}
         <div className="md:hidden relative w-full h-full">
           {images.map((image, index) => {
             const style = getCardStyle(index);
@@ -150,14 +153,15 @@ export const StackedCarousel = ({
                 animate={{
                   x: style.mobile.x,
                   y: style.mobile.y,
-                  scale: style.mobile.scale,
+                  scaleX: style.mobile.scaleX,
+                  scaleY: style.mobile.scaleY,
                   opacity: style.mobile.opacity,
                 }}
                 transition={{
                   duration: 0.3,
                   ease: [0.32, 0.72, 0, 1],
                 }}
-                className="absolute inset-0 cursor-pointer"
+                className="absolute inset-0 cursor-pointer origin-left"
                 style={{
                   zIndex: style.zIndex,
                 }}
