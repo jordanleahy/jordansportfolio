@@ -64,10 +64,14 @@ export const StackedCarousel = ({
   if (images.length === 0) return null;
 
   const getCardStyle = (index: number) => {
-    const diff = index - currentIndex;
+    // Calculate circular difference for infinite looping
+    let diff = index - currentIndex;
+    if (diff < 0) {
+      diff += images.length;
+    }
     
-    // Only show current and future cards (hide previous cards)
-    if (diff < 0 || diff > 2) return { display: 'none' };
+    // Only show current and next 2 cards in the loop
+    if (diff > 2) return { display: 'none' };
 
     // Horizontal stacking with height reduction - Framer style
     const desktopTransform = {
