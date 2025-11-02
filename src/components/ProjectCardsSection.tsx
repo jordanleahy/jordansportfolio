@@ -141,10 +141,10 @@ const ProjectCardsSection = () => {
                     <div className="px-6 pb-4">
                       <div className="relative group/image">
                         <img 
-                          src="/case1-cdi-dashboard.png"
+                          src="/case1-updated.png"
                           alt="Healthcare encounter interface showing diagnosis codes, patient information, and clinical decision support workflow"
                           className="w-full aspect-video object-cover rounded-lg border border-border/50"
-                          key="case1-image-v2"
+                          key="case1-image-v3"
                         />
                         <div className="absolute inset-0 bg-black/60 rounded-lg flex items-center justify-center opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
                           <p className="text-white text-body-sm font-medium text-center px-4">
