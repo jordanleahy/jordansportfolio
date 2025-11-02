@@ -189,7 +189,7 @@ export const StackedCarousel = ({
       </div>
 
       {/* Navigation Controls */}
-      <div className="flex items-center justify-between mt-10">
+      <div className="flex items-center justify-between mt-4">
         <Button
           variant="outline"
           size="icon"
