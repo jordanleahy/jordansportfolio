@@ -29,7 +29,7 @@ const projects = [
   },
   {
     id: "case4",
-    title: "Drug Prior Auth and Validation",
+    title: "As employee #1 I grew our monthly users base from 0 to 200,000 clinicians in 2 years.",
     company: "Digital Health Platform",
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
