@@ -7,6 +7,7 @@ import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswor
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
 import smarterdxLogo from "@/assets/smarterdx-logo.png";
 import prescriberPointLogo from "@/assets/prescriberpoint-logo.png";
+import definitiveHealthcareLogo from "@/assets/definitive-healthcare-logo.png";
 
 const projects = [
   {
@@ -136,6 +137,8 @@ const ProjectCardsSection = () => {
                           <img src={smarterdxLogo} alt="SmarterDx Logo" className="h-6 w-auto" />
                         ) : project.id === 'case4' ? (
                           <img src={prescriberPointLogo} alt="PrescriberPoint Logo" className="h-6 w-auto" />
+                        ) : project.id === 'case6' ? (
+                          <img src={definitiveHealthcareLogo} alt="Definitive Healthcare Logo" className="h-6 w-auto" />
                         ) : (
                           <project.icon className="h-6 w-6 text-accent" />
                         )}
