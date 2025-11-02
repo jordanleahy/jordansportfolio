@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Brain, Shield, Workflow, FileText, Activity } from "lucide-react";
 import { CaseStudyPasswordModal } from "@/components/case-study/CaseStudyPasswordModal";
 import { useCaseStudyAuth } from "@/hooks/useCaseStudyAuth";
+import smarterdxLogo from "@/assets/smarterdx-logo.png";
 
 const projects = [
   {
@@ -123,7 +124,11 @@ const ProjectCardsSection = () => {
                         whileHover={{ scale: 1.05, rotate: 5 }}
                         transition={{ duration: 0.3 }}
                       >
-                        <project.icon className="h-6 w-6 text-accent" />
+                        {project.id === 'case1' ? (
+                          <img src={smarterdxLogo} alt="SmarterDx Logo" className="h-6 w-auto" />
+                        ) : (
+                          <project.icon className="h-6 w-6 text-accent" />
+                        )}
                       </motion.div>
                       <motion.div
                         whileHover={{ x: 6, scale: 1.2 }}
