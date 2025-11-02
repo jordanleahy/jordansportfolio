@@ -103,75 +103,86 @@ export const StackedCarousel = ({
       {/* Carousel Container */}
       <div 
         ref={swipeRef}
-        className="relative w-full overflow-hidden"
+        className="relative w-full overflow-visible"
         style={{ aspectRatio }}
       >
         {/* Desktop: Perspective container */}
         <div className="hidden md:block relative w-full h-full" style={{ perspective: '1200px' }}>
-          <AnimatePresence initial={false}>
-            {images.map((image, index) => {
-              const style = getCardStyle(index);
-              if (style.display === 'none') return null;
+          {images.map((image, index) => {
+            const style = getCardStyle(index);
+            if (style.display === 'none') return null;
 
-              return (
-                <motion.div
-                  key={image.src}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{
-                    x: style.desktop.x,
-                    scale: style.desktop.scale,
-                    opacity: style.desktop.opacity,
-                    rotateY: style.desktop.rotateY,
-                    z: style.desktop.z,
-                  }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{
-                    duration: 0.4,
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                  }}
-                  className="absolute inset-0 cursor-pointer"
-                  style={{
-                    zIndex: style.zIndex,
-                    transformStyle: 'preserve-3d',
-                  }}
-                  onClick={index === currentIndex ? handleImageClick : () => goToSlide(index)}
-                >
-                  <div className="w-full h-full rounded-lg overflow-hidden shadow-2xl bg-card">
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+            return (
+              <motion.div
+                key={image.src}
+                animate={{
+                  x: style.desktop.x,
+                  scale: style.desktop.scale,
+                  opacity: style.desktop.opacity,
+                  rotateY: style.desktop.rotateY,
+                  z: style.desktop.z,
+                }}
+                transition={{
+                  duration: 0.4,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
+                className="absolute inset-0 cursor-pointer"
+                style={{
+                  zIndex: style.zIndex,
+                  transformStyle: 'preserve-3d',
+                }}
+                onClick={index === currentIndex ? handleImageClick : () => goToSlide(index)}
+              >
+                <div className="w-full h-full rounded-lg overflow-hidden shadow-2xl bg-card">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
 
-        {/* Mobile: Simple carousel */}
+        {/* Mobile: Stacked carousel with simpler transforms */}
         <div className="md:hidden relative w-full h-full">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={currentIndex}
-              initial={{ opacity: 0, x: 100 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.3 }}
-              className="absolute inset-0 cursor-pointer"
-              onClick={handleImageClick}
-            >
-              <div className="w-full h-full rounded-lg overflow-hidden shadow-lg bg-card">
-                <img
-                  src={images[currentIndex].src}
-                  alt={images[currentIndex].alt}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-            </motion.div>
-          </AnimatePresence>
+          {images.map((image, index) => {
+            const diff = index - currentIndex;
+            const absIndex = Math.abs(diff);
+            
+            if (absIndex > 2) return null;
+
+            return (
+              <motion.div
+                key={image.src}
+                animate={{
+                  x: diff * 30,
+                  scale: 1 - absIndex * 0.1,
+                  opacity: diff === 0 ? 1 : 0.4,
+                }}
+                transition={{
+                  duration: 0.3,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
+                className="absolute inset-0 cursor-pointer"
+                style={{
+                  zIndex: images.length - absIndex,
+                }}
+                onClick={index === currentIndex ? handleImageClick : () => goToSlide(index)}
+              >
+                <div className="w-full h-full rounded-lg overflow-hidden shadow-lg bg-card">
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
