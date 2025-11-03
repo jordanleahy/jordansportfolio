@@ -31,7 +31,7 @@ export interface NavigationItem {
 export const navigationConfig: NavigationItem[] = [
   // Public items (marketing routes)
   { href: "/", label: "Home", icon: Home, accessLevel: 'public', showInDesktop: true, showInMobile: true },
-  { href: "/vendors", label: "Vendors", icon: Package, accessLevel: 'public', showInDesktop: true, showInMobile: true },
+  { href: "/vendors", label: "RCM Companies", icon: Package, accessLevel: 'public', showInDesktop: true, showInMobile: true },
   { href: "/about", label: "About", icon: Target, accessLevel: 'public', showInDesktop: true, showInMobile: true },
 
   // Authenticated items
