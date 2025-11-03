@@ -30,7 +30,7 @@ const projects = [
   },
   {
     id: "case4",
-    title: "Driving product growth to 200,000 monthly users as employee #1",
+    title: "Led product growth from launch to 200K users",
     company: "Digital Health Platform",
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
