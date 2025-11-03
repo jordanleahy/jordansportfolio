@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from "@supabase/supabase-js";
 import AppLayout from "@/components/layout/AppLayout";
-import PersonalIntroSection from "@/components/PersonalIntroSection";
 import CompaniesSection from "@/components/CompaniesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import ProjectCardsSection from "@/components/ProjectCardsSection";
@@ -112,11 +111,10 @@ const About = () => {
         <HeroParallaxDemo />
       </Suspense>
       
-      {/* Portfolio Content - Reordered sections for trust building */}
-      <PersonalIntroSection />
+      {/* Portfolio Content - Reordered sections */}
       <CompaniesSection />
-      <TestimonialsSection />
       <ProjectCardsSection />
+      <TestimonialsSection />
       <ContactSection />
     </AppLayout>
     </>

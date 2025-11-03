@@ -17,13 +17,7 @@ const projects = [
     description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
     icon: Brain,
-    path: "/cases/case1",
-    impact: {
-      metric: "60%",
-      label: "Accuracy Improvement"
-    },
-    role: "Lead Product Designer",
-    timeline: "6 months"
+    path: "/cases/case1"
   },
   {
     id: "case2",
@@ -32,13 +26,7 @@ const projects = [
     description: "Inpatient EMR notes are essential for assigning the correct ICD-10 codes but they are often \"duplicates\" or \"copy and pasted\" making it hard for systems and humans to assign the right codes.",
     tags: ["#EMR", "#Notes", "#ICD-10", "#Duplicates", "#MetabolicEncephalopathy", "#UnstructuredNotes"],
     icon: FileText,
-    path: "/cases/case2",
-    impact: {
-      metric: "8 min",
-      label: "Time Saved per Review"
-    },
-    role: "Product Designer",
-    timeline: "4 months"
+    path: "/cases/case2"
   },
   {
     id: "case4",
@@ -47,13 +35,7 @@ const projects = [
     description: "Designed an AI drug prior authorization workflow tool that identifies formulary rules, medical requirements, step therapy, reauthorization dates, drafts the letter, and sends to the appropriate insurance company.",
     tags: ["#PriorAuth", "#ML", "#Workflow", "#Formulary", "#Denials", "#StepTherapy", "#AppealLetter"],
     icon: Shield,
-    path: "/cases/case4",
-    impact: {
-      metric: "200K+",
-      label: "Active Users"
-    },
-    role: "Lead Product Designer",
-    timeline: "18 months"
+    path: "/cases/case4"
   },
   {
     id: "case6",
@@ -62,13 +44,7 @@ const projects = [
     description: "Led a data-driven redesign to transform navigation chaos into clarity. Partnered with Product Management, Customer Success, and Data Science to restructure information architecture, streamline workflows, and reduce user effort across a product receiving 3 million annual page views.",
     tags: ["#DataDriven", "#UX", "#Navigation", "#InformationArchitecture", "#Workflow"],
     icon: Layout,
-    path: "/cases/case6",
-    impact: {
-      metric: "3M+",
-      label: "Annual Page Views"
-    },
-    role: "Senior Product Designer",
-    timeline: "12 months"
+    path: "/cases/case6"
   }
 ];
 
@@ -153,16 +129,6 @@ const ProjectCardsSection = () => {
                     <div className="absolute inset-0 bg-gradient-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                   )}
                   <CardHeader className="pb-4 relative z-10">
-                    {/* Impact Badge */}
-                    {project.impact && (
-                      <div className="mb-4">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                          <span className="text-primary font-bold text-sm">{project.impact.metric}</span>
-                          <span className="text-primary/70 text-xs">{project.impact.label}</span>
-                        </div>
-                      </div>
-                    )}
-                    
                     <div className="flex items-start justify-between mb-4">
                       <motion.div 
                         className="p-3"
@@ -186,12 +152,6 @@ const ProjectCardsSection = () => {
                     </div>
                     <div>
                       <h3 className="font-['Inter'] text-[24px] font-medium leading-[31.2px] mb-2 text-black">{project.title}</h3>
-                      {/* Role and Timeline */}
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                        <span className="font-medium">{project.role}</span>
-                        <span>•</span>
-                        <span>{project.timeline}</span>
-                      </div>
                     </div>
                   </CardHeader>
                   

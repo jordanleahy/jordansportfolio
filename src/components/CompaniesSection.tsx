@@ -6,46 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadImage } from "@/utils/imageUpload";
 
 const initialCompanies = [
-  { 
-    name: "SmarterDx", 
-    logo: "SD", 
-    logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//smarterdx.jpeg",
-    role: "Product Designer",
-    timeline: "2023 - 2024",
-    description: "AI-powered clinical decision support"
-  },
-  { 
-    name: "PrescriberPoint", 
-    logo: "DH", 
-    logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//ppt.jpeg",
-    role: "Lead Product Designer",
-    timeline: "2021 - 2023",
-    description: "Drug information & prior authorization"
-  },
-  { 
-    name: "BCG X", 
-    logo: "RC", 
-    logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png",
-    role: "Design Consultant",
-    timeline: "2023",
-    description: "Healthcare strategy & innovation"
-  },
-  { 
-    name: "Definitive Health", 
-    logo: "MI", 
-    logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png",
-    role: "Senior Product Designer",
-    timeline: "2020 - 2021",
-    description: "Healthcare intelligence platform"
-  },
-  { 
-    name: "HTD Health", 
-    logo: "CO", 
-    logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png",
-    role: "Competitive Intelligence Analyst",
-    timeline: "2019 - 2020",
-    description: "Healthcare market research"
-  }
+  { name: "SmarterDx", logo: "SD", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//smarterdx.jpeg" },
+  { name: "PrescriberPoint", logo: "DH", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//ppt.jpeg" },
+  { name: "BCG X", logo: "RC", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
+  { name: "Definitive Health", logo: "MI", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
+  { name: "HTD Health", logo: "CO", logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png" },
+  
+  
 ];
 
 const CompaniesSection = () => {
@@ -132,7 +99,7 @@ const CompaniesSection = () => {
               className="group relative w-full"
             >
               <div 
-                className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer w-full h-full relative overflow-hidden"
+                className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer w-full h-full"
                 onClick={() => {
                   if (company.name === "SmarterDx") {
                     window.open("https://www.smarterdx.com/", "_blank", "noopener,noreferrer");
@@ -163,13 +130,6 @@ const CompaniesSection = () => {
                 <p className="font-sans text-sm font-medium text-foreground/80 group-hover:text-accent transition-colors">
                   {company.name}
                 </p>
-                
-                {/* Hover overlay with role and timeline */}
-                <div className="absolute inset-0 bg-primary/95 rounded-lg flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
-                  <p className="text-white font-semibold text-sm mb-1">{(company as any).role}</p>
-                  <p className="text-white/80 text-xs mb-2">{(company as any).timeline}</p>
-                  <p className="text-white/70 text-xs text-center">{(company as any).description}</p>
-                </div>
                 
                 {editMode && (
                   <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

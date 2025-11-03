@@ -73,15 +73,9 @@ const ContactSection = () => {
       }} viewport={{
         once: true
       }} className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
-            <span className="text-body-sm font-medium text-primary">Let's Work Together</span>
-          </div>
           <h2 className="text-center mb-4 text-[#042F3A] text-[56px] font-medium leading-[61.6px] tracking-[0.84px]">Let's Create Impact Together</h2>
-          <p className="text-black font-['Inter'] text-[18px] font-normal leading-[27px] tracking-[-0.18px] max-w-2xl mx-auto mb-4">
+          <p className="text-black font-['Inter'] text-[18px] font-normal leading-[27px] tracking-[-0.18px] max-w-2xl mx-auto">
             I'm passionate about leveraging clinical data and AI to solve complex healthcare challenges. Let's explore how we can improve patient outcomes and operational excellence.
-          </p>
-          <p className="text-muted-foreground text-sm">
-            📧 Typical response time: Within 24 hours | 🗓️ Free 30-minute consultation available
           </p>
         </motion.div>
 
