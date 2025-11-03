@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 interface CaseStudyHeroProps {
   title: string;
   description: string;
-  heroImage: string;
-  heroImageAlt: string;
+  heroImage?: string;
+  heroImageAlt?: string;
   role: string;
   roleDetails?: string;
   timeline: string;
@@ -84,20 +84,22 @@ export const CaseStudyHero = ({
             <p className="text-[18px] font-normal leading-[27px] tracking-[-0.18px] mb-6" style={{ color: '#000' }}>{description}</p>
             
             {/* Hero Image */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }} 
-              animate={{ opacity: 1, scale: 1 }} 
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative mb-6 rounded-2xl overflow-hidden shadow-lg border border-border/50"
-            >
-              <img 
-                src={heroImage}
-                alt={heroImageAlt}
-                className="w-full h-auto"
-                loading="eager"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
-            </motion.div>
+            {heroImage && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }} 
+                animate={{ opacity: 1, scale: 1 }} 
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative mb-6 rounded-2xl overflow-hidden shadow-lg border border-border/50"
+              >
+                <img 
+                  src={heroImage}
+                  alt={heroImageAlt || ''}
+                  className="w-full h-auto"
+                  loading="eager"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent"></div>
+              </motion.div>
+            )}
           </div>
           
           <div className="grid md:grid-cols-2 gap-6 mb-8">

@@ -80,8 +80,8 @@ export interface CaseStudyData {
   // Hero Section
   title: string;
   description: string;
-  heroImage: string;
-  heroImageAlt: string;
+  heroImage?: string;
+  heroImageAlt?: string;
   role: string;
   roleDetails?: string;
   timeline: string;
