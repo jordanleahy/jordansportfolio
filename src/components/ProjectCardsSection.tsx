@@ -12,7 +12,7 @@ import definitiveHealthcareLogo from "@/assets/definitive-healthcare-logo.png";
 const projects = [
   {
     id: "case1",
-    title: "I improved clinical primary diagnosis by 60% through dense clinical design & storytelling",
+    title: "Achieved 60% diagnostic accuracy improvement",
     company: "Healthcare Analytics",
     description: "Designed an AI powered CDI dashboard to help CDS specialists review and validate new primary diagnoses.",
     tags: ["#RCM", "#LLM", "#ICD-10"],
