@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote, User } from "lucide-react";
+import { Quote, User, ExternalLink } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import ruthNacyProfile from "@/assets/ruth-nacy-profile.jpeg";
 import bryanLawsonProfile from "@/assets/bryan-lawson-profile.jpeg";
 import drugPriorAuthAvatar from "@/assets/bryan-lawson.jpeg";
@@ -12,25 +13,33 @@ const testimonials = [
     quote: "Jordan demonstrated a methodical approach to research, user experience design, and prototyping.",
     author: "Ruth Nacey",
     role: "Director of Product, SmarterDx",
-    avatar: ruthNacyProfile
+    avatar: ruthNacyProfile,
+    company: "SmarterDx",
+    linkedIn: "https://www.linkedin.com/in/ruth-nacey/"
   },
   {
     quote: "Jordan demonstrated a deep understanding of our users' needs and seamlessly translated complex requirements into intuitive and elegant experiences.",
     author: "Bryan Lawson",
     role: "Clinical Operations Lead, PrescriberPoint",
-    avatar: bryanLawsonProfile
+    avatar: bryanLawsonProfile,
+    company: "PrescriberPoint",
+    linkedIn: "https://www.linkedin.com/in/bryan-lawson-pharmd-mba-66120a14/"
   },
   {
     quote: "we tackled complex drug data, turning it into organized, accurate comparison information that HCPs could easily navigate.",
     author: "Shannon Epling",
     role: "Clinical Content Strategist, PrescriberPoint",
-    avatar: shannonEplingProfile
+    avatar: shannonEplingProfile,
+    company: "PrescriberPoint",
+    linkedIn: "https://www.linkedin.com/in/shannon-epling-pharmd-6a36571b/"
   },
   {
     quote: "He genuinely understands the challenges HCPs face, particularly how excessive clicks can hinder our workflow.",
     author: "Spencer Rizk DNP, APRN-CNP",
     role: "Clinical Staff, One Medical",
-    avatar: drugPriorAuthAvatar
+    avatar: drugPriorAuthAvatar,
+    company: "One Medical",
+    linkedIn: "https://www.linkedin.com/in/spencer-rizk-dnp-aprn-cnp-034a08129/"
   }
 ];
 
@@ -67,19 +76,39 @@ const TestimonialsSection = () => {
                   <blockquote className="font-sans text-lg mb-4 leading-relaxed text-card-foreground">
                     "{testimonial.quote}"
                   </blockquote>
-                  <div className="border-t border-accent/20 pt-4 flex items-center gap-3">
-                    <Avatar className="h-12 w-12">
-                      {testimonial.avatar && (
-                        <AvatarImage src={testimonial.avatar} alt={testimonial.author} />
-                      )}
-                      <AvatarFallback className="bg-accent/10">
-                        <User className="h-6 w-6 text-accent" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-sans font-semibold text-foreground">{testimonial.author}</p>
-                      <p className="font-sans text-sm text-accent">{testimonial.role}</p>
+                  <div className="border-t border-accent/20 pt-4">
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-12 w-12">
+                          {testimonial.avatar && (
+                            <AvatarImage src={testimonial.avatar} alt={testimonial.author} />
+                          )}
+                          <AvatarFallback className="bg-accent/10">
+                            <User className="h-6 w-6 text-accent" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-sans font-semibold text-foreground">{testimonial.author}</p>
+                          <p className="font-sans text-sm text-accent">{testimonial.role}</p>
+                        </div>
+                      </div>
                     </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="w-full mt-2 text-xs"
+                      asChild
+                    >
+                      <a 
+                        href={testimonial.linkedIn} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2"
+                      >
+                        View on LinkedIn
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
