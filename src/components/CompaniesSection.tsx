@@ -9,8 +9,8 @@ const initialCompanies = [
   { name: "SmarterDx", logo: "SD", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//smarterdx.jpeg" },
   { name: "PrescriberPoint", logo: "DH", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//ppt.jpeg" },
   { name: "BCG X", logo: "RC", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
-  { name: "Claims Intelligence", logo: "MI", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
-  { name: "Digital Health Agency", logo: "CO", logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png" },
+  { name: "Definitive Health", logo: "MI", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
+  { name: "HTD Health", logo: "CO", logoUrl: "/lovable-uploads/9e1e9048-62fc-4392-91bd-a5a82b8d5e42.png" },
   
   
 ];
@@ -107,9 +107,9 @@ const CompaniesSection = () => {
                     window.open("https://prescriberpoint.com/", "_blank", "noopener,noreferrer");
                   } else if (company.name === "BCG X") {
                     window.open("https://www.bcg.com/x/", "_blank", "noopener,noreferrer");
-                  } else if (company.name === "Claims Intelligence") {
+                  } else if (company.name === "Definitive Health") {
                     window.open("https://www.definitivehc.com/", "_blank", "noopener,noreferrer");
-                  } else if (company.name === "Digital Health Agency") {
+                  } else if (company.name === "HTD Health") {
                     window.open("https://htdhealth.com/", "_blank", "noopener,noreferrer");
                   }
                 }}
