@@ -17,7 +17,7 @@ const testimonials = [
   {
     quote: "Jordan demonstrated a deep understanding of our users' needs and seamlessly translated complex requirements into intuitive and elegant experiences.",
     author: "Bryan Lawson",
-    role: "Clinical Operations Lead",
+    role: "Clinical Operations Lead, PrescriberPoint",
     avatar: bryanLawsonProfile
   },
   {
