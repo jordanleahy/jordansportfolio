@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { uploadImage } from "@/utils/imageUpload";
 
 const initialCompanies = [
-  { name: "Revenue Cycle Management", logo: "SD", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//smarterdx.jpeg" },
+  { name: "SmarterDx", logo: "SD", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//smarterdx.jpeg" },
   { name: "Prior Authorization", logo: "DH", logoUrl: "https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/images//ppt.jpeg" },
   { name: "Pharma Innovation", logo: "RC", logoUrl: "/lovable-uploads/d16887ac-0992-4a5a-84f5-043c66a1acd3.png" },
   { name: "Claims Intelligence", logo: "MI", logoUrl: "/lovable-uploads/2cc42ee2-452d-41c2-a353-4d948c656a4a.png" },
@@ -101,7 +101,7 @@ const CompaniesSection = () => {
               <div 
                 className="bg-card border border-accent/20 rounded-lg p-6 text-center hover:shadow-lg transition-all duration-300 cursor-pointer w-full h-full"
                 onClick={() => {
-                  if (company.name === "Revenue Cycle Management") {
+                  if (company.name === "SmarterDx") {
                     window.open("https://www.smarterdx.com/", "_blank", "noopener,noreferrer");
                   } else if (company.name === "Prior Authorization") {
                     window.open("https://prescriberpoint.com/", "_blank", "noopener,noreferrer");
