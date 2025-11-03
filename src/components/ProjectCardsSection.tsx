@@ -39,7 +39,7 @@ const projects = [
   },
   {
     id: "case6",
-    title: "3 Million Views, Zero Clarity",
+    title: "Transformed 3M page views from chaos to clarity",
     company: "Healthcare Data Analytics",
     description: "Led a data-driven redesign to transform navigation chaos into clarity. Partnered with Product Management, Customer Success, and Data Science to restructure information architecture, streamline workflows, and reduce user effort across a product receiving 3 million annual page views.",
     tags: ["#DataDriven", "#UX", "#Navigation", "#InformationArchitecture", "#Workflow"],
