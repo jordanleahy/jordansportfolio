@@ -7,10 +7,8 @@ export const teamData = {
       title: "My Role",
       description: "Senior Product Designer",
       items: [
-        "Clinical workflow research & analysis",
-        "End to end product design", 
-        "User testing with medical staff",
-        "Design system implementation"
+        "Owned information architecture, visual design, and usability testing.",
+        "Defined the \"explainable AI\" layer for every recommendation."
       ]
     },
     {
