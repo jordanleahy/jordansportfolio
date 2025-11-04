@@ -2,7 +2,7 @@ import { Challenge } from "@/types/caseStudy";
 
 export const problemData = {
   problemTitle: "The Challenge",
-  problemDescription: "The original MVP design presented raw Elastic search data dumps that forced clinicians to manually piece together fragmented vitals, labs, and notes causing cognitive overload and inconsistent Sepsis diagnostic decisions.",
+  problemDescription: "Hospitals generate hundreds of data points per patient  vitals, labs, orders, notes, consults. Before billing, each record must be validated and coded correctly to create an accurate \"receipt\" for care.",
   challenges: [
     {
       type: 'problem',
