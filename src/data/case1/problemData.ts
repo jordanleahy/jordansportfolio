@@ -16,8 +16,10 @@ export const problemData = {
       type: 'need',
       title: 'Design Challenges',
       items: [
-        "AI models that flag diagnoses but don't explain why",
-        "Interfaces overloaded with data, not insight"
+        "Consolidates all relevant data into a single, trusted view",
+        "Shows the why behind every AI suggestion",
+        "Speeds up decision making without reducing accuracy",
+        "Fits seamlessly into existing EHR workflows"
       ]
     }
   ] as Challenge[],
