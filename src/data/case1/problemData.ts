@@ -8,18 +8,16 @@ export const problemData = {
       type: 'problem',
       title: 'Clinical Impact',
       items: [
-        "CDI teams spent hours manually validating each Sepsis case across disconnected systems",
-        "Sepsis claims denied at 2-3x the rate of other diagnoses due to insufficient documentation",
-        "$20-40K lost per denial when reviewers couldn't find criteria buried in fragmented data"
+        "Incomplete or inconsistent documentation across the chart",
+        "Slow review cycles that delay billing and increase denials"
       ]
     },
     {
       type: 'need',
       title: 'Design Challenges',
       items: [
-        "Reviewers toggled between 6+ data sources to manually confirm SIRS criteria",
-        "Critical timestamps and vital trends were scattered—making validation error-prone",
-        "Inconsistent clinical documentation led to missed criteria and preventable denials"
+        "AI models that flag diagnoses but don't explain why",
+        "Interfaces overloaded with data, not insight"
       ]
     }
   ] as Challenge[],
