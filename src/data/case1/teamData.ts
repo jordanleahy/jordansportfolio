@@ -16,10 +16,10 @@ export const teamData = {
       title: "Team & Stakeholders",
       description: "",
       items: [
-        "2 CDI Specialist",
-        "1 Data Scientist",
-        "3 Engineers",
-        "MD Cofounder"
+        "Clinical SMEs (nurses, coders)",
+        "Data science (model development and feature importance)",
+        "Product (RCM strategy)",
+        "Engineering (EHR integration)"
       ]
     },
     {
