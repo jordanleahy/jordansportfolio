@@ -9,6 +9,8 @@ export const problemData = {
       title: 'Clinical Impact',
       items: [
         "Incomplete or inconsistent documentation across the chart",
+        "AI models that flag diagnoses but don't explain why",
+        "Interfaces overloaded with data, not insight",
         "Slow review cycles that delay billing and increase denials"
       ]
     },
