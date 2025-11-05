@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Linkedin, Download, MapPin, Calendar } from "lucide-react";
+import { Mail, Linkedin, MapPin, Calendar } from "lucide-react";
 
 const ContactSection = () => {
   const contactMethods = [{
@@ -137,20 +137,12 @@ const ContactSection = () => {
               <h3 className="text-heading-sm font-bold mb-4 text-foreground">
                 Ready to discuss your next project?
               </h3>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild>
-                  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=jordanwilliamleahy@gmail.com&su=Lets%20chat%20RCM" target="_blank" rel="noopener noreferrer">
-                    <Mail className="mr-2 h-5 w-5" />
-                    Get In Touch
-                  </a>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <a href="https://wgwmzfbnkovumqcvsxgd.supabase.co/storage/v1/object/public/general//2025_Jordan%20Leahy%20Resume.pdf" target="_blank" rel="noopener noreferrer">
-                    <Download className="mr-2 h-5 w-5" />
-                    Download Resume
-                  </a>
-                </Button>
-              </div>
+              <Button size="lg" asChild>
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=jordanwilliamleahy@gmail.com&su=Lets%20chat%20RCM" target="_blank" rel="noopener noreferrer">
+                  <Mail className="mr-2 h-5 w-5" />
+                  Get In Touch
+                </a>
+              </Button>
             </CardContent>
           </Card>
         </motion.div>
