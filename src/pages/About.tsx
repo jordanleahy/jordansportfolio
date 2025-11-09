@@ -1,9 +1,13 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Helmet } from "react-helmet-async";
 import AppLayout from "@/components/layout/AppLayout";
+import ContactSection from "@/components/ContactSection";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 import { motion } from "framer-motion";
 import { Heart, Mountain, Book, Camera, Compass, Star } from "lucide-react";
+
+// Lazy load heavy HeroParallax component
+const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
 
 const About = () => {
   const aboutSEO = generateSEOMetadata({
@@ -31,21 +35,31 @@ const About = () => {
         <meta name="twitter:image" content={aboutSEO.image} />
       </Helmet>
       <AppLayout>
-        {/* Hero Section - Full screen photo with overlay */}
-        <section className="relative h-screen flex items-center justify-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20" />
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4')] bg-cover bg-center opacity-30" />
-          
+        {/* Hero Parallax Section - Reused from home */}
+        <Suspense fallback={
+          <div className="h-screen bg-gradient-to-b from-background to-background/50 flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="text-muted-foreground">Loading hero section...</p>
+            </div>
+          </div>
+        }>
+          <HeroParallaxDemo />
+        </Suspense>
+
+        {/* Optional: Custom hero overlay for personal message */}
+        <section className="relative py-24 px-4 bg-gradient-to-b from-background/50 to-background">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative z-10 text-center px-4"
+            className="max-w-3xl mx-auto text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-foreground">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
               [WIREFRAME] Who I Really Am
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground">
               [Add your opening statement/quote here - something personal and authentic]
             </p>
           </motion.div>
@@ -267,6 +281,9 @@ const About = () => {
             </motion.div>
           </div>
         </section>
+
+        {/* Contact Section - Reused from home */}
+        <ContactSection />
       </AppLayout>
     </>
   );
