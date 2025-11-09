@@ -4,7 +4,8 @@ import AppLayout from "@/components/layout/AppLayout";
 import ContactSection from "@/components/ContactSection";
 import { generateSEOMetadata } from "@/utils/seoHelpers";
 import { motion } from "framer-motion";
-import { Heart, Mountain, Book, Camera, Compass, Star } from "lucide-react";
+import { Camera } from "lucide-react";
+import { aboutData } from "@/data/aboutData";
 
 // Lazy load heavy HeroParallax component
 const HeroParallaxDemo = lazy(() => import("@/components/HeroParallaxDemo"));
@@ -47,7 +48,7 @@ const About = () => {
           <HeroParallaxDemo />
         </Suspense>
 
-        {/* Optional: Custom hero overlay for personal message */}
+        {/* Custom hero overlay for personal message */}
         <section className="relative py-24 px-4 bg-gradient-to-b from-background/50 to-background">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -57,10 +58,10 @@ const About = () => {
             className="max-w-3xl mx-auto text-center"
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-6 text-foreground">
-              [WIREFRAME] Who I Really Am
+              {aboutData.hero.title}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground">
-              [Add your opening statement/quote here - something personal and authentic]
+              {aboutData.hero.subtitle}
             </p>
           </motion.div>
         </section>
@@ -75,28 +76,27 @@ const About = () => {
               className="text-center mb-16"
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">My Values & Philosophy</h2>
-              <p className="text-muted-foreground text-lg">[WIREFRAME] What guides me in life</p>
+              <p className="text-muted-foreground text-lg">What guides me in life</p>
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              {[
-                { icon: Heart, title: "Value 1", desc: "Description of your first core value" },
-                { icon: Mountain, title: "Value 2", desc: "Description of your second core value" },
-                { icon: Star, title: "Value 3", desc: "Description of your third core value" }
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.2 }}
-                  className="p-8 rounded-lg border border-border bg-card hover:shadow-lg transition-shadow"
-                >
-                  <item.icon className="w-12 h-12 mb-4 text-primary" />
-                  <h3 className="text-2xl font-semibold mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground">{item.desc}</p>
-                </motion.div>
-              ))}
+              {aboutData.values.map((item, i) => {
+                const IconComponent = item.icon;
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.2 }}
+                    className="p-8 rounded-lg border border-border bg-card hover:shadow-lg transition-shadow"
+                  >
+                    <IconComponent className="w-12 h-12 mb-4 text-primary" />
+                    <h3 className="text-2xl font-semibold mb-3">{item.title}</h3>
+                    <p className="text-muted-foreground">{item.description}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -104,59 +104,57 @@ const About = () => {
         {/* Life Story - Photo + Text Split */}
         <section className="py-24 px-4 bg-muted/30">
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
+            {aboutData.lifeStories.map((story, index) => (
+              <div 
+                key={index}
+                className={`grid md:grid-cols-2 gap-12 items-center ${index > 0 ? 'mt-24' : ''}`}
               >
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                  <Camera className="w-24 h-24 text-muted-foreground" />
-                  <span className="ml-4 text-muted-foreground">[Photo placeholder 1]</span>
-                </div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-              >
-                <h2 className="text-4xl font-bold mb-6">Chapter 1: [Life Story Title]</h2>
-                <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-                  [Add your first life story/experience here - make it personal and authentic. This could be about your childhood, a pivotal moment, or an important journey.]
-                </p>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  [Continue the story with more details and reflections...]
-                </p>
-              </motion.div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="order-2 md:order-1"
-              >
-                <h2 className="text-4xl font-bold mb-6">Chapter 2: [Life Story Title]</h2>
-                <p className="text-lg text-muted-foreground leading-relaxed mb-4">
-                  [Add your second life story/experience here]
-                </p>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                  [Continue with more reflections...]
-                </p>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="order-1 md:order-2"
-              >
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
-                  <Camera className="w-24 h-24 text-muted-foreground" />
-                  <span className="ml-4 text-muted-foreground">[Photo placeholder 2]</span>
-                </div>
-              </motion.div>
-            </div>
+                <motion.div
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className={index % 2 === 0 ? '' : 'order-2 md:order-1'}
+                >
+                  {index % 2 === 0 ? (
+                    <div className="aspect-square rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                      <Camera className="w-24 h-24 text-muted-foreground" />
+                      <span className="ml-4 text-muted-foreground">[{story.image}]</span>
+                    </div>
+                  ) : (
+                    <>
+                      <h2 className="text-4xl font-bold mb-6">{story.chapter}</h2>
+                      {story.paragraphs.map((paragraph, pIndex) => (
+                        <p key={pIndex} className="text-lg text-muted-foreground leading-relaxed mb-4">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </>
+                  )}
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, x: index % 2 === 0 ? 20 : -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className={index % 2 === 0 ? '' : 'order-1 md:order-2'}
+                >
+                  {index % 2 === 0 ? (
+                    <>
+                      <h2 className="text-4xl font-bold mb-6">{story.chapter}</h2>
+                      {story.paragraphs.map((paragraph, pIndex) => (
+                        <p key={pIndex} className="text-lg text-muted-foreground leading-relaxed mb-4">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="aspect-square rounded-lg bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
+                      <Camera className="w-24 h-24 text-muted-foreground" />
+                      <span className="ml-4 text-muted-foreground">[{story.image}]</span>
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -170,31 +168,29 @@ const About = () => {
               className="text-center mb-16"
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">What I Love Doing</h2>
-              <p className="text-muted-foreground text-lg">[WIREFRAME] My passions and hobbies</p>
+              <p className="text-muted-foreground text-lg">My passions and hobbies</p>
             </motion.div>
 
             <div className="grid md:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="group relative aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 hover:shadow-xl transition-all"
-                >
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                    {i === 0 && <Book className="w-16 h-16 mb-4 text-primary" />}
-                    {i === 1 && <Mountain className="w-16 h-16 mb-4 text-primary" />}
-                    {i === 2 && <Compass className="w-16 h-16 mb-4 text-primary" />}
-                    {i === 3 && <Camera className="w-16 h-16 mb-4 text-primary" />}
-                    {i === 4 && <Heart className="w-16 h-16 mb-4 text-primary" />}
-                    {i === 5 && <Star className="w-16 h-16 mb-4 text-primary" />}
-                    <h3 className="text-xl font-semibold mb-2">[Hobby {i + 1}]</h3>
-                    <p className="text-sm text-muted-foreground">[Brief description]</p>
-                  </div>
-                </motion.div>
-              ))}
+              {aboutData.hobbies.map((hobby, i) => {
+                const IconComponent = hobby.icon;
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="group relative aspect-square rounded-lg overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 hover:shadow-xl transition-all"
+                  >
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                      <IconComponent className="w-16 h-16 mb-4 text-primary" />
+                      <h3 className="text-xl font-semibold mb-2">{hobby.name}</h3>
+                      <p className="text-sm text-muted-foreground">{hobby.description}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -209,11 +205,11 @@ const About = () => {
               className="text-center mb-16"
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-6">Life in Pictures</h2>
-              <p className="text-muted-foreground text-lg">[WIREFRAME] Moments that matter to me</p>
+              <p className="text-muted-foreground text-lg">Moments that matter to me</p>
             </motion.div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((item, i) => (
+              {aboutData.photoGallery.map((photo, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -221,11 +217,16 @@ const About = () => {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
                   className={`relative rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 ${
-                    i === 0 || i === 3 ? 'col-span-2 row-span-2' : 'aspect-square'
+                    photo.featured ? 'col-span-2 row-span-2' : 'aspect-square'
                   }`}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-muted-foreground">[Photo {i + 1}]</span>
+                  <div className="absolute inset-0 flex items-center justify-center text-center p-4">
+                    <div>
+                      <span className="text-muted-foreground block mb-2">[{photo.url}]</span>
+                      {photo.caption && (
+                        <span className="text-xs text-muted-foreground">{photo.caption}</span>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -243,10 +244,10 @@ const About = () => {
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-8">Where I'm Headed</h2>
               <p className="text-xl text-muted-foreground leading-relaxed mb-12">
-                [WIREFRAME] Share your dreams, goals, and aspirations for the future. What drives you? What are you working towards? What kind of life do you want to build?
+                My dreams, goals, and aspirations for the future
               </p>
               <div className="grid md:grid-cols-2 gap-6 text-left">
-                {[1, 2, 3, 4].map((item, i) => (
+                {aboutData.goals.map((goal, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, y: 20 }}
@@ -255,8 +256,8 @@ const About = () => {
                     transition={{ delay: i * 0.1 }}
                     className="p-6 rounded-lg border border-border bg-card"
                   >
-                    <h3 className="text-xl font-semibold mb-3">[Goal/Aspiration {i + 1}]</h3>
-                    <p className="text-muted-foreground">[Describe this personal goal or aspiration]</p>
+                    <h3 className="text-xl font-semibold mb-3">{goal.title}</h3>
+                    <p className="text-muted-foreground">{goal.description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -273,10 +274,10 @@ const About = () => {
               viewport={{ once: true }}
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                [WIREFRAME] Closing Thought
+                {aboutData.closing.title}
               </h2>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                [Add a meaningful closing statement - something that encapsulates who you are and what matters most to you]
+                {aboutData.closing.message}
               </p>
             </motion.div>
           </div>
