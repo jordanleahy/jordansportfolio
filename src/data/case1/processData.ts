@@ -19,12 +19,6 @@ export const processData = {
       },
       images: [
         {
-          src: "/src/assets/sepsis-definition.png",
-          alt: "Sepsis and SIRS criteria definition showing diagnostic parameters",
-          caption: "Medical definition of Sepsis and SIRS (Systemic Inflammatory Response Syndrome) with diagnostic criteria",
-          title: "What is Sepsis"
-        },
-        {
           src: "/lovable-uploads/501c3cff-f1e5-4d47-8fa5-671c09117479.png",
           alt: "Medical chart data and sepsis indicators",
           caption: "Real patient chart data showing sepsis indicators and clinical measurements",
