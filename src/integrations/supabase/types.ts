@@ -2864,7 +2864,7 @@ export type Database = {
         Returns: number
       }
       check_processing_health: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           check_name: string
           count: number
@@ -2894,22 +2894,10 @@ export type Database = {
           removed_posts: number
         }[]
       }
-      cleanup_expired_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_old_cached_prompts: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_old_submissions: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      cleanup_stuck_image_generations: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      cleanup_expired_cache: { Args: never; Returns: number }
+      cleanup_old_cached_prompts: { Args: never; Returns: number }
+      cleanup_old_submissions: { Args: never; Returns: number }
+      cleanup_stuck_image_generations: { Args: never; Returns: number }
       complete_image_generation: {
         Args: {
           p_aspect_ratio: string
@@ -2942,10 +2930,7 @@ export type Database = {
           theme: string
         }[]
       }
-      fix_hardcoded_aspect_ratio_in_prompts: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      fix_hardcoded_aspect_ratio_in_prompts: { Args: never; Returns: string }
       fuzzy_search_offerings: {
         Args: { search_term: string; similarity_threshold?: number }
         Returns: {
@@ -2964,10 +2949,7 @@ export type Database = {
           relationship_type: string
         }[]
       }
-      get_agent_name: {
-        Args: { constant_name: string }
-        Returns: string
-      }
+      get_agent_name: { Args: { constant_name: string }; Returns: string }
       get_cache_stats: {
         Args: { user_id_param?: string }
         Returns: {
@@ -3030,22 +3012,10 @@ export type Database = {
           success: boolean
         }[]
       }
-      insert_abc_learning_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      insert_blog_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      insert_blog_visual_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      insert_calendar_theme_json_processor: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      insert_abc_learning_agent: { Args: never; Returns: string }
+      insert_blog_agent: { Args: never; Returns: undefined }
+      insert_blog_visual_agent: { Args: never; Returns: undefined }
+      insert_calendar_theme_json_processor: { Args: never; Returns: undefined }
       insert_category_content: {
         Args: {
           category_name: string
@@ -3055,22 +3025,10 @@ export type Database = {
         }
         Returns: Json
       }
-      insert_cdi_content: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      insert_contracts_content: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      insert_engineering_work_report_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      insert_image_enhancement_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      insert_cdi_content: { Args: never; Returns: undefined }
+      insert_contracts_content: { Args: never; Returns: undefined }
+      insert_engineering_work_report_agent: { Args: never; Returns: string }
+      insert_image_enhancement_agent: { Args: never; Returns: string }
       insert_posts_for_theme: {
         Args: {
           posts_data: Json
@@ -3079,30 +3037,12 @@ export type Database = {
         }
         Returns: Json
       }
-      insert_sample_agents: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      insert_sirs_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      insert_social_media_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      insert_story_telling_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      insert_vendor_analysis_agent: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      is_bootstrap_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      insert_sample_agents: { Args: never; Returns: undefined }
+      insert_sirs_agent: { Args: never; Returns: undefined }
+      insert_social_media_agent: { Args: never; Returns: string }
+      insert_story_telling_agent: { Args: never; Returns: string }
+      insert_vendor_analysis_agent: { Args: never; Returns: string }
+      is_bootstrap_admin: { Args: { _user_id: string }; Returns: boolean }
       log_submission_event: {
         Args: {
           p_event_data?: Json
@@ -3113,9 +3053,30 @@ export type Database = {
         }
         Returns: string
       }
-      publish_shared_collection_1_1: {
-        Args:
-          | {
+      publish_shared_collection_1_1:
+        | {
+            Args: {
+              p_description?: string
+              p_handle: string
+              p_post_ids?: string[]
+              p_public_access_type?: string
+              p_theme_id?: string
+              p_title?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_description?: string
+              p_handle: string
+              p_post_ids?: string[]
+              p_theme_id?: string
+              p_title?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
               p_description?: string
               p_handle: string
               p_post_ids?: string[]
@@ -3124,26 +3085,21 @@ export type Database = {
               p_theme_id?: string
               p_title?: string
             }
-          | {
-              p_description?: string
-              p_handle: string
-              p_post_ids?: string[]
-              p_public_access_type?: string
-              p_theme_id?: string
-              p_title?: string
-            }
-          | {
+            Returns: string
+          }
+      publish_shared_collection_16_9:
+        | {
+            Args: {
               p_description?: string
               p_handle: string
               p_post_ids?: string[]
               p_theme_id?: string
               p_title?: string
             }
-        Returns: string
-      }
-      publish_shared_collection_16_9: {
-        Args:
-          | {
+            Returns: string
+          }
+        | {
+            Args: {
               p_category?: string
               p_description?: string
               p_handle: string
@@ -3151,23 +3107,13 @@ export type Database = {
               p_theme_id?: string
               p_title?: string
             }
-          | {
-              p_description?: string
-              p_handle: string
-              p_post_ids?: string[]
-              p_theme_id?: string
-              p_title?: string
-            }
-        Returns: string
-      }
+            Returns: string
+          }
       refresh_monthly_aggregates: {
         Args: { target_month?: string; target_user_id?: string }
         Returns: number
       }
-      refresh_offerings_view: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      refresh_offerings_view: { Args: never; Returns: undefined }
       restart_stuck_themes: {
         Args: { p_user_id?: string }
         Returns: {
@@ -3189,34 +3135,31 @@ export type Database = {
         Args: { p_generated_prompt: string; p_post_id: string }
         Returns: boolean
       }
-      update_shared_collection_1_1: {
-        Args:
-          | {
+      update_shared_collection_1_1:
+        | {
+            Args: {
               p_collection_id: string
               p_public_access_type?: string
               p_selected_image_urls?: Json
               p_theme_id?: string
             }
-          | {
+            Returns: string
+          }
+        | {
+            Args: {
               p_collection_id: string
               p_public_access_type?: string
               p_theme_id?: string
             }
-          | { p_collection_id: string; p_theme_id?: string }
-        Returns: string
-      }
-      upgrade_generic_system_prompts: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      validate_tldr_bullets: {
-        Args: { bullets: Json }
-        Returns: boolean
-      }
-      validate_visual_sections: {
-        Args: { sections: Json }
-        Returns: boolean
-      }
+            Returns: string
+          }
+        | {
+            Args: { p_collection_id: string; p_theme_id?: string }
+            Returns: string
+          }
+      upgrade_generic_system_prompts: { Args: never; Returns: string }
+      validate_tldr_bullets: { Args: { bullets: Json }; Returns: boolean }
+      validate_visual_sections: { Args: { sections: Json }; Returns: boolean }
     }
     Enums: {
       agent_status: "active" | "paused" | "deprecated"
